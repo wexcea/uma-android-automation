@@ -366,6 +366,8 @@ ${longTargetsString}
 🔄 Trackblazer Retry Grades: ${settings.scenarioOverrides?.trackblazerRetryRacesBeforeFinalGrades?.join(", ")}
 ✨ Trackblazer Enable Irregular Training: ${settings.scenarioOverrides?.trackblazerEnableIrregularTraining ? "✅" : "❌"}
 ✨ Trackblazer Irregular Training Min Gain: ${settings.scenarioOverrides?.trackblazerIrregularTrainingMinStatGain}
+🏇 Trackblazer Preferred Distances: ${settings.scenarioOverrides?.trackblazerPreferredDistances?.length === 0 ? "None" : settings.scenarioOverrides?.trackblazerPreferredDistances?.join(", ")}
+🏇 Trackblazer Preferred Surfaces: ${settings.scenarioOverrides?.trackblazerPreferredSurfaces?.length === 0 ? "None" : settings.scenarioOverrides?.trackblazerPreferredSurfaces?.join(", ")}
 
 ---------- Misc Options ----------
 🛑 Stop on Unexpected Popups: ${settings.general.enablePopupCheck ? "✅" : "❌"}

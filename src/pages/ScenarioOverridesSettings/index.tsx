@@ -323,6 +323,90 @@ const ScenarioOverridesSettings = () => {
                             </View>
                         </View>
 
+                        <View style={styles.section}>
+                            <Text style={{ fontSize: 16, color: colors.foreground, marginBottom: 8 }}>Preferred Track Distances</Text>
+                            <Text style={{ fontSize: 14, color: colors.foreground, opacity: 0.7, marginBottom: 12 }}>
+                                Select preferred track distances for extra race selection. Matching races will be prioritized. Leave empty for no preference.
+                            </Text>
+                            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                                {["Sprint", "Mile", "Medium", "Long"].map((distance) => (
+                                    <View
+                                        key={distance}
+                                        style={{
+                                            padding: 10,
+                                            borderRadius: 8,
+                                            marginRight: 8,
+                                            marginBottom: 8,
+                                            backgroundColor: scenarioOverrides.trackblazerPreferredDistances.includes(distance) ? colors.primary : colors.card,
+                                        }}
+                                        onTouchEnd={() => {
+                                            const current = scenarioOverrides.trackblazerPreferredDistances
+                                            if (current.includes(distance)) {
+                                                updateOverrideSetting(
+                                                    "trackblazerPreferredDistances",
+                                                    current.filter((d) => d !== distance)
+                                                )
+                                            } else {
+                                                updateOverrideSetting("trackblazerPreferredDistances", [...current, distance])
+                                            }
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: 14,
+                                                fontWeight: "600",
+                                                color: scenarioOverrides.trackblazerPreferredDistances.includes(distance) ? colors.background : colors.foreground,
+                                            }}
+                                        >
+                                            {distance}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+
+                        <View style={styles.section}>
+                            <Text style={{ fontSize: 16, color: colors.foreground, marginBottom: 8 }}>Preferred Track Surfaces</Text>
+                            <Text style={{ fontSize: 14, color: colors.foreground, opacity: 0.7, marginBottom: 12 }}>
+                                Select preferred track surfaces for extra race selection. Matching races will be prioritized. Leave empty for no preference.
+                            </Text>
+                            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                                {["Turf", "Dirt"].map((surface) => (
+                                    <View
+                                        key={surface}
+                                        style={{
+                                            padding: 10,
+                                            borderRadius: 8,
+                                            marginRight: 8,
+                                            marginBottom: 8,
+                                            backgroundColor: scenarioOverrides.trackblazerPreferredSurfaces.includes(surface) ? colors.primary : colors.card,
+                                        }}
+                                        onTouchEnd={() => {
+                                            const current = scenarioOverrides.trackblazerPreferredSurfaces
+                                            if (current.includes(surface)) {
+                                                updateOverrideSetting(
+                                                    "trackblazerPreferredSurfaces",
+                                                    current.filter((s) => s !== surface)
+                                                )
+                                            } else {
+                                                updateOverrideSetting("trackblazerPreferredSurfaces", [...current, surface])
+                                            }
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: 14,
+                                                fontWeight: "600",
+                                                color: scenarioOverrides.trackblazerPreferredSurfaces.includes(surface) ? colors.background : colors.foreground,
+                                            }}
+                                        >
+                                            {surface}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+
                         <Divider style={{ marginVertical: 16 }} />
 
                         <View style={styles.section}>
