@@ -354,19 +354,6 @@ class Training(private val game: Game, private val campaign: Campaign) {
         }
 
         /**
-         * Cross-validate failure chances and return corrected values.
-         *
-         * Failure chances are monotonically non-decreasing in training order
-         * (Speed <= Stamina <= Power <= Guts). Wit is excluded because it
-         * naturally has a lower failure chance than the other trainings.
-         * If an earlier training's failure chance is significantly lower than
-         * the next, it is likely an OCR misread and should be corrected upward.
-         *
-         * @param failureChances List of ([StatName], failureChance) pairs with valid (>= 0) values.
-         * @param suspiciousJumpThreshold Minimum difference to consider suspicious.
-         * @return Map of [StatName] to corrected failure chance.
-         */
-        /**
          * Calculate the expected failure chance based on the character's current energy.
          *
          * @param currentEnergy The character's current energy (0-100).
