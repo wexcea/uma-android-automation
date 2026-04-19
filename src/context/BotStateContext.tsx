@@ -201,6 +201,8 @@ export interface Settings {
         trackblazerIrregularTrainingMinStatGain: number
         trackblazerExcludedItems: string[]
         trackblazerShopCheckFrequency: number
+        trackblazerPreferredDistances: string[]
+        trackblazerPreferredSurfaces: string[]
     }
 }
 
