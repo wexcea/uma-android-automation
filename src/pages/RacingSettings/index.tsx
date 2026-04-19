@@ -40,6 +40,9 @@ const RacingSettings = () => {
         enableForceRacing,
         juniorYearRaceStrategy,
         originalRaceStrategy,
+        enablePerDistanceStrategy,
+        juniorYearPerDistanceStrategies,
+        originalPerDistanceStrategies,
         enableUserInGameRaceAgenda,
         limitRacesToInGameAgenda,
         skipSummerTrainingForAgenda,
@@ -200,54 +203,129 @@ const RacingSettings = () => {
                                 description="When enabled, the bot will automatically stop when it encounters a mandatory race, allowing you to manually handle them."
                                 className="my-2"
                             />
+                            <CustomCheckbox
+                                searchId="enable-per-distance-strategy"
+                                checked={enablePerDistanceStrategy}
+                                onCheckedChange={(checked) => updateRacingSetting("enablePerDistanceStrategy", checked)}
+                                label="Per-Distance Strategy"
+                                description="When enabled, allows setting different race strategies for each track distance (Short, Mile, Medium, Long) instead of a single strategy for all races."
+                                className="my-2"
+                            />
                         </View>
 
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Junior Year Race Strategy</Text>
-                            <CustomSelect
-                                searchId="junior-year-race-strategy"
-                                searchTitle="Junior Year Race Strategy"
-                                searchDescription="The race strategy to use for all races during Junior Year."
-                                options={[
-                                    { value: "Default", label: "Default" },
-                                    { value: "Auto", label: "Auto" },
-                                    { value: "Front", label: "Front" },
-                                    { value: "Pace", label: "Pace" },
-                                    { value: "Late", label: "Late" },
-                                    { value: "End", label: "End" },
-                                ]}
-                                value={juniorYearRaceStrategy}
-                                onValueChange={(value) => updateRacingSetting("juniorYearRaceStrategy", value)}
-                                placeholder="Select strategy"
-                            />
-                            <Text style={styles.inputDescription}>
-                                The race strategy to use for all races during Junior Year. If Auto is selected, the bot will auto-select the best strategy that puts them closest to the front of the
-                                pack.
-                            </Text>
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.inputLabel}>Original Race Strategy</Text>
-                            <CustomSelect
-                                searchId="original-race-strategy"
-                                searchTitle="Original Race Strategy"
-                                searchDescription="The race strategy to reset to after Junior Year. The bot will use this strategy for races in Year 2 and beyond."
-                                options={[
-                                    { value: "Default", label: "Default" },
-                                    { value: "Auto", label: "Auto" },
-                                    { value: "Front", label: "Front" },
-                                    { value: "Pace", label: "Pace" },
-                                    { value: "Late", label: "Late" },
-                                    { value: "End", label: "End" },
-                                ]}
-                                value={originalRaceStrategy}
-                                onValueChange={(value) => updateRacingSetting("originalRaceStrategy", value)}
-                                placeholder="Select strategy"
-                            />
-                            <Text style={styles.inputDescription}>
-                                The race strategy to reset to after Junior Year. The bot will use this strategy for races in Year 2 and beyond. If Auto is selected, the bot will auto-select the best
-                                strategy that puts them closest to the front of the pack. If Default is selected, the bot will not change whatever strategy is currently in effect.
-                            </Text>
-                        </View>
+                        {!enablePerDistanceStrategy ? (
+                            <>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.inputLabel}>Junior Year Race Strategy</Text>
+                                    <CustomSelect
+                                        searchId="junior-year-race-strategy"
+                                        searchTitle="Junior Year Race Strategy"
+                                        searchDescription="The race strategy to use for all races during Junior Year."
+                                        options={[
+                                            { value: "Default", label: "Default" },
+                                            { value: "Auto", label: "Auto" },
+                                            { value: "Front", label: "Front" },
+                                            { value: "Pace", label: "Pace" },
+                                            { value: "Late", label: "Late" },
+                                            { value: "End", label: "End" },
+                                        ]}
+                                        value={juniorYearRaceStrategy}
+                                        onValueChange={(value) => updateRacingSetting("juniorYearRaceStrategy", value)}
+                                        placeholder="Select strategy"
+                                    />
+                                    <Text style={styles.inputDescription}>
+                                        The race strategy to use for all races during Junior Year. If Auto is selected, the bot will auto-select the best strategy that puts them closest to the front
+                                        of the pack.
+                                    </Text>
+                                </View>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.inputLabel}>Original Race Strategy</Text>
+                                    <CustomSelect
+                                        searchId="original-race-strategy"
+                                        searchTitle="Original Race Strategy"
+                                        searchDescription="The race strategy to reset to after Junior Year. The bot will use this strategy for races in Year 2 and beyond."
+                                        options={[
+                                            { value: "Default", label: "Default" },
+                                            { value: "Auto", label: "Auto" },
+                                            { value: "Front", label: "Front" },
+                                            { value: "Pace", label: "Pace" },
+                                            { value: "Late", label: "Late" },
+                                            { value: "End", label: "End" },
+                                        ]}
+                                        value={originalRaceStrategy}
+                                        onValueChange={(value) => updateRacingSetting("originalRaceStrategy", value)}
+                                        placeholder="Select strategy"
+                                    />
+                                    <Text style={styles.inputDescription}>
+                                        The race strategy to reset to after Junior Year. The bot will use this strategy for races in Year 2 and beyond. If Auto is selected, the bot will auto-select
+                                        the best strategy that puts them closest to the front of the pack. If Default is selected, the bot will not change whatever strategy is currently in effect.
+                                    </Text>
+                                </View>
+                            </>
+                        ) : (
+                            <>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.inputDescription}>
+                                        Set a different race strategy for each track distance. If Auto is selected, the bot will auto-select the best strategy. If Default is selected, the bot will not
+                                        change whatever strategy is currently in effect.
+                                    </Text>
+                                </View>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.inputLabel}>Junior Year Per-Distance Strategy</Text>
+                                    {(["Short", "Mile", "Medium", "Long"] as const).map((distance) => (
+                                        <View key={`junior-${distance}`} style={{ marginBottom: 8 }}>
+                                            <Text style={[styles.inputDescription, { marginBottom: 4 }]}>{distance}</Text>
+                                            <CustomSelect
+                                                searchId={`junior-strategy-${distance.toLowerCase()}`}
+                                                searchTitle={`Junior Year ${distance} Distance Strategy`}
+                                                searchDescription={`The race strategy to use for ${distance.toLowerCase()} distance races during Junior Year.`}
+                                                options={[
+                                                    { value: "Default", label: "Default" },
+                                                    { value: "Auto", label: "Auto" },
+                                                    { value: "Front", label: "Front" },
+                                                    { value: "Pace", label: "Pace" },
+                                                    { value: "Late", label: "Late" },
+                                                    { value: "End", label: "End" },
+                                                ]}
+                                                value={juniorYearPerDistanceStrategies?.[distance] ?? "Default"}
+                                                onValueChange={(value) => {
+                                                    const updated = { ...juniorYearPerDistanceStrategies, [distance]: value }
+                                                    updateRacingSetting("juniorYearPerDistanceStrategies", updated)
+                                                }}
+                                                placeholder="Select strategy"
+                                            />
+                                        </View>
+                                    ))}
+                                </View>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.inputLabel}>Original Per-Distance Strategy</Text>
+                                    {(["Short", "Mile", "Medium", "Long"] as const).map((distance) => (
+                                        <View key={`original-${distance}`} style={{ marginBottom: 8 }}>
+                                            <Text style={[styles.inputDescription, { marginBottom: 4 }]}>{distance}</Text>
+                                            <CustomSelect
+                                                searchId={`original-strategy-${distance.toLowerCase()}`}
+                                                searchTitle={`Original ${distance} Distance Strategy`}
+                                                searchDescription={`The race strategy to use for ${distance.toLowerCase()} distance races in Year 2 and beyond.`}
+                                                options={[
+                                                    { value: "Default", label: "Default" },
+                                                    { value: "Auto", label: "Auto" },
+                                                    { value: "Front", label: "Front" },
+                                                    { value: "Pace", label: "Pace" },
+                                                    { value: "Late", label: "Late" },
+                                                    { value: "End", label: "End" },
+                                                ]}
+                                                value={originalPerDistanceStrategies?.[distance] ?? "Default"}
+                                                onValueChange={(value) => {
+                                                    const updated = { ...originalPerDistanceStrategies, [distance]: value }
+                                                    updateRacingSetting("originalPerDistanceStrategies", updated)
+                                                }}
+                                                placeholder="Select strategy"
+                                            />
+                                        </View>
+                                    ))}
+                                </View>
+                            </>
+                        )}
 
                         <View style={styles.section}>
                             <CustomCheckbox

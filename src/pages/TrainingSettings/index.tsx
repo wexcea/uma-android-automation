@@ -685,286 +685,345 @@ const TrainingSettings = () => {
                                 description="Set target values for each stat based on race distance. These stat targets are derived from past Champion Meetings. The bot will prioritize training stats that are below these targets."
                                 searchId="stat-targets-by-distance"
                             />
+
+                            {/* Distance Stat Targets Accordion */}
+                            <CustomAccordion
+                                type="single"
+                                sections={[
+                                    {
+                                        value: "sprint",
+                                        title: "Sprint Distance",
+                                        children: (
+                                            <>
+                                                <CustomSlider
+                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_speedStatTarget}
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_speedStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_speedStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Sprint Speed Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_staminaStatTarget}
+                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_staminaStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_staminaStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Sprint Stamina Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_powerStatTarget}
+                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_powerStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_powerStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Sprint Power Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_gutsStatTarget}
+                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_gutsStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_gutsStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Sprint Guts Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_witStatTarget}
+                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_witStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_witStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Sprint Wit Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                            </>
+                                        ),
+                                    },
+                                    {
+                                        value: "mile",
+                                        title: "Mile Distance",
+                                        children: (
+                                            <>
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_speedStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMileStatTarget_speedStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_speedStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Mile Speed Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_staminaStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMileStatTarget_staminaStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_staminaStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Mile Stamina Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_powerStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMileStatTarget_powerStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_powerStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Mile Power Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_gutsStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMileStatTarget_gutsStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_gutsStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Mile Guts Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_witStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMileStatTarget_witStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_witStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Mile Wit Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                            </>
+                                        ),
+                                    },
+                                    {
+                                        value: "medium",
+                                        title: "Medium Distance",
+                                        children: (
+                                            <>
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_speedStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_speedStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_speedStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Medium Speed Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_staminaStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_staminaStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_staminaStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Medium Stamina Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_powerStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_powerStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_powerStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Medium Power Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_gutsStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_gutsStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_gutsStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Medium Guts Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_witStatTarget}
+                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_witStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_witStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Medium Wit Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                            </>
+                                        ),
+                                    },
+                                    {
+                                        value: "long",
+                                        title: "Long Distance",
+                                        children: (
+                                            <>
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_speedStatTarget}
+                                                    value={trainingStatTargetSettings.trainingLongStatTarget_speedStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_speedStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Long Speed Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_staminaStatTarget}
+                                                    value={trainingStatTargetSettings.trainingLongStatTarget_staminaStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_staminaStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Long Stamina Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_powerStatTarget}
+                                                    value={trainingStatTargetSettings.trainingLongStatTarget_powerStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_powerStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Long Power Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_gutsStatTarget}
+                                                    value={trainingStatTargetSettings.trainingLongStatTarget_gutsStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_gutsStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Long Guts Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                                <CustomSlider
+                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_witStatTarget}
+                                                    value={trainingStatTargetSettings.trainingLongStatTarget_witStatTarget}
+                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_witStatTarget", value)}
+                                                    min={100}
+                                                    max={1200}
+                                                    step={10}
+                                                    label="Long Wit Target"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                />
+                                            </>
+                                        ),
+                                    },
+                                ]}
+                            />
+                        </View>
+                        {/* Training Year Milestone Targets */}
+                        <View style={styles.section}>
+                            <CustomTitle
+                                title="Training Year Milestone Targets"
+                                description={
+                                    `Controls how aggressively the bot paces stat training during the Pre-debut, Junior and Classic Years.\n\n` +
+                                    `The bot will target a scaled percentage of your stat targets prior to the Senior Year, ` +
+                                    `ramping up to the full stat targets by the Finale. For example, with milestone targets of 33% / 66%, a Speed ` +
+                                    `target of 1200 becomes ~396 in Junior Year and ~792 in Classic Year. This optimizes early-career statlines for better starting race results.\n\n` +
+                                    `Set both sliders to 100% to disable milestone pacing and always target the full statline.`
+                                }
+                                searchId="training-year-milestone-targets"
+                            />
+                            <SearchableItem
+                                searchId="classic-milestone-percent"
+                                searchTitle="Junior Year Milestone (Classic Year Start)"
+                                searchDescription="Percentage of the primary stat targets to aim for by the end of Junior Year (start of Classic)."
+                            >
+                                <CustomSlider
+                                    value={trainingSettings.classicMilestonePercent}
+                                    placeholder={defaultSettings.training.classicMilestonePercent}
+                                    onValueChange={(value) => updateTrainingSetting("classicMilestonePercent", value)}
+                                    min={0}
+                                    max={100}
+                                    step={1}
+                                    label="Junior Year Milestone (Classic Year Start)"
+                                    labelUnit="%"
+                                    showValue={true}
+                                    showLabels={true}
+                                />
+                            </SearchableItem>
+                            <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>
+                                The bot will aim for this % of your stat targets during Junior Year. Default: 33%.
+                            </Text>
                         </View>
 
-                        {/* Distance Stat Targets Accordion */}
-                        <CustomAccordion
-                            type="single"
-                            sections={[
-                                {
-                                    value: "sprint",
-                                    title: "Sprint Distance",
-                                    children: (
-                                        <>
-                                            <CustomSlider
-                                                value={trainingStatTargetSettings.trainingSprintStatTarget_speedStatTarget}
-                                                placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_speedStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_speedStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Sprint Speed Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_staminaStatTarget}
-                                                value={trainingStatTargetSettings.trainingSprintStatTarget_staminaStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_staminaStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Sprint Stamina Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_powerStatTarget}
-                                                value={trainingStatTargetSettings.trainingSprintStatTarget_powerStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_powerStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Sprint Power Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_gutsStatTarget}
-                                                value={trainingStatTargetSettings.trainingSprintStatTarget_gutsStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_gutsStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Sprint Guts Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_witStatTarget}
-                                                value={trainingStatTargetSettings.trainingSprintStatTarget_witStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_witStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Sprint Wit Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                        </>
-                                    ),
-                                },
-                                {
-                                    value: "mile",
-                                    title: "Mile Distance",
-                                    children: (
-                                        <>
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_speedStatTarget}
-                                                value={trainingStatTargetSettings.trainingMileStatTarget_speedStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_speedStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Mile Speed Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_staminaStatTarget}
-                                                value={trainingStatTargetSettings.trainingMileStatTarget_staminaStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_staminaStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Mile Stamina Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_powerStatTarget}
-                                                value={trainingStatTargetSettings.trainingMileStatTarget_powerStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_powerStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Mile Power Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_gutsStatTarget}
-                                                value={trainingStatTargetSettings.trainingMileStatTarget_gutsStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_gutsStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Mile Guts Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_witStatTarget}
-                                                value={trainingStatTargetSettings.trainingMileStatTarget_witStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_witStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Mile Wit Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                        </>
-                                    ),
-                                },
-                                {
-                                    value: "medium",
-                                    title: "Medium Distance",
-                                    children: (
-                                        <>
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_speedStatTarget}
-                                                value={trainingStatTargetSettings.trainingMediumStatTarget_speedStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_speedStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Medium Speed Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_staminaStatTarget}
-                                                value={trainingStatTargetSettings.trainingMediumStatTarget_staminaStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_staminaStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Medium Stamina Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_powerStatTarget}
-                                                value={trainingStatTargetSettings.trainingMediumStatTarget_powerStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_powerStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Medium Power Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_gutsStatTarget}
-                                                value={trainingStatTargetSettings.trainingMediumStatTarget_gutsStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_gutsStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Medium Guts Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_witStatTarget}
-                                                value={trainingStatTargetSettings.trainingMediumStatTarget_witStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_witStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Medium Wit Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                        </>
-                                    ),
-                                },
-                                {
-                                    value: "long",
-                                    title: "Long Distance",
-                                    children: (
-                                        <>
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_speedStatTarget}
-                                                value={trainingStatTargetSettings.trainingLongStatTarget_speedStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_speedStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Long Speed Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_staminaStatTarget}
-                                                value={trainingStatTargetSettings.trainingLongStatTarget_staminaStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_staminaStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Long Stamina Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_powerStatTarget}
-                                                value={trainingStatTargetSettings.trainingLongStatTarget_powerStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_powerStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Long Power Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_gutsStatTarget}
-                                                value={trainingStatTargetSettings.trainingLongStatTarget_gutsStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_gutsStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Long Guts Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                            <CustomSlider
-                                                placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_witStatTarget}
-                                                value={trainingStatTargetSettings.trainingLongStatTarget_witStatTarget}
-                                                onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_witStatTarget", value)}
-                                                min={100}
-                                                max={1200}
-                                                step={10}
-                                                label="Long Wit Target"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                            />
-                                        </>
-                                    ),
-                                },
-                            ]}
-                        />
+                        <View style={styles.section}>
+                            <SearchableItem
+                                searchId="senior-milestone-percent"
+                                searchTitle="Classic Year Milestone (Senior Year Start)"
+                                searchDescription="Percentage of the primary stat targets to aim for by the end of Classic Year (start of Senior)."
+                            >
+                                <CustomSlider
+                                    value={trainingSettings.seniorMilestonePercent}
+                                    placeholder={defaultSettings.training.seniorMilestonePercent}
+                                    onValueChange={(value) => updateTrainingSetting("seniorMilestonePercent", value)}
+                                    min={0}
+                                    max={100}
+                                    step={1}
+                                    label="Classic Year Milestone (Senior Year Start)"
+                                    labelUnit="%"
+                                    showValue={true}
+                                    showLabels={true}
+                                />
+                            </SearchableItem>
+                            <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>
+                                The bot will aim for this % of your stat targets during Classic Year. Default: 66%.
+                            </Text>
+                        </View>
                     </View>
                 </ScrollView>
             </SearchPageProvider>

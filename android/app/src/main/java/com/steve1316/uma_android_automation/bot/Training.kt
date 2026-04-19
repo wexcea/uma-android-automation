@@ -97,6 +97,12 @@ class Training(private val game: Game, private val campaign: Campaign) {
     /** The minimum stat gain required for using a Good-Luck Charm. */
     private val minStatGainForCharm = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerMinStatGainForCharm", 30)
 
+    /** Classic Year milestone percentage (applied to primary stat targets during Junior Year). */
+    private val trackblazerClassicMilestonePct: Int = SettingsHelper.getIntSetting("training", "classicMilestonePercent", 33)
+
+    /** Senior Year milestone percentage (applied to primary stat targets during Classic Year). */
+    private val trackblazerSeniorMilestonePct: Int = SettingsHelper.getIntSetting("training", "seniorMilestonePercent", 66)
+
     /** Map of current stat targets. */
     private var statTargets: Map<StatName, Int> = emptyMap()
 

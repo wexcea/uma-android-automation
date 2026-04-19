@@ -114,6 +114,10 @@ class Trainee {
         }
     }
 
+    /** The user-defined Classic and Senior milestone percentages for training thresholds (defaults: 33% and 66%). */
+    private val classicMilestonePct: Int = SettingsHelper.getIntSetting("training", "classicMilestonePercent", 33)
+    private val seniorMilestonePct: Int = SettingsHelper.getIntSetting("training", "seniorMilestonePercent", 66)
+
     /** The user-defined preferred track distance override from settings. */
     private val preferredDistanceOverride: String = SettingsHelper.getStringSetting("training", "preferredDistanceOverride")
 
@@ -310,6 +314,39 @@ class Trainee {
         }
 
         return statTargetsByDistance[distance]!!.asMap()
+    }
+
+    /**
+     * Retrieves stat targets scaled to the appropriate training year milestone.
+     *
+     * Instead of targeting the full end-of-game statline in all three years, this method
+     * returns a phase-scaled subset so the bot paces itself across the three training years:
+     * - Junior Year:  [classicMilestonePercent]% of the primary target (default 33%)
+     * - Classic Year: [seniorMilestonePercent]% of the primary target (default 66%)
+     * - Senior Year:  100% (the full primary target, unchanged)
+     *
+     * The milestone percentages are user-configurable via the "scenarioOverrides" settings.
+     *
+     * @param year The current [DateYear] to determine which milestone to apply.
+     * @param distance The [TrackDistance] to query. If null, uses the trainee's preferred distance.
+     * @return A map of [StatName] to their milestone-scaled target values for the current year.
+     */
+    fun getPhaseStatTargets(year: DateYear, distance: TrackDistance? = null): Map<StatName, Int> {
+        val primary = getStatTargetsByDistance(distance)
+
+        val multiplier: Double =
+            when (year) {
+                DateYear.JUNIOR -> classicMilestonePct / 100.0
+                DateYear.CLASSIC -> seniorMilestonePct / 100.0
+                DateYear.SENIOR -> 1.0
+            }
+
+        // Senior (multiplier == 1.0) returns the primary map untouched.
+        return if (multiplier == 1.0) {
+            primary
+        } else {
+            primary.mapValues { (_, target) -> (target * multiplier).toInt().coerceAtLeast(1) }
+        }
     }
 
     /**
@@ -905,6 +942,7 @@ class Trainee {
         }
         MessageLog.v(TAG, "[TRAINEE] Stats: $stats")
         MessageLog.v(TAG, "[TRAINEE] Energy: $energy%")
+        MessageLog.v(TAG, "[TRAINEE] Mood: ${mood.name}")
         MessageLog.v(TAG, "[TRAINEE] Fans: $fans")
         MessageLog.v(TAG, "[TRAINEE] Skill Points: $skillPoints")
         val trackString = "Turf=${trackSurfaceAptitudes[TrackSurface.TURF]}, Dirt=${trackSurfaceAptitudes[TrackSurface.DIRT]}"

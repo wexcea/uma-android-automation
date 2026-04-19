@@ -176,7 +176,27 @@ const searchConfig: SearchOption[] = [
             "Set target values for each stat based on race distance. These stat targets are derived from past Champion Meetings. The bot will prioritize training stats that are below these targets.",
         page: "TrainingSettings",
     },
-
+    {
+        id: "training-year-milestone-targets",
+        title: "Training Year Milestone Targets",
+        description:
+            "Controls how aggressively the bot paces stat training across the three in-game years. The bot will target a scaled percentage of your stat targets during Junior and Classic Year, ramping up to the full target by Senior Year.",
+        page: "TrainingSettings",
+    },
+    {
+        id: "classic-milestone-percent",
+        title: "Junior Year Milestone (Classic Year Start)",
+        description: "Percentage of the primary stat targets to aim for by the end of Junior Year (start of Classic). Default: 33%.",
+        page: "TrainingSettings",
+        parentId: "training-year-milestone-targets",
+    },
+    {
+        id: "senior-milestone-percent",
+        title: "Classic Year Milestone (Senior Year Start)",
+        description: "Percentage of the primary stat targets to aim for by the end of Classic Year (start of Senior). Default: 66%.",
+        page: "TrainingSettings",
+        parentId: "training-year-milestone-targets",
+    },
     // ============================================================
     // Training Event Settings
     // ============================================================
@@ -296,6 +316,60 @@ const searchConfig: SearchOption[] = [
         id: "original-race-strategy",
         title: "Original Race Strategy",
         description: "The race strategy to reset to after Junior Year. The bot will use this strategy for races in Year 2 and beyond.",
+        page: "RacingSettings",
+    },
+    {
+        id: "enable-per-distance-strategy",
+        title: "Per-Distance Strategy",
+        description: "When enabled, allows setting different race strategies for each track distance instead of a single strategy for all races.",
+        page: "RacingSettings",
+    },
+    {
+        id: "junior-strategy-short",
+        title: "Junior Year Short Distance Strategy",
+        description: "The race strategy to use for short distance races during Junior Year.",
+        page: "RacingSettings",
+    },
+    {
+        id: "junior-strategy-mile",
+        title: "Junior Year Mile Distance Strategy",
+        description: "The race strategy to use for mile distance races during Junior Year.",
+        page: "RacingSettings",
+    },
+    {
+        id: "junior-strategy-medium",
+        title: "Junior Year Medium Distance Strategy",
+        description: "The race strategy to use for medium distance races during Junior Year.",
+        page: "RacingSettings",
+    },
+    {
+        id: "junior-strategy-long",
+        title: "Junior Year Long Distance Strategy",
+        description: "The race strategy to use for long distance races during Junior Year.",
+        page: "RacingSettings",
+    },
+    {
+        id: "original-strategy-short",
+        title: "Original Short Distance Strategy",
+        description: "The race strategy to use for short distance races in Year 2 and beyond.",
+        page: "RacingSettings",
+    },
+    {
+        id: "original-strategy-mile",
+        title: "Original Mile Distance Strategy",
+        description: "The race strategy to use for mile distance races in Year 2 and beyond.",
+        page: "RacingSettings",
+    },
+    {
+        id: "original-strategy-medium",
+        title: "Original Medium Distance Strategy",
+        description: "The race strategy to use for medium distance races in Year 2 and beyond.",
+        page: "RacingSettings",
+    },
+    {
+        id: "original-strategy-long",
+        title: "Original Long Distance Strategy",
+        description: "The race strategy to use for long distance races in Year 2 and beyond.",
         page: "RacingSettings",
     },
     {
