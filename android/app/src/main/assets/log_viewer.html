@@ -1074,7 +1074,32 @@
                 font-size: 11px;
             }
 
-
+        /* Mood Section */
+        .mood-great {
+            background: rgba(247, 84, 136, 0.15);
+            color: #f75488;
+            border-color: rgba(247, 84, 136, 0.3);
+        }
+        .mood-good {
+            background: rgba(255, 125, 57, 0.15);
+            color: #ff7d39;
+            border-color: rgba(255, 125, 57, 0.3);
+        }
+        .mood-normal {
+            background: rgba(255, 166, 6, 0.15);
+            color: #ffa606;
+            border-color: rgba(255, 166, 6, 0.3);
+        }
+        .mood-bad {
+            background: rgba(16, 137, 247, 0.15);
+            color: #1089f7;
+            border-color: rgba(16, 137, 247, 0.3);
+        }
+        .mood-awful {
+            background: rgba(172, 85, 255, 0.15);
+            color: #ac55ff;
+            border-color: rgba(172, 85, 255, 0.3);
+        }
 
             /* Custom Tooltip */
             .custom-tooltip {
@@ -1284,6 +1309,12 @@
             </table>
                 <!-- Trainee Conditions -->
                 <div class="conditions-section">
+            <div class="condition-group">
+                <div class="condition-group-label">Mood Conditions</div>
+                <div id="moodConditions" class="condition-list">
+                    <span class="condition-empty">Unknown</span>
+                </div>
+            </div>
                     <div class="condition-group">
                         <div class="condition-group-label">Positive Conditions</div>
                         <div id="positiveConditions" class="condition-list">
@@ -2056,6 +2087,7 @@
                     skillPoints: null,
                     date: null,
                     turn: null,
+                    mood: null,
                     stats: {},
                     apts: {},
                     positiveStatuses: null,
@@ -2304,6 +2336,7 @@
                 // Reset conditions.
                 document.getElementById("positiveConditions").innerHTML = '<span class="condition-empty">None</span>'
                 document.getElementById("negativeConditions").innerHTML = '<span class="condition-empty">None</span>'
+                document.getElementById("moodConditions").innerHTML = '<span class="condition-empty">Unknown</span>'
 
                 // Reset dashboard info.
                 document.getElementById("dashboardDate").textContent = "-"
@@ -2519,6 +2552,8 @@
                 if (stateTarget) {
                     if (category === "Name") {
                         stateTarget.name = data.trim()
+                    } else if (category === "Mood") {
+                        stateTarget.mood = data.trim()
                     } else if (category === "Positive Statuses") {
                         stateTarget.positiveStatuses = data.split(", ").map((s) => s.trim())
                     } else if (category === "Negative Statuses") {
@@ -2596,6 +2631,9 @@
                 if (state.skillPoints) {
                     document.getElementById("dashboardSkillPoints").textContent = formatNumberWithCommas(state.skillPoints)
                 }
+                if (state.mood !== null && state.mood !== undefined) {
+                    updateMoodBadge(state.mood)
+                }
                 if (state.positiveStatuses) {
                     updateConditionBadges(document.getElementById("positiveConditions"), state.positiveStatuses, "condition-positive")
                 }
@@ -2663,6 +2701,35 @@
                 }
             }
 
+            /**
+             * Maps a Mood enum name (AWFUL/BAD/NORMAL/GOOD/GREAT) to a badge in the Mood Conditions panel.
+             * @param {string} mood - The mood name from the Mood enum (case-insensitive).
+             */
+            function updateMoodBadge(mood) {
+                const container = document.getElementById("moodConditions")
+                if (!container) return
+
+                const moodConfig = {
+                    AWFUL:  { label: "😞 Awful",  cls: "mood-awful",  tip: "Training Results: -20%, Race Attributes: -4%" },
+                    BAD:    { label: "😕 Bad",    cls: "mood-bad",    tip: "Training Results: -10%, Race Attributes: -2%" },
+                    NORMAL: { label: "😐 Normal", cls: "mood-normal", tip: "Training Results: 0%, Race Attributes: 0%" },
+                    GOOD:   { label: "😊 Good",   cls: "mood-good",   tip: "Training Results: +10%, Race Attributes: 2%" },
+                    GREAT:  { label: "😄 Great",  cls: "mood-great",  tip: "Training Results: +20%, Race Attributes: 4%" }
+                }
+
+                const cfg = moodConfig[mood.toUpperCase()]
+                if (!cfg) return
+
+                container.innerHTML = ""
+
+                const span = document.createElement("span")
+                span.className = "condition-badge " + cfg.cls
+                span.textContent = cfg.label
+                span.title = cfg.tip
+
+                container.appendChild(span)
+            }
+
             /** Helper to update condition badges. */
             function updateConditionBadges(container, statuses, className) {
                 if (!container) return
@@ -2712,6 +2779,12 @@
                         stateTarget.name = data.trim()
                     } else {
                         document.getElementById("dashboardName").textContent = data.trim()
+                    }
+                } else if (category === "Mood") {
+                    if (stateTarget) {
+                        stateTarget.mood = data.trim()
+                    } else {
+                        updateMoodBadge(data.trim())
                     }
                 } else if (category === "Positive Statuses") {
                     const statuses = data.split(", ").map((s) => s.trim())
