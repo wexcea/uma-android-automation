@@ -310,6 +310,7 @@ ${longTargetsString}
 👥 Prioritize Farming Fans: ${settings.racing.enableFarmingFans ? "✅" : "❌"}
 ⏰ Modulo Days to Farm Fans: ${settings.racing.enableFarmingFans ? `${settings.racing.daysToRunExtraRaces} days` : "❌"}
 🚫 Ignore Consecutive Race Warning: ${settings.racing.ignoreConsecutiveRaceWarning ? "✅" : "❌"}
+⚡ Ignore Low Energy Racing Block: ${settings.racing.ignoreLowEnergyRacingBlock ? "✅" : "❌"}
 🔄 Disable Race Retries: ${settings.racing.disableRaceRetries ? "✅" : "❌"}
 \t🔄 Allow Daily Free Race Retry: ${settings.racing.enableFreeRaceRetry ? "✅" : "❌"}
 🏁 Stop on Mandatory Race: ${settings.racing.enableStopOnMandatoryRaces ? "✅" : "❌"}

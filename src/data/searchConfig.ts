@@ -281,6 +281,12 @@ const searchConfig: SearchOption[] = [
         page: "RacingSettings",
     },
     {
+        id: "ignore-low-energy-racing-block",
+        title: "Ignore Low Energy Racing Block",
+        description: "When enabled, the Trackblazer bot will not block racing when energy is critically low with consecutive races.",
+        page: "RacingSettings",
+    },
+    {
         id: "disable-race-retries",
         title: "Disable Race Retries",
         description: "When enabled, the bot will not retry mandatory races if they fail and will stop.",
