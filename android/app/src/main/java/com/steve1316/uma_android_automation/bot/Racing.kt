@@ -2008,7 +2008,11 @@ class Racing(private val game: Game, private val campaign: Campaign) {
      * @param consecutiveRaceCount Current number of consecutive races performed.
      * @return Pair of the best suitable race's location and [RaceData], or null if none found.
      */
-    fun findSuitableTrackblazerRace(consecutiveRaceCount: Int): Pair<Point, RaceData>? {
+    fun findSuitableTrackblazerRace(
+        consecutiveRaceCount: Int,
+        preferredDistances: List<TrackDistance> = emptyList(),
+        preferredSurfaces: List<TrackSurface> = emptyList(),
+    ): Pair<Point, RaceData>? {
         val sb = StringBuilder()
         sb.appendLine("\n========== Trackblazer Race Analysis ==========")
         sb.appendLine("Current Date: ${campaign.date}")
@@ -2180,10 +2184,21 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                 RaceGrade.PRE_OP to 5,
             )
 
-        val sortedRaces = allSuitableRaces.sortedWith(compareByDescending<Candidate> { it.isRival }.thenBy { gradePriority[it.race.grade] ?: 99 })
+        val sortedRaces = allSuitableRaces.sortedWith(
+            compareByDescending<Candidate> { it.isRival }
+                .thenByDescending {
+                    val distanceMatch = preferredDistances.isEmpty() || it.race.trackDistance in preferredDistances
+                    val surfaceMatch = preferredSurfaces.isEmpty() || it.race.trackSurface in preferredSurfaces
+                    distanceMatch && surfaceMatch
+                }
+                .thenBy { gradePriority[it.race.grade] ?: 99 }
+        )
         val winner = sortedRaces.first()
 
+        val winnerDistanceMatch = preferredDistances.isEmpty() || winner.race.trackDistance in preferredDistances
+        val winnerSurfaceMatch = preferredSurfaces.isEmpty() || winner.race.trackSurface in preferredSurfaces
         sb.appendLine("\nSelected Race: ${winner.race.name} (${winner.race.grade}) Rival: ${winner.isRival}")
+        sb.appendLine("Distance: ${winner.race.trackDistance}, Surface: ${winner.race.trackSurface}, Preference Match: ${winnerDistanceMatch && winnerSurfaceMatch}")
         sb.appendLine("================================================")
         MessageLog.v(TAG, sb.toString())
 

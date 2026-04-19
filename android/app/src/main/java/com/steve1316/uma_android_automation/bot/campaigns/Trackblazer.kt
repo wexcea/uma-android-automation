@@ -39,6 +39,8 @@ import com.steve1316.uma_android_automation.types.PositiveStatus
 import com.steve1316.uma_android_automation.types.RaceGrade
 import com.steve1316.uma_android_automation.types.ScannedItem
 import com.steve1316.uma_android_automation.types.StatName
+import com.steve1316.uma_android_automation.types.TrackDistance
+import com.steve1316.uma_android_automation.types.TrackSurface
 import com.steve1316.uma_android_automation.types.TrackblazerShopList
 import com.steve1316.uma_android_automation.types.Trainee
 import com.steve1316.uma_android_automation.utils.ScrollListEntry
@@ -107,6 +109,44 @@ class Trackblazer(game: Game) : Campaign(game) {
         } catch (e: Exception) {
             Log.e(TAG, "[ERROR] shopCheckGrades:: Failed to parse shopCheckGrades setting: ${e.message}")
             listOf(RaceGrade.G1, RaceGrade.G2, RaceGrade.G3)
+        }
+
+    /** List of preferred track distances for race selection prioritization. */
+    private val preferredDistances: List<TrackDistance> =
+        try {
+            val distancesString = SettingsHelper.getStringSetting("scenarioOverrides", "trackblazerPreferredDistances", "[]")
+            val jsonArray = JSONArray(distancesString)
+            val distances = mutableListOf<TrackDistance>()
+            for (i in 0 until jsonArray.length()) {
+                val distanceName = jsonArray.getString(i)
+                val distance = TrackDistance.fromName(distanceName)
+                if (distance != null) {
+                    distances.add(distance)
+                }
+            }
+            distances
+        } catch (e: Exception) {
+            Log.e(TAG, "[ERROR] preferredDistances:: Failed to parse setting: ${e.message}")
+            emptyList()
+        }
+
+    /** List of preferred track surfaces for race selection prioritization. */
+    private val preferredSurfaces: List<TrackSurface> =
+        try {
+            val surfacesString = SettingsHelper.getStringSetting("scenarioOverrides", "trackblazerPreferredSurfaces", "[]")
+            val jsonArray = JSONArray(surfacesString)
+            val surfaces = mutableListOf<TrackSurface>()
+            for (i in 0 until jsonArray.length()) {
+                val surfaceName = jsonArray.getString(i)
+                val surface = TrackSurface.fromName(surfaceName)
+                if (surface != null) {
+                    surfaces.add(surface)
+                }
+            }
+            surfaces
+        } catch (e: Exception) {
+            Log.e(TAG, "[ERROR] preferredSurfaces:: Failed to parse setting: ${e.message}")
+            emptyList()
         }
 
     /** Tracks the number of consecutive races performed. */
@@ -226,7 +266,7 @@ class Trackblazer(game: Game) : Campaign(game) {
             updateDate(isOnMainScreen = false)
 
             MessageLog.i(TAG, "[TEST] Currently on Race List screen. Calling findSuitableTrackblazerRace($consecutiveRaceCount)...")
-            val result = racing.findSuitableTrackblazerRace(consecutiveRaceCount)
+            val result = racing.findSuitableTrackblazerRace(consecutiveRaceCount, preferredDistances, preferredSurfaces)
 
             if (result != null) {
                 val (point, raceData) = result
@@ -579,7 +619,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                 return false
             }
 
-            val suitableRaceResult = racing.findSuitableTrackblazerRace(consecutiveRaceCount)
+            val suitableRaceResult = racing.findSuitableTrackblazerRace(consecutiveRaceCount, preferredDistances, preferredSurfaces)
             if (suitableRaceResult != null) {
                 val suitableRaceLocation = suitableRaceResult.first
                 val raceData = suitableRaceResult.second
@@ -1199,6 +1239,7 @@ class Trackblazer(game: Game) : Campaign(game) {
             }
 
             bIsIrregularTraining = false
+            training.firstTrainingCheck = false
             return
         }
 
@@ -1256,6 +1297,7 @@ class Trackblazer(game: Game) : Campaign(game) {
         // Final Training Execution.
         if (trainingSelected != null) {
             training.executeTraining(trainingSelected)
+            training.firstTrainingCheck = false
         } else {
             MessageLog.i(TAG, "[TRACKBLAZER] Still no suitable training found. Backing out to rest/recollect.")
             ButtonBack.click(game.imageUtils)

@@ -1809,7 +1809,7 @@ abstract class Campaign(game: Game) : Task(game) {
             if (trainee.energy < 70) {
                 MessageLog.i(TAG, "[INFO] Energy is low (${trainee.energy}% < 70%). Forcing rest during $date in preparation for Summer Training.")
                 return MainScreenAction.REST
-            } else if (trainee.mood < Mood.GREAT) {
+            } else if (trainee.mood < Mood.GREAT && !training.firstTrainingCheck) {
                 MessageLog.i(TAG, "[INFO] Energy is sufficient (>= 70%) but Mood is not Great (${trainee.mood}). Forcing mood recovery during $date in preparation for Summer Training.")
                 forcedTargetMood = Mood.GREAT
                 return MainScreenAction.RECOVER_MOOD

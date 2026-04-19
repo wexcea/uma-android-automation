@@ -610,6 +610,18 @@ const searchConfig: SearchOption[] = [
         description: "Sets the frequency of shop checks after races in the Trackblazer scenario. 1 = every race, 2 = 1 day after, 3 = 2 days after, etc.",
         page: "ScenarioOverridesSettings",
     },
+    {
+        id: "trackblazer-preferred-distances",
+        title: "Trackblazer Preferred Track Distances",
+        description: "Select preferred track distances for extra race selection. Matching races will be prioritized. Leave empty for no preference.",
+        page: "ScenarioOverridesSettings",
+    },
+    {
+        id: "trackblazer-preferred-surfaces",
+        title: "Trackblazer Preferred Track Surfaces",
+        description: "Select preferred track surfaces for extra race selection. Matching races will be prioritized. Leave empty for no preference.",
+        page: "ScenarioOverridesSettings",
+    },
 
     // ============================================================
     // Debug Settings

@@ -410,6 +410,8 @@ export const defaultSettings: Settings = {
         trackblazerIrregularTrainingMinStatGain: 30,
         trackblazerExcludedItems: [],
         trackblazerShopCheckFrequency: 3,
+        trackblazerPreferredDistances: [] as string[],
+        trackblazerPreferredSurfaces: [] as string[],
     },
 }
 
