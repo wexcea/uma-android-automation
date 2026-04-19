@@ -64,6 +64,9 @@ export interface Settings {
         smartRacingCheckInterval: number
         juniorYearRaceStrategy: string
         originalRaceStrategy: string
+        enablePerDistanceStrategy: boolean
+        juniorYearPerDistanceStrategies: Record<string, string>
+        originalPerDistanceStrategies: Record<string, string>
         minimumQualityThreshold: number
         timeDecayFactor: number
         improvementThreshold: number
@@ -242,6 +245,9 @@ export const defaultSettings: Settings = {
         smartRacingCheckInterval: 2,
         juniorYearRaceStrategy: "Default",
         originalRaceStrategy: "Default",
+        enablePerDistanceStrategy: false,
+        juniorYearPerDistanceStrategies: { Short: "Default", Mile: "Default", Medium: "Default", Long: "Default" },
+        originalPerDistanceStrategies: { Short: "Default", Mile: "Default", Medium: "Default", Long: "Default" },
         minimumQualityThreshold: 50.0,
         timeDecayFactor: 0.7,
         improvementThreshold: 50.0,

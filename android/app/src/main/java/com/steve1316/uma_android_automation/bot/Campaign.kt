@@ -409,11 +409,11 @@ abstract class Campaign(game: Game) : Task(game) {
                 val runningStyleString: String =
                     when {
                         // Special case for when the bot has not been able to check the date i.e. when the bot starts at the race screen.
-                        date.day == 1 -> racing.userSelectedOriginalStrategy
+                        date.day == 1 -> racing.resolveStrategyForCurrentRace(isJuniorYear = false)
 
-                        date.year == DateYear.JUNIOR -> racing.juniorYearRaceStrategy
+                        date.year == DateYear.JUNIOR -> racing.resolveStrategyForCurrentRace(isJuniorYear = true)
 
-                        else -> racing.userSelectedOriginalStrategy
+                        else -> racing.resolveStrategyForCurrentRace(isJuniorYear = false)
                     }
                 when (runningStyleString.uppercase()) {
                     // Do not select a strategy. Use what is already selected.
