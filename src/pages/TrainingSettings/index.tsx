@@ -965,12 +965,13 @@ const TrainingSettings = () => {
                                 ]}
                             />
                         </View>
+
                         {/* Training Year Milestone Targets */}
                         <View style={styles.section}>
                             <CustomTitle
                                 title="Training Year Milestone Targets"
                                 description={
-                                    `Controls how aggressively the bot paces stat training during the Pre-debut, Junior and Classic Years.\n\n` +
+                                    `Controls how aggressively the bot paces stat training during the Pre-Debut, Junior and Classic Years.\n\n` +
                                     `The bot will target a scaled percentage of your stat targets prior to the Senior Year, ` +
                                     `ramping up to the full stat targets by the Finale. For example, with milestone targets of 33% / 66%, a Speed ` +
                                     `target of 1200 becomes ~396 in Junior Year and ~792 in Classic Year. This optimizes early-career statlines for better starting race results.\n\n` +
@@ -980,8 +981,8 @@ const TrainingSettings = () => {
                             />
                             <SearchableItem
                                 id="classic-milestone-percent"
-                                title="Junior Year Milestone (Classic Year Start)"
-                                description="Percentage of the primary stat targets to aim for by the end of Junior Year (start of Classic)."
+                                title="End of Junior Year Milestone"
+                                description="Percentage of the primary stat targets to aim for by the end of Junior Year."
                             >
                                 <CustomSlider
                                     value={trainingSettings.classicMilestonePercent}
@@ -990,7 +991,7 @@ const TrainingSettings = () => {
                                     min={0}
                                     max={100}
                                     step={1}
-                                    label="Junior Year Milestone (Classic Year Start)"
+                                    label="End of Junior Year Milestone"
                                     labelUnit="%"
                                     showValue={true}
                                     showLabels={true}
@@ -1004,8 +1005,8 @@ const TrainingSettings = () => {
                         <View style={styles.section}>
                             <SearchableItem
                                 id="senior-milestone-percent"
-                                title="Classic Year Milestone (Senior Year Start)"
-                                description="Percentage of the primary stat targets to aim for by the end of Classic Year (start of Senior)."
+                                title="End of Classic Year Milestone"
+                                description="Percentage of the primary stat targets to aim for by the end of Classic Year."
                             >
                                 <CustomSlider
                                     value={trainingSettings.seniorMilestonePercent}
@@ -1014,7 +1015,7 @@ const TrainingSettings = () => {
                                     min={0}
                                     max={100}
                                     step={1}
-                                    label="Classic Year Milestone (Senior Year Start)"
+                                    label="End of Classic Year Milestone"
                                     labelUnit="%"
                                     showValue={true}
                                     showLabels={true}
