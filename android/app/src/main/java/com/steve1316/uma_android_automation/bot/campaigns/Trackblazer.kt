@@ -1331,7 +1331,7 @@ class Trackblazer(game: Game) : Campaign(game) {
             } else {
                 // Force a training (Only Wit if negative conditions to avoid possible stat reductions such as Slow Metabolism)
                 // 80 Energy is optimal for Wit, as there may be post events that provide additional energy.
-                val forcedStat = if (trainee.energy >= 80 && trainee.currentNegativeStatuses.isNotEmpty()) StatName.SPEED else StatName.WIT
+                val forcedStat = if (trainee.energy >= 80 && trainee.currentNegativeStatuses.isEmpty()) StatName.SPEED else StatName.WIT
                 MessageLog.i(TAG, "[TRACKBLAZER] Still no suitable training found. Energy (${trainee.energy}%) and Mood (${trainee.mood}) are sufficient. Forcing $forcedStat training.")
                 training.executeTraining(forcedStat)
                 training.firstTrainingCheck = false
