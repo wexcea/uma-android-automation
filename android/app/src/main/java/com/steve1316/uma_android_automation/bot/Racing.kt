@@ -2046,20 +2046,22 @@ class Racing(private val game: Game, private val campaign: Campaign) {
     }
 
     /**
-     * Searches the race list for a race that meets Trackblazer criteria.
+     * Searches the race list for a suitable race based on double-star predictions and grade criteria.
      *
      * Junior Year: G1/G2/G3 with double predictions. Classic/Senior: Priority racing, but if consecutive race count >= 3, only G1/G2/G3.
      *
      * @param consecutiveRaceCount Current number of consecutive races performed.
+     * @param preferredDistances Optional list of preferred track distances for prioritization.
+     * @param preferredSurfaces Optional list of preferred track surfaces for prioritization.
      * @return Pair of the best suitable race's location and [RaceData], or null if none found.
      */
-    fun findSuitableTrackblazerRace(
+    fun findSuitableRace(
         consecutiveRaceCount: Int,
         preferredDistances: List<TrackDistance> = emptyList(),
         preferredSurfaces: List<TrackSurface> = emptyList(),
     ): Pair<Point, RaceData>? {
         val sb = StringBuilder()
-        sb.appendLine("\n========== Trackblazer Race Analysis ==========")
+        sb.appendLine("\n========== Race Selection Analysis ==========")
         sb.appendLine("Current Date: ${campaign.date}")
         sb.appendLine("Consecutive Race Count: $consecutiveRaceCount")
 
@@ -2069,7 +2071,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
 
         val scrollList = ScrollList.create(game)
         if (scrollList != null) {
-            MessageLog.i(TAG, "[RACE] Scanning the whole race list for suitable Trackblazer races...")
+            MessageLog.i(TAG, "[RACE] Scanning the whole race list for suitable races...")
             val entryRaceNamesMap = mutableMapOf<Int, List<String>>()
             scrollList.process(
                 keyExtractor = { entry ->
@@ -2094,7 +2096,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                             game.imageUtils.relY(predictionLocation.y, -165),
                             game.imageUtils.relWidth(340),
                             game.imageUtils.relHeight(80),
-                            "findSuitableTrackblazerRace rival scan",
+                            "findSuitableRace rival scan",
                         )
                     val rivalFound =
                         rivalBitmap != null &&
@@ -2151,7 +2153,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                 false // Continue scanning all pages.
             }
         } else {
-            MessageLog.w(TAG, "[WARN] findSuitableTrackblazerRace:: Failed to create ScrollList. Falling back to single-page detection.")
+            MessageLog.w(TAG, "[WARN] findSuitableRace:: Failed to create ScrollList. Falling back to single-page detection.")
             val doubleStarPredictions = IconRaceListPredictionDoubleStar.findAll(game.imageUtils)
             val sourceBitmap = game.imageUtils.getSourceBitmap()
             for (location in doubleStarPredictions) {
@@ -2163,7 +2165,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                         game.imageUtils.relY(location.y, -165),
                         game.imageUtils.relWidth(320),
                         game.imageUtils.relHeight(80),
-                        "findSuitableTrackblazerRace rival fallback",
+                        "findSuitableRace rival fallback",
                     )
                 val rivalFound =
                     rivalBitmap != null &&

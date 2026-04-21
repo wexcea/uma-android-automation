@@ -271,14 +271,14 @@ class Trackblazer(game: Game) : Campaign(game) {
             // Update the date first for racing logic.
             updateDate(isOnMainScreen = false)
 
-            MessageLog.i(TAG, "[TEST] Currently on Race List screen. Calling findSuitableTrackblazerRace($consecutiveRaceCount)...")
-            val result = racing.findSuitableTrackblazerRace(consecutiveRaceCount, preferredDistances, preferredSurfaces)
+            MessageLog.i(TAG, "[TEST] Currently on Race List screen. Calling findSuitableRace($consecutiveRaceCount)...")
+            val result = racing.findSuitableRace(consecutiveRaceCount, preferredDistances, preferredSurfaces)
 
             if (result != null) {
                 val (point, raceData) = result
                 MessageLog.i(TAG, "[TEST] Selection Finalized: ${raceData.name} (${raceData.grade}) at (${point.x}, ${point.y}).")
             } else {
-                MessageLog.i(TAG, "[TEST] findSuitableTrackblazerRace returned null. No suitable races found.")
+                MessageLog.i(TAG, "[TEST] findSuitableRace returned null. No suitable races found.")
             }
         } else {
             MessageLog.e(TAG, "[ERROR] startTrackblazerRaceSelectionTest:: Not on Main Screen or Race List screen. Ending test.")
@@ -649,7 +649,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                 return false
             }
 
-            val suitableRaceResult = racing.findSuitableTrackblazerRace(consecutiveRaceCount, preferredDistances, preferredSurfaces)
+            val suitableRaceResult = racing.findSuitableRace(consecutiveRaceCount, preferredDistances, preferredSurfaces)
             if (suitableRaceResult != null) {
                 val suitableRaceLocation = suitableRaceResult.first
                 val raceData = suitableRaceResult.second
