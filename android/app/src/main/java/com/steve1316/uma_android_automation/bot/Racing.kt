@@ -141,7 +141,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
     val skipSummerTrainingForAgenda = SettingsHelper.getBooleanSetting("racing", "skipSummerTrainingForAgenda")
 
     /** The current number of retries available for the run. */
-    internal var raceRetries = 3
+    internal var raceRetries = campaign.getMaxRaceRetries()
 
     /** Whether to check for the consecutive race warning. */
     internal var raceRepeatWarningCheck = false
@@ -222,26 +222,11 @@ class Racing(private val game: Game, private val campaign: Campaign) {
     /** The user's defined planned races loaded at initialization. */
     private val userPlannedRaces: List<PlannedRace> = loadUserPlannedRaces()
 
-    /** The maximum number of retries allowed per race. */
-    private val maxRetriesPerRace = if (game.scenario == "Trackblazer") SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerMaxRetriesPerRace", 1) else 1
+    /** The maximum number of retries allowed per race, provided by the campaign. */
+    private val maxRetriesPerRace: Int = campaign.getMaxRetriesPerRace()
 
-    /** The list of race grades that are eligible for retries in Trackblazer. */
-    internal val trackblazerRetryGrades: List<RaceGrade> =
-        try {
-            val gradesString = SettingsHelper.getStringSetting("scenarioOverrides", "trackblazerRetryRacesBeforeFinalGrades", "[\"G1\",\"G2\",\"G3\"]")
-            val jsonArray = JSONArray(gradesString)
-            val grades = mutableListOf<RaceGrade>()
-            for (i in 0 until jsonArray.length()) {
-                val gradeName = jsonArray.getString(i)
-                val grade = RaceGrade.fromName(gradeName)
-                if (grade != null) {
-                    grades.add(grade)
-                }
-            }
-            grades
-        } catch (e: Exception) {
-            listOf(RaceGrade.G1, RaceGrade.G2, RaceGrade.G3)
-        }
+    /** The list of race grades that are eligible for retries, provided by the campaign. */
+    internal val retryEligibleGrades: List<RaceGrade> = campaign.getRetryEligibleGrades()
 
     /**
      * Stores comprehensive information about a specific race.
@@ -349,12 +334,6 @@ class Racing(private val game: Game, private val campaign: Campaign) {
         private const val SIMILARITY_THRESHOLD = 0.7
     }
 
-    init {
-        if (game.scenario == "Trackblazer") {
-            // Total pool of retries for the entire run.
-            raceRetries = 5
-        }
-    }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////
     // //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1380,7 +1359,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
 
                     // After closing the popup, check if we can retry a specific race grade.
                     if (lastRaceGrade != null &&
-                        trackblazerRetryGrades.contains(lastRaceGrade) &&
+                        retryEligibleGrades.contains(lastRaceGrade) &&
                         raceRetries > 0 &&
                         retriesThisRace < maxRetriesPerRace &&
                         ButtonTryAgainAlt.checkDisabled(game.imageUtils) == false
@@ -1393,7 +1372,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                         }
                     } else if (lastRaceIsRival &&
                         lastRaceGrade != null &&
-                        trackblazerRetryGrades.contains(lastRaceGrade) &&
+                        retryEligibleGrades.contains(lastRaceGrade) &&
                         !bRetriedCurrentRace &&
                         raceRetries > 0 &&
                         retriesThisRace < maxRetriesPerRace &&
@@ -1414,7 +1393,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
 
                 game.scenario == "Trackblazer" &&
                     lastRaceGrade != null &&
-                    trackblazerRetryGrades.contains(lastRaceGrade) &&
+                    retryEligibleGrades.contains(lastRaceGrade) &&
                     raceRetries > 0 &&
                     retriesThisRace < maxRetriesPerRace &&
                     ButtonTryAgainAlt.checkDisabled(
@@ -1433,7 +1412,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                 game.scenario == "Trackblazer" &&
                     lastRaceIsRival &&
                     lastRaceGrade != null &&
-                    trackblazerRetryGrades.contains(lastRaceGrade) &&
+                    retryEligibleGrades.contains(lastRaceGrade) &&
                     !bRetriedCurrentRace &&
                     raceRetries > 0 &&
                     retriesThisRace < maxRetriesPerRace &&

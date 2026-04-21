@@ -449,6 +449,19 @@ class Trackblazer(game: Game) : Campaign(game) {
         return super.recoverMood(sourceBitmap, targetMood)
     }
 
+    override fun getMaxRetriesPerRace(): Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerMaxRetriesPerRace", 1)
+
+    override fun getMaxRaceRetries(): Int = 5
+
+    override fun getRetryEligibleGrades(): List<Racing.RaceGrade> =
+        try {
+            val gradesString = SettingsHelper.getStringSetting("scenarioOverrides", "trackblazerRetryRacesBeforeFinalGrades", "[\"G1\",\"G2\",\"G3\"]")
+            val jsonArray = JSONArray(gradesString)
+            (0 until jsonArray.length()).mapNotNull { Racing.RaceGrade.fromName(jsonArray.getString(it)) }
+        } catch (e: Exception) {
+            listOf(Racing.RaceGrade.G1, Racing.RaceGrade.G2, Racing.RaceGrade.G3)
+        }
+
     override fun onConsecutiveRaceWarningDetected(dialog: DialogInterface, args: Map<String, Any>) {
         val okButtonLocation: Point? = ButtonOk.find(game.imageUtils).first
 
@@ -551,7 +564,7 @@ class Trackblazer(game: Game) : Campaign(game) {
     }
 
     override fun shouldRetryRace(dialog: DialogInterface, args: Map<String, Any>): Boolean {
-        if (racing.lastRaceGrade != null && racing.trackblazerRetryGrades.contains(racing.lastRaceGrade) && racing.raceRetries >= 0) {
+        if (racing.lastRaceGrade != null && racing.retryEligibleGrades.contains(racing.lastRaceGrade) && racing.raceRetries >= 0) {
             if (racing.lastRaceIsRival && !racing.bRetriedCurrentRace) {
                 MessageLog.i(TAG, "[TRACKBLAZER] ${racing.lastRaceGrade} Rival Race retry button is available. Retrying once.")
                 racing.bRetriedCurrentRace = true

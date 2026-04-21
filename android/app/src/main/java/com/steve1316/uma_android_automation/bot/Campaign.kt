@@ -594,6 +594,27 @@ abstract class Campaign(game: Game) : Task(game) {
     }
 
     /**
+     * Returns the maximum number of retries allowed per individual race.
+     *
+     * @return The maximum retries per race.
+     */
+    open fun getMaxRetriesPerRace(): Int = 1
+
+    /**
+     * Returns the total pool of race retries for the entire run.
+     *
+     * @return The maximum total race retries.
+     */
+    open fun getMaxRaceRetries(): Int = 3
+
+    /**
+     * Returns the list of race grades that are eligible for retries.
+     *
+     * @return The list of eligible [Racing.RaceGrade] values, or empty if no retries are allowed.
+     */
+    open fun getRetryEligibleGrades(): List<Racing.RaceGrade> = emptyList()
+
+    /**
      * Executes logic at the very beginning of [handleMainScreen].
      */
     open fun onBeforeMainScreenUpdate() {
