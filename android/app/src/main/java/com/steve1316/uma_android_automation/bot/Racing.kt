@@ -1351,9 +1351,9 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                     MessageLog.i(TAG, "[RACE] Clicked skip button.")
                 }
 
-                // Handle post-race Rival popups.
-                game.scenario == "Trackblazer" && ButtonClose.click(game.imageUtils, sourceBitmap = bitmap) -> {
-                    MessageLog.i(TAG, "[TRACKBLAZER] Closed post-race Rival popup.")
+                // Handle post-race popups (e.g. Rival popups in Trackblazer).
+                campaign.hasPostRacePopups() && ButtonClose.click(game.imageUtils, sourceBitmap = bitmap) -> {
+                    MessageLog.i(TAG, "[RACE] Closed post-race popup.")
                     campaign.onRaceWin()
                     game.wait(1.0)
 
@@ -1364,7 +1364,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                         retriesThisRace < maxRetriesPerRace &&
                         ButtonTryAgainAlt.checkDisabled(game.imageUtils) == false
                     ) {
-                        MessageLog.i(TAG, "[TRACKBLAZER] $lastRaceGrade race detected and retry button is available. Retrying...")
+                        MessageLog.i(TAG, "[RACE] $lastRaceGrade race detected and retry button is available. Retrying...")
                         if (ButtonTryAgainAlt.click(game.imageUtils)) {
                             game.wait(3.0)
                             retriesThisRace++
@@ -1378,8 +1378,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                         retriesThisRace < maxRetriesPerRace &&
                         ButtonTryAgainAlt.checkDisabled(game.imageUtils) == false
                     ) {
-                        // Trackblazer Rival Race retry logic: retry once then stop.
-                        MessageLog.i(TAG, "[TRACKBLAZER] Rival Race retry button is available. Retrying once...")
+                        MessageLog.i(TAG, "[RACE] Rival Race retry button is available. Retrying once...")
                         bRetriedCurrentRace = true
                         if (ButtonTryAgainAlt.click(game.imageUtils)) {
                             game.wait(3.0)
@@ -1387,12 +1386,11 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                             raceRetries--
                         }
                     } else {
-                        MessageLog.i(TAG, "[TRACKBLAZER] No retries remaining or G1/G2/G3/Rival race conditions not met.")
+                        MessageLog.i(TAG, "[RACE] No retries remaining or eligible race conditions not met.")
                     }
                 }
 
-                game.scenario == "Trackblazer" &&
-                    lastRaceGrade != null &&
+                lastRaceGrade != null &&
                     retryEligibleGrades.contains(lastRaceGrade) &&
                     raceRetries > 0 &&
                     retriesThisRace < maxRetriesPerRace &&
@@ -1400,8 +1398,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                         game.imageUtils,
                         sourceBitmap = bitmap,
                     ) == false -> {
-                    // Check if we can retry a specific race grade even if no popup appeared.
-                    MessageLog.i(TAG, "[TRACKBLAZER] $lastRaceGrade race detected and retry button is available. Retrying...")
+                    MessageLog.i(TAG, "[RACE] $lastRaceGrade race detected and retry button is available. Retrying...")
                     if (ButtonTryAgainAlt.click(game.imageUtils, sourceBitmap = bitmap)) {
                         game.wait(3.0)
                         retriesThisRace++
@@ -1409,8 +1406,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                     }
                 }
 
-                game.scenario == "Trackblazer" &&
-                    lastRaceIsRival &&
+                lastRaceIsRival &&
                     lastRaceGrade != null &&
                     retryEligibleGrades.contains(lastRaceGrade) &&
                     !bRetriedCurrentRace &&
@@ -1420,8 +1416,7 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                         game.imageUtils,
                         sourceBitmap = bitmap,
                     ) == false -> {
-                    // Trackblazer Rival Race retry logic even if no popup appeared.
-                    MessageLog.i(TAG, "[TRACKBLAZER] Rival Race retry button is available. Retrying once...")
+                    MessageLog.i(TAG, "[RACE] Rival Race retry button is available. Retrying once...")
                     bRetriedCurrentRace = true
                     if (ButtonTryAgainAlt.click(game.imageUtils, sourceBitmap = bitmap)) {
                         game.wait(3.0)

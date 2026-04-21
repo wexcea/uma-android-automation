@@ -594,6 +594,14 @@ abstract class Campaign(game: Game) : Task(game) {
     }
 
     /**
+     * Whether to handle a close button as a post-race popup during race retries.
+     * Override this to return true for scenarios that show popups (e.g. Rival popups) after races.
+     *
+     * @return True to handle close button as a post-race popup, false otherwise.
+     */
+    open fun hasPostRacePopups(): Boolean = false
+
+    /**
      * Whether to bypass smart racing and interval checks for extra race eligibility.
      * Override this to return true for scenarios that race as often as possible.
      *
