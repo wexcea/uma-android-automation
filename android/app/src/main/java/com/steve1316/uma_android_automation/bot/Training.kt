@@ -154,14 +154,11 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
         /** Total number of rainbow trainings detected. */
         var numRainbow: Int = 0
 
-        /** Total number of Spirit Gauges that can currently be filled. */
-        var numSpiritGaugesCanFill: Int = 0
-
-        /** Total number of Spirit Gauges that are ready for a Spirit Explosion. */
-        var numSpiritGaugesReadyToBurst: Int = 0
-
         /** Total number of detected skill hints. */
         var numSkillHints: Int = 0
+
+        /** Scenario-specific extra data populated by [runExtraTrainingAnalysis]. */
+        val extras: MutableMap<String, Any?> = mutableMapOf()
     }
 
     /**
@@ -173,9 +170,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
      * @property failureChance The detected failure chance percentage.
      * @property relationshipBars List of detected relationship bar fill levels.
      * @property numRainbow Total number of rainbow trainings detected.
-     * @property numSpiritGaugesCanFill Total number of fillable Spirit Gauges.
-     * @property numSpiritGaugesReadyToBurst Total number of Spirit Gauges ready to burst.
      * @property numSkillHints Total number of detected skill hints.
+     * @property extras Scenario-specific extra data from [runExtraTrainingAnalysis].
      * @property skipReason Optional reason if this training was skipped during recommendation.
      */
     data class TrainingOption(
@@ -185,9 +181,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
         val failureChance: Int,
         val relationshipBars: ArrayList<CustomImageUtils.BarFillResult>,
         val numRainbow: Int,
-        val numSpiritGaugesCanFill: Int = 0,
-        val numSpiritGaugesReadyToBurst: Int = 0,
         val numSkillHints: Int = 0,
+        val extras: Map<String, Any?> = emptyMap(),
         val skipReason: String? = null,
     ) {
         override fun equals(other: Any?): Boolean {
@@ -202,9 +197,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             if (correctedStats != other.correctedStats) return false
             if (relationshipBars != other.relationshipBars) return false
             if (numRainbow != other.numRainbow) return false
-            if (numSpiritGaugesCanFill != other.numSpiritGaugesCanFill) return false
-            if (numSpiritGaugesReadyToBurst != other.numSpiritGaugesReadyToBurst) return false
             if (numSkillHints != other.numSkillHints) return false
+            if (extras != other.extras) return false
             if (skipReason != other.skipReason) return false
 
             return true
@@ -217,9 +211,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             result = 31 * result + correctedStats.hashCode()
             result = 31 * result + relationshipBars.hashCode()
             result = 31 * result + numRainbow
-            result = 31 * result + numSpiritGaugesCanFill
-            result = 31 * result + numSpiritGaugesReadyToBurst
             result = 31 * result + numSkillHints
+            result = 31 * result + extras.hashCode()
             result = 31 * result + (skipReason?.hashCode() ?: 0)
             return result
         }
@@ -473,16 +466,19 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
         fun scoreUnityCupTraining(config: TrainingConfig, training: TrainingOption): Double {
             MessageLog.v(TAG, "\n[TRAINING] Starting process to score ${training.name} Training for Unity Cup with redirected priority: Stats > Burst > Filling.")
 
+            val numSpiritGaugesCanFill = training.extras["spiritGaugesCanFill"] as? Int ?: 0
+            val numSpiritGaugesReadyToBurst = training.extras["spiritGaugesReadyToBurst"] as? Int ?: 0
+
             // 1. Primary Priority: Stat Efficiency.
             var score = calculateStatEfficiencyScore(config, training)
             MessageLog.i(TAG, "[TRAINING] [${training.name}] Base stat efficiency score: ${String.format("%.2f", score)}")
 
             // 2. Second Priority: Trainings with Spirit Explosion Gauges ready to burst.
-            if (training.numSpiritGaugesReadyToBurst > 0) {
+            if (numSpiritGaugesReadyToBurst > 0) {
                 // We give a significant bonus for bursting, but not so much that it always overrides huge stat gains elsewhere.
-                val burstBonus = 800.0 + (training.numSpiritGaugesReadyToBurst * 400.0)
+                val burstBonus = 800.0 + (numSpiritGaugesReadyToBurst * 400.0)
                 score += burstBonus
-                MessageLog.i(TAG, "[TRAINING] [${training.name}] Adding burst bonus for ${training.numSpiritGaugesReadyToBurst} gauge(s): $burstBonus")
+                MessageLog.i(TAG, "[TRAINING] [${training.name}] Adding burst bonus for ${numSpiritGaugesReadyToBurst} gauge(s): $burstBonus")
 
                 // Facility preference bonuses for bursting.
                 when (training.name) {
@@ -507,7 +503,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
 
                     StatName.GUTS -> {
                         // Guts is not ideal, but can be worth it if building up gauges to max them out for bursting.
-                        if (training.numSpiritGaugesCanFill >= 2) {
+                        if (numSpiritGaugesCanFill >= 2) {
                             score += 100.0 // Building up multiple gauges to allow for bursting.
                         } else {
                             score -= 50.0 // Not ideal without building up multiple gauges.
@@ -517,12 +513,12 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             }
 
             // 3. Third Priority: Trainings that can fill Spirit Explosion Gauges (not at 100% yet).
-            if (training.numSpiritGaugesCanFill > 0) {
+            if (numSpiritGaugesCanFill > 0) {
                 // Score increases with number of gauges that can be filled.
                 // Each gauge fills by 25% per training execution.
-                val fillBonus = 300.0 + (training.numSpiritGaugesCanFill * 100.0)
+                val fillBonus = 300.0 + (numSpiritGaugesCanFill * 100.0)
                 score += fillBonus
-                MessageLog.i(TAG, "[TRAINING] [${training.name}] Training can fill ${training.numSpiritGaugesCanFill} Spirit Explosion Gauge(s). Adding fill bonus: $fillBonus")
+                MessageLog.i(TAG, "[TRAINING] [${training.name}] Training can fill ${numSpiritGaugesCanFill} Spirit Explosion Gauge(s). Adding fill bonus: $fillBonus")
 
                 // Early game: If gauges can be filled for deprioritized stat trainings, ignore stat prioritization.
                 if (config.currentDate.year == DateYear.JUNIOR) {
@@ -1346,8 +1342,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                             failureChance = result.failureChance,
                             relationshipBars = result.relationshipBars,
                             numRainbow = result.numRainbow,
-                            numSpiritGaugesCanFill = result.numSpiritGaugesCanFill,
-                            numSpiritGaugesReadyToBurst = result.numSpiritGaugesReadyToBurst,
+                            extras = result.extras,
                             numSkillHints = result.numSkillHints,
                         )
                     trainingMap[result.name] = newTraining
@@ -1477,8 +1472,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                         failureChance = result.failureChance,
                         relationshipBars = result.relationshipBars,
                         numRainbow = result.numRainbow,
-                        numSpiritGaugesCanFill = result.numSpiritGaugesCanFill,
-                        numSpiritGaugesReadyToBurst = result.numSpiritGaugesReadyToBurst,
+                        extras = result.extras,
                         numSkillHints = result.numSkillHints,
                         skipReason = skipReason,
                     )
@@ -1501,8 +1495,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                         failureChance = result.failureChance,
                         relationshipBars = result.relationshipBars,
                         numRainbow = result.numRainbow,
-                        numSpiritGaugesCanFill = result.numSpiritGaugesCanFill,
-                        numSpiritGaugesReadyToBurst = result.numSpiritGaugesReadyToBurst,
+                        extras = result.extras,
                         numSkillHints = result.numSkillHints,
                         skipReason = "low gain with charm",
                     )
@@ -1523,8 +1516,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                             failureChance = result.failureChance,
                             relationshipBars = result.relationshipBars,
                             numRainbow = result.numRainbow,
-                            numSpiritGaugesCanFill = result.numSpiritGaugesCanFill,
-                            numSpiritGaugesReadyToBurst = result.numSpiritGaugesReadyToBurst,
+                            extras = result.extras,
                             numSkillHints = result.numSkillHints,
                             skipReason = "low irregular gain",
                         )
@@ -1541,8 +1533,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                     failureChance = result.failureChance,
                     relationshipBars = result.relationshipBars,
                     numRainbow = result.numRainbow,
-                    numSpiritGaugesCanFill = result.numSpiritGaugesCanFill,
-                    numSpiritGaugesReadyToBurst = result.numSpiritGaugesReadyToBurst,
+                    extras = result.extras,
                     numSkillHints = result.numSkillHints,
                 )
             trainingMap[result.name] = newTraining
@@ -1835,6 +1826,23 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
     }
 
     /**
+     * Returns scenario-specific extra log lines for a training option. Override to add custom log output.
+     *
+     * @param training The training option to generate extra log fields for.
+     * @return A list of log line strings, or empty if none.
+     */
+    open fun getExtraLogFields(training: TrainingOption): List<String> = emptyList()
+
+    /**
+     * Returns scenario-specific key factors for the training recommendation log. Override to add custom factors.
+     *
+     * @param selected The selected training option.
+     * @param args Scenario-specific parameters.
+     * @return A list of key factor strings, or empty if none.
+     */
+    open fun getExtraKeyFactors(selected: TrainingOption, args: Map<String, Any?> = emptyMap()): List<String> = emptyList()
+
+    /**
      * Recommend the best training option based on the current scoring mode and game state.
      *
      * @param forceSelection If true, the best training option will be selected even if it exceeds the failure chance threshold.
@@ -1962,15 +1970,9 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             val keyFactors = mutableListOf<String>()
 
             // Mode-specific key factors.
-            when (scoringMode) {
-                "Unity Cup (Spirit Gauge)" -> {
-                    if (selected.numSpiritGaugesReadyToBurst > 0) {
-                        keyFactors.add("Has ${selected.numSpiritGaugesReadyToBurst} Spirit Gauge(s) ready to burst (highest priority).")
-                    } else if (selected.numSpiritGaugesCanFill > 0) {
-                        keyFactors.add("Can fill ${selected.numSpiritGaugesCanFill} Spirit Gauge(s).")
-                    }
-                }
+            keyFactors.addAll(getExtraKeyFactors(selected, args))
 
+            when (scoringMode) {
                 "Friendship (Junior Year)" -> {
                     val blueCount = selected.relationshipBars.count { it.dominantColor == "blue" }
                     val greenCount = selected.relationshipBars.count { it.dominantColor == "green" }
@@ -2179,9 +2181,9 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             sb.appendLine("  -> Relationship bars: $barsSummary")
         }
 
-        // Print Spirit Gauge info if any gauges are present.
-        if (training.numSpiritGaugesCanFill > 0 || training.numSpiritGaugesReadyToBurst > 0) {
-            sb.appendLine("  -> Spirit Gauges: fillable=${training.numSpiritGaugesCanFill}, ready to burst=${training.numSpiritGaugesReadyToBurst}")
+        // Print scenario-specific extra data.
+        for (line in getExtraLogFields(training)) {
+            sb.appendLine("  -> $line")
         }
 
         // Print skill hints if any.
@@ -2209,8 +2211,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             sb.append(gains.ifEmpty { "None" })
             sb.append(" | Fail: ${training.failureChance}%")
             sb.append(" | Rainbow: ${training.numRainbow}")
-            if (game.scenario == "Unity Cup") {
-                sb.append(" | Gauges: CanFill=${training.numSpiritGaugesCanFill}, Ready=${training.numSpiritGaugesReadyToBurst}")
+            for (field in getExtraLogFields(training)) {
+                sb.append(" | $field")
             }
             if (training.relationshipBars.isNotEmpty()) {
                 sb.append(" | Bars: ${training.relationshipBars.size}")
