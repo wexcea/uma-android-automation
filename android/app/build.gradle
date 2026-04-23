@@ -245,6 +245,9 @@ dependencies {
 
     // MediaPipe GenAI for the on-device documentation chatbot's LLM inference fallback path.
     implementation(libs.mediapipe.tasks.genai)
+
+    // ML Kit GenAI Prompt API for the on-device documentation chatbot's Gemini Nano accelerator path on supported devices.
+    implementation(libs.mlkit.genai.prompt)
 }
 
 // ============================================================================
