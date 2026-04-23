@@ -23,9 +23,6 @@ enum class TaskResultCode {
 
     /** A connection error occurred during task execution. */
     TASK_RESULT_CONNECTION_ERROR,
-
-    /** The task timed out before completing its objectives. */
-    TASK_RESULT_TIMED_OUT,
 }
 
 /** Represents the final result of a task's execution. */
@@ -147,21 +144,18 @@ abstract class Task(game: Game) : DialogHandler(game) {
     // //////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Run the task's main loop until completion or timeout.
+     * Run the task's main loop until completion or manual stop.
      *
-     * @param maxRuntimeMinutes The maximum time (in minutes) allowed for the task before timing out.
      * @return The final [TaskResult] of the task's execution.
      */
-    open fun start(maxRuntimeMinutes: Int = 90): TaskResult {
+    open fun start(): TaskResult {
         var result: TaskResult =
             TaskResult.Error(
-                TaskResultCode.TASK_RESULT_TIMED_OUT,
-                "The task timed out after $maxRuntimeMinutes minutes.",
+                TaskResultCode.TASK_RESULT_UNHANDLED_EXCEPTION,
+                "Task ended unexpectedly.",
             )
 
-        val timeoutMs = (maxRuntimeMinutes * (60 * 1000)).toLong()
-        val startTime = System.currentTimeMillis()
-        while (System.currentTimeMillis() - startTime < timeoutMs) {
+        while (true) {
             try {
                 val tmpResult: TaskResult? = process()
                 // Stop the task if a non-null result is received.
