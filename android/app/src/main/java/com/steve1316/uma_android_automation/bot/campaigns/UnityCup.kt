@@ -28,6 +28,8 @@ import org.opencv.core.Point
  * @property game The [Game] instance for interacting with the game state.
  */
 class UnityCup(game: Game) : Campaign(game) {
+    override val training = UnityCupTraining(game, this)
+
     /** Flag indicating if the tutorial has been disabled. */
     private var tutorialDisabled = false
 

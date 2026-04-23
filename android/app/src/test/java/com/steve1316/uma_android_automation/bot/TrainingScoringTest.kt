@@ -98,8 +98,7 @@ class TrainingScoringTest {
         failureChance: Int = 5,
         relationshipBars: ArrayList<BarFillResult> = arrayListOf(),
         numRainbow: Int = 0,
-        numSpiritGaugesCanFill: Int = 0,
-        numSpiritGaugesReadyToBurst: Int = 0,
+        extras: Map<String, Any?> = emptyMap(),
     ): TrainingOption {
         return TrainingOption(
             name = name,
@@ -107,8 +106,7 @@ class TrainingScoringTest {
             failureChance = failureChance,
             relationshipBars = relationshipBars,
             numRainbow = numRainbow,
-            numSpiritGaugesCanFill = numSpiritGaugesCanFill,
-            numSpiritGaugesReadyToBurst = numSpiritGaugesReadyToBurst,
+            extras = extras,
         )
     }
 
@@ -682,20 +680,16 @@ class TrainingScoringTest {
         val trainingWithBurst =
             createDefaultTrainingOption(
                 name = StatName.SPEED,
-                numSpiritGaugesReadyToBurst = 1,
-                numSpiritGaugesCanFill = 0,
+                extras = mapOf("spiritGaugesReadyToBurst" to 1, "spiritGaugesCanFill" to 0),
             )
         val trainingWithFill =
             createDefaultTrainingOption(
                 name = StatName.STAMINA,
-                numSpiritGaugesReadyToBurst = 0,
-                numSpiritGaugesCanFill = 3,
+                extras = mapOf("spiritGaugesCanFill" to 3),
             )
         val trainingWithNoGauges =
             createDefaultTrainingOption(
                 name = StatName.POWER,
-                numSpiritGaugesReadyToBurst = 0,
-                numSpiritGaugesCanFill = 0,
             )
 
         val config =
@@ -716,24 +710,24 @@ class TrainingScoringTest {
     @DisplayName("Speed and Wit get facility preference bonuses when spirit gauge bursting")
     fun testFacilityPreferenceBonusesForBursting() {
         // Zero out stat gains to isolate facility bonuses.
+        val burstExtras = mapOf<String, Any?>("spiritGaugesReadyToBurst" to 1)
         val speedTraining =
             createDefaultTrainingOption(
                 name = StatName.SPEED,
                 statGains = statGainsToMap(intArrayOf(0, 0, 0, 0, 0)),
-                numSpiritGaugesReadyToBurst = 1,
+                extras = burstExtras,
             )
         val witTraining =
             createDefaultTrainingOption(
                 name = StatName.WIT,
                 statGains = statGainsToMap(intArrayOf(0, 0, 0, 0, 0)),
-                numSpiritGaugesReadyToBurst = 1,
+                extras = burstExtras,
             )
         val gutsTraining =
             createDefaultTrainingOption(
                 name = StatName.GUTS,
                 statGains = statGainsToMap(intArrayOf(0, 0, 0, 0, 0)),
-                numSpiritGaugesReadyToBurst = 1,
-                numSpiritGaugesCanFill = 0,
+                extras = burstExtras,
             )
 
         val config =
@@ -758,7 +752,7 @@ class TrainingScoringTest {
         val training =
             createDefaultTrainingOption(
                 name = StatName.SPEED,
-                numSpiritGaugesCanFill = 2,
+                extras = mapOf("spiritGaugesCanFill" to 2),
             )
 
         val earlyConfig =
@@ -786,13 +780,13 @@ class TrainingScoringTest {
         val rainbowBurstTraining =
             createDefaultTrainingOption(
                 name = StatName.SPEED,
-                numSpiritGaugesReadyToBurst = 1,
+                extras = mapOf("spiritGaugesReadyToBurst" to 1),
                 numRainbow = 1,
             )
         val normalBurstTraining =
             createDefaultTrainingOption(
                 name = StatName.SPEED,
-                numSpiritGaugesReadyToBurst = 1,
+                extras = mapOf("spiritGaugesReadyToBurst" to 1),
                 numRainbow = 0,
             )
 
@@ -835,8 +829,7 @@ class TrainingScoringTest {
         val name: StatName,
         val statGains: IntArray,
         val relationshipBars: List<BarDef> = emptyList(),
-        val numSpiritGaugesCanFill: Int = 0,
-        val numSpiritGaugesReadyToBurst: Int = 0,
+        val extras: Map<String, Any?> = emptyMap(),
         val numRainbow: Int = 0,
     ) {
         override fun equals(other: Any?): Boolean {
@@ -845,8 +838,7 @@ class TrainingScoringTest {
 
             other as TrainingDef
 
-            if (numSpiritGaugesCanFill != other.numSpiritGaugesCanFill) return false
-            if (numSpiritGaugesReadyToBurst != other.numSpiritGaugesReadyToBurst) return false
+            if (extras != other.extras) return false
             if (numRainbow != other.numRainbow) return false
             if (name != other.name) return false
             if (!statGains.contentEquals(other.statGains)) return false
@@ -856,8 +848,7 @@ class TrainingScoringTest {
         }
 
         override fun hashCode(): Int {
-            var result = numSpiritGaugesCanFill
-            result = 31 * result + numSpiritGaugesReadyToBurst
+            var result = extras.hashCode()
             result = 31 * result + numRainbow
             result = 31 * result + name.hashCode()
             result = 31 * result + statGains.contentHashCode()
@@ -889,17 +880,16 @@ class TrainingScoringTest {
                     currentStats = mapOf("Speed" to 358, "Stamina" to 217, "Power" to 258, "Guts" to 168, "Wit" to 168),
                     trainings =
                         listOf(
-                            TrainingDef(StatName.SPEED, intArrayOf(15, 0, 6, 0, 0), listOf(BarDef(color = "green")), numSpiritGaugesCanFill = 1),
+                            TrainingDef(StatName.SPEED, intArrayOf(15, 0, 6, 0, 0), listOf(BarDef(color = "green")), extras = mapOf("spiritGaugesCanFill" to 1)),
                             TrainingDef(StatName.STAMINA, intArrayOf(0, 8, 0, 4, 0)),
                             TrainingDef(StatName.POWER, intArrayOf(0, 4, 8, 0, 0)),
                             TrainingDef(
                                 StatName.GUTS,
                                 intArrayOf(11, 0, 10, 31, 0),
                                 listOf(BarDef(color = "green"), BarDef(color = "green"), BarDef(color = "green")),
-                                numSpiritGaugesCanFill = 1,
-                                numSpiritGaugesReadyToBurst = 1,
+                                extras = mapOf("spiritGaugesCanFill" to 1, "spiritGaugesReadyToBurst" to 1),
                             ),
-                            TrainingDef(StatName.WIT, intArrayOf(4, 0, 0, 0, 17), numSpiritGaugesReadyToBurst = 1),
+                            TrainingDef(StatName.WIT, intArrayOf(4, 0, 0, 0, 17), extras = mapOf("spiritGaugesReadyToBurst" to 1)),
                         ),
                     preferredDistance = "Medium",
                     date = GameDate(year = DateYear.JUNIOR, month = DateMonth.DECEMBER, phase = DatePhase.EARLY),
@@ -910,9 +900,17 @@ class TrainingScoringTest {
                     currentStats = mapOf("Speed" to 453, "Stamina" to 372, "Power" to 483, "Guts" to 244, "Wit" to 214),
                     trainings =
                         listOf(
-                            TrainingDef(StatName.SPEED, intArrayOf(22, 0, 10, 0, 0), listOf(BarDef(color = "green")), numSpiritGaugesCanFill = 1),
-                            TrainingDef(StatName.STAMINA, intArrayOf(0, 25, 0, 13, 0), listOf(BarDef(color = "orange"), BarDef(color = "green"), BarDef(color = "green")), numSpiritGaugesCanFill = 1),
-                            TrainingDef(StatName.POWER, intArrayOf(0, 15, 23, 0, 0), listOf(BarDef(color = "orange")), numSpiritGaugesCanFill = 1, numRainbow = 1),
+                            TrainingDef(StatName.SPEED, intArrayOf(22, 0, 10, 0, 0), listOf(BarDef(color = "green")), extras = mapOf("spiritGaugesCanFill" to 1)),
+                            TrainingDef(
+                                StatName.STAMINA,
+                                intArrayOf(0, 25, 0, 13, 0),
+                                listOf(BarDef(color = "orange"), BarDef(color = "green"), BarDef(color = "green")),
+                                extras =
+                                    mapOf(
+                                        "spiritGaugesCanFill" to 1,
+                                    ),
+                            ),
+                            TrainingDef(StatName.POWER, intArrayOf(0, 15, 23, 0, 0), listOf(BarDef(color = "orange")), extras = mapOf("spiritGaugesCanFill" to 1), numRainbow = 1),
                             TrainingDef(StatName.GUTS, intArrayOf(5, 0, 5, 15, 0)),
                             TrainingDef(StatName.WIT, intArrayOf(5, 0, 0, 0, 12)),
                         ),
@@ -925,10 +923,10 @@ class TrainingScoringTest {
                     currentStats = mapOf("Speed" to 834, "Stamina" to 588, "Power" to 724, "Guts" to 335, "Wit" to 283),
                     trainings =
                         listOf(
-                            TrainingDef(StatName.SPEED, intArrayOf(33, 0, 13, 0, 0), listOf(BarDef(color = "orange")), numSpiritGaugesCanFill = 2, numRainbow = 1),
-                            TrainingDef(StatName.STAMINA, intArrayOf(0, 47, 0, 22, 0), listOf(BarDef(color = "orange")), numSpiritGaugesReadyToBurst = 1),
-                            TrainingDef(StatName.POWER, intArrayOf(0, 8, 14, 0, 0), numSpiritGaugesCanFill = 1),
-                            TrainingDef(StatName.GUTS, intArrayOf(12, 0, 9, 35, 0), numSpiritGaugesReadyToBurst = 1),
+                            TrainingDef(StatName.SPEED, intArrayOf(33, 0, 13, 0, 0), listOf(BarDef(color = "orange")), extras = mapOf("spiritGaugesCanFill" to 2), numRainbow = 1),
+                            TrainingDef(StatName.STAMINA, intArrayOf(0, 47, 0, 22, 0), listOf(BarDef(color = "orange")), extras = mapOf("spiritGaugesReadyToBurst" to 1)),
+                            TrainingDef(StatName.POWER, intArrayOf(0, 8, 14, 0, 0), extras = mapOf("spiritGaugesCanFill" to 1)),
+                            TrainingDef(StatName.GUTS, intArrayOf(12, 0, 9, 35, 0), extras = mapOf("spiritGaugesReadyToBurst" to 1)),
                             TrainingDef(StatName.WIT, intArrayOf(6, 0, 0, 0, 13)),
                         ),
                     preferredDistance = "Medium",
@@ -1008,9 +1006,8 @@ class TrainingScoringTest {
                                 BarFillResult(statName = StatName.SPEED, bar.fillPercent, bar.filledSegments, bar.color)
                             },
                         ),
-                    numSpiritGaugesCanFill = def.numSpiritGaugesCanFill,
-                    numSpiritGaugesReadyToBurst = def.numSpiritGaugesReadyToBurst,
                     numRainbow = def.numRainbow,
+                    extras = def.extras,
                 )
             }
 

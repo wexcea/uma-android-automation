@@ -62,6 +62,7 @@ import com.steve1316.uma_android_automation.types.DateYear
 import com.steve1316.uma_android_automation.types.FanCountClass
 import com.steve1316.uma_android_automation.types.GameDate
 import com.steve1316.uma_android_automation.types.Mood
+import com.steve1316.uma_android_automation.types.RaceGrade
 import com.steve1316.uma_android_automation.types.RunningStyle
 import com.steve1316.uma_android_automation.types.StatName
 import com.steve1316.uma_android_automation.types.Trainee
@@ -112,8 +113,8 @@ abstract class Campaign(game: Game) : Task(game) {
     /** Required instance of the Trainee class. */
     val trainee: Trainee = Trainee()
 
-    /** Required instance of the Training class. */
-    val training: Training = Training(game, this)
+    /** Required instance of the Training class. Override to provide a scenario-specific Training subclass. */
+    open val training: Training = Training(game, this)
 
     /** Required instance of the TrainingEvent class. */
     protected val trainingEvent: TrainingEvent = TrainingEvent(game, this)
@@ -592,6 +593,43 @@ abstract class Campaign(game: Game) : Task(game) {
     open fun onRaceWin() {
         return
     }
+
+    /**
+     * Whether to handle a close button as a post-race popup during race retries.
+     * Override this to return true for scenarios that show popups (e.g. Rival popups) after races.
+     *
+     * @return True to handle close button as a post-race popup, false otherwise.
+     */
+    open fun hasPostRacePopups(): Boolean = false
+
+    /**
+     * Whether to bypass smart racing and interval checks for extra race eligibility.
+     * Override this to return true for scenarios that race as often as possible.
+     *
+     * @return True to bypass smart racing checks, false to use default logic.
+     */
+    open fun shouldBypassSmartRacing(): Boolean = false
+
+    /**
+     * Returns the maximum number of retries allowed per individual race.
+     *
+     * @return The maximum retries per race.
+     */
+    open fun getMaxRetriesPerRace(): Int = 1
+
+    /**
+     * Returns the total pool of race retries for the entire run.
+     *
+     * @return The maximum total race retries.
+     */
+    open fun getMaxRaceRetries(): Int = 3
+
+    /**
+     * Returns the list of race grades that are eligible for retries.
+     *
+     * @return The list of eligible [RaceGrade] values, or empty if no retries are allowed.
+     */
+    open fun getRetryEligibleGrades(): List<RaceGrade> = emptyList()
 
     /**
      * Executes logic at the very beginning of [handleMainScreen].
