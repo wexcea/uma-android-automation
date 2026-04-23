@@ -110,7 +110,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
     private val statsTrainedOverBuffer: MutableSet<StatName> = mutableSetOf()
 
     /** List of stat trainings to ignore. */
-    private val blacklist: List<StatName?> = SettingsHelper.getStringArraySetting("training", "trainingBlacklist").map { StatName.fromName(it) }
+    internal val blacklist: List<StatName?> = SettingsHelper.getStringArraySetting("training", "trainingBlacklist").map { StatName.fromName(it) }
 
     /** Whether the last analysis was skipped due to energy being too low (failure chance too high). */
     var needsEnergyRecovery: Boolean = false
