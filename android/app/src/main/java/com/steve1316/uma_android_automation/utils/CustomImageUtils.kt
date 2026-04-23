@@ -2456,9 +2456,22 @@ class CustomImageUtils(context: Context, private val game: Game) : ImageUtils(co
         ocrEngine: String = "tesseract",
         debugName: String = "",
     ): String {
+        // Clamp the crop region to the bitmap bounds. relX/relY can produce negative coordinates
+        // which would otherwise crash Bitmap.createBitmap with "y must be >= 0".
+        val safeX = x.coerceIn(0, (sourceBitmap.width - 1).coerceAtLeast(0))
+        val safeY = y.coerceIn(0, (sourceBitmap.height - 1).coerceAtLeast(0))
+        val safeWidth = width.coerceAtLeast(1).coerceAtMost(sourceBitmap.width - safeX)
+        val safeHeight = height.coerceAtLeast(1).coerceAtMost(sourceBitmap.height - safeY)
+        if (safeX != x || safeY != y || safeWidth != width || safeHeight != height) {
+            MessageLog.w(
+                TAG,
+                "[WARN] performOCROnRegion:: Crop region ($x, $y, ${width}x$height) clamped to ($safeX, $safeY, ${safeWidth}x$safeHeight) for bitmap ${sourceBitmap.width}x${sourceBitmap.height}${if (debugName.isNotEmpty()) " [$debugName]" else ""}.",
+            )
+        }
+
         // Perform OCR using findText() from ImageUtils.
         return findText(
-            cropRegion = intArrayOf(x, y, width, height),
+            cropRegion = intArrayOf(safeX, safeY, safeWidth, safeHeight),
             grayscale = useGrayscale,
             thresh = useThreshold,
             threshold = threshold.toDouble(),
