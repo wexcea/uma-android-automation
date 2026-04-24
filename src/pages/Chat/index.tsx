@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { View, ScrollView, StyleSheet, TextInput, Text, NativeModules, Pressable } from "react-native"
+import Markdown from "react-native-markdown-display"
 import { useTheme } from "../../context/ThemeContext"
 import CustomButton from "../../components/CustomButton"
 import PageHeader from "../../components/PageHeader"
@@ -126,7 +127,6 @@ const Chat = () => {
                     marginBottom: 12,
                     backgroundColor: colors.card,
                 },
-                answerText: { color: colors.foreground, fontSize: 15, lineHeight: 22 },
                 modeLabel: { fontSize: 11, color: colors.mutedForeground, marginTop: 8, fontStyle: "italic" },
                 sectionLabel: { fontSize: 13, fontWeight: "600", color: colors.foreground, marginTop: 10, marginBottom: 6 },
                 resultCard: {
@@ -139,8 +139,8 @@ const Chat = () => {
                 },
                 resultHeading: { fontWeight: "600", color: colors.foreground, marginBottom: 4 },
                 resultMeta: { fontSize: 11, color: colors.mutedForeground, marginBottom: 6 },
-                resultText: { color: colors.foreground },
                 emptyText: { color: colors.mutedForeground, textAlign: "center", marginTop: 20, paddingHorizontal: 20 },
+                markdownLink: { color: colors.primary, textDecorationLine: "underline" as const },
                 disclaimer: { fontSize: 11, color: colors.mutedForeground, marginTop: 4, marginBottom: 8, fontStyle: "italic" },
                 historyHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12, marginBottom: 6 },
                 historyTitle: { fontSize: 12, fontWeight: "600", color: colors.mutedForeground, textTransform: "uppercase", letterSpacing: 0.5 },
@@ -158,6 +158,60 @@ const Chat = () => {
                 historyChipText: { color: colors.foreground, fontSize: 12 },
                 historyChipRow: { flexDirection: "row", flexWrap: "wrap" },
             }),
+        [colors]
+    )
+
+    // Shared Markdown rule styles. `react-native-markdown-display` colors elements via this `rules`-like map; we
+    // map each tag to a themed RN style so light/dark mode stay consistent with the rest of the app.
+    const markdownStyles = useMemo(
+        () => ({
+            body: { color: colors.foreground, fontSize: 15, lineHeight: 22 },
+            heading1: { color: colors.foreground, fontWeight: "700" as const, fontSize: 20, marginTop: 10, marginBottom: 6 },
+            heading2: { color: colors.foreground, fontWeight: "700" as const, fontSize: 17, marginTop: 10, marginBottom: 6 },
+            heading3: { color: colors.foreground, fontWeight: "600" as const, fontSize: 15, marginTop: 8, marginBottom: 4 },
+            strong: { color: colors.foreground, fontWeight: "700" as const },
+            em: { color: colors.foreground, fontStyle: "italic" as const },
+            paragraph: { color: colors.foreground, marginTop: 0, marginBottom: 8 },
+            bullet_list: { color: colors.foreground },
+            ordered_list: { color: colors.foreground },
+            list_item: { color: colors.foreground },
+            code_inline: {
+                color: colors.foreground,
+                backgroundColor: colors.muted,
+                borderRadius: 4,
+                paddingHorizontal: 4,
+                fontFamily: "monospace" as const,
+            },
+            code_block: {
+                color: colors.foreground,
+                backgroundColor: colors.muted,
+                borderRadius: 6,
+                padding: 8,
+                fontFamily: "monospace" as const,
+            },
+            fence: {
+                color: colors.foreground,
+                backgroundColor: colors.muted,
+                borderRadius: 6,
+                padding: 8,
+                fontFamily: "monospace" as const,
+            },
+            blockquote: {
+                color: colors.mutedForeground,
+                backgroundColor: colors.muted,
+                borderLeftColor: colors.border,
+                borderLeftWidth: 3,
+                paddingLeft: 8,
+                paddingVertical: 4,
+                marginVertical: 4,
+            },
+            hr: { backgroundColor: colors.border, height: 1, marginVertical: 8 },
+            link: { color: colors.primary, textDecorationLine: "underline" as const },
+            table: { borderColor: colors.border, borderWidth: 1, borderRadius: 4, marginVertical: 6 },
+            thead: { backgroundColor: colors.muted },
+            th: { color: colors.foreground, fontWeight: "700" as const, padding: 6 },
+            td: { color: colors.foreground, padding: 6 },
+        }),
         [colors]
     )
 
@@ -206,7 +260,7 @@ const Chat = () => {
                 {result && (
                     <>
                         <View style={styles.answerCard}>
-                            <Text style={styles.answerText}>{result.answer}</Text>
+                            <Markdown style={markdownStyles as any}>{result.answer}</Markdown>
                             {modeLabel && <Text style={styles.modeLabel}>{modeLabel}</Text>}
                         </View>
                         {result.citations.length > 0 && <Text style={styles.sectionLabel}>Sources</Text>}
@@ -216,7 +270,7 @@ const Chat = () => {
                                 <Text style={styles.resultMeta}>
                                     {r.source} · similarity {(r.score * 100).toFixed(0)}%
                                 </Text>
-                                <Text style={styles.resultText}>{r.text}</Text>
+                                <Markdown style={markdownStyles as any}>{r.text}</Markdown>
                             </View>
                         ))}
                     </>
