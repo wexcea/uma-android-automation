@@ -38,6 +38,16 @@ const MODEL_PRESETS: Array<{ label: string; detail: string; url: string }> = [
 
 const DEFAULT_MODEL_URL = MODEL_PRESETS[0].url
 
+/**
+ * Derive the local `.task` filename the downloader will use for [url]. Mirrors `filenameFromUrl` in
+ * [LLMChatModule.kt] so the UI can check whether a preset is already downloaded before offering the button.
+ */
+const filenameFromUrl = (url: string): string => {
+    const noQuery = url.split("?")[0].split("#")[0]
+    const last = noQuery.substring(noQuery.lastIndexOf("/") + 1).trim()
+    return last.endsWith(".task") ? last : "chat-model.task"
+}
+
 interface ServiceStatus {
     mediaPipeDownloaded: boolean
     mediaPipeSizeBytes: number
@@ -217,6 +227,9 @@ const LLMSettings = () => {
 
     const isDownloading = downloadState?.status === "running" || downloadState?.status === "pending" || downloadState?.status === "paused"
 
+    const selectedFilename = useMemo(() => filenameFromUrl(modelUrl), [modelUrl])
+    const selectedAlreadyDownloaded = useMemo(() => downloadedModels.some((m) => m.filename === selectedFilename), [downloadedModels, selectedFilename])
+
     const progressText = useMemo(() => {
         if (!downloadState) return null
         if (downloadState.status === "complete") return "Download complete."
@@ -353,8 +366,8 @@ const LLMSettings = () => {
                     {progressText && <Text style={styles.hint}>{progressText}</Text>}
                     <View style={styles.buttonRow}>
                         {!isDownloading && (
-                            <CustomButton variant="primary" onPress={handleDownload}>
-                                {downloadedModels.length > 0 ? "Download another model" : "Download"}
+                            <CustomButton variant="primary" onPress={handleDownload} disabled={selectedAlreadyDownloaded}>
+                                {selectedAlreadyDownloaded ? "Already downloaded" : downloadedModels.length > 0 ? "Download another model" : "Download"}
                             </CustomButton>
                         )}
                         {isDownloading && (
