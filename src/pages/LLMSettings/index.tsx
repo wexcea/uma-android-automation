@@ -16,22 +16,18 @@ const MODEL_URL_SETTING = { category: "chat", key: "modelUrl" } as const
 const HF_TOKEN_SETTING = { category: "chat", key: "hfToken" } as const
 const ACTIVE_MODEL_SETTING = { category: "chat", key: "activeModelFilename" } as const
 
-/** Known LiteRT community `.task` models sorted by ascending size. All are HF-gated; requires a Read token. */
+/** Known LiteRT community `.task` models. Sizes and filenames verified against the Hugging Face tree views. All
+ *  are gated — requires a HF read token with the Gemma license accepted. */
 const MODEL_PRESETS: Array<{ label: string; detail: string; url: string }> = [
     {
-        label: "Gemma 3 1B (~530 MB, fast, weak summaries)",
+        label: "Gemma 3 1B (555 MB, fast, weak summaries)",
         detail: "Smallest option. Runs on almost any phone, but paraphrasing quality is limited.",
         url: "https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/Gemma3-1B-IT_multi-prefill-seq_q4_ekv2048.task",
     },
     {
-        label: "Gemma 3n E2B (~1.5 GB, balanced)",
-        detail: "Purpose-built for on-device, much better summarization than 1B. Needs ~4 GB free RAM.",
+        label: "Gemma 3n E2B (3.14 GB, best available on Android)",
+        detail: "Purpose-built for on-device; much better summaries than 1B. Needs ~4 GB free RAM and a fast phone.",
         url: "https://huggingface.co/google/gemma-3n-E2B-it-litert-preview/resolve/main/gemma-3n-E2B-it-int4.task",
-    },
-    {
-        label: "Gemma 3 4B (~2.8 GB, best quality, slow)",
-        detail: "Full summary-quality answers. Needs ~6 GB total RAM. Slow on non-flagship phones.",
-        url: "https://huggingface.co/litert-community/Gemma3-4B-IT/resolve/main/Gemma3-4B-IT_multi-prefill-seq_q4_ekv2048.task",
     },
 ]
 
