@@ -152,21 +152,26 @@ class ChatOrchestrator(private val context: Context) {
     // --------------------------------------------------------------------------------------------------
 
     private fun buildPrompt(query: String, citations: List<DocIndex.Result>): String {
-        val contextBlock = citations.mapIndexed { i, r -> "[${i + 1}] ${r.chunk.heading}: ${r.chunk.text}" }.joinToString("\n\n")
+        // Separator-delimited excerpts rather than a "[i] heading: text" layout — small models (Gemma 3 1B) tend to
+        // echo structured prompt templates back as output. Plain prose between separators gives them less to imitate.
+        val contextBlock = citations.joinToString("\n\n---\n\n") { r -> r.chunk.text }
         return """
-            You are a friendly documentation guide for an Android automation app. Using the CONTEXT below, write a natural, conversational summary that answers the user's QUESTION. Paraphrase freely, reorganize points for clarity, and focus on what is relevant to the question — skip unrelated parts of the context. Keep it to 2–5 sentences.
+            You are a friendly documentation guide for an Android automation app.
 
-            Rules:
-            - Use only information grounded in CONTEXT. Do not invent features, numbers, thresholds, button names, or behavior that the CONTEXT does not mention.
-            - If the CONTEXT genuinely does not address the QUESTION, reply with exactly: NOT_IN_DOCS
-            - Write in plain prose, not a bulleted list or "[1] / [2]" references.
+            Below are excerpts from the app's documentation, separated by ---:
 
-            CONTEXT:
             $contextBlock
 
-            QUESTION: $query
+            Using only the excerpts above, write a natural, conversational 2–5 sentence answer to this question:
 
-            ANSWER:
+            $query
+
+            Rules you must follow:
+            - Paraphrase in your own words. Do NOT copy sentences verbatim from the excerpts.
+            - Do NOT prefix lines with headings, numbers, bullets, "Answer:", or "---".
+            - Write a single flowing paragraph.
+            - Only use facts that appear in the excerpts. Do not invent features, numbers, button names, or behavior.
+            - If the excerpts do not answer the question, reply with exactly: NOT_IN_DOCS
         """.trimIndent()
     }
 

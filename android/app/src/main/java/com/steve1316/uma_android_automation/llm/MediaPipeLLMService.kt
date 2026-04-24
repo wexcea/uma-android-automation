@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.google.mediapipe.tasks.genai.llminference.LlmInference
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
+import com.google.mediapipe.tasks.genai.llminference.PromptTemplates
 import com.steve1316.automation_library.data.SharedData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -51,6 +52,7 @@ class MediaPipeLLMService(
                 .setTopK(40)
                 .setTopP(0.95f)
                 .setTemperature(temperature)
+                .setPromptTemplates(GEMMA_TEMPLATES)
                 .build()
             LlmInferenceSession.createFromOptions(engine, sessionOptions).use { session ->
                 session.addQueryChunk(prompt)
@@ -61,6 +63,21 @@ class MediaPipeLLMService(
             null
         }
     }
+
+    /**
+     * Prompt template for the Gemma 3 instruction-tuned family. Without these delimiters MediaPipe feeds raw text to
+     * the model, which then does free-form continuation rather than instruction-following — the symptom was Gemma
+     * echoing the CONTEXT block verbatim instead of summarizing it. Gemma 3 has no native system role, so system
+     * instructions get folded into the user turn by the orchestrator's prompt builder.
+     */
+    private val GEMMA_TEMPLATES: PromptTemplates = PromptTemplates.builder()
+        .setUserPrefix("<start_of_turn>user\n")
+        .setUserSuffix("<end_of_turn>\n")
+        .setModelPrefix("<start_of_turn>model\n")
+        .setModelSuffix("<end_of_turn>\n")
+        .setSystemPrefix("")
+        .setSystemSuffix("")
+        .build()
 
     private fun ensureEngine(): LlmInference? {
         engine?.let { return it }
