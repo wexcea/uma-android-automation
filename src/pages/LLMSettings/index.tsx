@@ -186,25 +186,26 @@ const LLMSettings = () => {
     }, [refreshStatus, refreshModels])
 
     const handleDownload = useCallback(() => {
-        Alert.alert(
-            "Download chat model?",
-            "This downloads ~530 MB over Wi-Fi. The Gemma 3 1B model is gated on Hugging Face — you must accept Google's Gemma license on the model page and paste a read-access token below before downloading.",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Download",
-                    onPress: async () => {
-                        try {
-                            NativeModules.LLMChatModule.setAuthToken(hfToken.trim())
-                            await NativeModules.LLMChatModule.downloadModel(modelUrl.trim() || DEFAULT_MODEL_URL)
-                        } catch (e: any) {
-                            Alert.alert("Download failed to start", e?.message ?? "Unknown error")
-                        }
-                    },
+        const preset = MODEL_PRESETS.find((p) => p.url === modelUrl)
+        const title = preset ? `Download ${preset.label.split(" (")[0]}?` : "Download custom model?"
+        const body = preset
+            ? `${preset.label}\n\n${preset.detail}\n\nGated on Hugging Face — accept the license on the model page and paste a read-access token below before downloading. Prefer Wi-Fi.`
+            : `Downloading from:\n${modelUrl}\n\nGated models require an accepted license and a read-access token. Prefer Wi-Fi.`
+        Alert.alert(title, body, [
+            { text: "Cancel", style: "cancel" },
+            {
+                text: "Download",
+                onPress: async () => {
+                    try {
+                        NativeModules.LLMChatModule.setAuthToken(hfToken.trim())
+                        await NativeModules.LLMChatModule.downloadModel(modelUrl.trim() || DEFAULT_MODEL_URL)
+                    } catch (e: any) {
+                        Alert.alert("Download failed to start", e?.message ?? "Unknown error")
+                    }
                 },
-            ]
-        )
-    }, [hfToken])
+            },
+        ])
+    }, [hfToken, modelUrl])
 
     const handleCancel = useCallback(async () => {
         await NativeModules.LLMChatModule.cancelDownload()
