@@ -10,24 +10,20 @@ import com.steve1316.automation_library.data.SharedData
  * Two entry points:
  * - [searchDocs] runs retrieve-only: embed query, cosine-search the bundled doc index, return top-k chunks verbatim.
  *   Always available, zero hallucination risk.
- * - [chat] layers generation on top: retrieves, builds a grounded prompt, picks the best available LLM service
- *   (Gemini Nano > MediaPipe), runs [GroundingVerifier], and falls back to retrieve-only when verification fails or
- *   no model is available.
+ * - [chat] layers generation on top: retrieves, builds a grounded prompt, runs the MediaPipe LLM when a model is
+ *   downloaded, runs [GroundingVerifier], and falls back to retrieve-only when verification fails or no model is
+ *   available.
  *
  * Lazily initializes every subsystem; first call to either entry point pays the load cost.
  *
- * @property context Application context for asset access, DownloadManager, and ML Kit clients.
+ * @property context Application context for asset access and DownloadManager.
  */
 class ChatOrchestrator(private val context: Context) {
     @Volatile private var embedder: EmbeddingService? = null
     @Volatile private var index: DocIndex? = null
 
     private val downloader = ModelDownloader(context)
-    private val nano = GeminiNanoLLMService()
     @Volatile private var mediapipe: MediaPipeLLMService? = null
-
-    /** Whether the bot should prefer Gemini Nano when available; toggled from the LLM Settings page. */
-    @Volatile var preferNano: Boolean = true
 
     /** User-chosen active model filename. When null the orchestrator falls back to the most recently modified
      *  `.task` file in the model directory. Set from LLM Settings when the user has multiple models downloaded. */
@@ -132,22 +128,20 @@ class ChatOrchestrator(private val context: Context) {
 
     /** Current service status snapshot for the LLM Settings page. */
     data class ServiceStatus(
-        val nanoStatus: Int,
         val mediaPipeDownloaded: Boolean,
         val mediaPipeSizeBytes: Long,
         val activeService: String,
     )
 
     /**
-     * Poll current status of both LLM services — reported by the LLM Settings page.
+     * Poll current status of the MediaPipe LLM service — reported by the LLM Settings page.
      *
      * @return [ServiceStatus] snapshot.
      */
     suspend fun getServiceStatus(): ServiceStatus {
-        val nanoCode = nano.checkStatus()
         val downloaded = downloader.isDownloaded()
         val picked = pickService()?.first ?: "none"
-        return ServiceStatus(nanoCode, downloaded, downloader.size(activeModelFilename), picked)
+        return ServiceStatus(downloaded, downloader.size(activeModelFilename), picked)
     }
 
     /** Downloader instance exposed for bridge methods that manage model files. */
@@ -160,7 +154,6 @@ class ChatOrchestrator(private val context: Context) {
         index = null
         mediapipe?.close()
         mediapipe = null
-        nano.close()
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -249,7 +242,6 @@ class ChatOrchestrator(private val context: Context) {
     }
 
     private suspend fun pickService(): Pair<String, LLMService>? {
-        if (preferNano && nano.isAvailable()) return "nano" to nano
         val mp = ensureMediaPipe()
         if (mp != null && mp.isAvailable()) return "mediapipe" to mp
         return null

@@ -243,11 +243,8 @@ dependencies {
     // ONNX Runtime for YOLOv8 inference and on-device doc embedding for the documentation chatbot.
     implementation(libs.onnxruntime)
 
-    // MediaPipe GenAI for the on-device documentation chatbot's LLM inference fallback path.
+    // MediaPipe GenAI for the on-device documentation chatbot's LLM inference.
     implementation(libs.mediapipe.tasks.genai)
-
-    // ML Kit GenAI Prompt API for the on-device documentation chatbot's Gemini Nano accelerator path on supported devices.
-    implementation(libs.mlkit.genai.prompt)
 }
 
 // ============================================================================

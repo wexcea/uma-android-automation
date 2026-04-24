@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { View, ScrollView, StyleSheet, Text, TextInput, NativeModules, NativeEventEmitter, Alert, Linking, Pressable } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
 import CustomButton from "../../components/CustomButton"
-import CustomCheckbox from "../../components/CustomCheckbox"
 import PageHeader from "../../components/PageHeader"
 import WarningContainer from "../../components/WarningContainer"
 import InfoContainer from "../../components/InfoContainer"
@@ -35,16 +34,9 @@ const MODEL_PRESETS: Array<{ label: string; detail: string; url: string }> = [
     },
 ]
 
-// ML Kit FeatureStatus codes (mirrors com.google.mlkit.genai.common.FeatureStatus).
-const NANO_STATUS_UNAVAILABLE = 0
-const NANO_STATUS_DOWNLOADABLE = 1
-const NANO_STATUS_DOWNLOADING = 2
-const NANO_STATUS_AVAILABLE = 3
-
 const DEFAULT_MODEL_URL = MODEL_PRESETS[0].url
 
 interface ServiceStatus {
-    nanoStatus: number
     mediaPipeDownloaded: boolean
     mediaPipeSizeBytes: number
     activeService: string
@@ -66,15 +58,13 @@ interface DownloadedModel {
 /**
  * LLM Settings page.
  *
- * Manages the on-device documentation chatbot's generative model: download/cancel/delete the MediaPipe Gemma 3 1B
- * file (~530 MB), toggle Gemini Nano preference, and display current service availability. Retrieve-only search is
- * always available regardless of what happens here.
+ * Manages the on-device documentation chatbot's generative model: download/cancel/delete MediaPipe `.task` files
+ * and pick which downloaded model is active. Retrieve-only search is always available regardless of what happens here.
  */
 const LLMSettings = () => {
     const { colors } = useTheme()
     const [status, setStatus] = useState<ServiceStatus | null>(null)
     const [downloadState, setDownloadState] = useState<DownloadState | null>(null)
-    const [preferNano, setPreferNano] = useState(true)
     const [hfToken, setHfToken] = useState("")
     const [modelUrl, setModelUrl] = useState(DEFAULT_MODEL_URL)
     const [downloadedModels, setDownloadedModels] = useState<DownloadedModel[]>([])
@@ -223,29 +213,6 @@ const LLMSettings = () => {
         ])
     }, [refreshStatus])
 
-    const handleTogglePreferNano = useCallback(
-        (next: boolean) => {
-            setPreferNano(next)
-            NativeModules.LLMChatModule.setPreferNano(next)
-            refreshStatus()
-        },
-        [refreshStatus]
-    )
-
-    const nanoLabel = useMemo(() => {
-        switch (status?.nanoStatus) {
-            case NANO_STATUS_AVAILABLE:
-                return "Available"
-            case NANO_STATUS_DOWNLOADABLE:
-                return "Downloadable via system"
-            case NANO_STATUS_DOWNLOADING:
-                return "Downloading..."
-            case NANO_STATUS_UNAVAILABLE:
-            default:
-                return "Unavailable on this device"
-        }
-    }, [status?.nanoStatus])
-
     const isDownloading = downloadState?.status === "running" || downloadState?.status === "pending" || downloadState?.status === "paused"
 
     const progressText = useMemo(() => {
@@ -330,12 +297,6 @@ const LLMSettings = () => {
             <PageHeader title="LLM Settings" />
             <ScrollView>
                 <InfoContainer>Retrieve-only search always works. The options below add optional natural-language answers backed by an on-device model.</InfoContainer>
-
-                <View style={styles.section}>
-                    <Text style={styles.sectionLabel}>Gemini Nano (system)</Text>
-                    <Text style={styles.statusRow}>{nanoLabel}</Text>
-                    <CustomCheckbox checked={preferNano} onCheckedChange={handleTogglePreferNano} label="Prefer Gemini Nano when available" />
-                </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionLabel}>MediaPipe Chat Model</Text>

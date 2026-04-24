@@ -2,10 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!--ML Kit GenAI Prompt API requires minSdk 26 but the app targets 24; the library guards itself at runtime via isAvailable()
-        so the manifest merge is safe to force. Nano-specific code paths must still check availability before calling.-->
-    <uses-sdk tools:overrideLibrary="com.google.mlkit.genai.prompt,com.google.mlkit.genai.common" />
-
     <!--Grants permission for MediaProjection to display a Notification that tells users that it is currently running.-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 

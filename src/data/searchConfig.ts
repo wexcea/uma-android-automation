@@ -836,14 +836,7 @@ const searchConfig: SearchOption[] = [
             "On-device documentation chatbot. Answers are grounded in README.md, HOW_IT_WORKS.md, and the in-app option descriptions, retrieved via MiniLM embeddings and cosine similarity. Fully offline.",
         page: "Chat",
     },
-    {
-        id: "llm-prefer-nano",
-        title: "Prefer Gemini Nano when available",
-        description:
-            "When enabled, the chatbot routes generation through Gemini Nano on supported flagships (Pixel 8+, Galaxy S24+, Fold/Flip 6+). Falls back to the MediaPipe model on other devices.",
-        page: "LLMSettings",
-    },
-    {
+{
         id: "llm-download-chat-model",
         title: "Download Chat Model",
         description:

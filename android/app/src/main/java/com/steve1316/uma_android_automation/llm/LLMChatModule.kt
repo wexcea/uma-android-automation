@@ -97,14 +97,13 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         }
     }
 
-    /** Resolves with `{ nanoStatus, mediaPipeDownloaded, mediaPipeSizeBytes, activeService }`. */
+    /** Resolves with `{ mediaPipeDownloaded, mediaPipeSizeBytes, activeService }`. */
     @ReactMethod
     fun getServiceStatus(promise: Promise) {
         scope.launch {
             try {
                 val s = orchestrator.getServiceStatus()
                 val map = Arguments.createMap()
-                map.putInt("nanoStatus", s.nanoStatus)
                 map.putBoolean("mediaPipeDownloaded", s.mediaPipeDownloaded)
                 map.putDouble("mediaPipeSizeBytes", s.mediaPipeSizeBytes.toDouble())
                 map.putString("activeService", s.activeService)
@@ -114,14 +113,6 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
                 promise.reject("E_STATUS_FAILED", e.message, e)
             }
         }
-    }
-
-    /**
-     * Toggle whether the orchestrator prefers Gemini Nano over MediaPipe when both are available.
-     */
-    @ReactMethod
-    fun setPreferNano(prefer: Boolean) {
-        orchestrator.preferNano = prefer
     }
 
     /**
