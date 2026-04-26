@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { View, ScrollView, StyleSheet, TextInput, Text, NativeModules, Pressable } from "react-native"
 import { useMarkdown, type MarkedStyles } from "react-native-marked"
 import type { UserTheme } from "react-native-marked/dist/typescript/theme/types"
@@ -412,7 +412,7 @@ function MarkdownView({ children, theme, mdStyles }: { children: string; theme: 
     return (
         <View>
             {elements.map((el, i) => (
-                <View key={i}>{el}</View>
+                <Fragment key={i}>{el}</Fragment>
             ))}
         </View>
     )
