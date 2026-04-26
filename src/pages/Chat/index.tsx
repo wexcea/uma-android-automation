@@ -236,6 +236,14 @@ const Chat = () => {
                 },
                 resultHeading: { fontWeight: "600", color: colors.foreground, marginBottom: 4 },
                 resultMeta: { fontSize: 11, color: colors.mutedForeground, marginBottom: 6 },
+                codeBlock: {
+                    fontFamily: "monospace",
+                    fontSize: 12,
+                    color: colors.foreground,
+                    backgroundColor: colors.muted,
+                    borderRadius: 6,
+                    padding: 8,
+                },
                 emptyText: { color: colors.mutedForeground, textAlign: "center", marginTop: 20, paddingHorizontal: 20 },
                 disclaimer: { fontSize: 11, color: colors.mutedForeground, marginTop: 4, marginBottom: 8, fontStyle: "italic" },
                 historyHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12, marginBottom: 6 },
@@ -402,9 +410,13 @@ const Chat = () => {
                                 <Text style={styles.resultMeta}>
                                     {r.source} · similarity {(r.score * 100).toFixed(0)}%
                                 </Text>
-                                <Markdown style={markdownStyles as any} rules={markdownRules}>
-                                    {r.kind === "code" ? `\`\`\`kotlin\n${r.text}\n\`\`\`` : r.text}
-                                </Markdown>
+                                {r.kind === "code" ? (
+                                    <Text style={styles.codeBlock}>{r.text}</Text>
+                                ) : (
+                                    <Markdown style={markdownStyles as any} rules={markdownRules}>
+                                        {r.text}
+                                    </Markdown>
+                                )}
                             </View>
                         ))}
                     </>
