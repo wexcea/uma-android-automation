@@ -1,10 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { View, ScrollView, StyleSheet, TextInput, Text, NativeModules, Pressable } from "react-native"
-import { Renderer as MarkedRenderer, useMarkdown, type MarkedStyles } from "react-native-marked"
+import { useMarkdown, type MarkedStyles } from "react-native-marked"
 import type { UserTheme } from "react-native-marked/dist/typescript/theme/types"
-import MarkedList from "@jsamr/react-native-li"
-import decimal from "@jsamr/counter-style/presets/decimal"
-import disc from "@jsamr/counter-style/presets/disc"
 import { useTheme } from "../../context/ThemeContext"
 import CustomButton from "../../components/CustomButton"
 import PageHeader from "../../components/PageHeader"
@@ -410,32 +407,27 @@ const Chat = () => {
  * falls back to the most recently modified model if no explicit selection is set.
  */
 /** Code citations show as `Racing.kt::findSuitableRace`; doc citations keep their hierarchical heading. */
-/** Per-item-codepoint marker-box width factor. The library's default of 0.6 is too tight for ordered lists like
- *  "1.", "10." at our font size — the Text wraps and the marker stacks above the content. 1.0 gives the marker
- *  enough room without leaving an unreasonable gap before the list content. */
-const MARKER_WIDTH_FACTOR = 1.0
-
-class WideMarkerRenderer extends MarkedRenderer {
-    list(ordered: boolean, li: React.ReactNode[], listStyle?: any, textStyle?: any, startIndex?: number) {
-        const counterRenderer = ordered ? decimal : disc
-        return (
-            <MarkedList
-                key={this.getKey()}
-                counterRenderer={counterRenderer}
-                startIndex={startIndex}
-                markerTextStyle={textStyle}
-                markerBoxStyle={listStyle}
-                computeMarkerBoxWidth={(n: number, f: number) => n * f * MARKER_WIDTH_FACTOR}
-            >
-                {li}
-            </MarkedList>
-        )
-    }
+/** Replace markdown list lines with plain prose lines using a unicode bullet ("• ") for unordered items and an
+ *  escaped digit ("1\. ") for ordered ones, so marked won't reparse them as lists. Each line gets a trailing
+ *  hard-break (two spaces) so consecutive items become separate visual lines inside one paragraph instead of
+ *  being collapsed by markdown's whitespace folding. Avoids the entire RN flex-marker layout class of bugs at
+ *  the cost of nested-block-content inside list items, which the chatbot rarely produces. */
+function flattenLists(md: string): string {
+    return md
+        .split("\n")
+        .map((line) => {
+            const u = line.match(/^(\s*)[-*+]\s+(.*)$/)
+            if (u) return `${u[1]}• ${u[2]}  `
+            const o = line.match(/^(\s*)(\d+)\.\s+(.*)$/)
+            if (o) return `${o[1]}${o[2]}\\. ${o[3]}  `
+            return line
+        })
+        .join("\n")
 }
 
 function MarkdownView({ children, theme, mdStyles }: { children: string; theme: UserTheme; mdStyles: MarkedStyles }) {
-    const renderer = useMemo(() => new WideMarkerRenderer(), [])
-    const elements = useMarkdown(children, { theme, styles: mdStyles, renderer })
+    const flattened = useMemo(() => flattenLists(children), [children])
+    const elements = useMarkdown(flattened, { theme, styles: mdStyles })
     return (
         <View>
             {elements.map((el, i) => (
