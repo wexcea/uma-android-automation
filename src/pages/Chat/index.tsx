@@ -409,7 +409,13 @@ const Chat = () => {
 /** Code citations show as `Racing.kt::findSuitableRace`; doc citations keep their hierarchical heading. */
 function MarkdownView({ children, theme, mdStyles }: { children: string; theme: UserTheme; mdStyles: MarkedStyles }) {
     const elements = useMarkdown(children, { theme, styles: mdStyles })
-    return <View>{elements as any}</View>
+    return (
+        <View>
+            {elements.map((el, i) => (
+                <View key={i}>{el}</View>
+            ))}
+        </View>
+    )
 }
 
 function citationHeading(r: DocResult): string {
