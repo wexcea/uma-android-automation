@@ -16,7 +16,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**
- * React Native bridge exposing the on-device documentation chatbot to the JS frontend.
+ * React Native bridge for the on-device documentation chatbot's retrieval + model-file-management surface.
+ *
+ * After migrating the LLM to llama.rn (JS-side), this module's responsibility narrows to:
+ * - Retrieval: [searchDocs] runs MiniLM embedding + cosine search over the bundled index and returns the top-k
+ *   chunks with their full enclosing section text expanded.
+ * - Model file management: download/cancel/delete/list/select GGUF model files. The actual inference happens
+ *   JS-side in `src/lib/chat/llamaRunner.ts`.
  *
  * @property reactContext Injected by React Native's module loader.
  */
@@ -38,18 +44,29 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
     override fun getName(): String = MODULE_NAME
 
     /**
-     * Retrieve-only search. See [ChatOrchestrator.searchDocs].
+     * Retrieve top-[k] doc chunks with their full enclosing section text expanded.
      *
-     * @param query User question.
+     * @param query User-typed natural-language question.
      * @param k Maximum chunks to return.
-     * @param promise Resolved with `[{ id, source, heading, text, score }]`.
+     * @param promise Resolves with `[{ id, source, heading, text, score, expandedText }]`.
      */
     @ReactMethod
     fun searchDocs(query: String, k: Int, promise: Promise) {
         scope.launch {
             try {
                 val results = orchestrator.searchDocs(query, k)
-                promise.resolve(resultsToArray(results))
+                val array = Arguments.createArray()
+                for (r in results) {
+                    val map = Arguments.createMap()
+                    map.putString("id", r.chunk.id)
+                    map.putString("source", r.chunk.source)
+                    map.putString("heading", r.chunk.heading)
+                    map.putString("text", r.chunk.text)
+                    map.putDouble("score", r.score.toDouble())
+                    map.putString("expandedText", r.expandedText)
+                    array.pushMap(map)
+                }
+                promise.resolve(array)
             } catch (e: Exception) {
                 Log.e(TAG, "searchDocs:: failed: ${e.message}", e)
                 promise.reject("E_SEARCH_FAILED", e.message, e)
@@ -57,68 +74,7 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         }
     }
 
-    /**
-     * Full RAG chat. Resolves with `{ answer, mode, service, overlap, citations, rejectedAnswer? }`.
-     * `mode` is one of `"generated"`, `"retrieveOnly"`, `"verifierFallback"`.
-     *
-     * @param query User question.
-     * @param k Maximum chunks to use as context.
-     * @param promise Resolved with the chat result.
-     */
-    @ReactMethod
-    fun chat(query: String, k: Int, promise: Promise) {
-        scope.launch {
-            try {
-                val result = orchestrator.chat(query, k)
-                val map = Arguments.createMap()
-                map.putString("answer", result.answer)
-                map.putArray("citations", resultsToArray(result.citations))
-                when (val mode = result.mode) {
-                    is ChatOrchestrator.ChatMode.RetrieveOnly -> {
-                        map.putString("mode", "retrieveOnly")
-                    }
-                    is ChatOrchestrator.ChatMode.Generated -> {
-                        map.putString("mode", "generated")
-                        map.putString("service", mode.service)
-                        map.putDouble("overlap", mode.overlap.toDouble())
-                    }
-                    is ChatOrchestrator.ChatMode.VerifierFallback -> {
-                        map.putString("mode", "verifierFallback")
-                        map.putString("service", mode.service)
-                        map.putDouble("overlap", mode.overlap.toDouble())
-                        map.putString("rejectedAnswer", mode.rejectedAnswer)
-                    }
-                }
-                promise.resolve(map)
-            } catch (e: Exception) {
-                Log.e(TAG, "chat:: failed: ${e.message}", e)
-                promise.reject("E_CHAT_FAILED", e.message, e)
-            }
-        }
-    }
-
-    /** Resolves with `{ mediaPipeDownloaded, mediaPipeSizeBytes, activeService }`. */
-    @ReactMethod
-    fun getServiceStatus(promise: Promise) {
-        scope.launch {
-            try {
-                val s = orchestrator.getServiceStatus()
-                val map = Arguments.createMap()
-                map.putBoolean("mediaPipeDownloaded", s.mediaPipeDownloaded)
-                map.putDouble("mediaPipeSizeBytes", s.mediaPipeSizeBytes.toDouble())
-                map.putString("activeService", s.activeService)
-                promise.resolve(map)
-            } catch (e: Exception) {
-                Log.e(TAG, "getServiceStatus:: failed: ${e.message}", e)
-                promise.reject("E_STATUS_FAILED", e.message, e)
-            }
-        }
-    }
-
-    /**
-     * Start downloading the generative model from [url]. Progress is emitted via [EVENT_DOWNLOAD_STATE].
-     * Resolves immediately once the download has been enqueued.
-     */
+    /** Start downloading the model. Progress emitted via [EVENT_DOWNLOAD_STATE]. */
     @ReactMethod
     fun downloadModel(url: String, promise: Promise) {
         val existing = downloadJob
@@ -155,7 +111,7 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         promise.resolve(null)
     }
 
-    /** Delete every downloaded model from disk. Legacy "bulk clear" entry point. */
+    /** Delete every downloaded model from disk. */
     @ReactMethod
     fun deleteModel(promise: Promise) {
         val deleted = orchestrator.modelDownloader().delete()
@@ -169,7 +125,7 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         promise.resolve(deleted)
     }
 
-    /** Resolves with an array of `{ filename, sizeBytes, lastModifiedMillis }` for every downloaded model. */
+    /** Resolves with `[{ filename, path, sizeBytes, lastModifiedMillis }]` for every downloaded model. */
     @ReactMethod
     fun listModels(promise: Promise) {
         try {
@@ -178,6 +134,7 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
             for (f in models) {
                 val map = Arguments.createMap()
                 map.putString("filename", f.name)
+                map.putString("path", f.absolutePath)
                 map.putDouble("sizeBytes", f.length().toDouble())
                 map.putDouble("lastModifiedMillis", f.lastModified().toDouble())
                 array.pushMap(map)
@@ -189,72 +146,21 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         }
     }
 
-    /**
-     * Select which downloaded model the orchestrator uses. Empty string clears the selection, reverting to
-     * "most recently modified".
-     */
+    /** Select which downloaded model the bridge surfaces as "active". Empty string clears the selection. */
     @ReactMethod
     fun setActiveModel(filename: String) {
         orchestrator.activeModelFilename = filename.trim().ifEmpty { null }
     }
 
-    /** Update the LLM's max output token budget at runtime. JS persists this under `("chat", "maxOutputTokens")`. */
-    @ReactMethod
-    fun setMaxOutputTokens(n: Int) {
-        if (n > 0) orchestrator.maxOutputTokens = n
-    }
-
-    /** Update the per-citation context char cap at runtime. JS persists this under `("chat", "llmCitationCharCap")`. */
-    @ReactMethod
-    fun setLlmCitationCharCap(n: Int) {
-        if (n > 0) orchestrator.llmCitationCharCap = n
-    }
-
-    /**
-     * Update the LLM engine's KV-cache size at runtime. Triggers a MediaPipe engine reload on the next chat call;
-     * JS persists this under `("chat", "modelContextWindow")`.
-     */
-    @ReactMethod
-    fun setModelContextWindow(n: Int) {
-        if (n > 0) orchestrator.modelContextWindow = n
-    }
-
-    /**
-     * Resolves with the current generation tuning values so the UI can populate its inputs:
-     * `{ maxOutputTokens, llmCitationCharCap, modelContextWindow, defaultMaxOutputTokens, defaultLlmCitationCharCap, defaultModelContextWindow }`.
-     */
-    @ReactMethod
-    fun getGenerationTuning(promise: Promise) {
-        val map = Arguments.createMap()
-        map.putInt("maxOutputTokens", orchestrator.maxOutputTokens)
-        map.putInt("llmCitationCharCap", orchestrator.llmCitationCharCap)
-        map.putInt("modelContextWindow", orchestrator.modelContextWindow)
-        map.putInt("defaultMaxOutputTokens", ChatOrchestrator.DEFAULT_MAX_OUTPUT_TOKENS)
-        map.putInt("defaultLlmCitationCharCap", ChatOrchestrator.DEFAULT_LLM_CITATION_CHAR_CAP)
-        map.putInt("defaultModelContextWindow", ChatOrchestrator.DEFAULT_MODEL_CONTEXT_WINDOW)
-        promise.resolve(map)
-    }
-
     // --------------------------------------------------------------------------------------------------
 
-    /** Derive a local filename from the model URL's last path segment, stripping query strings and falling back
-     *  to a generic name when the URL is unparseable. */
+    /** Derive a local filename from the model URL's last path segment, falling back to a generic name when the
+     *  URL is unparseable or doesn't end in a recognized model extension. */
     private fun filenameFromUrl(url: String): String {
         val noQuery = url.substringBefore('?').substringBefore('#')
         val last = noQuery.substringAfterLast('/', missingDelimiterValue = "").trim()
-        return if (last.isNotEmpty() && last.endsWith(".task")) last else "chat-model.task"
-    }
-
-    private fun resultsToArray(results: List<DocIndex.Result>) = Arguments.createArray().also { array ->
-        for (r in results) {
-            val map = Arguments.createMap()
-            map.putString("id", r.chunk.id)
-            map.putString("source", r.chunk.source)
-            map.putString("heading", r.chunk.heading)
-            map.putString("text", r.chunk.text)
-            map.putDouble("score", r.score.toDouble())
-            array.pushMap(map)
-        }
+        val isModel = last.endsWith(".gguf", ignoreCase = true) || last.endsWith(".task", ignoreCase = true)
+        return if (last.isNotEmpty() && isModel) last else "chat-model.gguf"
     }
 
     private fun emitDownloadState(state: ModelDownloader.State) {
