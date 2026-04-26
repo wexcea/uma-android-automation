@@ -398,8 +398,7 @@ const Chat = () => {
                             {modeLabel && <Text style={styles.modeLabel}>{modeLabel}</Text>}
                             {result.stats && (
                                 <Text style={styles.modeLabel}>
-                                    {result.stats.tokensPredicted} tok in {(result.stats.predictedMs / 1000).toFixed(2)}s · {result.stats.predictedPerSecond.toFixed(2)} tok/s · prefill{" "}
-                                    {result.stats.tokensEvaluated} tok @ {result.stats.promptPerSecond.toFixed(2)} tok/s
+                                    {`${result.stats.tokensPredicted} tok in ${(result.stats.predictedMs / 1000).toFixed(2)}s · ${result.stats.predictedPerSecond.toFixed(2)} tok/s · prefill ${result.stats.tokensEvaluated} tok @ ${result.stats.promptPerSecond.toFixed(2)} tok/s`}
                                 </Text>
                             )}
                         </View>
@@ -408,7 +407,7 @@ const Chat = () => {
                             <View key={r.id} style={styles.resultCard}>
                                 <Text style={styles.resultHeading}>{citationHeading(r)}</Text>
                                 <Text style={styles.resultMeta}>
-                                    {r.source} · similarity {(r.score * 100).toFixed(0)}%
+                                    {`${r.source} · similarity ${(r.score * 100).toFixed(0)}%`}
                                 </Text>
                                 {r.kind === "code" ? (
                                     <Text style={styles.codeBlock}>{r.text}</Text>
