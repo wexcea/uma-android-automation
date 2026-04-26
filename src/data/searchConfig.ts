@@ -849,6 +849,24 @@ const searchConfig: SearchOption[] = [
         description: "Removes the downloaded chat model from disk to free ~530 MB. Retrieve-only search continues to work without the model.",
         page: "LLMSettings",
     },
+    {
+        id: "llm-max-output-tokens",
+        title: "Max output tokens",
+        description: "Upper bound on chatbot answer length. Higher values produce longer, more thorough answers but slow generation noticeably on phones above ~1024.",
+        page: "LLMSettings",
+    },
+    {
+        id: "llm-citation-char-cap",
+        title: "Context per citation",
+        description: "How much of each retrieved doc section is fed to the chatbot LLM. Larger caps give the model more material to summarize from but consume more of the model's context window budget.",
+        page: "LLMSettings",
+    },
+    {
+        id: "llm-model-context-window",
+        title: "Model context window",
+        description: "Engine KV-cache size for the chatbot LLM. 4096 tokens is the default; raising it requires the loaded model to support it. Changing this reloads the model on the next chat call.",
+        page: "LLMSettings",
+    },
 ]
 
 export default searchConfig
