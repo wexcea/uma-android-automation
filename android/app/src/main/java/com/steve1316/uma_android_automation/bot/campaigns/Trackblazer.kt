@@ -1841,6 +1841,10 @@ class Trackblazer(game: Game) : Campaign(game) {
 
         val itemsUsedWithReasons = mutableListOf<Pair<String, String>>()
         val itemNameMapInManage = mutableMapOf<Int, String>()
+        // Snapshot energy at the start of the pass so the energy-item threshold gate stays
+        // open after earlier items in the same pass raise `trainee.energy`. The greedy
+        // selection in `isBestEnergyItemToUse` still drives which specific items are queued.
+        val passStartEnergy = trainee?.energy ?: 0
         shopList.processItemsWithFallback(
             keyExtractor = { entry ->
                 val name = shopList.getShopItemName(entry, ButtonSkillUp.checkDisabled(game.imageUtils, entry.bitmap) == true)
@@ -1917,7 +1921,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                             }
                         } else if (trainee != null) {
                             // Handle Energy, Mood, Ankle Weights, Charm, Megaphones, etc.
-                            val reason = handleInlineUsage(trainee, itemName, entry, isDisabled, trainingSelected, nextInventory, remainingItemsOfInterest)
+                            val reason = handleInlineUsage(trainee, itemName, entry, isDisabled, trainingSelected, nextInventory, remainingItemsOfInterest, passStartEnergy)
                             if (reason != null) {
                                 itemsUsedCount++
                                 itemsUsedWithReasons.add(itemName to reason)
@@ -2010,6 +2014,8 @@ class Trackblazer(game: Game) : Campaign(game) {
      * @param trainingSelected The stat name of the selected training.
      * @param nextInventory The updated inventory map reflecting changes in this pass.
      * @param remainingItemsOfInterest The set of items we are still looking for.
+     * @param passStartEnergy Trainee energy snapshotted at the start of the pass; used by the
+     *   energy-item threshold gate so it does not close mid-pass after earlier items raise energy.
      * @return The specific reason why the item was used, or null if not used.
      */
     private fun handleInlineUsage(
@@ -2020,6 +2026,7 @@ class Trackblazer(game: Game) : Campaign(game) {
         trainingSelected: StatName?,
         nextInventory: MutableMap<String, Int>,
         remainingItemsOfInterest: Set<String>,
+        passStartEnergy: Int,
     ): String? {
         if (isDisabled) return null
 
@@ -2059,7 +2066,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                 (date.day >= 13 && failureChance >= 20 && (nextInventory["Good-Luck Charm"] ?: 0) > 0)
 
         // Energy Items Check.
-        if (!charmBeingUsedThisTurn && trainee.energy <= energyThresholdToUseEnergyItems && shopList.energyItemNames.contains(itemName)) {
+        if (!charmBeingUsedThisTurn && passStartEnergy <= energyThresholdToUseEnergyItems && shopList.energyItemNames.contains(itemName)) {
             // Conservation: always keep the last unit of the lowest-level energy item for emergency race recovery.
             if (!bForceUseReservedItem) {
                 val conserveItem = energyItemConservationOrder.firstOrNull { (nextInventory[it] ?: 0) > 0 }
@@ -2071,7 +2078,7 @@ class Trackblazer(game: Game) : Campaign(game) {
 
             if (isBestEnergyItemToUse(trainee, itemName, nextInventory, remainingItemsOfInterest)) {
                 val gain = energyGains[itemName] ?: 0
-                val reason = "Restored energy (current: ${trainee.energy}%) because it fell below the $energyThresholdToUseEnergyItems% threshold."
+                val reason = "Restored energy (current: ${trainee.energy}%, pass start: $passStartEnergy%) because it fell below the $energyThresholdToUseEnergyItems% threshold."
                 if (clickItemPlusButton(itemName, entry, "[TRACKBLAZER] Queuing $itemName for use (Energy: ${trainee.energy}%, Gain: +$gain).", nextInventory, reason = reason)) {
                     val oldEnergy = trainee.energy
                     trainee.energy = (trainee.energy + gain).coerceAtMost(100)
