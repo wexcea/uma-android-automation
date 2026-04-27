@@ -1,21 +1,22 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { View, ScrollView, StyleSheet, TextInput, Text, NativeModules, Pressable } from "react-native"
 import { useFocusEffect } from "@react-navigation/native"
-import { useMarkdown, type MarkedStyles } from "react-native-marked"
+import { type MarkedStyles } from "react-native-marked"
 import type { UserTheme } from "react-native-marked/dist/typescript/theme/types"
 import { KotlinCode, DARK_PALETTE, LIGHT_PALETTE } from "../../lib/llm/kotlinHighlight"
 import { useTheme } from "../../context/ThemeContext"
 import CustomButton from "../../components/CustomButton"
 import PageHeader from "../../components/PageHeader"
+import { MarkdownView } from "../../components/ChatMarkdown"
 import { databaseManager } from "../../lib/database"
 import * as llamaRunner from "../../lib/chat/llamaRunner"
 import * as verifier from "../../lib/chat/groundingVerifier"
 import { loadChatTuning, trimToCap, type ChatTuning } from "../../lib/chat/chatSettings"
+import { resolveActiveModel } from "../../lib/chat/activeModel"
 
 const HISTORY_CATEGORY = "chat"
 const HISTORY_KEY = "questionHistory"
 const HISTORY_MAX = 20
-const ACTIVE_MODEL_KEY = { category: "chat", key: "activeModelFilename" } as const
 const TOP_K = 4
 
 type CitationKind = "doc" | "code"
@@ -27,13 +28,6 @@ interface DocResult {
     score: number
     expandedText: string
     kind: CitationKind
-}
-
-interface DownloadedModel {
-    filename: string
-    path: string
-    sizeBytes: number
-    lastModifiedMillis: number
 }
 
 type ChatMode = "generated" | "retrieveOnly" | "verifierFallback"
@@ -70,8 +64,8 @@ const Chat = () => {
     const [activeModelFilename, setActiveModelFilename] = useState<string | null | undefined>(undefined)
 
     const refreshActiveModel = useCallback(async () => {
-        const filename = await resolveActiveModelFilename()
-        setActiveModelFilename(filename)
+        const resolved = await resolveActiveModel()
+        setActiveModelFilename(resolved?.filename ?? null)
     }, [])
 
     useFocusEffect(
@@ -92,8 +86,8 @@ const Chat = () => {
                 if (!cancelled) setTuning(t)
             } catch {}
             try {
-                const filename = await resolveActiveModelFilename()
-                if (!cancelled) setActiveModelFilename(filename)
+                const resolved = await resolveActiveModel()
+                if (!cancelled) setActiveModelFilename(resolved?.filename ?? null)
             } catch {}
         })()
         return () => {
@@ -127,13 +121,13 @@ const Chat = () => {
             }
 
             // Pick a downloaded GGUF model. If none, retrieve-only fallback.
-            const modelPath = await pickModelPath()
-            if (!modelPath) {
+            const resolvedModel = await resolveActiveModel()
+            if (!resolvedModel) {
                 setResult({ answer: citations[0].expandedText, mode: "retrieveOnly", citations })
                 return
             }
 
-            await llamaRunner.ensureContext(modelPath, { nCtx: tuning.modelContextWindow })
+            await llamaRunner.ensureContext(resolvedModel.path, { nCtx: tuning.modelContextWindow })
 
             // Build prompt: system instructions + per-citation excerpts in the system message; question in the user message.
             const trimmed = citations.map((c) => trimToCap(c.expandedText, tuning.llmCitationCharCap))
@@ -451,175 +445,12 @@ const Chat = () => {
     )
 }
 
-/**
- * Resolve which downloaded GGUF model to feed to llama.rn. Honors the user's "Active" selection from LLM Settings;
- * falls back to the most recently modified model if no explicit selection is set.
- */
 /** Code citations show as `Racing.kt::findSuitableRace`; doc citations keep their hierarchical heading. */
-/** Replace markdown list lines with plain prose lines using a unicode bullet ("• ") for unordered items and an
- *  escaped digit ("1\. ") for ordered ones, so marked won't reparse them as lists. Each line gets a trailing
- *  hard-break (two spaces) so consecutive items become separate visual lines inside one paragraph instead of
- *  being collapsed by markdown's whitespace folding. Avoids the entire RN flex-marker layout class of bugs at
- *  the cost of nested-block-content inside list items, which the chatbot rarely produces. */
-/** Fold inline GitHub-flavored HTML tags into markdown equivalents the marked tokenizer can style.
- *  <details>/<summary> are NOT folded here — they're handled separately by splitDetails so we can render
- *  them as collapsible sections instead of static text. */
-function foldHtmlTags(md: string): string {
-    return md
-        .replace(/<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, "**$1**")
-        .replace(/<(?:em|i)[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, "*$1*")
-        .replace(/<br\s*\/?>/gi, "  \n")
-}
-
-const DETAILS_RE = /<details[^>]*>\s*<summary[^>]*>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/gi
-
-type MdSegment = { kind: "md"; text: string } | { kind: "details"; summary: string; body: string }
-
-/** Split markdown into a stream of plain-markdown and details-block segments. Each details segment is
- *  rendered as a Pressable collapsible by MarkdownView; everything else falls through to the marked
- *  pipeline. Stray `<details>`/`</details>`/`<summary>` tags that don't form a complete block are left
- *  as-is and stripped by the marked html-token renderer downstream. */
-function splitDetails(md: string): MdSegment[] {
-    const segments: MdSegment[] = []
-    let lastIndex = 0
-    let m: RegExpExecArray | null
-    DETAILS_RE.lastIndex = 0
-    while ((m = DETAILS_RE.exec(md)) !== null) {
-        if (m.index > lastIndex) segments.push({ kind: "md", text: md.slice(lastIndex, m.index) })
-        segments.push({ kind: "details", summary: m[1].trim(), body: m[2].trim() })
-        lastIndex = m.index + m[0].length
-    }
-    if (lastIndex < md.length) segments.push({ kind: "md", text: md.slice(lastIndex) })
-    return segments
-}
-
-function flattenLists(md: string): string {
-    return foldHtmlTags(md)
-        .split("\n")
-        .map((line) => {
-            const u = line.match(/^(\s*)[-*+]\s+(.*)$/)
-            if (u) return `${u[1]}• ${u[2]}  `
-            const o = line.match(/^(\s*)(\d+)\.\s+(.*)$/)
-            if (o) return `${o[1]}${o[2]}\\. ${o[3]}  `
-            return line
-        })
-        .join("\n")
-}
-
-function MarkdownText({ children, theme, mdStyles }: { children: string; theme: UserTheme; mdStyles: MarkedStyles }) {
-    const flattened = useMemo(() => flattenLists(children), [children])
-    const elements = useMarkdown(flattened, { theme, styles: mdStyles })
-    return (
-        <View>
-            {elements.map((el, i) => (
-                <Fragment key={i}>{el}</Fragment>
-            ))}
-        </View>
-    )
-}
-
-function CollapsibleDetails({
-    summary,
-    body,
-    theme,
-    mdStyles,
-    chevronColor,
-    borderColor,
-    headerBg,
-}: {
-    summary: string
-    body: string
-    theme: UserTheme
-    mdStyles: MarkedStyles
-    chevronColor: string
-    borderColor: string
-    headerBg: string
-}) {
-    const [open, setOpen] = useState(false)
-    return (
-        <View style={{ borderWidth: 1, borderColor, borderRadius: 4, marginVertical: 4, overflow: "hidden" }}>
-            <Pressable onPress={() => setOpen((o) => !o)} style={{ flexDirection: "row", alignItems: "flex-start", padding: 6, backgroundColor: headerBg }}>
-                <Text style={{ color: chevronColor, marginRight: 6, marginTop: 2 }}>{open ? "▼" : "▶"}</Text>
-                <View style={{ flex: 1 }}>
-                    <MarkdownText theme={theme} mdStyles={mdStyles}>
-                        {summary}
-                    </MarkdownText>
-                </View>
-            </Pressable>
-            {open && (
-                <View style={{ paddingHorizontal: 8, paddingTop: 4, paddingBottom: 6, borderTopWidth: 1, borderTopColor: borderColor }}>
-                    <MarkdownText theme={theme} mdStyles={mdStyles}>
-                        {body}
-                    </MarkdownText>
-                </View>
-            )}
-        </View>
-    )
-}
-
-function MarkdownView({ children, theme, mdStyles }: { children: string; theme: UserTheme; mdStyles: MarkedStyles }) {
-    const { colors } = useTheme()
-    const folded = useMemo(() => foldHtmlTags(children), [children])
-    const segments = useMemo(() => splitDetails(folded), [folded])
-    return (
-        <View>
-            {segments.map((s, i) =>
-                s.kind === "md" ? (
-                    <MarkdownText key={i} theme={theme} mdStyles={mdStyles}>
-                        {s.text}
-                    </MarkdownText>
-                ) : (
-                    <CollapsibleDetails
-                        key={i}
-                        summary={s.summary}
-                        body={s.body}
-                        theme={theme}
-                        mdStyles={mdStyles}
-                        chevronColor={colors.foreground}
-                        borderColor={colors.border}
-                        headerBg={colors.muted}
-                    />
-                )
-            )}
-        </View>
-    )
-}
-
 function citationHeading(r: DocResult): string {
     if (r.kind !== "code") return r.heading
     const lastSep = r.heading.lastIndexOf(" › ")
     const member = lastSep >= 0 ? r.heading.slice(lastSep + 3) : r.heading
     return `${r.source}::${member}`
-}
-
-async function resolveActiveModelFilename(): Promise<string | null> {
-    try {
-        const models: DownloadedModel[] = await NativeModules.LLMChatModule.listModels()
-        if (!models || models.length === 0) return null
-        const active = await databaseManager.loadSetting(ACTIVE_MODEL_KEY.category, ACTIVE_MODEL_KEY.key)
-        if (typeof active === "string" && active.length > 0) {
-            const matched = models.find((m) => m.filename === active)
-            if (matched) return matched.filename
-        }
-        return models[0].filename
-    } catch {
-        return null
-    }
-}
-
-async function pickModelPath(): Promise<string | null> {
-    try {
-        const models: DownloadedModel[] = await NativeModules.LLMChatModule.listModels()
-        if (!models || models.length === 0) return null
-        const active = await databaseManager.loadSetting(ACTIVE_MODEL_KEY.category, ACTIVE_MODEL_KEY.key)
-        if (typeof active === "string" && active.length > 0) {
-            const matched = models.find((m) => m.filename === active)
-            if (matched) return matched.path
-        }
-        return models[0].path
-    } catch {
-        return null
-    }
 }
 
 export default Chat

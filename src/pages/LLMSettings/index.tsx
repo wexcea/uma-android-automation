@@ -9,6 +9,7 @@ import WarningContainer from "../../components/WarningContainer"
 import InfoContainer from "../../components/InfoContainer"
 import { databaseManager } from "../../lib/database"
 import { DEFAULTS as TUNING_DEFAULTS, saveTuning } from "../../lib/chat/chatSettings"
+import { ACTIVE_MODEL_SETTING } from "../../lib/chat/activeModel"
 
 const MODEL_URL_SETTING = { category: "chat", key: "modelUrl" } as const
 /**
@@ -16,7 +17,6 @@ const MODEL_URL_SETTING = { category: "chat", key: "modelUrl" } as const
  * NOT included in settings exports — a token is a user-specific secret and must never leak into a shared JSON.
  */
 const HF_TOKEN_SETTING = { category: "chat", key: "hfToken" } as const
-const ACTIVE_MODEL_SETTING = { category: "chat", key: "activeModelFilename" } as const
 const MAX_OUTPUT_TOKENS_SETTING = { category: "chat", key: "maxOutputTokens" } as const
 const CITATION_CHAR_CAP_SETTING = { category: "chat", key: "llmCitationCharCap" } as const
 const MODEL_CONTEXT_WINDOW_SETTING = { category: "chat", key: "modelContextWindow" } as const
