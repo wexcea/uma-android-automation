@@ -27,28 +27,45 @@ import kotlinx.coroutines.launch
  * @property reactContext Injected by React Native's module loader.
  */
 class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+    /** Owned retrieval orchestrator; same lifetime as this module. */
     private val orchestrator = ChatOrchestrator(reactContext.applicationContext)
+
+    /** Background scope for bridge methods that fan out into coroutines (search, downloads). */
     private val scope = CoroutineScope(Dispatchers.Default)
 
+    /** In-flight download coroutine, if any. Volatile so [cancelDownload] sees the latest value cross-thread. */
     @Volatile private var downloadJob: Job? = null
 
+    /** Optional Bearer token applied to the next [downloadModel] call. Volatile so updates are visible immediately. */
     @Volatile private var authToken: String? = null
 
     companion object {
+        /** Logger tag for this class. */
         private const val TAG = "${SharedData.loggerTag}LLMChatModule"
+
+        /** Name JS imports this module under via `NativeModules.LLMChatModule`. */
         private const val MODULE_NAME = "LLMChatModule"
 
         /** Event emitted per DownloadManager progress snapshot. Payload: `{ status, bytesDownloaded, bytesTotal }`. */
         const val EVENT_DOWNLOAD_STATE = "LLMChatModule.DownloadState"
     }
 
+    /** @return The name JS uses to look up this module via `NativeModules.LLMChatModule`. */
     override fun getName(): String = MODULE_NAME
 
-    // Required for NativeEventEmitter; events are dispatched via RCTDeviceEventEmitter.
+    /**
+     * Required no-op for `NativeEventEmitter`; events are dispatched via `RCTDeviceEventEmitter`.
+     *
+     * @param eventName Ignored; React Native's emitter contract requires this signature.
+     */
     @ReactMethod
     fun addListener(eventName: String) {}
 
-    // Required for NativeEventEmitter; events are dispatched via RCTDeviceEventEmitter.
+    /**
+     * Required no-op for `NativeEventEmitter`; events are dispatched via `RCTDeviceEventEmitter`.
+     *
+     * @param count Ignored; React Native's emitter contract requires this signature.
+     */
     @ReactMethod
     fun removeListeners(count: Int) {}
 
@@ -84,7 +101,12 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         }
     }
 
-    /** Start downloading the model. Progress emitted via [EVENT_DOWNLOAD_STATE]. */
+    /**
+     * Start downloading the model. Progress emitted via [EVENT_DOWNLOAD_STATE].
+     *
+     * @param url HTTPS URL of the model file to download.
+     * @param promise Resolves with null once the download has been enqueued, or rejects when one is already running.
+     */
     @ReactMethod
     fun downloadModel(url: String, promise: Promise) {
         val existing = downloadJob
@@ -108,13 +130,21 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         promise.resolve(null)
     }
 
-    /** Store an optional Bearer token applied to the next [downloadModel] call. Pass empty to clear. */
+    /**
+     * Store an optional Bearer token applied to the next [downloadModel] call. Pass empty to clear.
+     *
+     * @param token Bearer token to apply, or an empty/blank string to clear any previously stored token.
+     */
     @ReactMethod
     fun setAuthToken(token: String) {
         authToken = token.trim().ifEmpty { null }
     }
 
-    /** Cancel the in-progress download, if any. */
+    /**
+     * Cancel the in-progress download, if any.
+     *
+     * @param promise Resolves with null once cancellation has been requested.
+     */
     @ReactMethod
     fun cancelDownload(promise: Promise) {
         downloadJob?.cancel()
@@ -122,21 +152,34 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         promise.resolve(null)
     }
 
-    /** Delete every downloaded model from disk. */
+    /**
+     * Delete every downloaded model from disk.
+     *
+     * @param promise Resolves with `true` if any file was deleted, `false` otherwise.
+     */
     @ReactMethod
     fun deleteModel(promise: Promise) {
         val deleted = orchestrator.modelDownloader().delete()
         promise.resolve(deleted)
     }
 
-    /** Delete a specific downloaded model by filename. */
+    /**
+     * Delete a specific downloaded model by filename.
+     *
+     * @param filename Bare filename of the model to delete.
+     * @param promise Resolves with `true` if the file existed and was deleted, `false` otherwise.
+     */
     @ReactMethod
     fun deleteModelFile(filename: String, promise: Promise) {
         val deleted = orchestrator.modelDownloader().deleteByName(filename)
         promise.resolve(deleted)
     }
 
-    /** Resolves with `[{ filename, path, sizeBytes, lastModifiedMillis }]` for every downloaded model. */
+    /**
+     * List every model downloaded on-device.
+     *
+     * @param promise Resolves with `[{ filename, path, sizeBytes, lastModifiedMillis }]` for every downloaded model.
+     */
     @ReactMethod
     fun listModels(promise: Promise) {
         try {
@@ -157,16 +200,26 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         }
     }
 
-    /** Select which downloaded model the bridge surfaces as "active". Empty string clears the selection. */
+    /**
+     * Select which downloaded model the bridge surfaces as "active". Empty string clears the selection.
+     *
+     * @param filename Bare filename of the desired active model, or an empty/blank string to clear the selection.
+     */
     @ReactMethod
     fun setActiveModel(filename: String) {
         orchestrator.activeModelFilename = filename.trim().ifEmpty { null }
     }
 
-    // --------------------------------------------------------------------------------------------------
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /** Derive a local filename from the model URL's last path segment, falling back to a generic name when the
-     *  URL is unparseable or doesn't end in a recognized model extension. */
+    /**
+     * Derive a local filename from the model URL's last path segment, falling back to a generic name when the URL
+     * is unparseable or doesn't end in a recognized model extension.
+     *
+     * @param url Source URL of the model download.
+     * @return The chosen local filename ending in `.gguf` or `.task`.
+     */
     private fun filenameFromUrl(url: String): String {
         val noQuery = url.substringBefore('?').substringBefore('#')
         val last = noQuery.substringAfterLast('/', missingDelimiterValue = "").trim()
@@ -174,6 +227,11 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         return if (last.isNotEmpty() && isModel) last else "chat-model.gguf"
     }
 
+    /**
+     * Map a [ModelDownloader.State] into an [EVENT_DOWNLOAD_STATE] payload and forward it to JS.
+     *
+     * @param state The latest snapshot from the download flow.
+     */
     private fun emitDownloadState(state: ModelDownloader.State) {
         when (state) {
             is ModelDownloader.State.Pending -> emitDownloadStateRaw("pending", 0, 0, null)
@@ -184,6 +242,14 @@ class LLMChatModule(private val reactContext: ReactApplicationContext) : ReactCo
         }
     }
 
+    /**
+     * Emit a single [EVENT_DOWNLOAD_STATE] event with the supplied fields.
+     *
+     * @param status One of `pending`, `running`, `paused`, `complete`, `failed`, `error`.
+     * @param soFar Bytes downloaded so far.
+     * @param total Total expected bytes, or 0 when unknown.
+     * @param error Optional error description; included in the payload when non-null.
+     */
     private fun emitDownloadStateRaw(status: String, soFar: Long, total: Long, error: String?) {
         val map: WritableMap = Arguments.createMap()
         map.putString("status", status)
