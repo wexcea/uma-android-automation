@@ -99,10 +99,35 @@ class ModelDownloader(private val context: Context) {
     sealed class State {
         object Pending : State()
 
+        /**
+         * Active download with byte-level progress.
+         *
+         * Emitted repeatedly by [download] as DownloadManager reports new totals; consumers should drive a
+         * determinate progress bar from these fields.
+         *
+         * @property bytesDownloaded Bytes received so far.
+         * @property bytesTotal Total expected bytes, or -1 when the server did not advertise Content-Length
+         *   (in which case progress can only be shown as indeterminate).
+         */
         data class Running(val bytesDownloaded: Long, val bytesTotal: Long) : State()
 
+        /**
+         * Download paused by DownloadManager (e.g. waiting for Wi-Fi, queued behind another download, or
+         * device idle). Same byte semantics as [Running]; consumers typically render this identically with a
+         * "paused" badge.
+         *
+         * @property bytesDownloaded Bytes received so far before the pause.
+         * @property bytesTotal Total expected bytes, or -1 when unknown.
+         */
         data class Paused(val bytesDownloaded: Long, val bytesTotal: Long) : State()
 
+        /**
+         * Terminal failure emission. Stops the [download] flow; no further [State]s follow.
+         *
+         * @property failureReason Raw [DownloadManager] reason code (`ERROR_*` / `PAUSED_*` constants).
+         *   Unknown statuses from [query] collapse to [DownloadManager.ERROR_UNKNOWN] so callers always have
+         *   a defined value to switch on.
+         */
         data class Failed(val failureReason: Int) : State()
 
         object Complete : State()
@@ -137,6 +162,8 @@ class ModelDownloader(private val context: Context) {
             emit(State.Pending)
 
             try {
+                // DownloadManager has no push API for progress, so we poll its content cursor until the request reaches a terminal state.
+                // A null snapshot means the row is already gone (e.g. the user cleared notifications mid-flight), which we surface as a generic failure.
                 while (true) {
                     val snapshot = query(id)
                     if (snapshot == null) {
@@ -148,8 +175,9 @@ class ModelDownloader(private val context: Context) {
                     delay(POLL_INTERVAL_MS)
                 }
             } finally {
-                // Leave the file in place on success; DownloadManager auto-cleans temp files on failure. If the
-                // consumer cancels mid-flight we remove the partial record so the notification disappears.
+                // Leave the file in place on success; DownloadManager auto-cleans temp files on failure.
+                // If the consumer cancels mid-flight (coroutine cancellation triggers this finally) the request is still active in DownloadManager.
+                // Removing it cancels the underlying download and dismisses the system notification so the user doesn't see a stuck progress bar.
                 val latest = query(id)
                 if (latest !is State.Complete && latest !is State.Failed) dm.remove(id)
             }
@@ -194,8 +222,12 @@ class ModelDownloader(private val context: Context) {
      */
     private fun query(id: Long): State? {
         val q = DownloadManager.Query().setFilterById(id)
+        // `.use` closes the Cursor on every path - leaking it would tie up a SQLite connection per poll.
         dm.query(q).use { cursor: Cursor ->
+            // No row means DownloadManager has dropped this id (e.g. user cleared the notification). Treat
+            // that as a missing snapshot so the caller can surface a failure rather than spin forever.
             if (!cursor.moveToFirst()) return null
+
             val statusIdx = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)
             val soFarIdx = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
             val totalIdx = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
@@ -203,6 +235,9 @@ class ModelDownloader(private val context: Context) {
             val status = cursor.getInt(statusIdx)
             val soFar = cursor.getLong(soFarIdx)
             val total = cursor.getLong(totalIdx)
+
+            // Translate DownloadManager's int status into our typed [State] hierarchy. Any unknown status
+            // collapses to [Failed] with ERROR_UNKNOWN so we never emit an unhandled value to the bridge.
             return when (status) {
                 DownloadManager.STATUS_PENDING -> State.Pending
                 DownloadManager.STATUS_RUNNING -> State.Running(soFar, total)
