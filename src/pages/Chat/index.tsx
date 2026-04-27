@@ -227,7 +227,7 @@ const Chat = () => {
                     backgroundColor: colors.card,
                 },
                 modeLabel: { fontSize: 11, color: colors.mutedForeground, marginTop: 8, fontStyle: "italic" },
-                sectionLabel: { fontSize: 13, fontWeight: "600", color: colors.foreground, marginTop: 10, marginBottom: 6 },
+                sectionLabel: { fontSize: 15, fontWeight: "600", color: colors.foreground, marginTop: 10, marginBottom: 6 },
                 resultCard: {
                     borderWidth: 1,
                     borderColor: colors.border,
@@ -388,7 +388,7 @@ const Chat = () => {
                                 </Text>
                                 {r.kind === "code" ? (
                                     <View style={styles.codeBlock}>
-                                        <KotlinCode text={r.text} palette={isDark ? DARK_PALETTE : LIGHT_PALETTE} style={{ fontSize: 13, lineHeight: 18 }} />
+                                        <KotlinCode text={r.text} palette={isDark ? DARK_PALETTE : LIGHT_PALETTE} style={{ fontSize: 10, lineHeight: 18 }} />
                                     </View>
                                 ) : (
                                     <MarkdownView theme={markedTheme} mdStyles={markedStyles}>
