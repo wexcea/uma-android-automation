@@ -78,10 +78,19 @@ class DocIndex(val chunks: List<Chunk>, val dim: Int) {
     }
 
     companion object {
+        /** Logger tag for this class. */
         private const val TAG = "${SharedData.loggerTag}DocIndex"
+
+        /** First 8 bytes of every index file; used to sanity-check the binary stream on [load]. */
         private const val MAGIC = "UMADOCIX"
+
+        /** Index format version; bumped whenever the on-disk layout changes. */
         private const val VERSION = 2
+
+        /** Sentinel byte tagging a chunk as documentation prose. */
         private const val KIND_DOC: Byte = 0x01
+
+        /** Sentinel byte tagging a chunk as Kotlin source code. */
         private const val KIND_CODE: Byte = 0x02
 
         /**
@@ -118,12 +127,14 @@ class DocIndex(val chunks: List<Chunk>, val dim: Int) {
             return DocIndex(chunks, dim)
         }
 
+        /** Read a little-endian unsigned 16-bit integer from [input] as an [Int]. */
         private fun readU16LE(input: DataInputStream): Int {
             val b0 = input.readUnsignedByte()
             val b1 = input.readUnsignedByte()
             return b0 or (b1 shl 8)
         }
 
+        /** Read a little-endian unsigned 32-bit integer from [input] as an [Int]. */
         private fun readU32LE(input: DataInputStream): Int {
             val b0 = input.readUnsignedByte()
             val b1 = input.readUnsignedByte()
@@ -132,6 +143,7 @@ class DocIndex(val chunks: List<Chunk>, val dim: Int) {
             return b0 or (b1 shl 8) or (b2 shl 16) or (b3 shl 24)
         }
 
+        /** Read [byteLen] bytes from [input] and decode them as a UTF-8 string. */
         private fun readString(input: DataInputStream, byteLen: Int): String {
             val bytes = ByteArray(byteLen).also { input.readFully(it) }
             return String(bytes, Charsets.UTF_8)
