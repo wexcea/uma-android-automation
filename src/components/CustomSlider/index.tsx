@@ -5,6 +5,13 @@ import { useTheme } from "../../context/ThemeContext"
 import { Input } from "../ui/input"
 import SearchableItem from "../SearchableItem"
 
+/**
+ * Horizontal inset (in dp) that `@react-native-community/slider` reserves on each side of the track for the
+ * thumb on Android. Used to align the custom thumb overlay with the native track fill, since the native
+ * track spans `sliderWidth - 2 * NATIVE_TRACK_INSET`, not the full container width.
+ */
+const NATIVE_TRACK_INSET = 16
+
 interface CustomSliderProps {
     /** The current value of the slider. */
     value: number
@@ -196,13 +203,20 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
 
     /**
      * Calculates the tooltip position based on the current value.
+     *
+     * `@react-native-community/slider` insets its track horizontally by ~`NATIVE_TRACK_INSET` dp on each side
+     * to leave room for the thumb. Mapping the value linearly across `sliderWidth` would put the custom thumb
+     * overlay outside the native track at the endpoints; the track length is `sliderWidth - 2 * inset` and
+     * starts at `inset`.
+     *
      * @param currentValue The current value of the slider.
-     * @returns The tooltip position.
+     * @returns The tooltip position in dp, aligned with the native track fill.
      */
     const calculateTooltipPosition = (currentValue: number) => {
         if (sliderWidth === 0) return 0
         const percentage = (currentValue - min) / (max - min)
-        return percentage * sliderWidth
+        const trackWidth = Math.max(0, sliderWidth - 2 * NATIVE_TRACK_INSET)
+        return NATIVE_TRACK_INSET + percentage * trackWidth
     }
 
     /**
