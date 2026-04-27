@@ -102,6 +102,9 @@ class ChatOrchestrator(private val context: Context) {
 
         val idx = index ?: return top.text
         val prefix = top.heading
+
+        // Pull every doc chunk under [top]'s heading scope: same heading, or a deeper subsection (heading prefix followed by the breadcrumb separator).
+        // Subsections live under their parent so the expanded section captures the whole hierarchy the user is most likely asking about.
         val matches =
             idx.chunks.filter { c ->
                 c.kind == DocIndex.Kind.DOC &&
@@ -110,11 +113,18 @@ class ChatOrchestrator(private val context: Context) {
             }
         if (matches.size <= 1) return top.text
 
+        // Chunk ids look like `source.md#heading-{flush}-{seq}`. Group by the `flush` integer so chunks emitted
+        // together by the indexer's flush boundary stay together (each flush group represents one continuous
+        // run of prose that was sliced by the chunker). Sorting the groups by flush index puts them back in the
+        // order they appeared in the source file.
         val byFlush =
             matches.groupBy { c ->
                 c.id.substringAfterLast('#').substringBefore('-').toIntOrNull() ?: 0
             }.toSortedMap()
 
+        // Within a flush group, sort by the trailing `seq` index so consecutive sliced chunks reassemble in
+        // order. The first chunk of each group keeps its full text; every subsequent chunk drops the indexer's
+        // CHUNK_OVERLAP_WORDS-word prefix so the overlap doesn't get duplicated in the output.
         val parts =
             byFlush.values.map { group ->
                 val sorted =
@@ -126,11 +136,13 @@ class ChatOrchestrator(private val context: Context) {
                 }.trim()
             }.filter { it.isNotEmpty() }
 
+        // Hard char cap so a runaway heading scope doesn't blow up the JS-side prompt budget. Truncate at the
+        // last whole word before the cap to avoid mid-word cuts that would confuse the LLM.
         val combined = parts.joinToString("\n\n")
         return if (combined.length <= EXPANSION_CHAR_CAP) {
             combined
         } else {
-            combined.take(EXPANSION_CHAR_CAP).substringBeforeLast(' ') + "…"
+            combined.take(EXPANSION_CHAR_CAP).substringBeforeLast(' ') + "..."
         }
     }
 
@@ -146,12 +158,18 @@ class ChatOrchestrator(private val context: Context) {
         var consumed = 0
         var i = 0
         val len = text.length
+
+        // Skip any leading whitespace so the first character processed is part of a real word.
         while (i < len && text[i].isWhitespace()) i++
+
+        // Walk one word at a time: advance past the word's non-whitespace run, then past the whitespace that follows it.
+        // After [n] iterations [i] points at the first character of the (n+1)th word (or end of text).
         while (consumed < n && i < len) {
             while (i < len && !text[i].isWhitespace()) i++
             consumed += 1
             while (i < len && text[i].isWhitespace()) i++
         }
+
         return text.substring(i)
     }
 
@@ -162,8 +180,10 @@ class ChatOrchestrator(private val context: Context) {
      * @return The shared embedder, or null if construction failed.
      */
     private fun ensureEmbedder(): EmbeddingService? {
+        // Fast path: already-initialized reads bypass the lock entirely. Safe because [embedder] is @Volatile.
         embedder?.let { return it }
         synchronized(this) {
+            // Re-check inside the lock so a thread that lost the race doesn't create a second instance.
             embedder?.let { return it }
             val created = EmbeddingService(context)
             embedder = created
@@ -178,8 +198,10 @@ class ChatOrchestrator(private val context: Context) {
      * @return The shared in-memory index, or null if asset loading failed.
      */
     private fun ensureIndex(): DocIndex? {
+        // Fast path: already-loaded reads bypass the lock entirely. Safe because [index] is @Volatile.
         index?.let { return it }
         synchronized(this) {
+            // Re-check inside the lock so a thread that lost the race doesn't reparse the asset.
             index?.let { return it }
             try {
                 context.assets.open(INDEX_PATH).use { stream ->
