@@ -19,9 +19,16 @@ import java.text.Normalizer
  */
 class WordPieceTokenizer(private val vocab: Map<String, Int>) {
     companion object {
+        /** Vocabulary id of the BERT `[CLS]` classification token prepended to every input. */
         const val CLS_ID = 101
+
+        /** Vocabulary id of the BERT `[SEP]` separator token appended to every input. */
         const val SEP_ID = 102
+
+        /** Vocabulary id used to right-pad sequences out to [MAX_SEQ_LEN]. */
         const val PAD_ID = 0
+
+        /** Vocabulary id of the `[UNK]` token emitted for any wordpiece not found in [vocab]. */
         const val UNK_ID = 100
 
         /** Max sequence length matching sentence-transformers/all-MiniLM-L6-v2 default. */
