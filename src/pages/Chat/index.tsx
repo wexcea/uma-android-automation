@@ -66,6 +66,12 @@ const Chat = () => {
     const [searched, setSearched] = useState(false)
     const [history, setHistory] = useState<string[]>([])
     const [tuning, setTuning] = useState<ChatTuning | null>(null)
+    const [activeModelFilename, setActiveModelFilename] = useState<string | null | undefined>(undefined)
+
+    const refreshActiveModel = useCallback(async () => {
+        const filename = await resolveActiveModelFilename()
+        setActiveModelFilename(filename)
+    }, [])
 
     useEffect(() => {
         let cancelled = false
@@ -77,6 +83,10 @@ const Chat = () => {
             try {
                 const t = await loadChatTuning()
                 if (!cancelled) setTuning(t)
+            } catch {}
+            try {
+                const filename = await resolveActiveModelFilename()
+                if (!cancelled) setActiveModelFilename(filename)
             } catch {}
         })()
         return () => {
@@ -177,6 +187,7 @@ const Chat = () => {
         } finally {
             setIsSearching(false)
             setPartialAnswer("")
+            refreshActiveModel().catch(() => undefined)
         }
     }, [query, tuning])
 
@@ -248,6 +259,9 @@ const Chat = () => {
                 },
                 emptyText: { color: colors.mutedForeground, textAlign: "center", marginTop: 20, paddingHorizontal: 20 },
                 disclaimer: { fontSize: 11, color: colors.mutedForeground, marginTop: 4, marginBottom: 8, fontStyle: "italic" },
+                modelStatus: { fontSize: 12, color: colors.foreground, marginBottom: 8 },
+                modelStatusInactive: { fontSize: 12, color: colors.mutedForeground, fontStyle: "italic", marginBottom: 8 },
+                modelStatusName: { fontWeight: "600" },
                 historyHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12, marginBottom: 6 },
                 historyTitle: { fontSize: 12, fontWeight: "600", color: colors.mutedForeground, textTransform: "uppercase", letterSpacing: 0.5 },
                 historyClear: { fontSize: 11, color: colors.mutedForeground, textDecorationLine: "underline" },
@@ -317,6 +331,13 @@ const Chat = () => {
         <View style={styles.root}>
             <PageHeader title="Ask the Docs" />
             <Text style={styles.disclaimer}>Answers are grounded in README.md, HOW_IT_WORKS.md, and in-app option descriptions. Fully offline.</Text>
+            {activeModelFilename === undefined ? null : activeModelFilename ? (
+                <Text style={styles.modelStatus}>
+                    Model: <Text style={styles.modelStatusName}>{activeModelFilename}</Text>
+                </Text>
+            ) : (
+                <Text style={styles.modelStatusInactive}>No model · retrieve-only mode</Text>
+            )}
 
             <View style={styles.inputColumn}>
                 <TextInput
@@ -445,6 +466,21 @@ function citationHeading(r: DocResult): string {
     const lastSep = r.heading.lastIndexOf(" › ")
     const member = lastSep >= 0 ? r.heading.slice(lastSep + 3) : r.heading
     return `${r.source}::${member}`
+}
+
+async function resolveActiveModelFilename(): Promise<string | null> {
+    try {
+        const models: DownloadedModel[] = await NativeModules.LLMChatModule.listModels()
+        if (!models || models.length === 0) return null
+        const active = await databaseManager.loadSetting(ACTIVE_MODEL_KEY.category, ACTIVE_MODEL_KEY.key)
+        if (typeof active === "string" && active.length > 0) {
+            const matched = models.find((m) => m.filename === active)
+            if (matched) return matched.filename
+        }
+        return models[0].filename
+    } catch {
+        return null
+    }
 }
 
 async function pickModelPath(): Promise<string | null> {
