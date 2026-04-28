@@ -1,6 +1,7 @@
 import { useMemo, useContext, useState, useEffect, useRef } from "react"
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native"
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native"
 import { Divider } from "react-native-paper"
+import { previewSchedule, SchedulePreview, SolverConfigSnapshot } from "../../lib/solver/preview"
 import { useTheme } from "../../context/ThemeContext"
 import { BotStateContext, defaultSettings } from "../../context/BotStateContext"
 import { SearchPageProvider } from "../../context/SearchPageContext"
@@ -61,6 +62,23 @@ interface WeightsMap {
 }
 
 const APTITUDE_RANKS = ["S", "A", "B", "C", "D", "E", "F", "G"]
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+const YEAR_LABELS: Array<{ name: string; startTurn: number }> = [
+    { name: "Junior", startTurn: 1 },
+    { name: "Classic", startTurn: 25 },
+    { name: "Senior", startTurn: 49 },
+]
+const GRADE_COLORS: Record<string, string> = {
+    G1: "#dc2626",
+    G2: "#ea580c",
+    G3: "#ca8a04",
+    OP: "#2563eb",
+    PRE_OP: "#3b82f6",
+    MAIDEN: "#6b7280",
+    DEBUT: "#6b7280",
+    FINALE: "#7c3aed",
+    EX: "#7c3aed",
+}
 const DEFAULT_APTITUDES: AptitudeMap = { Sprint: "A", Mile: "A", Medium: "A", Long: "A", Turf: "A", Dirt: "A" }
 const DEFAULT_WEIGHTS: WeightsMap = {
     raceValue: 1.0,
@@ -163,6 +181,11 @@ const SmartRaceSolverSettings = () => {
     const [lockTurnInput, setLockTurnInput] = useState("")
     const [lockRaceSearch, setLockRaceSearch] = useState("")
 
+    // Schedule preview — computed by the Kotlin solver via the React Native bridge.
+    const [preview, setPreview] = useState<SchedulePreview | null>(null)
+    const [previewLoading, setPreviewLoading] = useState(false)
+    const [previewError, setPreviewError] = useState<string | null>(null)
+
     // -------- Derived filters --------
 
     const filteredPresets = useMemo(() => {
@@ -257,6 +280,50 @@ const SmartRaceSolverSettings = () => {
         updateRacingSetting("smartRaceSolverWeights", JSON.stringify({ ...weights, [key]: value }))
     }
 
+    // -------- Preview --------
+
+    const buildSnapshot = (): SolverConfigSnapshot => ({
+        scenario: settings.general?.scenario || "Trackblazer",
+        characterPreset: smartRaceSolverCharacterPreset,
+        aptitudes: aptitudes,
+        targetEpithets,
+        forcedEpithets,
+        manualLocks,
+        weights,
+    })
+
+    useEffect(() => {
+        if (!enableSmartRaceSolver) {
+            setPreview(null)
+            setPreviewError(null)
+            return
+        }
+        const handle = setTimeout(async () => {
+            setPreviewLoading(true)
+            try {
+                const snapshot = buildSnapshot()
+                const result = await previewSchedule(snapshot)
+                setPreview(result)
+                setPreviewError(result.error ?? null)
+            } catch (e: any) {
+                setPreview(null)
+                setPreviewError(String(e?.message ?? e))
+            } finally {
+                setPreviewLoading(false)
+            }
+        }, 500)
+        return () => clearTimeout(handle)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        enableSmartRaceSolver,
+        smartRaceSolverCharacterPreset,
+        smartRaceSolverAptitudes,
+        smartRaceSolverTargetEpithets,
+        smartRaceSolverForcedEpithets,
+        smartRaceSolverManualLocks,
+        smartRaceSolverWeights,
+    ])
+
     // -------- Styles --------
 
     const styles = useMemo(
@@ -321,6 +388,39 @@ const SmartRaceSolverSettings = () => {
                     fontFamily: "monospace",
                     paddingVertical: 4,
                 },
+                yearCard: {
+                    marginVertical: 6,
+                    padding: 8,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    borderRadius: 6,
+                    backgroundColor: colors.background,
+                },
+                yearCardTitle: { fontSize: 14, fontWeight: "700", color: colors.foreground, marginBottom: 4 },
+                calendarHeaderRow: { flexDirection: "row", paddingVertical: 4, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.border },
+                calendarHeaderLabel: { width: 36, fontSize: 11, color: colors.mutedForeground, textAlign: "center" },
+                calendarHeaderPhase: { flex: 1, fontSize: 11, color: colors.mutedForeground, textAlign: "center" },
+                calendarRow: { flexDirection: "row", alignItems: "center", paddingVertical: 3 },
+                calendarMonthLabel: { width: 36, fontSize: 11, color: colors.foreground, textAlign: "center" },
+                calendarCell: {
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingVertical: 4,
+                    marginHorizontal: 2,
+                    borderRadius: 4,
+                    backgroundColor: colors.card,
+                    minHeight: 24,
+                },
+                calendarCellRace: {
+                    backgroundColor: colors.card,
+                },
+                calendarDot: { width: 8, height: 8, borderRadius: 4, marginRight: 4 },
+                calendarGradeLabel: { fontSize: 10, color: colors.foreground, fontWeight: "600" },
+                calendarCellEmpty: { fontSize: 10, color: colors.mutedForeground },
+                previewStatus: { fontSize: 12, color: colors.mutedForeground, paddingVertical: 4 },
+                previewError: { fontSize: 12, color: "#dc2626", paddingVertical: 4 },
             }),
         [colors]
     )
@@ -355,6 +455,49 @@ const SmartRaceSolverSettings = () => {
         >
             <Text style={selected ? styles.chipTextActive : styles.chipText}>{epithet.name}</Text>
         </TouchableOpacity>
+    )
+
+    const renderCalendarCell = (turn: number) => {
+        const entry = preview?.decisions[String(turn)]
+        if (!entry || entry.type !== "Race") {
+            return (
+                <View key={turn} style={styles.calendarCell}>
+                    <Text style={styles.calendarCellEmpty}>{entry?.type === "Rest" ? "Rest" : "—"}</Text>
+                </View>
+            )
+        }
+        const color = GRADE_COLORS[entry.grade ?? ""] ?? colors.primary
+        const onPress = () => {
+            Alert.alert(`Turn ${turn}`, `${entry.name ?? entry.raceKey ?? "Race"}\n${entry.grade ?? ""}`)
+        }
+        return (
+            <TouchableOpacity key={turn} style={[styles.calendarCell, styles.calendarCellRace]} onPress={onPress}>
+                <View style={[styles.calendarDot, { backgroundColor: color }]} />
+                <Text style={styles.calendarGradeLabel}>{(entry.grade ?? "").replace("PRE_OP", "Pre")}</Text>
+            </TouchableOpacity>
+        )
+    }
+
+    const renderYearCard = (year: { name: string; startTurn: number }) => (
+        <View key={year.name} style={styles.yearCard}>
+            <Text style={styles.yearCardTitle}>{year.name} Year</Text>
+            <View style={styles.calendarHeaderRow}>
+                <Text style={styles.calendarHeaderLabel}>Mo</Text>
+                <Text style={styles.calendarHeaderPhase}>1st Half</Text>
+                <Text style={styles.calendarHeaderPhase}>2nd Half</Text>
+            </View>
+            {MONTH_LABELS.map((label, monthIdx) => {
+                const firstTurn = year.startTurn + monthIdx * 2
+                const secondTurn = firstTurn + 1
+                return (
+                    <View key={label} style={styles.calendarRow}>
+                        <Text style={styles.calendarMonthLabel}>{label}</Text>
+                        {renderCalendarCell(firstTurn)}
+                        {renderCalendarCell(secondTurn)}
+                    </View>
+                )
+            })}
+        </View>
     )
 
     // -------- Render --------
@@ -663,6 +806,36 @@ const SmartRaceSolverSettings = () => {
                                     placeholder="5.0"
                                 />
                                 <Text style={styles.inputDescription}>Penalty for racing during summer training blocks (turns 12-14, 36-39, 60-63).</Text>
+                            </View>
+                        </SearchableItem>
+
+                        {/* Schedule preview calendar */}
+                        <SearchableItem
+                            id="smart-solver-calendar-preview"
+                            condition={enableSmartRaceSolver}
+                            parentId="enable-smart-race-solver"
+                            title="Schedule Preview"
+                            description="Solver's initial schedule across the 72-turn career, computed from the current configuration. Does not account for in-run wins or losses."
+                            style={styles.section}
+                        >
+                            <View style={sectionsDisabledStyle}>
+                                <Text style={styles.sectionTitle}>Schedule Preview</Text>
+                                <Text style={styles.description}>
+                                    Compact preview of the schedule the solver would start with. Tap a colored cell for the full race name. Does not reflect mid-run dynamic re-planning.
+                                </Text>
+                                {previewLoading && (
+                                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                        <ActivityIndicator size="small" color={colors.primary} />
+                                        <Text style={[styles.previewStatus, { marginLeft: 6 }]}>Computing preview…</Text>
+                                    </View>
+                                )}
+                                {previewError && <Text style={styles.previewError}>Preview error: {previewError}</Text>}
+                                {!previewLoading && !previewError && preview && (
+                                    <Text style={styles.previewStatus}>
+                                        Projected score {preview.totalScore.toFixed(1)} · {preview.projectedEpithets.length} epithet{preview.projectedEpithets.length === 1 ? "" : "s"} reachable
+                                    </Text>
+                                )}
+                                {YEAR_LABELS.map(renderYearCard)}
                             </View>
                         </SearchableItem>
 
