@@ -839,6 +839,62 @@ const SmartRaceSolverSettings = () => {
                             </View>
                         </SearchableItem>
 
+                        {/* Epithet rewards */}
+                        <SearchableItem
+                            id="smart-solver-epithet-rewards"
+                            condition={enableSmartRaceSolver}
+                            parentId="enable-smart-race-solver"
+                            title="Epithet Rewards"
+                            description="Rewards for each selected and projected epithet."
+                            style={styles.section}
+                        >
+                            <View style={sectionsDisabledStyle}>
+                                <Text style={styles.sectionTitle}>Selected Epithets</Text>
+                                {(() => {
+                                    const selectedNames = Array.from(new Set([...targetEpithets, ...forcedEpithets]))
+                                    if (selectedNames.length === 0) {
+                                        return <Text style={styles.inputDescription}>No epithets selected — pick targets above to see their rewards here.</Text>
+                                    }
+                                    return selectedNames.map((name) => {
+                                        const ep = (epithetsData as Record<string, EpithetEntry>)[name]
+                                        const isForced = forcedEpithets.includes(name)
+                                        const reward = ep?.reward_text ?? "(reward unknown)"
+                                        return (
+                                            <View key={`sel-${name}`} style={styles.lockRow}>
+                                                <Text style={[styles.lockRace, { fontWeight: "600" }]}>
+                                                    {name}
+                                                    {isForced ? "  ★" : ""}
+                                                </Text>
+                                                <Text style={[styles.lockRace, { color: colors.mutedForeground, flex: 2 }]}>{reward}</Text>
+                                            </View>
+                                        )
+                                    })
+                                })()}
+
+                                <Divider style={{ marginVertical: 8 }} />
+
+                                <Text style={styles.sectionTitle}>Projected Completions</Text>
+                                {previewLoading && <Text style={styles.previewStatus}>Computing preview…</Text>}
+                                {!previewLoading && (preview?.projectedEpithets?.length ?? 0) === 0 && (
+                                    <Text style={styles.inputDescription}>The preview schedule does not project completing any epithets with the current configuration.</Text>
+                                )}
+                                {(preview?.projectedEpithets ?? []).map((name) => {
+                                    const ep = (epithetsData as Record<string, EpithetEntry>)[name]
+                                    const reward = ep?.reward_text ?? "(reward unknown)"
+                                    const isSelected = targetEpithets.includes(name) || forcedEpithets.includes(name)
+                                    return (
+                                        <View key={`proj-${name}`} style={styles.lockRow}>
+                                            <Text style={[styles.lockRace, { fontWeight: "600", color: isSelected ? colors.primary : colors.foreground }]}>
+                                                {name}
+                                                {isSelected ? "  ✓" : ""}
+                                            </Text>
+                                            <Text style={[styles.lockRace, { color: colors.mutedForeground, flex: 2 }]}>{reward}</Text>
+                                        </View>
+                                    )
+                                })}
+                            </View>
+                        </SearchableItem>
+
                         {/* Diagnostic */}
                         <SearchableItem
                             id="smart-solver-diagnostic"
