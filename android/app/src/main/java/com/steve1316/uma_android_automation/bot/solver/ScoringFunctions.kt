@@ -36,38 +36,44 @@ object ScoringFunctions {
         RaceGrade.G3 -> 30.0
         RaceGrade.OP -> 20.0
         RaceGrade.PRE_OP -> 15.0
-        else -> 10.0
+        RaceGrade.MAIDEN -> 8.0
+        RaceGrade.DEBUT -> 5.0
+        RaceGrade.FINALE -> 60.0
+        RaceGrade.EX -> 35.0
     }
 
     /**
      * Returns the value of running a single race, ignoring epithet contributions.
      *
-     * Components: stat * statWeight, sp * spWeight, fans / 100, scaled by [Weights.raceValue].
+     * Mirrors the reference Trackblazer solver: gross reward (stats * statWeight + sp * spWeight)
+     * minus a flat [RACE_COST] that pushes low-grade races negative, with fans included only as a
+     * small tiebreaker so two equally-graded options pick the bigger event. Training is
+     * implicitly 0, so any race must clear [RACE_COST] to be chosen over a Train turn.
      */
     fun raceValue(race: RaceCandidate, weights: Weights): Double {
         val stat = gradeStatValue(race.grade) * weights.statWeight
         val sp = gradeSkillPoints(race.grade) * weights.spWeight
-        val fans = race.fans / 100.0
-        return (stat + sp + fans) * weights.raceValue
+        val fansTiebreaker = race.fans / 1000.0
+        return (stat + sp + fansTiebreaker - RACE_COST) * weights.raceValue
     }
 
     /**
-     * Approximate per-turn value of a single-facility training session. Calibrated so Train
-     * comfortably beats Pre-OP / OP races and only G3+ (or epithet-completing) races win — without
-     * this baseline, Race scores positively while Train scores zero and the solver picks "race
-     * every turn".
+     * Training is the default action — value 0. The decision between Race and Train is driven by
+     * [raceValue] going positive (race) or negative (train), matching the reference solver's
+     * `NO_RACE = 0` baseline.
      */
-    fun trainValue(weights: Weights): Double {
-        val stat = TRAIN_BASE_STAT * weights.statWeight
-        val sp = TRAIN_BASE_SP * weights.spWeight
-        return stat + sp
-    }
+    fun trainValue(@Suppress("UNUSED_PARAMETER") weights: Weights): Double = 0.0
 
     /** Resting yields no scoring contribution; energy is not modelled in the static preview. */
     fun restValue(@Suppress("UNUSED_PARAMETER") weights: Weights): Double = 0.0
 
-    private const val TRAIN_BASE_STAT: Double = 30.0
-    private const val TRAIN_BASE_SP: Double = 5.0
+    /**
+     * Flat per-race penalty subtracted from gross race reward. Calibrated so Pre-OP / OP / Maiden
+     * / Debut races score negative under default weights (and thus Train wins), while G2 / G1 /
+     * Finale clear the bar. G3 lands close to zero — raced when fans or epithets push it past
+     * [RACE_COST].
+     */
+    private const val RACE_COST: Double = 40.0
 
     /**
      * Reward magnitude of completing [epithet]. Stat rewards return [Epithet.amount]; hint

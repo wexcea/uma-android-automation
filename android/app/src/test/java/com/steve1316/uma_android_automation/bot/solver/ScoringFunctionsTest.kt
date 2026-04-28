@@ -49,20 +49,28 @@ class ScoringFunctionsTest {
     }
 
     @Test
-    fun trainValueIsPositiveUnderDefaultWeights() {
-        assertTrue(ScoringFunctions.trainValue(w) > 0.0)
-    }
-
-    @Test
-    fun trainValueScalesWithStatWeight() {
-        val low = ScoringFunctions.trainValue(Weights(statWeight = 1.0))
-        val high = ScoringFunctions.trainValue(Weights(statWeight = 5.0))
-        assertTrue(high > low)
+    fun trainValueIsZero() {
+        assertEquals(0.0, ScoringFunctions.trainValue(w), 1e-9)
     }
 
     @Test
     fun restValueIsZero() {
         assertEquals(0.0, ScoringFunctions.restValue(w), 1e-9)
+    }
+
+    @Test
+    fun lowGradeRaceValueIsNegative() {
+        // Pre-OP / OP races should score below zero so Train (value 0) is preferred.
+        val preOp = race("PreOp", 20, grade = RaceGrade.PRE_OP, fans = 500)
+        val op = race("Op", 20, grade = RaceGrade.OP, fans = 1000)
+        assertTrue(ScoringFunctions.raceValue(preOp, w) < 0.0)
+        assertTrue(ScoringFunctions.raceValue(op, w) < 0.0)
+    }
+
+    @Test
+    fun g1RaceValueIsPositive() {
+        val g1 = race("G1", 20, grade = RaceGrade.G1, fans = 8000)
+        assertTrue(ScoringFunctions.raceValue(g1, w) > 0.0)
     }
 
     @Test
