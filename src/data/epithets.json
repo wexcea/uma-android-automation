@@ -1,0 +1,576 @@
+{
+    "Breakneck Miler": {
+        "name": "Breakneck Miler",
+        "category": "+15 to 2 random stats",
+        "reward_text": "+15 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 30,
+        "display_amount": 15,
+        "condition_text": "Win the NHK Mile Cup, Yasuda Kinen, and Mile Championship.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "NHK Mile Cup"},
+            {"type": "winRace", "name": "Yasuda Kinen"},
+            {"type": "winRace", "name": "Mile Championship"}
+        ]
+    },
+    "Dirt Dancer": {
+        "name": "Dirt Dancer",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win one dirt short-distance, mile, and medium-distance race.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 1, "filter": {"terrain": "Dirt", "distanceTypes": ["Sprint"]}},
+            {"type": "winCount", "count": 1, "filter": {"terrain": "Dirt", "distanceTypes": ["Mile"]}},
+            {"type": "winCount", "count": 1, "filter": {"terrain": "Dirt", "distanceTypes": ["Medium"]}}
+        ]
+    },
+    "Dirt G1 Achiever": {
+        "name": "Dirt G1 Achiever",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win 3 dirt G1 races.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 3, "filter": {"terrain": "Dirt", "grade": "G1"}}
+        ]
+    },
+    "Dirt G1 Dominator": {
+        "name": "Dirt G1 Dominator",
+        "category": "Skill Hint",
+        "reward_text": "Top Pick hint +1",
+        "reward_kind": "hint",
+        "amount": 1,
+        "display_amount": 1,
+        "condition_text": "Win 9 dirt G1 races.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "Single hint level.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 9, "filter": {"terrain": "Dirt", "grade": "G1"}}
+        ]
+    },
+    "Dirt G1 Powerhouse": {
+        "name": "Dirt G1 Powerhouse",
+        "category": "+15 to 2 random stats",
+        "reward_text": "+15 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 30,
+        "display_amount": 15,
+        "condition_text": "Win 5 dirt G1 races.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 5, "filter": {"terrain": "Dirt", "grade": "G1"}}
+        ]
+    },
+    "Dirt G1 Star": {
+        "name": "Dirt G1 Star",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win 4 dirt G1 races.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 4, "filter": {"terrain": "Dirt", "grade": "G1"}}
+        ]
+    },
+    "Dirt Sprinter": {
+        "name": "Dirt Sprinter",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win the JBC Sprint twice.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRaceTimes", "name": "JBC Sprint", "times": 2}
+        ]
+    },
+    "Dirty Work": {
+        "name": "Dirty Work",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 5 dirt races.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 5, "filter": {"terrain": "Dirt"}}
+        ]
+    },
+    "Eat My Dust": {
+        "name": "Eat My Dust",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win 15 Dirt races.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 15, "filter": {"terrain": "Dirt"}}
+        ]
+    },
+    "Fall Champion": {
+        "name": "Fall Champion",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win the Tenno Sho (Autumn), Japan Cup, and Arima Kinen.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "Tenno Sho (Autumn)"},
+            {"type": "winRace", "name": "Japan Cup"},
+            {"type": "winRace", "name": "Arima Kinen"}
+        ]
+    },
+    "Globe-Trotter": {
+        "name": "Globe-Trotter",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 3 races which include a country's name in their name.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 3, "filter": {"nameContainsCountry": true}}
+        ]
+    },
+    "Goddess": {
+        "name": "Goddess",
+        "category": "+15 to 2 random stats",
+        "reward_text": "+15 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 30,
+        "display_amount": 15,
+        "condition_text": "Get the Lady epithet. Win the Victoria Mile, Hanshin Juvenile Fillies, and the Queen Elizabeth II Cup twice.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": ["Lady"],
+        "matchers": [
+            {"type": "epithetAll", "names": ["Lady"]},
+            {"type": "winRace", "name": "Victoria Mile"},
+            {"type": "winRace", "name": "Hanshin Juvenile Fillies"},
+            {"type": "winRaceTimes", "name": "Queen Elizabeth II Cup", "times": 2}
+        ]
+    },
+    "Heroine": {
+        "name": "Heroine",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Get the Lady epithet. Win the Queen Elizabeth II Cup (Classic).",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": ["Lady"],
+        "matchers": [
+            {"type": "epithetAll", "names": ["Lady"]},
+            {"type": "winRace", "name": "Queen Elizabeth II Cup", "atClass": "Classic"}
+        ]
+    },
+    "Hokkaido Hotshot": {
+        "name": "Hokkaido Hotshot",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 3 graded races held at Sapporo or Hakodate.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 3, "filter": {"raceTracks": ["Sapporo", "Hakodate"], "gradedOnly": true}}
+        ]
+    },
+    "Incredible": {
+        "name": "Incredible",
+        "category": "+15 to 2 random stats",
+        "reward_text": "+15 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 30,
+        "display_amount": 15,
+        "condition_text": "Get the Stunning epithet. Win either the Japan Cup (Classic) or the Arima Kinen (Classic).",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": ["Stunning"],
+        "matchers": [
+            {"type": "epithetAll", "names": ["Stunning"]},
+            {"type": "winAnyOf", "names": ["Japan Cup", "Arima Kinen"], "count": 1, "atClass": "Classic"}
+        ]
+    },
+    "Junior Jewel": {
+        "name": "Junior Jewel",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 3 races with 'Junior Stakes' in their name.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 3, "filter": {"nameContains": "Junior Stakes"}}
+        ]
+    },
+    "Kanto Conqueror": {
+        "name": "Kanto Conqueror",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 3 graded races held at Tokyo, Nakayama, or Ooi.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 3, "filter": {"raceTracks": ["Tokyo", "Nakayama", "Ooi"], "gradedOnly": true}}
+        ]
+    },
+    "Kicking Up Dust": {
+        "name": "Kicking Up Dust",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win the Unicorn Stakes, Leopard Stakes, and Japan Dirt Derby.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "Unicorn Stakes"},
+            {"type": "winRace", "name": "Leopard Stakes"},
+            {"type": "winRace", "name": "Japan Dirt Derby"}
+        ]
+    },
+    "Kokura Constable": {
+        "name": "Kokura Constable",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 2 graded races held at Kokura.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 2, "filter": {"raceTracks": ["Kokura"], "gradedOnly": true}}
+        ]
+    },
+    "Lady": {
+        "name": "Lady",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win the Oka Sho, Japanese Oaks, and Shuka Sho.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "Oka Sho"},
+            {"type": "winRace", "name": "Japanese Oaks"},
+            {"type": "winRace", "name": "Shuka Sho"}
+        ]
+    },
+    "Legendary": {
+        "name": "Legendary",
+        "category": "Skill Hint",
+        "reward_text": "Homestretch Haste hint +1",
+        "reward_kind": "hint",
+        "amount": 1,
+        "display_amount": 1,
+        "condition_text": "Get either the Stunning or Lady epithet. Get the Spring Champion and Fall Champion epithet.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "Single hint level.",
+        "dependsOn": ["Stunning", "Lady", "Spring Champion", "Fall Champion"],
+        "matchers": [
+            {"type": "epithetAnyOf", "names": ["Stunning", "Lady"]},
+            {"type": "epithetAll", "names": ["Spring Champion", "Fall Champion"]}
+        ]
+    },
+    "Mile a Minute": {
+        "name": "Mile a Minute",
+        "category": "Skill Hint",
+        "reward_text": "Mile Straightaways ○ hint +1",
+        "reward_kind": "hint",
+        "amount": 1,
+        "display_amount": 1,
+        "condition_text": "Win the NHK Mile Cup, Oka Sho, Yasuda Kinen, Victoria Mile, Mile Championship, and either the Hanshin Juvenile Fillies or the Asahi Hai Futurity Stakes.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "Single hint level.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "NHK Mile Cup"},
+            {"type": "winRace", "name": "Oka Sho"},
+            {"type": "winRace", "name": "Yasuda Kinen"},
+            {"type": "winRace", "name": "Victoria Mile"},
+            {"type": "winRace", "name": "Mile Championship"},
+            {"type": "winAnyOf", "names": ["Hanshin Juvenile Fillies", "Asahi Hai Futurity Stakes"], "count": 1}
+        ]
+    },
+    "Non-Standard Distance Leader": {
+        "name": "Non-Standard Distance Leader",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win 10 non-core distance races.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 10, "filter": {"distanceTypes": ["Sprint", "Long"]}}
+        ]
+    },
+    "Phenomenal": {
+        "name": "Phenomenal",
+        "category": "+15 to 2 random stats",
+        "reward_text": "+15 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 30,
+        "display_amount": 15,
+        "condition_text": "Get the Stunning epithet. Win any two of the Tenno Sho (Spring), Takarazuka Kinen, Japan Cup, Tenno Sho (Autumn), Osaka Hai and Arima Kinen.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": ["Stunning"],
+        "matchers": [
+            {"type": "epithetAll", "names": ["Stunning"]},
+            {"type": "winAtLeast", "names": ["Tenno Sho (Spring)", "Takarazuka Kinen", "Japan Cup", "Tenno Sho (Autumn)", "Osaka Hai", "Arima Kinen"], "count": 2}
+        ]
+    },
+    "Playing Dirty": {
+        "name": "Playing Dirty",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win 10 Dirt races.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 10, "filter": {"terrain": "Dirt"}}
+        ]
+    },
+    "Pro Racer": {
+        "name": "Pro Racer",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 10 races of grade Open or higher.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 10, "filter": {"gradeAtLeastOpen": true}}
+        ]
+    },
+    "Shield Bearer": {
+        "name": "Shield Bearer",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win the Tenno Sho (Spring) and Tenno Sho (Autumn).",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "Tenno Sho (Spring)"},
+            {"type": "winRace", "name": "Tenno Sho (Autumn)"}
+        ]
+    },
+    "Spring Champion": {
+        "name": "Spring Champion",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win the Osaka Hai, Tenno Sho (Spring), and Takarazuka Kinen.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "Osaka Hai"},
+            {"type": "winRace", "name": "Tenno Sho (Spring)"},
+            {"type": "winRace", "name": "Takarazuka Kinen"}
+        ]
+    },
+    "Sprint Go-Getter": {
+        "name": "Sprint Go-Getter",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win the Takamatsunomiya Kinen and Sprinters Stakes.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "Takamatsunomiya Kinen"},
+            {"type": "winRace", "name": "Sprinters Stakes"}
+        ]
+    },
+    "Sprint Speedster": {
+        "name": "Sprint Speedster",
+        "category": "+15 to 2 random stats",
+        "reward_text": "+15 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 30,
+        "display_amount": 15,
+        "condition_text": "Win the Takamatsunomiya Kinen, Sprinters Stakes, Yasuda Kinen, and Mile Championship.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "Takamatsunomiya Kinen"},
+            {"type": "winRace", "name": "Sprinters Stakes"},
+            {"type": "winRace", "name": "Yasuda Kinen"},
+            {"type": "winRace", "name": "Mile Championship"}
+        ]
+    },
+    "Standard Distance Leader": {
+        "name": "Standard Distance Leader",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win 10 core distance races.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 10, "filter": {"distanceTypes": ["Mile", "Medium"]}}
+        ]
+    },
+    "Stunning": {
+        "name": "Stunning",
+        "category": "+10 to 2 random stats",
+        "reward_text": "+10 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 20,
+        "display_amount": 10,
+        "condition_text": "Win the Satsuki Sho, Tokyo Yushun (Japanese Derby), and Kikuka Sho.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winRace", "name": "Satsuki Sho"},
+            {"type": "winRace", "name": "Tokyo Yushun (Japanese Derby)"},
+            {"type": "winRace", "name": "Kikuka Sho"}
+        ]
+    },
+    "Tohoku Top Dog": {
+        "name": "Tohoku Top Dog",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 3 graded races held at Fukushima or Niigata.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 3, "filter": {"raceTracks": ["Fukushima", "Niigata"], "gradedOnly": true}}
+        ]
+    },
+    "Turf Tussler": {
+        "name": "Turf Tussler",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win one turf short-distance, mile, medium-distance, and long-distance race.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 1, "filter": {"terrain": "Turf", "distanceTypes": ["Sprint"]}},
+            {"type": "winCount", "count": 1, "filter": {"terrain": "Turf", "distanceTypes": ["Mile"]}},
+            {"type": "winCount", "count": 1, "filter": {"terrain": "Turf", "distanceTypes": ["Medium"]}},
+            {"type": "winCount", "count": 1, "filter": {"terrain": "Turf", "distanceTypes": ["Long"]}}
+        ]
+    },
+    "Umatastic": {
+        "name": "Umatastic",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 3 races with 'Uma Musume Stakes' in their name.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 3, "filter": {"nameContains": "Uma Musume Stakes"}}
+        ]
+    },
+    "West Japan Whiz": {
+        "name": "West Japan Whiz",
+        "category": "+5 to 2 random stats",
+        "reward_text": "+5 to 2 random stats",
+        "reward_kind": "stat",
+        "amount": 10,
+        "display_amount": 5,
+        "condition_text": "Win 3 graded races held at Chukyo, Hanshin, or Kyoto.",
+        "source_url": "https://gametora.com/umamusume/nicknames",
+        "notes": "The 2 stats are random.",
+        "dependsOn": [],
+        "matchers": [
+            {"type": "winCount", "count": 3, "filter": {"raceTracks": ["Chukyo", "Hanshin", "Kyoto"], "gradedOnly": true}}
+        ]
+    }
+}

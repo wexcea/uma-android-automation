@@ -1113,6 +1113,149 @@ class RaceScraper(BaseScraper):
         driver.quit()
 
 
+class EpithetScraper(BaseScraper):
+    """Scrapes the epithets/nicknames from gametora.
+
+    Gametora exposes only the human-readable name, category, condition and reward text
+    for each epithet. The Smart Race Solver also needs structured `dependsOn` (prerequisite
+    epithet names) and `matchers` (machine-readable race-condition predicates), which are
+    hand-curated locally. This scraper preserves those two fields when delta-merging so
+    a re-scrape never clobbers the curated data.
+    """
+
+    # Fields owned by the scraper. Everything else (notably `dependsOn` and `matchers`)
+    # is preserved from the existing local JSON when present.
+    SCRAPED_FIELDS = (
+        "name",
+        "category",
+        "reward_text",
+        "reward_kind",
+        "amount",
+        "display_amount",
+        "condition_text",
+        "source_url",
+        "notes",
+    )
+
+    def __init__(self):
+        super().__init__("https://gametora.com/umamusume/nicknames", "epithets.json")
+
+    def start(self):
+        """Starts the scraping process."""
+        driver = create_chromedriver()
+        driver.get(self.url)
+        time.sleep(5)
+
+        self.handle_cookie_consent(driver)
+
+        scraped = self._extract_epithets(driver)
+        logging.info(f"Scraped {len(scraped)} epithets from {self.url}.")
+
+        # Merge each scraped entry into existing data, preserving curated fields.
+        for name, fresh in scraped.items():
+            existing = self.data.get(name, {})
+            merged = dict(existing)
+            for field in self.SCRAPED_FIELDS:
+                if field in fresh and fresh[field] is not None:
+                    merged[field] = fresh[field]
+            merged.setdefault("dependsOn", [])
+            merged.setdefault("matchers", [])
+            self.data[name] = merged
+
+        self.save_data()
+        driver.quit()
+
+    def _extract_epithets(self, driver: webdriver.Chrome) -> Dict[str, Dict[str, Any]]:
+        """Extracts epithet rows from the gametora nicknames page.
+
+        Gametora uses CSS-module class names with hashed suffixes, so we match on
+        `contains(@class, ...)` substrings. The page structure is a single grid of rows
+        where each row exposes the epithet name, category/reward text, and condition.
+
+        Returns:
+            Dict keyed by epithet name with the scraper-owned fields populated.
+        """
+        results: Dict[str, Dict[str, Any]] = {}
+
+        # The nicknames list renders as repeated row blocks. Selector substrings
+        # may need updating if gametora reshuffles their CSS modules.
+        rows = driver.find_elements(By.XPATH, "//div[contains(@class, 'nicknames_row') or contains(@class, 'nicknames_item')]")
+        if not rows:
+            # Fallback: any direct child of a nicknames-list container.
+            rows = driver.find_elements(By.XPATH, "//div[contains(@class, 'nicknames_list')]/div")
+
+        for row in rows:
+            try:
+                name_el = row.find_element(By.XPATH, ".//*[contains(@class, 'nicknames_name') or contains(@class, 'nickname_name')]")
+                name = name_el.text.strip()
+                if not name:
+                    continue
+
+                reward_text = self._safe_text(row, ".//*[contains(@class, 'nicknames_reward') or contains(@class, 'nickname_reward')]")
+                condition_text = self._safe_text(row, ".//*[contains(@class, 'nicknames_condition') or contains(@class, 'nickname_condition')]")
+                category = self._safe_text(row, ".//*[contains(@class, 'nicknames_category') or contains(@class, 'nickname_category')]") or reward_text
+                notes = self._safe_text(row, ".//*[contains(@class, 'nicknames_note') or contains(@class, 'nickname_note')]")
+
+                reward_kind, amount, display_amount = self._derive_reward_fields(reward_text)
+
+                results[name] = {
+                    "name": name,
+                    "category": category,
+                    "reward_text": reward_text,
+                    "reward_kind": reward_kind,
+                    "amount": amount,
+                    "display_amount": display_amount,
+                    "condition_text": condition_text,
+                    "source_url": self.url,
+                    "notes": notes,
+                }
+            except NoSuchElementException as e:
+                logging.warning(f"Skipping epithet row due to missing element: {e}")
+                continue
+
+        return results
+
+    @staticmethod
+    def _safe_text(parent: WebElement, xpath: str) -> str:
+        """Returns stripped text of the first element matching `xpath`, or empty string."""
+        try:
+            return parent.find_element(By.XPATH, xpath).text.strip()
+        except NoSuchElementException:
+            return ""
+
+    @staticmethod
+    def _derive_reward_fields(reward_text: str):
+        """Parses reward_text into (reward_kind, amount, display_amount).
+
+        Examples:
+            `+15 to 2 random stats` -> (`stat`, 30, 15)
+            `+10 to 2 random stats` -> (`stat`, 20, 10)
+            `Homestretch Haste hint +1` -> (`hint`, 1, 1)
+
+        Args:
+            reward_text: The free-text reward shown by gametora.
+
+        Returns:
+            Tuple of (reward_kind, amount, display_amount). Falls back to (`unknown`, 0, 0)
+            when the format is unrecognized so the scraper never raises on edge cases.
+        """
+        if not reward_text:
+            return ("unknown", 0, 0)
+
+        stat_match = re.match(r"\+(\d+)\s+to\s+(\d+)\s+random\s+stats?", reward_text, re.IGNORECASE)
+        if stat_match:
+            per_stat = int(stat_match.group(1))
+            stat_count = int(stat_match.group(2))
+            return ("stat", per_stat * stat_count, per_stat)
+
+        hint_match = re.search(r"hint\s*\+(\d+)", reward_text, re.IGNORECASE)
+        if hint_match:
+            value = int(hint_match.group(1))
+            return ("hint", value, value)
+
+        return ("unknown", 0, 0)
+
+
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
     start_time = time.time()
@@ -1129,6 +1272,9 @@ if __name__ == "__main__":
 
     race_scraper = RaceScraper()
     race_scraper.start()
+
+    epithet_scraper = EpithetScraper()
+    epithet_scraper.start()
 
     end_time = round(time.time() - start_time, 2)
     logging.info(f"Total time for processing all applications: {end_time} seconds or {round(end_time / 60, 2)} minutes.")
