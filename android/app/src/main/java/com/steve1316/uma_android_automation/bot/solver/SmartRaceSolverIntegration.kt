@@ -32,6 +32,8 @@ object SmartRaceSolverIntegration {
 
     @Volatile private var cachedPresets: Map<String, Aptitudes>? = null
 
+    @Volatile private var cachedRaces: Map<TurnNumber, List<RaceCandidate>>? = null
+
     /** Clears in-memory race history. Call at the start of a fresh bot run. */
     fun reset() {
         synchronized(raceHistory) { raceHistory.clear() }
@@ -81,6 +83,46 @@ object SmartRaceSolverIntegration {
     }
 
     /**
+     * Computes a preview schedule from the user-supplied [configJson], without consulting any
+     * runtime race history. Used by the settings UI to render a calendar preview of what the
+     * solver would do if a fresh run started today with the current configuration.
+     *
+     * @param configJson Snapshot of the user's solver config: scenario, characterPreset, aptitudes,
+     *   targetEpithets, forcedEpithets, manualLocks, weights.
+     * @return JSON string of `{decisions, projectedEpithets, totalScore}`. Each decision entry is
+     *   either `{type:"Train"}`, `{type:"Rest"}`, or `{type:"Race", raceKey, name, grade}`.
+     */
+    fun previewSchedule(configJson: String): String {
+        val epithets = loadEpithets() ?: emptyList()
+        val racesByTurn = loadAllRaces()
+        if (racesByTurn == null) {
+            return JSONObject()
+                .put("decisions", JSONObject())
+                .put("projectedEpithets", JSONArray())
+                .put("totalScore", 0.0)
+                .put("error", "races data unavailable")
+                .toString()
+        }
+
+        val config = runCatching { JSONObject(configJson) }.getOrElse { JSONObject() }
+        val state = SolverState(
+            currentTurn = 1,
+            scenario = config.optString("scenario", "Trackblazer"),
+            characterPreset = config.optStringOrNull("characterPreset"),
+            aptitudes = parseAptitudesObj(config.optJSONObject("aptitudes")),
+            racesByTurn = racesByTurn,
+            epithets = epithets,
+            forcedEpithets = jsonStringList(config.optJSONArray("forcedEpithets")).toSet(),
+            targetEpithets = jsonStringList(config.optJSONArray("targetEpithets")).toSet(),
+            lockedDecisions = parseManualLocks(config.optJSONObject("manualLocks"), racesByTurn),
+            weights = parseWeightsObj(config.optJSONObject("weights")),
+        )
+
+        val schedule = SmartRaceSolver.solve(state)
+        return serializeSchedule(schedule, racesByTurn)
+    }
+
+    /**
      * Builds the solver state for [currentTurn]. Only the on-screen [candidates] populate the
      * candidate pool — the solver still receives the full epithet list so it can score
      * schedule-completing picks correctly relative to alternatives.
@@ -109,17 +151,19 @@ object SmartRaceSolverIntegration {
     private fun readUserAptitudes(): Aptitudes {
         val json = SettingsHelper.getStringSetting("racing", "smartRaceSolverAptitudes")
         if (json.isEmpty()) return Aptitudes.DEFAULT_A
-        return runCatching {
-            val obj = JSONObject(json)
-            Aptitudes(
-                sprint = parseAptitude(obj.optString("Sprint", "A")),
-                mile = parseAptitude(obj.optString("Mile", "A")),
-                medium = parseAptitude(obj.optString("Medium", "A")),
-                long = parseAptitude(obj.optString("Long", "A")),
-                turf = parseAptitude(obj.optString("Turf", "A")),
-                dirt = parseAptitude(obj.optString("Dirt", "A")),
-            )
-        }.getOrElse { Aptitudes.DEFAULT_A }
+        return runCatching { parseAptitudesObj(JSONObject(json)) }.getOrElse { Aptitudes.DEFAULT_A }
+    }
+
+    private fun parseAptitudesObj(obj: JSONObject?): Aptitudes {
+        if (obj == null) return Aptitudes.DEFAULT_A
+        return Aptitudes(
+            sprint = parseAptitude(obj.optString("Sprint", "A")),
+            mile = parseAptitude(obj.optString("Mile", "A")),
+            medium = parseAptitude(obj.optString("Medium", "A")),
+            long = parseAptitude(obj.optString("Long", "A")),
+            turf = parseAptitude(obj.optString("Turf", "A")),
+            dirt = parseAptitude(obj.optString("Dirt", "A")),
+        )
     }
 
     private fun readStringSet(key: String): Set<String> {
@@ -134,19 +178,21 @@ object SmartRaceSolverIntegration {
     private fun readWeights(): Weights {
         val json = SettingsHelper.getStringSetting("racing", "smartRaceSolverWeights")
         if (json.isEmpty()) return Weights()
-        return runCatching {
-            val obj = JSONObject(json)
-            Weights(
-                raceValue = obj.optDouble("raceValue", 1.0),
-                epithetValue = obj.optDouble("epithetValue", 1.0),
-                statWeight = obj.optDouble("statWeight", 1.0),
-                spWeight = obj.optDouble("spWeight", 1.0),
-                hintWeight = obj.optDouble("hintWeight", 8.0),
-                consecutiveRacePenalty = obj.optDouble("consecutiveRacePenalty", 3.0),
-                summerPenalty = obj.optDouble("summerPenalty", 5.0),
-                aptitudeThreshold = parseAptitude(obj.optString("aptitudeThreshold", "C")),
-            )
-        }.getOrElse { Weights() }
+        return runCatching { parseWeightsObj(JSONObject(json)) }.getOrElse { Weights() }
+    }
+
+    private fun parseWeightsObj(obj: JSONObject?): Weights {
+        if (obj == null) return Weights()
+        return Weights(
+            raceValue = obj.optDouble("raceValue", 1.0),
+            epithetValue = obj.optDouble("epithetValue", 1.0),
+            statWeight = obj.optDouble("statWeight", 1.0),
+            spWeight = obj.optDouble("spWeight", 1.0),
+            hintWeight = obj.optDouble("hintWeight", 8.0),
+            consecutiveRacePenalty = obj.optDouble("consecutiveRacePenalty", 3.0),
+            summerPenalty = obj.optDouble("summerPenalty", 5.0),
+            aptitudeThreshold = parseAptitude(obj.optString("aptitudeThreshold", "C")),
+        )
     }
 
     private fun parseAptitude(s: String): Aptitude =
@@ -161,6 +207,17 @@ object SmartRaceSolverIntegration {
             .onFailure { MessageLog.e(TAG, "Failed to parse epithetsData: ${it.message}") }
             .getOrNull()
             ?.also { cachedEpithets = it }
+    }
+
+    /** Lazy, cached parse of `racesData` into a turn-keyed candidate pool. Returns null on failure. */
+    private fun loadAllRaces(): Map<TurnNumber, List<RaceCandidate>>? {
+        cachedRaces?.let { return it }
+        val json = SettingsHelper.getStringSetting("racing", "racesData")
+        if (json.isEmpty()) return null
+        return runCatching { parseRacesData(json) }
+            .onFailure { MessageLog.e(TAG, "Failed to parse racesData: ${it.message}") }
+            .getOrNull()
+            ?.also { cachedRaces = it }
     }
 
     @Suppress("unused") // exposed for the settings UI; loader is here so tests can hit it.
@@ -274,6 +331,88 @@ object SmartRaceSolverIntegration {
             )
         }
         return out
+    }
+
+    private fun parseRacesData(json: String): Map<TurnNumber, List<RaceCandidate>> {
+        val obj = JSONObject(json)
+        val out = HashMap<TurnNumber, MutableList<RaceCandidate>>()
+        val keys = obj.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val r = obj.getJSONObject(key)
+            val turn = r.optInt("turnNumber", -1)
+            if (turn <= 0) continue
+            val date = r.optString("date", "")
+            val classYear = if (date.contains(" Class")) date.substringBefore(" Class").trim() else ""
+            // races.json uses "Pre-OP" but the RaceGrade enum is PRE_OP, so normalise dashes to underscores.
+            val gradeStr = r.optString("grade", "OP").replace("-", "_")
+            val candidate = RaceCandidate(
+                key = key,
+                name = r.optString("name", ""),
+                date = date,
+                classYear = classYear,
+                raceTrack = r.optString("raceTrack", ""),
+                grade = RaceGrade.fromName(gradeStr) ?: RaceGrade.OP,
+                terrain = TrackSurface.fromName(r.optString("terrain", "TURF")) ?: TrackSurface.TURF,
+                distanceType = TrackDistance.fromName(r.optString("distanceType", "MEDIUM")) ?: TrackDistance.MEDIUM,
+                distanceMeters = r.optInt("distanceMeters", 0),
+                fans = r.optInt("fans", 0),
+                turnNumber = turn,
+            )
+            out.getOrPut(turn) { mutableListOf() }.add(candidate)
+        }
+        return out.mapValues { it.value.toList() }
+    }
+
+    /** Resolves user-supplied turn → race-name pairs into [Decision.RaceDecision]s by name match. */
+    private fun parseManualLocks(
+        obj: JSONObject?,
+        racesByTurn: Map<TurnNumber, List<RaceCandidate>>,
+    ): Map<TurnNumber, Decision> {
+        if (obj == null) return emptyMap()
+        val out = HashMap<TurnNumber, Decision>()
+        val keys = obj.keys()
+        while (keys.hasNext()) {
+            val turnStr = keys.next()
+            val turn = turnStr.toIntOrNull() ?: continue
+            val raceName = obj.optString(turnStr, "")
+            if (raceName.isEmpty()) continue
+            val candidate = racesByTurn[turn]?.firstOrNull { it.name == raceName }
+            if (candidate != null) {
+                out[turn] = Decision.RaceDecision(candidate.key)
+            } else {
+                MessageLog.w(TAG, "Manual lock for turn $turn references unknown race \"$raceName\"; ignoring.")
+            }
+        }
+        return out
+    }
+
+    /** Serialises a [Schedule] into the JSON shape the React Native preview UI expects. */
+    private fun serializeSchedule(
+        schedule: Schedule,
+        racesByTurn: Map<TurnNumber, List<RaceCandidate>>,
+    ): String {
+        val decisions = JSONObject()
+        for ((turn, decision) in schedule.decisions) {
+            val entry = JSONObject()
+            when (decision) {
+                is Decision.RaceDecision -> {
+                    val race = racesByTurn[turn]?.firstOrNull { it.key == decision.raceKey }
+                    entry.put("type", "Race")
+                    entry.put("raceKey", decision.raceKey)
+                    entry.put("name", race?.name ?: decision.raceKey)
+                    entry.put("grade", race?.grade?.name ?: "")
+                }
+                Decision.Train -> entry.put("type", "Train")
+                Decision.Rest -> entry.put("type", "Rest")
+            }
+            decisions.put(turn.toString(), entry)
+        }
+        return JSONObject()
+            .put("decisions", decisions)
+            .put("projectedEpithets", JSONArray(schedule.projectedEpithets.toList()))
+            .put("totalScore", schedule.totalScore)
+            .toString()
     }
 
     // -------- Helpers --------
