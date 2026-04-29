@@ -2,7 +2,7 @@ import { useContext, useState, useMemo, useCallback, useRef } from "react"
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TextInput, Dimensions } from "react-native"
 import { FlashList } from "@shopify/flash-list"
 import { useTheme } from "../../context/ThemeContext"
-import { BotStateContext, defaultSettings } from "../../context/BotStateContext"
+import { TrainingEventContext, defaultSettings } from "../../context/BotStateContext"
 import { SearchPageProvider } from "../../context/SearchPageContext"
 import CustomAccordion from "../../components/CustomAccordion"
 import CustomCheckbox from "../../components/CustomCheckbox"
@@ -51,10 +51,9 @@ const excludedEventNames = new Set([
 const TrainingEventSettings = () => {
     usePerformanceLogging("TrainingEventSettings")
     const { colors } = useTheme()
-    const bsc = useContext(BotStateContext)
+    const { trainingEvent, updateTrainingEvent } = useContext(TrainingEventContext)
     const scrollViewRef = useRef<ScrollView>(null)
 
-    const { settings, setSettings } = bsc
     // Merge current training event settings with defaults to handle missing properties.
     const {
         enablePrioritizeEnergyOptions,
@@ -65,7 +64,7 @@ const TrainingEventSettings = () => {
         characterEventOverrides,
         supportEventOverrides,
         scenarioEventOverrides,
-    } = { ...defaultSettings.trainingEvent, ...settings.trainingEvent }
+    } = { ...defaultSettings.trainingEvent, ...trainingEvent }
 
     const [eventOverrideModalVisible, setEventOverrideModalVisible] = useState(false)
     const [eventOverrideSearchQuery, setEventOverrideSearchQuery] = useState("")
@@ -137,14 +136,8 @@ const TrainingEventSettings = () => {
      * @param key The key of the setting to update.
      * @param value The value to set the setting to.
      */
-    const updateTrainingEventSetting = (key: keyof typeof settings.trainingEvent, value: any) => {
-        setSettings({
-            ...bsc.settings,
-            trainingEvent: {
-                ...bsc.settings.trainingEvent,
-                [key]: value,
-            },
-        })
+    const updateTrainingEventSetting = (key: keyof typeof trainingEvent, value: any) => {
+        updateTrainingEvent({ [key]: value } as any)
     }
 
     /**
@@ -154,19 +147,16 @@ const TrainingEventSettings = () => {
      * @param value The new value for the field.
      */
     const updateSpecialEventOverride = (eventName: string, field: "selectedOption" | "requiresConfirmation" | "enableEnergyBasedSelection", value: any) => {
-        setSettings({
-            ...bsc.settings,
-            trainingEvent: {
-                ...bsc.settings.trainingEvent,
-                specialEventOverrides: {
-                    ...bsc.settings.trainingEvent.specialEventOverrides,
-                    [eventName]: {
-                        ...bsc.settings.trainingEvent.specialEventOverrides[eventName],
-                        [field]: value,
-                    },
+        updateTrainingEvent((prev) => ({
+            ...prev,
+            specialEventOverrides: {
+                ...prev.specialEventOverrides,
+                [eventName]: {
+                    ...prev.specialEventOverrides[eventName],
+                    [field]: value,
                 },
             },
-        })
+        }))
     }
 
     /**
@@ -274,38 +264,20 @@ const TrainingEventSettings = () => {
         const eventType = allEvents.find((e) => e.key === eventKey)?.type
 
         if (eventType === "character") {
-            setSettings({
-                ...bsc.settings,
-                trainingEvent: {
-                    ...bsc.settings.trainingEvent,
-                    characterEventOverrides: {
-                        ...(bsc.settings.trainingEvent.characterEventOverrides || {}),
-                        [eventKey]: optionIndex,
-                    },
-                },
-            })
+            updateTrainingEvent((prev) => ({
+                ...prev,
+                characterEventOverrides: { ...(prev.characterEventOverrides || {}), [eventKey]: optionIndex },
+            }))
         } else if (eventType === "support") {
-            setSettings({
-                ...bsc.settings,
-                trainingEvent: {
-                    ...bsc.settings.trainingEvent,
-                    supportEventOverrides: {
-                        ...(bsc.settings.trainingEvent.supportEventOverrides || {}),
-                        [eventKey]: optionIndex,
-                    },
-                },
-            })
+            updateTrainingEvent((prev) => ({
+                ...prev,
+                supportEventOverrides: { ...(prev.supportEventOverrides || {}), [eventKey]: optionIndex },
+            }))
         } else if (eventType === "scenario") {
-            setSettings({
-                ...bsc.settings,
-                trainingEvent: {
-                    ...bsc.settings.trainingEvent,
-                    scenarioEventOverrides: {
-                        ...(bsc.settings.trainingEvent.scenarioEventOverrides || {}),
-                        [eventKey]: optionIndex,
-                    },
-                },
-            })
+            updateTrainingEvent((prev) => ({
+                ...prev,
+                scenarioEventOverrides: { ...(prev.scenarioEventOverrides || {}), [eventKey]: optionIndex },
+            }))
         }
         // Close the option selection modal.
         setOptionSelectionModalVisible(false)
@@ -320,34 +292,22 @@ const TrainingEventSettings = () => {
         const eventType = allEvents.find((e) => e.key === eventKey)?.type
 
         if (eventType === "character") {
-            const newOverrides = { ...(bsc.settings.trainingEvent.characterEventOverrides || {}) }
-            delete newOverrides[eventKey]
-            setSettings({
-                ...bsc.settings,
-                trainingEvent: {
-                    ...bsc.settings.trainingEvent,
-                    characterEventOverrides: newOverrides,
-                },
+            updateTrainingEvent((prev) => {
+                const next = { ...(prev.characterEventOverrides || {}) }
+                delete next[eventKey]
+                return { ...prev, characterEventOverrides: next }
             })
         } else if (eventType === "support") {
-            const newOverrides = { ...(bsc.settings.trainingEvent.supportEventOverrides || {}) }
-            delete newOverrides[eventKey]
-            setSettings({
-                ...bsc.settings,
-                trainingEvent: {
-                    ...bsc.settings.trainingEvent,
-                    supportEventOverrides: newOverrides,
-                },
+            updateTrainingEvent((prev) => {
+                const next = { ...(prev.supportEventOverrides || {}) }
+                delete next[eventKey]
+                return { ...prev, supportEventOverrides: next }
             })
         } else if (eventType === "scenario") {
-            const newOverrides = { ...(bsc.settings.trainingEvent.scenarioEventOverrides || {}) }
-            delete newOverrides[eventKey]
-            setSettings({
-                ...bsc.settings,
-                trainingEvent: {
-                    ...bsc.settings.trainingEvent,
-                    scenarioEventOverrides: newOverrides,
-                },
+            updateTrainingEvent((prev) => {
+                const next = { ...(prev.scenarioEventOverrides || {}) }
+                delete next[eventKey]
+                return { ...prev, scenarioEventOverrides: next }
             })
         }
     }
