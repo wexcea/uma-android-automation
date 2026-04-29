@@ -46,9 +46,7 @@ const TrainingSettings = () => {
     const [statPrioritizationItems, setStatPrioritizationItems] = useState<string[]>(() =>
         training?.statPrioritization !== undefined ? training.statPrioritization : defaultSettings.training.statPrioritization
     )
-    const [blacklistItems, setBlacklistItems] = useState<string[]>(() =>
-        training?.trainingBlacklist !== undefined ? training.trainingBlacklist : defaultSettings.training.trainingBlacklist
-    )
+    const [blacklistItems, setBlacklistItems] = useState<string[]>(() => (training?.trainingBlacklist !== undefined ? training.trainingBlacklist : defaultSettings.training.trainingBlacklist))
     const [sparkStatTargetItems, setSparkStatTargetItems] = useState<string[]>(() => {
         const value = training?.focusOnSparkStatTarget
         // Ensure we always have an array (migration should handle this, but be safe).
