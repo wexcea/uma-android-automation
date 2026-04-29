@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, useRef } from "react"
 import { DeviceEventEmitter, AppState, InteractionManager } from "react-native"
-import { BotStateContext, BotStateProviderProps } from "../context/BotStateContext"
+import { BotMetaContext, GeneralMiscContext } from "../context/BotStateContext"
 import { MessageLogContext, MessageLogProviderProps } from "../context/MessageLogContext"
 import { useSettings } from "../context/SettingsContext"
 import { logWithTimestamp, logErrorWithTimestamp } from "../lib/logger"
@@ -15,7 +15,8 @@ export const useBootstrap = () => {
     const [isReady, setIsReady] = useState<boolean>(false)
     const isSavingRef = useRef<boolean>(false)
 
-    const bsc = useContext(BotStateContext) as BotStateProviderProps
+    const { setReadyStatus } = useContext(BotMetaContext)
+    const { general } = useContext(GeneralMiscContext)
     const mlc = useContext(MessageLogContext) as MessageLogProviderProps
 
     // Hook for managing settings persistence.
@@ -212,8 +213,8 @@ export const useBootstrap = () => {
     // Update ready status whenever settings change or app becomes ready.
     useEffect(() => {
         if (isReady) {
-            const scenario = bsc.settings.general.scenario
-            bsc.setReadyStatus(scenario !== "")
+            const scenario = general.scenario
+            setReadyStatus(scenario !== "")
         }
-    }, [isReady, bsc.settings.general.scenario])
+    }, [isReady, general.scenario])
 }
