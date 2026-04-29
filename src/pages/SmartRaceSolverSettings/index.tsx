@@ -423,13 +423,13 @@ const SmartRaceSolverSettings = () => {
                 calendarHeaderPhase: { flex: 1, fontSize: 13, color: colors.mutedForeground, textAlign: "center" },
                 calendarRow: { flexDirection: "row", alignItems: "center", paddingVertical: 5 },
                 calendarMonthLabel: { width: 48, fontSize: 13, color: colors.foreground, textAlign: "center", fontWeight: "600" },
+                calendarCellWrapper: { flex: 1, marginHorizontal: 3 },
                 calendarCell: {
                     flex: 1,
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "center",
                     paddingVertical: 10,
-                    marginHorizontal: 3,
                     borderRadius: 6,
                     backgroundColor: colors.card,
                     minHeight: 44,
@@ -535,7 +535,7 @@ const SmartRaceSolverSettings = () => {
         const isRace = entry?.type === "Race"
         const color = isRace ? GRADE_COLORS[entry.grade ?? ""] ?? colors.primary : null
         return (
-            <Popover key={turn}>
+            <Popover key={turn} style={styles.calendarCellWrapper}>
                 <PopoverTrigger asChild>
                     <TouchableOpacity style={[styles.calendarCell, isRace && styles.calendarCellRace]}>
                         {isRace ? (
