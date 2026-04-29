@@ -235,10 +235,10 @@ const MessageLog = () => {
         setShowErrorDialog(true)
     }, [])
 
-    // Format settings when settings change.
-    const formattedSettingsString = useMemo(() => {
-        const settings = bsc.settings
-
+    // Build the formatted settings welcome banner. Pure function of the settings snapshot;
+    // the surrounding effect defers invocation so the heavy template-literal work stays off
+    // the synchronous toggle path.
+    const buildFormattedSettings = useCallback((settings: typeof bsc.settings): string => {
         // Training stat targets by distance.
         const sprintTargetsString = `Sprint: \n\t\tSpeed: ${settings.trainingStatTarget.trainingSprintStatTarget_speedStatTarget}\t\tStamina: ${settings.trainingStatTarget.trainingSprintStatTarget_staminaStatTarget}\t\tPower: ${settings.trainingStatTarget.trainingSprintStatTarget_powerStatTarget}\n\t\tGuts: ${settings.trainingStatTarget.trainingSprintStatTarget_gutsStatTarget}\t\t\tWit: ${settings.trainingStatTarget.trainingSprintStatTarget_witStatTarget}`
         const mileTargetsString = `Mile: \n\t\tSpeed: ${settings.trainingStatTarget.trainingMileStatTarget_speedStatTarget}\t\tStamina: ${settings.trainingStatTarget.trainingMileStatTarget_staminaStatTarget}\t\tPower: ${settings.trainingStatTarget.trainingMileStatTarget_powerStatTarget}\n\t\tGuts: ${settings.trainingStatTarget.trainingMileStatTarget_gutsStatTarget}\t\t\tWit: ${settings.trainingStatTarget.trainingMileStatTarget_witStatTarget}`
@@ -406,12 +406,30 @@ ${longTargetsString}
 🔑 Discord Bot Token: ${settings.discord?.discordToken ? "Configured" : "Not Set"}
 
 ****************************************`
-    }, [bsc.settings])
+    }, [])
+
+    // Debounced state for the formatted settings banner. Recomputing the ~30-line template
+    // literal (including `JSON.parse(racingPlan)` and `Object.keys(...)` over each override map)
+    // synchronously on every settings change was making toggles feel sluggish once the user
+    // imported a populated settings file. We now compute it 250ms after the last settings
+    // change, off the toggle's render commit. The intro/log path keeps using the previous
+    // value until the new one lands; downstream memos bail out via `Object.is`.
+    const [formattedSettingsString, setFormattedSettingsString] = useState<string>(() => buildFormattedSettings(bsc.settings))
+    const formattedStringTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    useEffect(() => {
+        if (formattedStringTimerRef.current) clearTimeout(formattedStringTimerRef.current)
+        formattedStringTimerRef.current = setTimeout(() => {
+            const next = buildFormattedSettings(bsc.settings)
+            setFormattedSettingsString((prev) => (prev === next ? prev : next))
+        }, 250)
+        return () => {
+            if (formattedStringTimerRef.current) clearTimeout(formattedStringTimerRef.current)
+        }
+    }, [bsc.settings, buildFormattedSettings])
 
     // Persist the formatted string directly to SQLite. The Kotlin runtime is the only consumer
     // (via SettingsHelper.getStringSetting), so writing through `setSettings` would just trigger
     // an extra full re-render of every BotStateContext consumer for each user toggle.
-    // Debounce coalesces bursts of rapid setting changes into a single DB write.
     const formattedStringWriteTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     useEffect(() => {
         if (formattedStringWriteTimer.current) clearTimeout(formattedStringWriteTimer.current)
