@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { View, ScrollView, StyleSheet, Text, TextInput, NativeModules, NativeEventEmitter, Alert, Linking, Pressable } from "react-native"
 import { Check, Trash2 } from "lucide-react-native"
 import { useTheme } from "../../context/ThemeContext"
-import { BotStateContext } from "../../context/BotStateContext"
+import { ChatContext } from "../../context/BotStateContext"
 import CustomButton from "../../components/CustomButton"
 import CustomCheckbox from "../../components/CustomCheckbox"
 import CustomSlider from "../../components/CustomSlider"
@@ -102,8 +102,8 @@ interface DownloadedModel {
  */
 const LLMSettings = () => {
     const { colors } = useTheme()
-    const bsc = useContext(BotStateContext)
-    const enableAskTheDocs = bsc.settings.chat?.enableAskTheDocs ?? false
+    const { chat, updateChat } = useContext(ChatContext)
+    const enableAskTheDocs = chat?.enableAskTheDocs ?? false
     const [downloadState, setDownloadState] = useState<DownloadState | null>(null)
     const [embedderState, setEmbedderState] = useState<DownloadState | null>(null)
     const [embedderReady, setEmbedderReady] = useState(false)
@@ -496,7 +496,7 @@ const LLMSettings = () => {
                 <View style={styles.section}>
                     <CustomCheckbox
                         checked={enableAskTheDocs}
-                        onCheckedChange={(checked) => bsc.setSettings({ ...bsc.settings, chat: { ...bsc.settings.chat, enableAskTheDocs: checked } })}
+                        onCheckedChange={(checked) => updateChat({ enableAskTheDocs: checked })}
                         label="Enable Ask the Docs feature"
                         description="Show the Ask the Docs page in the navigation drawer and reveal the rest of these LLM options. Off by default."
                         searchId="llm-enable-ask-the-docs"

@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { Avatar, AvatarImage } from "../ui/avatar"
 import { markNavigationStart } from "../../lib/performanceLogger"
 import { useTheme } from "../../context/ThemeContext"
-import { BotStateContext } from "../../context/BotStateContext"
+import { ChatContext, BotMetaContext } from "../../context/BotStateContext"
 import { skillPlanSettingsPages } from "../../pages/SkillPlanSettings/config"
 
 interface MenuItem {
@@ -29,7 +29,8 @@ interface MenuItem {
 const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
     const { colors } = useTheme()
     const { state, navigation } = props
-    const bsc = useContext(BotStateContext)
+    const { chat } = useContext(ChatContext)
+    const { appVersion } = useContext(BotMetaContext)
     const drawerStatus = useDrawerStatus()
     // Initialize with Settings expanded by default.
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Settings"]))
@@ -192,7 +193,7 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
         [colors]
     )
 
-    const askTheDocsEnabled = bsc.settings.chat?.enableAskTheDocs ?? false
+    const askTheDocsEnabled = chat?.enableAskTheDocs ?? false
 
     // Define the menu item configurations for the drawer.
     const menuItems: MenuItem[] = [
@@ -524,7 +525,7 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
                 <View style={styles.header}>
                     <View style={styles.headerTextContainer}>
                         <Text style={styles.headerTitle}>Uma Android Automation</Text>
-                        <Text style={styles.headerSubtitle}>{bsc.appVersion}</Text>
+                        <Text style={styles.headerSubtitle}>{appVersion}</Text>
                     </View>
                     <Avatar alt="UAA" style={{ width: 72, height: 72 }}>
                         <AvatarImage source={require("../../assets/app_icon.png")} />
