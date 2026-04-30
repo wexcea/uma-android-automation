@@ -13,7 +13,6 @@ enum class EpithetStatus { COMPLETED, IN_PROGRESS, DEAD, UNTOUCHED }
  * around them. All functions here are deterministic — same state in, same status out.
  */
 object EpithetTracker {
-
     /** Reduces a [SolverState] to a per-epithet status map keyed by epithet name. */
     fun classifyAll(state: SolverState): Map<String, EpithetStatus> =
         state.epithets.associate { it.name to classify(it, state) }
@@ -74,10 +73,11 @@ object EpithetTracker {
                 (have.toDouble() / matcher.times).coerceAtMost(1.0)
             }
             is EpithetMatcher.WinAnyOf -> {
-                val have = state.raceHistory.count { win ->
-                    win.name in matcher.names &&
-                        (matcher.atClass == null || win.classYear.equals(matcher.atClass, ignoreCase = true))
-                }
+                val have =
+                    state.raceHistory.count { win ->
+                        win.name in matcher.names &&
+                            (matcher.atClass == null || win.classYear.equals(matcher.atClass, ignoreCase = true))
+                    }
                 (have.toDouble() / matcher.count).coerceAtMost(1.0)
             }
             is EpithetMatcher.WinAtLeast -> {
@@ -91,8 +91,11 @@ object EpithetTracker {
             is EpithetMatcher.EpithetAnyOf ->
                 if (matcher.names.any { it in state.completedEpithets }) 1.0 else 0.0
             is EpithetMatcher.EpithetAll ->
-                if (matcher.names.isEmpty()) 1.0
-                else matcher.names.count { it in state.completedEpithets }.toDouble() / matcher.names.size
+                if (matcher.names.isEmpty()) {
+                    1.0
+                } else {
+                    matcher.names.count { it in state.completedEpithets }.toDouble() / matcher.names.size
+                }
         }
     }
 
@@ -100,9 +103,10 @@ object EpithetTracker {
     private fun matchesFilter(win: RaceWin, filter: EpithetFilter, state: SolverState): Boolean {
         // RaceWin only carries identity; filter checks need full RaceCandidate fields. Look up
         // the candidate pool for the win's turn and find the matching key (or fall back to name).
-        val candidate = state.racesByTurn[win.turnNumber]
-            ?.firstOrNull { it.key == win.raceKey || it.name == win.name }
-            ?: return false
+        val candidate =
+            state.racesByTurn[win.turnNumber]
+                ?.firstOrNull { it.key == win.raceKey || it.name == win.name }
+                ?: return false
 
         if (filter.terrain != null && candidate.terrain != filter.terrain) return false
         if (filter.grade != null && candidate.grade != filter.grade) return false
@@ -111,21 +115,9 @@ object EpithetTracker {
         if (filter.distanceTypes.isNotEmpty() && candidate.distanceType !in filter.distanceTypes) return false
         if (filter.raceTracks.isNotEmpty() && candidate.raceTrack !in filter.raceTracks) return false
         if (filter.nameContains != null && !candidate.name.contains(filter.nameContains, ignoreCase = true)) return false
-        if (filter.nameContainsCountry && !nameContainsCountry(candidate.name)) return false
+        if (filter.nameContainsCountry && !EpithetFilters.nameContainsCountry(candidate.name)) return false
         return true
     }
 
     private val GRADED_RACES = setOf(RaceGrade.G1, RaceGrade.G2, RaceGrade.G3)
-
-    // Country tokens used by the "Globe-Trotter" epithet's `nameContainsCountry` filter.
-    // Kept minimal — extend as new races are added that should count.
-    private val COUNTRY_NAMES = listOf(
-        "America", "American", "Argentina", "Australia", "Brazil", "Canada", "China",
-        "Dubai", "England", "English", "France", "French", "Germany", "Hong Kong",
-        "India", "Ireland", "Italy", "Japan", "Japanese", "Korea", "Mexico", "Russia",
-        "Singapore", "Spain", "USA", "UAE",
-    )
-
-    private fun nameContainsCountry(name: String): Boolean =
-        COUNTRY_NAMES.any { it in name }
 }
