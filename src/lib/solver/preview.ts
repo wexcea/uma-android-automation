@@ -15,13 +15,15 @@ export interface SolverConfigSnapshot {
         hintWeight: number
         consecutiveRacePenalty: number
         summerPenalty: number
+        raceBonusPct: number
+        raceCostPct: number
         aptitudeThreshold: string
+        includeOpAndPreOp: boolean
+        allowSummerRacing: boolean
     }
-    /**
-     * Bundled races.json and epithets.json passed inline so the bridge does not depend on
-     * SettingsHelper persistence having reached SQLite by the time the preview fires.
-     */
+    /** Bundled races.json passed inline so the bridge does not depend on SettingsHelper persistence having reached SQLite by the time the preview fires. */
     racesDataJson?: string
+    /** Bundled epithets.json passed inline for the same reason as `racesDataJson`. */
     epithetsDataJson?: string
 }
 
