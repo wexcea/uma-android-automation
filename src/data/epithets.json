@@ -11,9 +11,18 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "NHK Mile Cup"},
-            {"type": "winRace", "name": "Yasuda Kinen"},
-            {"type": "winRace", "name": "Mile Championship"}
+            {
+                "type": "winRace",
+                "name": "NHK Mile Cup"
+            },
+            {
+                "type": "winRace",
+                "name": "Yasuda Kinen"
+            },
+            {
+                "type": "winRace",
+                "name": "Mile Championship"
+            }
         ]
     },
     "Dirt Dancer": {
@@ -28,9 +37,36 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 1, "filter": {"terrain": "Dirt", "distanceTypes": ["Sprint"]}},
-            {"type": "winCount", "count": 1, "filter": {"terrain": "Dirt", "distanceTypes": ["Mile"]}},
-            {"type": "winCount", "count": 1, "filter": {"terrain": "Dirt", "distanceTypes": ["Medium"]}}
+            {
+                "type": "winCount",
+                "count": 1,
+                "filter": {
+                    "terrain": "Dirt",
+                    "distanceTypes": [
+                        "Sprint"
+                    ]
+                }
+            },
+            {
+                "type": "winCount",
+                "count": 1,
+                "filter": {
+                    "terrain": "Dirt",
+                    "distanceTypes": [
+                        "Mile"
+                    ]
+                }
+            },
+            {
+                "type": "winCount",
+                "count": 1,
+                "filter": {
+                    "terrain": "Dirt",
+                    "distanceTypes": [
+                        "Medium"
+                    ]
+                }
+            }
         ]
     },
     "Dirt G1 Achiever": {
@@ -45,7 +81,14 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 3, "filter": {"terrain": "Dirt", "grade": "G1"}}
+            {
+                "type": "winCount",
+                "count": 3,
+                "filter": {
+                    "terrain": "Dirt",
+                    "grade": "G1"
+                }
+            }
         ]
     },
     "Dirt G1 Dominator": {
@@ -60,7 +103,14 @@
         "notes": "Single hint level.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 9, "filter": {"terrain": "Dirt", "grade": "G1"}}
+            {
+                "type": "winCount",
+                "count": 9,
+                "filter": {
+                    "terrain": "Dirt",
+                    "grade": "G1"
+                }
+            }
         ]
     },
     "Dirt G1 Powerhouse": {
@@ -75,7 +125,14 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 5, "filter": {"terrain": "Dirt", "grade": "G1"}}
+            {
+                "type": "winCount",
+                "count": 5,
+                "filter": {
+                    "terrain": "Dirt",
+                    "grade": "G1"
+                }
+            }
         ]
     },
     "Dirt G1 Star": {
@@ -90,7 +147,14 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 4, "filter": {"terrain": "Dirt", "grade": "G1"}}
+            {
+                "type": "winCount",
+                "count": 4,
+                "filter": {
+                    "terrain": "Dirt",
+                    "grade": "G1"
+                }
+            }
         ]
     },
     "Dirt Sprinter": {
@@ -105,7 +169,11 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRaceTimes", "name": "JBC Sprint", "times": 2}
+            {
+                "type": "winRaceTimes",
+                "name": "JBC Sprint",
+                "times": 2
+            }
         ]
     },
     "Dirty Work": {
@@ -120,7 +188,13 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 5, "filter": {"terrain": "Dirt"}}
+            {
+                "type": "winCount",
+                "count": 5,
+                "filter": {
+                    "terrain": "Dirt"
+                }
+            }
         ]
     },
     "Eat My Dust": {
@@ -135,7 +209,13 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 15, "filter": {"terrain": "Dirt"}}
+            {
+                "type": "winCount",
+                "count": 15,
+                "filter": {
+                    "terrain": "Dirt"
+                }
+            }
         ]
     },
     "Fall Champion": {
@@ -150,9 +230,18 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "Tenno Sho (Autumn)"},
-            {"type": "winRace", "name": "Japan Cup"},
-            {"type": "winRace", "name": "Arima Kinen"}
+            {
+                "type": "winRace",
+                "name": "Tenno Sho (Autumn)"
+            },
+            {
+                "type": "winRace",
+                "name": "Japan Cup"
+            },
+            {
+                "type": "winRace",
+                "name": "Arima Kinen"
+            }
         ]
     },
     "Globe-Trotter": {
@@ -167,7 +256,13 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 3, "filter": {"nameContainsCountry": true}}
+            {
+                "type": "winCount",
+                "count": 3,
+                "filter": {
+                    "nameContainsCountry": true
+                }
+            }
         ]
     },
     "Goddess": {
@@ -180,12 +275,29 @@
         "condition_text": "Get the Lady epithet. Win the Victoria Mile, Hanshin Juvenile Fillies, and the Queen Elizabeth II Cup twice.",
         "source_url": "https://gametora.com/umamusume/nicknames",
         "notes": "The 2 stats are random.",
-        "dependsOn": ["Lady"],
+        "dependsOn": [
+            "Lady"
+        ],
         "matchers": [
-            {"type": "epithetAll", "names": ["Lady"]},
-            {"type": "winRace", "name": "Victoria Mile"},
-            {"type": "winRace", "name": "Hanshin Juvenile Fillies"},
-            {"type": "winRaceTimes", "name": "Queen Elizabeth II Cup", "times": 2}
+            {
+                "type": "epithetAll",
+                "names": [
+                    "Lady"
+                ]
+            },
+            {
+                "type": "winRace",
+                "name": "Victoria Mile"
+            },
+            {
+                "type": "winRace",
+                "name": "Hanshin Juvenile Fillies"
+            },
+            {
+                "type": "winRaceTimes",
+                "name": "Queen Elizabeth II Cup",
+                "times": 2
+            }
         ]
     },
     "Heroine": {
@@ -198,10 +310,21 @@
         "condition_text": "Get the Lady epithet. Win the Queen Elizabeth II Cup (Classic).",
         "source_url": "https://gametora.com/umamusume/nicknames",
         "notes": "The 2 stats are random.",
-        "dependsOn": ["Lady"],
+        "dependsOn": [
+            "Lady"
+        ],
         "matchers": [
-            {"type": "epithetAll", "names": ["Lady"]},
-            {"type": "winRace", "name": "Queen Elizabeth II Cup", "atClass": "Classic"}
+            {
+                "type": "epithetAll",
+                "names": [
+                    "Lady"
+                ]
+            },
+            {
+                "type": "winRace",
+                "name": "Queen Elizabeth II Cup",
+                "atClass": "Classic"
+            }
         ]
     },
     "Hokkaido Hotshot": {
@@ -216,7 +339,17 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 3, "filter": {"raceTracks": ["Sapporo", "Hakodate"], "gradedOnly": true}}
+            {
+                "type": "winCount",
+                "count": 3,
+                "filter": {
+                    "raceTracks": [
+                        "Sapporo",
+                        "Hakodate"
+                    ],
+                    "gradedOnly": true
+                }
+            }
         ]
     },
     "Incredible": {
@@ -229,10 +362,25 @@
         "condition_text": "Get the Stunning epithet. Win either the Japan Cup (Classic) or the Arima Kinen (Classic).",
         "source_url": "https://gametora.com/umamusume/nicknames",
         "notes": "The 2 stats are random.",
-        "dependsOn": ["Stunning"],
+        "dependsOn": [
+            "Stunning"
+        ],
         "matchers": [
-            {"type": "epithetAll", "names": ["Stunning"]},
-            {"type": "winAnyOf", "names": ["Japan Cup", "Arima Kinen"], "count": 1, "atClass": "Classic"}
+            {
+                "type": "epithetAll",
+                "names": [
+                    "Stunning"
+                ]
+            },
+            {
+                "type": "winAnyOf",
+                "names": [
+                    "Japan Cup",
+                    "Arima Kinen"
+                ],
+                "count": 1,
+                "atClass": "Classic"
+            }
         ]
     },
     "Junior Jewel": {
@@ -247,7 +395,13 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 3, "filter": {"nameContains": "Junior Stakes"}}
+            {
+                "type": "winCount",
+                "count": 3,
+                "filter": {
+                    "nameContains": "Junior Stakes"
+                }
+            }
         ]
     },
     "Kanto Conqueror": {
@@ -262,7 +416,18 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 3, "filter": {"raceTracks": ["Tokyo", "Nakayama", "Ooi"], "gradedOnly": true}}
+            {
+                "type": "winCount",
+                "count": 3,
+                "filter": {
+                    "raceTracks": [
+                        "Tokyo",
+                        "Nakayama",
+                        "Ooi"
+                    ],
+                    "gradedOnly": true
+                }
+            }
         ]
     },
     "Kicking Up Dust": {
@@ -277,9 +442,18 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "Unicorn Stakes"},
-            {"type": "winRace", "name": "Leopard Stakes"},
-            {"type": "winRace", "name": "Japan Dirt Derby"}
+            {
+                "type": "winRace",
+                "name": "Unicorn Stakes"
+            },
+            {
+                "type": "winRace",
+                "name": "Leopard Stakes"
+            },
+            {
+                "type": "winRace",
+                "name": "Japan Dirt Derby"
+            }
         ]
     },
     "Kokura Constable": {
@@ -294,7 +468,16 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 2, "filter": {"raceTracks": ["Kokura"], "gradedOnly": true}}
+            {
+                "type": "winCount",
+                "count": 2,
+                "filter": {
+                    "raceTracks": [
+                        "Kokura"
+                    ],
+                    "gradedOnly": true
+                }
+            }
         ]
     },
     "Lady": {
@@ -309,9 +492,18 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "Oka Sho"},
-            {"type": "winRace", "name": "Japanese Oaks"},
-            {"type": "winRace", "name": "Shuka Sho"}
+            {
+                "type": "winRace",
+                "name": "Oka Sho"
+            },
+            {
+                "type": "winRace",
+                "name": "Japanese Oaks"
+            },
+            {
+                "type": "winRace",
+                "name": "Shuka Sho"
+            }
         ]
     },
     "Legendary": {
@@ -324,10 +516,27 @@
         "condition_text": "Get either the Stunning or Lady epithet. Get the Spring Champion and Fall Champion epithet.",
         "source_url": "https://gametora.com/umamusume/nicknames",
         "notes": "Single hint level.",
-        "dependsOn": ["Stunning", "Lady", "Spring Champion", "Fall Champion"],
+        "dependsOn": [
+            "Stunning",
+            "Lady",
+            "Spring Champion",
+            "Fall Champion"
+        ],
         "matchers": [
-            {"type": "epithetAnyOf", "names": ["Stunning", "Lady"]},
-            {"type": "epithetAll", "names": ["Spring Champion", "Fall Champion"]}
+            {
+                "type": "epithetAnyOf",
+                "names": [
+                    "Stunning",
+                    "Lady"
+                ]
+            },
+            {
+                "type": "epithetAll",
+                "names": [
+                    "Spring Champion",
+                    "Fall Champion"
+                ]
+            }
         ]
     },
     "Mile a Minute": {
@@ -342,12 +551,34 @@
         "notes": "Single hint level.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "NHK Mile Cup"},
-            {"type": "winRace", "name": "Oka Sho"},
-            {"type": "winRace", "name": "Yasuda Kinen"},
-            {"type": "winRace", "name": "Victoria Mile"},
-            {"type": "winRace", "name": "Mile Championship"},
-            {"type": "winAnyOf", "names": ["Hanshin Juvenile Fillies", "Asahi Hai Futurity Stakes"], "count": 1}
+            {
+                "type": "winRace",
+                "name": "NHK Mile Cup"
+            },
+            {
+                "type": "winRace",
+                "name": "Oka Sho"
+            },
+            {
+                "type": "winRace",
+                "name": "Yasuda Kinen"
+            },
+            {
+                "type": "winRace",
+                "name": "Victoria Mile"
+            },
+            {
+                "type": "winRace",
+                "name": "Mile Championship"
+            },
+            {
+                "type": "winAnyOf",
+                "names": [
+                    "Hanshin Juvenile Fillies",
+                    "Asahi Hai Futurity Stakes"
+                ],
+                "count": 1
+            }
         ]
     },
     "Non-Standard Distance Leader": {
@@ -362,7 +593,16 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 10, "filter": {"distanceTypes": ["Sprint", "Long"]}}
+            {
+                "type": "winCount",
+                "count": 10,
+                "filter": {
+                    "distanceTypes": [
+                        "Sprint",
+                        "Long"
+                    ]
+                }
+            }
         ]
     },
     "Phenomenal": {
@@ -375,10 +615,28 @@
         "condition_text": "Get the Stunning epithet. Win any two of the Tenno Sho (Spring), Takarazuka Kinen, Japan Cup, Tenno Sho (Autumn), Osaka Hai and Arima Kinen.",
         "source_url": "https://gametora.com/umamusume/nicknames",
         "notes": "The 2 stats are random.",
-        "dependsOn": ["Stunning"],
+        "dependsOn": [
+            "Stunning"
+        ],
         "matchers": [
-            {"type": "epithetAll", "names": ["Stunning"]},
-            {"type": "winAtLeast", "names": ["Tenno Sho (Spring)", "Takarazuka Kinen", "Japan Cup", "Tenno Sho (Autumn)", "Osaka Hai", "Arima Kinen"], "count": 2}
+            {
+                "type": "epithetAll",
+                "names": [
+                    "Stunning"
+                ]
+            },
+            {
+                "type": "winAtLeast",
+                "names": [
+                    "Tenno Sho (Spring)",
+                    "Takarazuka Kinen",
+                    "Japan Cup",
+                    "Tenno Sho (Autumn)",
+                    "Osaka Hai",
+                    "Arima Kinen"
+                ],
+                "count": 2
+            }
         ]
     },
     "Playing Dirty": {
@@ -393,7 +651,13 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 10, "filter": {"terrain": "Dirt"}}
+            {
+                "type": "winCount",
+                "count": 10,
+                "filter": {
+                    "terrain": "Dirt"
+                }
+            }
         ]
     },
     "Pro Racer": {
@@ -408,7 +672,13 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 10, "filter": {"gradeAtLeastOpen": true}}
+            {
+                "type": "winCount",
+                "count": 10,
+                "filter": {
+                    "gradeAtLeastOpen": true
+                }
+            }
         ]
     },
     "Shield Bearer": {
@@ -423,8 +693,14 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "Tenno Sho (Spring)"},
-            {"type": "winRace", "name": "Tenno Sho (Autumn)"}
+            {
+                "type": "winRace",
+                "name": "Tenno Sho (Spring)"
+            },
+            {
+                "type": "winRace",
+                "name": "Tenno Sho (Autumn)"
+            }
         ]
     },
     "Spring Champion": {
@@ -439,9 +715,18 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "Osaka Hai"},
-            {"type": "winRace", "name": "Tenno Sho (Spring)"},
-            {"type": "winRace", "name": "Takarazuka Kinen"}
+            {
+                "type": "winRace",
+                "name": "Osaka Hai"
+            },
+            {
+                "type": "winRace",
+                "name": "Tenno Sho (Spring)"
+            },
+            {
+                "type": "winRace",
+                "name": "Takarazuka Kinen"
+            }
         ]
     },
     "Sprint Go-Getter": {
@@ -456,8 +741,14 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "Takamatsunomiya Kinen"},
-            {"type": "winRace", "name": "Sprinters Stakes"}
+            {
+                "type": "winRace",
+                "name": "Takamatsunomiya Kinen"
+            },
+            {
+                "type": "winRace",
+                "name": "Sprinters Stakes"
+            }
         ]
     },
     "Sprint Speedster": {
@@ -472,10 +763,22 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "Takamatsunomiya Kinen"},
-            {"type": "winRace", "name": "Sprinters Stakes"},
-            {"type": "winRace", "name": "Yasuda Kinen"},
-            {"type": "winRace", "name": "Mile Championship"}
+            {
+                "type": "winRace",
+                "name": "Takamatsunomiya Kinen"
+            },
+            {
+                "type": "winRace",
+                "name": "Sprinters Stakes"
+            },
+            {
+                "type": "winRace",
+                "name": "Yasuda Kinen"
+            },
+            {
+                "type": "winRace",
+                "name": "Mile Championship"
+            }
         ]
     },
     "Standard Distance Leader": {
@@ -490,7 +793,16 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 10, "filter": {"distanceTypes": ["Mile", "Medium"]}}
+            {
+                "type": "winCount",
+                "count": 10,
+                "filter": {
+                    "distanceTypes": [
+                        "Mile",
+                        "Medium"
+                    ]
+                }
+            }
         ]
     },
     "Stunning": {
@@ -505,9 +817,18 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winRace", "name": "Satsuki Sho"},
-            {"type": "winRace", "name": "Tokyo Yushun (Japanese Derby)"},
-            {"type": "winRace", "name": "Kikuka Sho"}
+            {
+                "type": "winRace",
+                "name": "Satsuki Sho"
+            },
+            {
+                "type": "winRace",
+                "name": "Tokyo Yushun (Japanese Derby)"
+            },
+            {
+                "type": "winRace",
+                "name": "Kikuka Sho"
+            }
         ]
     },
     "Tohoku Top Dog": {
@@ -522,7 +843,17 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 3, "filter": {"raceTracks": ["Fukushima", "Niigata"], "gradedOnly": true}}
+            {
+                "type": "winCount",
+                "count": 3,
+                "filter": {
+                    "raceTracks": [
+                        "Fukushima",
+                        "Niigata"
+                    ],
+                    "gradedOnly": true
+                }
+            }
         ]
     },
     "Turf Tussler": {
@@ -537,10 +868,46 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 1, "filter": {"terrain": "Turf", "distanceTypes": ["Sprint"]}},
-            {"type": "winCount", "count": 1, "filter": {"terrain": "Turf", "distanceTypes": ["Mile"]}},
-            {"type": "winCount", "count": 1, "filter": {"terrain": "Turf", "distanceTypes": ["Medium"]}},
-            {"type": "winCount", "count": 1, "filter": {"terrain": "Turf", "distanceTypes": ["Long"]}}
+            {
+                "type": "winCount",
+                "count": 1,
+                "filter": {
+                    "terrain": "Turf",
+                    "distanceTypes": [
+                        "Sprint"
+                    ]
+                }
+            },
+            {
+                "type": "winCount",
+                "count": 1,
+                "filter": {
+                    "terrain": "Turf",
+                    "distanceTypes": [
+                        "Mile"
+                    ]
+                }
+            },
+            {
+                "type": "winCount",
+                "count": 1,
+                "filter": {
+                    "terrain": "Turf",
+                    "distanceTypes": [
+                        "Medium"
+                    ]
+                }
+            },
+            {
+                "type": "winCount",
+                "count": 1,
+                "filter": {
+                    "terrain": "Turf",
+                    "distanceTypes": [
+                        "Long"
+                    ]
+                }
+            }
         ]
     },
     "Umatastic": {
@@ -555,7 +922,13 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 3, "filter": {"nameContains": "Uma Musume Stakes"}}
+            {
+                "type": "winCount",
+                "count": 3,
+                "filter": {
+                    "nameContains": "Uma Musume Stakes"
+                }
+            }
         ]
     },
     "West Japan Whiz": {
@@ -570,7 +943,18 @@
         "notes": "The 2 stats are random.",
         "dependsOn": [],
         "matchers": [
-            {"type": "winCount", "count": 3, "filter": {"raceTracks": ["Chukyo", "Hanshin", "Kyoto"], "gradedOnly": true}}
+            {
+                "type": "winCount",
+                "count": 3,
+                "filter": {
+                    "raceTracks": [
+                        "Chukyo",
+                        "Hanshin",
+                        "Kyoto"
+                    ],
+                    "gradedOnly": true
+                }
+            }
         ]
     }
 }
