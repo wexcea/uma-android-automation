@@ -2,7 +2,7 @@ import React, { useMemo, useContext, useState, useRef, FC, useCallback } from "r
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native"
 import { Divider } from "react-native-paper"
 import { useTheme } from "../../context/ThemeContext"
-import { BotStateContext, defaultSettings } from "../../context/BotStateContext"
+import { SkillsContext, defaultSettings } from "../../context/BotStateContext"
 import { SkillPlanSettingsProps } from "./config"
 import CustomSelect from "../../components/CustomSelect"
 import CustomCheckbox from "../../components/CustomCheckbox"
@@ -70,12 +70,10 @@ const skillData: Skill[] = Object.values(skillsData)
 const SkillPlanSettings: FC<SkillPlanSettingsProps> = ({ planKey, name, title, description }) => {
     usePerformanceLogging(name)
     const { colors } = useTheme()
-    const bsc = useContext(BotStateContext)
-
-    const { settings, setSettings } = bsc
+    const { skills, updateSkills } = useContext(SkillsContext)
 
     // Merge current skills settings with defaults to handle missing properties.
-    const combinedConfig = { ...defaultSettings.skills.plans, ...settings.skills.plans }
+    const combinedConfig = { ...defaultSettings.skills.plans, ...skills.plans }
 
     const { enabled, strategy, enableBuyInheritedUniqueSkills, enableBuyNegativeSkills, plan } = combinedConfig[planKey]
 
@@ -108,21 +106,15 @@ const SkillPlanSettings: FC<SkillPlanSettingsProps> = ({ planKey, name, title, d
      */
     const updateSkillsSetting = useCallback(
         (key: string, value: any) => {
-            setSettings({
-                ...bsc.settings,
-                skills: {
-                    ...bsc.settings.skills,
-                    plans: {
-                        ...bsc.settings.skills.plans,
-                        [planKey]: {
-                            ...bsc.settings.skills.plans[planKey],
-                            [key]: value,
-                        },
-                    },
+            updateSkills((prev) => ({
+                ...prev,
+                plans: {
+                    ...prev.plans,
+                    [planKey]: { ...prev.plans[planKey], [key]: value },
                 },
-            })
+            }))
         },
-        [bsc.settings, planKey, setSettings]
+        [planKey, updateSkills]
     )
 
     /**

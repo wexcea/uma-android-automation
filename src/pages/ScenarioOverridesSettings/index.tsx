@@ -2,7 +2,7 @@ import { useMemo, useContext, useRef, useState, useCallback } from "react"
 import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from "react-native"
 import { Divider } from "react-native-paper"
 import { useTheme } from "../../context/ThemeContext"
-import { BotStateContext } from "../../context/BotStateContext"
+import { ScenarioOverridesContext, BotMetaContext, Settings } from "../../context/BotStateContext"
 import { SearchPageProvider } from "../../context/SearchPageContext"
 import CustomSlider from "../../components/CustomSlider"
 import CustomCheckbox from "../../components/CustomCheckbox"
@@ -21,11 +21,9 @@ import trackblazerIcons from "./icons"
 const ScenarioOverridesSettings = () => {
     usePerformanceLogging("ScenarioOverridesSettings")
     const { colors } = useTheme()
-    const bsc = useContext(BotStateContext)
+    const { scenarioOverrides, updateScenarioOverrides } = useContext(ScenarioOverridesContext)
+    const { defaultSettings } = useContext(BotMetaContext)
     const scrollViewRef = useRef<ScrollView>(null)
-
-    const { settings, setSettings } = bsc
-    const { scenarioOverrides } = settings
 
     const [searchQuery, setSearchQuery] = useState("")
 
@@ -43,16 +41,10 @@ const ScenarioOverridesSettings = () => {
      * @param value The value to set the setting to.
      */
     const updateOverrideSetting = useCallback(
-        (key: keyof typeof scenarioOverrides, value: any) => {
-            setSettings((prev) => ({
-                ...prev,
-                scenarioOverrides: {
-                    ...prev.scenarioOverrides,
-                    [key]: value,
-                },
-            }))
+        (key: keyof Settings["scenarioOverrides"], value: any) => {
+            updateScenarioOverrides({ [key]: value } as Partial<Settings["scenarioOverrides"]>)
         },
-        [setSettings]
+        [updateScenarioOverrides]
     )
 
     /**
@@ -113,7 +105,7 @@ const ScenarioOverridesSettings = () => {
                             <CustomSlider
                                 searchId="trackblazer-consecutive-races-limit"
                                 value={scenarioOverrides.trackblazerConsecutiveRacesLimit}
-                                placeholder={bsc.defaultSettings.scenarioOverrides.trackblazerConsecutiveRacesLimit}
+                                placeholder={defaultSettings.scenarioOverrides.trackblazerConsecutiveRacesLimit}
                                 onValueChange={(value) => updateOverrideSetting("trackblazerConsecutiveRacesLimit", value)}
                                 onSlidingComplete={(value) => updateOverrideSetting("trackblazerConsecutiveRacesLimit", value)}
                                 min={3}
@@ -131,7 +123,7 @@ const ScenarioOverridesSettings = () => {
                             <CustomSlider
                                 searchId="trackblazer-energy-threshold"
                                 value={scenarioOverrides.trackblazerEnergyThreshold}
-                                placeholder={bsc.defaultSettings.scenarioOverrides.trackblazerEnergyThreshold}
+                                placeholder={defaultSettings.scenarioOverrides.trackblazerEnergyThreshold}
                                 onValueChange={(value) => updateOverrideSetting("trackblazerEnergyThreshold", value)}
                                 onSlidingComplete={(value) => updateOverrideSetting("trackblazerEnergyThreshold", value)}
                                 min={0}
@@ -149,7 +141,7 @@ const ScenarioOverridesSettings = () => {
                             <CustomSlider
                                 searchId="trackblazer-max-retries-per-race"
                                 value={scenarioOverrides.trackblazerMaxRetriesPerRace}
-                                placeholder={bsc.defaultSettings.scenarioOverrides.trackblazerMaxRetriesPerRace}
+                                placeholder={defaultSettings.scenarioOverrides.trackblazerMaxRetriesPerRace}
                                 onValueChange={(value) => updateOverrideSetting("trackblazerMaxRetriesPerRace", value)}
                                 onSlidingComplete={(value) => updateOverrideSetting("trackblazerMaxRetriesPerRace", value)}
                                 min={0}
@@ -167,7 +159,7 @@ const ScenarioOverridesSettings = () => {
                             <CustomSlider
                                 searchId="trackblazer-min-stat-gain-for-charm"
                                 value={scenarioOverrides.trackblazerMinStatGainForCharm}
-                                placeholder={bsc.defaultSettings.scenarioOverrides.trackblazerMinStatGainForCharm}
+                                placeholder={defaultSettings.scenarioOverrides.trackblazerMinStatGainForCharm}
                                 onValueChange={(value) => updateOverrideSetting("trackblazerMinStatGainForCharm", value)}
                                 onSlidingComplete={(value) => updateOverrideSetting("trackblazerMinStatGainForCharm", value)}
                                 min={20}
@@ -196,7 +188,7 @@ const ScenarioOverridesSettings = () => {
                                 <CustomSlider
                                     searchId="trackblazer-irregular-training-min-stat-gain"
                                     value={scenarioOverrides.trackblazerIrregularTrainingMinStatGain}
-                                    placeholder={bsc.defaultSettings.scenarioOverrides.trackblazerIrregularTrainingMinStatGain}
+                                    placeholder={defaultSettings.scenarioOverrides.trackblazerIrregularTrainingMinStatGain}
                                     onValueChange={(value) => updateOverrideSetting("trackblazerIrregularTrainingMinStatGain", value)}
                                     onSlidingComplete={(value) => updateOverrideSetting("trackblazerIrregularTrainingMinStatGain", value)}
                                     min={20}
@@ -225,7 +217,7 @@ const ScenarioOverridesSettings = () => {
                             <CustomSlider
                                 searchId="trackblazer-shop-check-frequency"
                                 value={scenarioOverrides.trackblazerShopCheckFrequency}
-                                placeholder={bsc.defaultSettings.scenarioOverrides.trackblazerShopCheckFrequency}
+                                placeholder={defaultSettings.scenarioOverrides.trackblazerShopCheckFrequency}
                                 onValueChange={(value) => updateOverrideSetting("trackblazerShopCheckFrequency", value)}
                                 onSlidingComplete={(value) => updateOverrideSetting("trackblazerShopCheckFrequency", value)}
                                 min={1}

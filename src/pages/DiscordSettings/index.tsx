@@ -1,7 +1,7 @@
 import { useMemo, useContext, useRef, useState, useCallback } from "react"
 import { View, ScrollView, StyleSheet, TextInput, Text } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
-import { BotStateContext, defaultSettings } from "../../context/BotStateContext"
+import { DiscordContext, defaultSettings, Settings } from "../../context/BotStateContext"
 import { SearchPageProvider } from "../../context/SearchPageContext"
 import CustomCheckbox from "../../components/CustomCheckbox"
 import CustomButton from "../../components/CustomButton"
@@ -20,17 +20,15 @@ import { NativeModules } from "react-native"
 const DiscordSettings = () => {
     usePerformanceLogging("DiscordSettings")
     const { colors, isDark } = useTheme()
-    const bsc = useContext(BotStateContext)
+    const { discord, updateDiscord } = useContext(DiscordContext)
     const scrollViewRef = useRef<ScrollView>(null)
 
     // Test connection state.
     const [isTesting, setIsTesting] = useState(false)
     const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
 
-    const { settings, setSettings } = bsc
-
     // Merge current Discord settings with defaults to handle missing properties.
-    const discordSettings = { ...defaultSettings.discord, ...settings.discord }
+    const discordSettings = { ...defaultSettings.discord, ...discord }
     const { enableDiscordNotifications, discordToken } = discordSettings
     // Coerce to string since SQLite may store numeric IDs as numbers.
     const discordUserID = String(discordSettings.discordUserID || "")
@@ -42,16 +40,10 @@ const DiscordSettings = () => {
      * @param value The new value for the setting.
      */
     const updateDiscordSetting = useCallback(
-        (key: keyof typeof settings.discord, value: any) => {
-            setSettings({
-                ...bsc.settings,
-                discord: {
-                    ...bsc.settings.discord,
-                    [key]: value,
-                },
-            })
+        (key: keyof Settings["discord"], value: any) => {
+            updateDiscord({ [key]: value } as Partial<Settings["discord"]>)
         },
-        [bsc.settings, setSettings]
+        [updateDiscord]
     )
 
     /**

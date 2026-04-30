@@ -1,15 +1,10 @@
 import { useContext, useEffect, useState, useRef } from "react"
-import { DeviceEventEmitter, AppState } from "react-native"
-import { BotStateContext, BotStateProviderProps } from "../context/BotStateContext"
+import { DeviceEventEmitter, AppState, InteractionManager } from "react-native"
+import { BotMetaContext, GeneralMiscContext } from "../context/BotStateContext"
 import { MessageLogContext, MessageLogProviderProps } from "../context/MessageLogContext"
 import { useSettings } from "../context/SettingsContext"
 import { logWithTimestamp, logErrorWithTimestamp } from "../lib/logger"
 import { databaseManager, DatabaseRace, DatabaseSkill } from "../lib/database"
-import racesData from "../data/races.json"
-import skillsData from "../data/skills.json"
-import charactersData from "../data/characters.json"
-import supportsData from "../data/supports.json"
-import scenariosData from "../data/scenarios.json"
 
 /**
  * Manages app initialization, settings persistence, and message handling.
@@ -20,7 +15,8 @@ export const useBootstrap = () => {
     const [isReady, setIsReady] = useState<boolean>(false)
     const isSavingRef = useRef<boolean>(false)
 
-    const bsc = useContext(BotStateContext) as BotStateProviderProps
+    const { setReadyStatus } = useContext(BotMetaContext)
+    const { general } = useContext(GeneralMiscContext)
     const mlc = useContext(MessageLogContext) as MessageLogProviderProps
 
     // Hook for managing settings persistence.
@@ -35,7 +31,7 @@ export const useBootstrap = () => {
         return () => messageLogSubscription.remove()
     }, [])
 
-    // Initialize database and populate races data on mount.
+    // Initialize database and populate data after the first paint so the splash can render.
     useEffect(() => {
         const initializeApp = async () => {
             try {
@@ -59,8 +55,21 @@ export const useBootstrap = () => {
             }
         }
 
-        initializeApp()
+        // Defer the heavy JSON parses + DB writes until after the first frame paints.
+        const handle = InteractionManager.runAfterInteractions(() => {
+            initializeApp()
+        })
+        return () => handle.cancel()
     }, [])
+
+    /**
+     * Yield to the UI thread so any pending frame can paint before the next heavy step.
+     * @returns A promise that resolves once interactions are idle.
+     */
+    const yieldToFrame = (): Promise<void> =>
+        new Promise((resolve) => {
+            InteractionManager.runAfterInteractions(() => resolve())
+        })
 
     /**
      * Populate race event data from racing.json into SQLite.
@@ -70,8 +79,11 @@ export const useBootstrap = () => {
         try {
             logWithTimestamp("[Bootstrap] Starting races data population...")
 
+            const racesData = require("../data/races.json")
+            await yieldToFrame()
+
             // Convert races.json data to database format.
-            const races: Array<Omit<DatabaseRace, "id">> = Object.entries(racesData).map(([key, race]) => ({
+            const races: Array<Omit<DatabaseRace, "id">> = Object.entries(racesData).map(([key, race]: [string, any]) => ({
                 key,
                 name: race.name,
                 date: race.date,
@@ -108,8 +120,11 @@ export const useBootstrap = () => {
         try {
             logWithTimestamp("[Bootstrap] Starting skills data population...")
 
+            const skillsData = require("../data/skills.json")
+            await yieldToFrame()
+
             // Convert skills.json data to database format.
-            const skills: Array<Omit<DatabaseSkill, "id">> = Object.entries(skillsData).map(([key, skill]) => ({
+            const skills: Array<Omit<DatabaseSkill, "id">> = Object.entries(skillsData).map(([key, skill]: [string, any]) => ({
                 key,
                 skill_id: skill.id,
                 gene_id: skill.gene_id,
@@ -150,15 +165,22 @@ export const useBootstrap = () => {
         try {
             logWithTimestamp("[Bootstrap] Starting event data population...")
 
-            // Save character event data to SQLite.
+            // Lazy-require each large bundled JSON between yields so each parse and write
+            // happens on its own frame instead of all in one main-thread block.
+            const charactersData = require("../data/characters.json")
+            await yieldToFrame()
             await databaseManager.saveSetting("trainingEvent", "characterEventData", charactersData, true)
             logWithTimestamp(`[Bootstrap] Successfully saved character event data (${Object.keys(charactersData).length} characters) to SQLite`)
+            await yieldToFrame()
 
-            // Save support event data to SQLite.
+            const supportsData = require("../data/supports.json")
+            await yieldToFrame()
             await databaseManager.saveSetting("trainingEvent", "supportEventData", supportsData, true)
             logWithTimestamp(`[Bootstrap] Successfully saved support event data (${Object.keys(supportsData).length} supports) to SQLite`)
+            await yieldToFrame()
 
-            // Save scenario-specific event data to SQLite.
+            const scenariosData = require("../data/scenarios.json")
+            await yieldToFrame()
             await databaseManager.saveSetting("trainingEvent", "scenarioEventData", scenariosData, true)
             logWithTimestamp(`[Bootstrap] Successfully saved scenario-specific event data (${Object.keys(scenariosData).length} scenarios) to SQLite`)
 
@@ -191,8 +213,8 @@ export const useBootstrap = () => {
     // Update ready status whenever settings change or app becomes ready.
     useEffect(() => {
         if (isReady) {
-            const scenario = bsc.settings.general.scenario
-            bsc.setReadyStatus(scenario !== "")
+            const scenario = general.scenario
+            setReadyStatus(scenario !== "")
         }
-    }, [isReady, bsc.settings.general.scenario])
+    }, [isReady, general.scenario])
 }

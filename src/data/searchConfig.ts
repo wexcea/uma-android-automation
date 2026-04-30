@@ -87,6 +87,18 @@ const searchConfig: SearchOption[] = [
         page: "TrainingSettings",
     },
     {
+        id: "event-choice-stat-priority",
+        title: "Event Choice Prioritization",
+        description: "Select the priority order of stats used when scoring in-game event choices. Events typically grant flat stat gains, so a different ordering than regular training may be optimal.",
+        page: "TrainingSettings",
+    },
+    {
+        id: "summer-training-stat-priority",
+        title: "Summer Training Prioritization",
+        description: "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer with no facility progression, so a different ordering than regular training may be optimal.",
+        page: "TrainingSettings",
+    },
+    {
         id: "disable-training-on-maxed-stats",
         title: "Disable Training on Maxed Stats",
         description: "When enabled, training will be skipped for stats that have reached their maximum value.",

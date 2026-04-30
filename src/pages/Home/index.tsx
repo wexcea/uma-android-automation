@@ -1,7 +1,7 @@
 import * as Application from "expo-application"
 import MessageLog from "../../components/MessageLog"
 import { useContext, useEffect, useRef, useState, useMemo } from "react"
-import { BotStateContext } from "../../context/BotStateContext"
+import { BotMetaContext, GeneralMiscContext } from "../../context/BotStateContext"
 import { useSettings } from "../../context/SettingsContext"
 import { logWithTimestamp, logErrorWithTimestamp } from "../../lib/logger"
 import { Animated, DeviceEventEmitter, StyleSheet, View, NativeModules } from "react-native"
@@ -76,7 +76,8 @@ const Home = () => {
 
     const navigation = useNavigation()
 
-    const bsc = useContext(BotStateContext)
+    const { readyStatus, setReadyStatus, setAppName, setAppVersion } = useContext(BotMetaContext)
+    const { general, updateGeneral } = useContext(GeneralMiscContext)
     const mlc = useContext(MessageLogContext)
     const { saveSettings } = useSettings()
 
@@ -135,8 +136,8 @@ const Home = () => {
      * Checks if the currently selected scenario exists in the available scenarios data.
      */
     const isScenarioValid: boolean = useMemo(() => {
-        return scenarios.some((it) => it.value === bsc.settings.general.scenario)
-    }, [bsc.settings.general.scenario])
+        return scenarios.some((it) => it.value === general.scenario)
+    }, [general.scenario])
 
     /**
      * Fetch device metrics from NativeModule.
@@ -168,8 +169,8 @@ const Home = () => {
         var version = Application.nativeApplicationVersion || "0.0.0"
         version += " (" + (Application.nativeBuildVersion || "0") + ")"
         logWithTimestamp(`Android app ${appName} version is ${version}`)
-        bsc.setAppName(appName)
-        bsc.setAppVersion(version)
+        setAppName(appName)
+        setAppVersion(version)
     }
 
     /**
@@ -178,7 +179,7 @@ const Home = () => {
     const handleButtonPress = async () => {
         if (isRunning) {
             StartModule.stop()
-        } else if (bsc.readyStatus) {
+        } else if (readyStatus) {
             // Check accessibility status first.
             try {
                 const status = await StartModule.getAccessibilityStatus()
@@ -273,7 +274,7 @@ where width and height of the screen is in pixels, and diagonal is the diagonal 
             )
         }
 
-        if (!bsc.readyStatus && !isRunning) {
+        if (!readyStatus && !isRunning) {
             return (
                 <Tooltip delayDuration={150}>
                     <TooltipTrigger>
@@ -314,11 +315,11 @@ where width and height of the screen is in pixels, and diagonal is the diagonal 
                         iconName={getSelectButtonIconName()}
                         options={scenarios}
                         placeholder={deviceMetrics ? "Select a Scenario" : "Not Ready"}
-                        value={bsc.settings.general.scenario}
+                        value={general.scenario}
                         onValueChange={(value) => {
                             const newScenario = value || ""
-                            bsc.setSettings({ ...bsc.settings, general: { ...bsc.settings.general, scenario: newScenario } })
-                            bsc.setReadyStatus(newScenario !== "")
+                            updateGeneral({ scenario: newScenario })
+                            setReadyStatus(newScenario !== "")
                         }}
                         onPress={handleButtonPress}
                     />

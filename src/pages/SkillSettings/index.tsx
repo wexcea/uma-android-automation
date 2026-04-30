@@ -9,7 +9,7 @@ import CustomCheckbox from "../../components/CustomCheckbox"
 import CustomSlider from "../../components/CustomSlider"
 import CustomTitle from "../../components/CustomTitle"
 import PageHeader from "../../components/PageHeader"
-import { BotStateContext, defaultSettings } from "../../context/BotStateContext"
+import { SkillsContext, defaultSettings } from "../../context/BotStateContext"
 import { SearchPageProvider } from "../../context/SearchPageContext"
 import { skillPlanSettingsPages } from "../SkillPlanSettings/config"
 import InfoContainer from "../../components/InfoContainer"
@@ -25,26 +25,18 @@ const SkillSettings = () => {
     usePerformanceLogging("SkillSettings")
     const { colors } = useTheme()
     const navigation = useNavigation()
-    const bsc = useContext(BotStateContext)
+    const { skills, updateSkills } = useContext(SkillsContext)
     const scrollViewRef = useRef<ScrollView>(null)
 
-    const { settings, setSettings } = bsc
-
     // Merge current skills settings with defaults to handle missing properties.
-    const skillSettings = { ...defaultSettings.skills, ...settings.skills }
+    const skillSettings = { ...defaultSettings.skills, ...skills }
     const { preferredRunningStyle, preferredTrackDistance, preferredTrackSurface } = skillSettings
 
     useEffect(() => {
-        if (bsc.settings.skills.plans.skillPointCheck.enabled) {
-            bsc.setSettings({
-                ...bsc.settings,
-                skills: {
-                    ...bsc.settings.skills,
-                    enableSkillPointCheck: true,
-                },
-            })
+        if (skills.plans.skillPointCheck.enabled) {
+            updateSkills({ enableSkillPointCheck: true })
         }
-    }, [bsc.settings.skills.plans.skillPointCheck.enabled])
+    }, [skills.plans.skillPointCheck.enabled])
 
     /**
      * Update a skill setting.
@@ -52,13 +44,7 @@ const SkillSettings = () => {
      * @param value The value to set the setting to.
      */
     const updateSkillsSetting = (key: string, value: any) => {
-        setSettings({
-            ...bsc.settings,
-            skills: {
-                ...bsc.settings.skills,
-                [key]: value,
-            },
-        })
+        updateSkills({ [key]: value } as any)
     }
 
     const styles = useMemo(
@@ -125,35 +111,26 @@ const SkillSettings = () => {
                         <Divider style={{ marginBottom: 16 }} />
                         <CustomCheckbox
                             searchId="enable-skill-point-check"
-                            checked={bsc.settings.skills.enableSkillPointCheck}
+                            checked={skills.enableSkillPointCheck}
                             onCheckedChange={(checked) => {
-                                bsc.setSettings({
-                                    ...bsc.settings,
-                                    skills: { ...bsc.settings.skills, enableSkillPointCheck: checked },
-                                })
+                                updateSkills({ enableSkillPointCheck: checked })
                             }}
                             label="Enable Skill Point Check"
                             description="Enables check for a certain skill point threshold. When the threshold is reached, the bot is stopped. This can be changed to allow the selected Skill Plan to spend those points instead of stopping the bot."
                         />
 
-                        <View style={bsc.settings.skills.enableSkillPointCheck ? { marginTop: 8 } : { display: "none" }}>
+                        <View style={skills.enableSkillPointCheck ? { marginTop: 8 } : { display: "none" }}>
                             <CustomSlider
                                 searchId="skill-point-check"
-                                searchCondition={bsc.settings.skills.enableSkillPointCheck}
+                                searchCondition={skills.enableSkillPointCheck}
                                 parentId="enable-skill-point-check"
-                                value={bsc.settings.skills.skillPointCheck}
-                                placeholder={bsc.defaultSettings.skills.skillPointCheck}
+                                value={skills.skillPointCheck}
+                                placeholder={defaultSettings.skills.skillPointCheck}
                                 onValueChange={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        skills: { ...bsc.settings.skills, skillPointCheck: value },
-                                    })
+                                    updateSkills({ skillPointCheck: value })
                                 }}
                                 onSlidingComplete={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        skills: { ...bsc.settings.skills, skillPointCheck: value },
-                                    })
+                                    updateSkills({ skillPointCheck: value })
                                 }}
                                 min={100}
                                 max={2000}
@@ -166,23 +143,17 @@ const SkillSettings = () => {
                             />
                             <CustomCheckbox
                                 searchId="skill-point-check-plan"
-                                searchCondition={bsc.settings.skills.enableSkillPointCheck}
+                                searchCondition={skills.enableSkillPointCheck}
                                 parentId="enable-skill-point-check"
-                                checked={bsc.settings.skills.plans.skillPointCheck.enabled}
+                                checked={skills.plans.skillPointCheck.enabled}
                                 onCheckedChange={(checked) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        skills: {
-                                            ...bsc.settings.skills,
-                                            plans: {
-                                                ...bsc.settings.skills.plans,
-                                                skillPointCheck: {
-                                                    ...bsc.settings.skills.plans.skillPointCheck,
-                                                    enabled: checked,
-                                                },
-                                            },
+                                    updateSkills((prev) => ({
+                                        ...prev,
+                                        plans: {
+                                            ...prev.plans,
+                                            skillPointCheck: { ...prev.plans.skillPointCheck, enabled: checked },
                                         },
-                                    })
+                                    }))
                                 }}
                                 label="Enable Skill Plan Upon Meeting Threshold"
                                 description="Instead of stopping the bot, this will run the Skill Plan to spend the skill points when the threshold is met."

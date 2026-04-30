@@ -3,10 +3,14 @@ import { startTiming, markNavigationEnd } from "../lib/performanceLogger"
 
 /**
  * A custom hook that logs component lifecycle events (mount, unmount, re-render).
- * All logs are gated by `PerformanceLogger.ENABLED`.
+ * All logs are gated by `PerformanceLogger.ENABLED`. In release builds the hook is a no-op
+ * because `__DEV__` is a compile-time constant — the early return makes the rest dead code
+ * for the release bundle, eliminating the per-render `useRef`/`useEffect` overhead.
  * @param componentName - The name of the component to track.
  */
 export const usePerformanceLogging = (componentName: string) => {
+    if (!__DEV__) return
+
     const renderCount = useRef(1)
 
     useEffect(() => {

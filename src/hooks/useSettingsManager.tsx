@@ -143,8 +143,10 @@ export const useSettingsManager = () => {
 
             // Load from SQLite database.
             let newSettings: Settings = JSON.parse(JSON.stringify(defaultSettings))
+            let rawDbSettings: any = undefined
             try {
                 const dbSettings = await databaseManager.loadAllSettings()
+                rawDbSettings = dbSettings
                 // Use deep merge to preserve nested default values.
                 newSettings = deepMerge(defaultSettings, dbSettings as Partial<Settings>)
                 logWithTimestamp(`[SettingsManager] Settings loaded from SQLite database ${context}.`)
@@ -154,7 +156,7 @@ export const useSettingsManager = () => {
             }
 
             // Apply all migrations to the settings.
-            const { settings: migratedSettings, anyMigrated } = applyMigrations(newSettings)
+            const { settings: migratedSettings, anyMigrated } = applyMigrations(newSettings, rawDbSettings)
             newSettings = migratedSettings
 
             // If any migration occurred, save the migrated settings back to the database.
@@ -214,7 +216,7 @@ export const useSettingsManager = () => {
     const fixSettings = (decoded: Settings): Settings => {
         const merged = deepMerge(defaultSettings, decoded as Partial<Settings>)
         // Apply all migrations to the settings.
-        const { settings } = applyMigrations(merged)
+        const { settings } = applyMigrations(merged, decoded)
         return settings
     }
 

@@ -100,6 +100,17 @@ describe("convertSettingsToBatch", () => {
         const batch = convertSettingsToBatch(settings)
         expect(batch).toHaveLength(5)
     })
+
+    it("skips misc.formattedSettingsString so MessageLog's direct DB write isn't clobbered", () => {
+        const settings = {
+            misc: { formattedSettingsString: "stale react-state value", currentProfileName: "p1" },
+            general: { scenario: "URA" },
+        } as any
+        const batch = convertSettingsToBatch(settings)
+        expect(batch).toContainEqual({ category: "misc", key: "currentProfileName", value: "p1" })
+        expect(batch).toContainEqual({ category: "general", key: "scenario", value: "URA" })
+        expect(batch.find((row) => row.category === "misc" && row.key === "formattedSettingsString")).toBeUndefined()
+    })
 })
 
 // ===========================================================================

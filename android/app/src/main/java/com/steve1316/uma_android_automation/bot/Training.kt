@@ -87,6 +87,18 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
     /** The final stat prioritization list. */
     internal val statPrioritization: List<StatName> = statPrioritizationRaw.ifEmpty { StatName.entries }
 
+    /** The raw stat prioritization list for in-game event choices, sourced from user settings. */
+    private val eventChoiceStatPriorityRaw: List<StatName> = SettingsHelper.getStringArraySetting("training", "eventChoiceStatPriority").map { StatName.fromName(it)!! }
+
+    /** The final stat prioritization list applied to event choice scoring. Falls back to [statPrioritization] if unset. */
+    internal val eventChoiceStatPriority: List<StatName> = eventChoiceStatPriorityRaw.ifEmpty { statPrioritization }
+
+    /** The raw stat prioritization list for Summer Training, sourced from user settings. */
+    private val summerTrainingStatPriorityRaw: List<StatName> = SettingsHelper.getStringArraySetting("training", "summerTrainingStatPriority").map { StatName.fromName(it)!! }
+
+    /** The final stat prioritization list applied during Summer Training. Falls back to [statPrioritization] if unset. */
+    internal val summerTrainingStatPriority: List<StatName> = summerTrainingStatPriorityRaw.ifEmpty { statPrioritization }
+
     /** The maximum allowed failure chance for training. */
     private val maximumFailureChance: Int = SettingsHelper.getIntSetting("training", "maximumFailureChance")
 
@@ -245,7 +257,9 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
      * Store configuration for training scoring calculations.
      *
      * @property currentStats Map of current character stats.
-     * @property statPrioritization Ordered list of stat priorities.
+     * @property statPrioritization Ordered list of stat priorities for regular training.
+     * @property eventChoiceStatPriority Ordered list of stat priorities used when scoring in-game event choices.
+     * @property summerTrainingStatPriority Ordered list of stat priorities applied during Summer Training.
      * @property statTargets Map of target values for each stat.
      * @property currentDate The current in-game date.
      * @property scenario The current training scenario name.
@@ -262,6 +276,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
         // Global configuration.
         val currentStats: Map<StatName, Int>,
         val statPrioritization: List<StatName>,
+        val eventChoiceStatPriority: List<StatName>,
+        val summerTrainingStatPriority: List<StatName>,
         val statTargets: Map<StatName, Int>,
         val currentDate: GameDate,
         val scenario: String,
@@ -282,6 +298,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
 
             if (currentStats != other.currentStats) return false
             if (statPrioritization != other.statPrioritization) return false
+            if (eventChoiceStatPriority != other.eventChoiceStatPriority) return false
+            if (summerTrainingStatPriority != other.summerTrainingStatPriority) return false
             if (statTargets != other.statTargets) return false
             if (currentDate != other.currentDate) return false
             if (scenario != other.scenario) return false
@@ -300,6 +318,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
         override fun hashCode(): Int {
             var result = currentStats.hashCode()
             result = 31 * result + statPrioritization.hashCode()
+            result = 31 * result + eventChoiceStatPriority.hashCode()
+            result = 31 * result + summerTrainingStatPriority.hashCode()
             result = 31 * result + statTargets.hashCode()
             result = 31 * result + currentDate.hashCode()
             result = 31 * result + scenario.hashCode()
@@ -587,13 +607,16 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
         fun calculateStatEfficiencyScore(config: TrainingConfig, training: TrainingOption): Double {
             var score = 0.0
 
+            // Use the Summer-specific priority list during Summer Training; otherwise use the regular list.
+            val activePriority = if (config.currentDate.isSummer()) config.summerTrainingStatPriority else config.statPrioritization
+
             for (statName in StatName.entries) {
                 val currentStat = config.currentStats[statName] ?: 0
                 val targetStat = config.statTargets[statName] ?: 0
                 val statGain = training.statGains[statName] ?: 0
 
                 if (statGain > 0 && targetStat > 0) {
-                    val priorityIndex = config.statPrioritization.indexOf(statName)
+                    val priorityIndex = activePriority.indexOf(statName)
 
                     // Calculate completion percentage (how far along this stat is toward its target).
                     val completionPercent = (currentStat.toDouble() / targetStat) * 100.0
@@ -624,7 +647,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
 
                     // Priority-based tiebreaker (only applies when completion is similar).
                     // Find the completion percentage of the highest priority stat for comparison.
-                    val highestPriorityStat: StatName? = config.statPrioritization.firstOrNull()
+                    val highestPriorityStat: StatName? = activePriority.firstOrNull()
                     val highestPriorityCompletion =
                         if (highestPriorityStat != null) {
                             val hpCurrent = config.currentStats[highestPriorityStat] ?: 0
@@ -637,7 +660,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                     // Only apply priority bonus if this stat's completion is within 10% of highest priority stat.
                     val priorityMultiplier =
                         if (priorityIndex != -1 && kotlin.math.abs(completionPercent - highestPriorityCompletion) <= 10.0) {
-                            1.0 + (0.1 * (config.statPrioritization.size - priorityIndex))
+                            1.0 + (0.1 * (activePriority.size - priorityIndex))
                         } else {
                             1.0
                         }
@@ -1882,6 +1905,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             TrainingConfig(
                 currentStats = campaign.trainee.stats.asMap(),
                 statPrioritization = statPrioritization,
+                eventChoiceStatPriority = eventChoiceStatPriority,
+                summerTrainingStatPriority = summerTrainingStatPriority,
                 statTargets = campaign.trainee.getPhaseStatTargets(campaign.date.year),
                 currentDate = campaign.date,
                 scenario = game.scenario,

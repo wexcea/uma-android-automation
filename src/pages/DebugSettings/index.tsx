@@ -1,7 +1,7 @@
 import { useMemo, useContext, useRef, useState, useEffect } from "react"
 import { View, Text, ScrollView, StyleSheet, NativeModules, Linking, AppState, AppStateStatus } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
-import { BotStateContext } from "../../context/BotStateContext"
+import { DebugContext, BotMetaContext } from "../../context/BotStateContext"
 import CustomSlider from "../../components/CustomSlider"
 import CustomCheckbox from "../../components/CustomCheckbox"
 import CustomTitle from "../../components/CustomTitle"
@@ -22,10 +22,11 @@ import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 const DebugSettings = () => {
     usePerformanceLogging("DebugSettings")
     const { colors } = useTheme()
-    const bsc = useContext(BotStateContext)
+    const { debug, updateDebug } = useContext(DebugContext)
+    const { defaultSettings } = useContext(BotMetaContext)
     const scrollViewRef = useRef<ScrollView>(null)
 
-    /** List of all diagnostic debug test property names in bsc.settings.debug. */
+    /** List of all diagnostic debug test property names in debug. */
     const debugTestKeys = [
         "debugMode_startTemplateMatchingTest",
         "debugMode_startSingleTrainingOCRTest",
@@ -54,19 +55,9 @@ const DebugSettings = () => {
                 return acc
             }, {} as any)
 
-            bsc.setSettings({
-                ...bsc.settings,
-                debug: {
-                    ...bsc.settings.debug,
-                    ...updates,
-                },
-            })
+            updateDebug(updates)
         } else {
-            // Just disable the one test.
-            bsc.setSettings({
-                ...bsc.settings,
-                debug: { ...bsc.settings.debug, [key]: false },
-            })
+            updateDebug({ [key]: false } as any)
         }
     }
 
@@ -101,12 +92,12 @@ const DebugSettings = () => {
     }
 
     useEffect(() => {
-        if (bsc.settings.debug.enableRemoteLogViewer) {
+        if (debug.enableRemoteLogViewer) {
             NativeModules.StartModule.getDeviceIpAddress()
                 .then((ip: string) => setDeviceIp(ip))
                 .catch(() => setDeviceIp("<phone-ip>"))
         }
-    }, [bsc.settings.debug.enableRemoteLogViewer])
+    }, [debug.enableRemoteLogViewer])
 
     useEffect(() => {
         checkAccessibilityStatus()
@@ -166,37 +157,28 @@ const DebugSettings = () => {
                             {/* Enable Debug Mode Checkbox */}
                             <CustomCheckbox
                                 searchId="enable-debug-mode"
-                                checked={bsc.settings.debug.enableDebugMode}
+                                checked={debug.enableDebugMode}
                                 onCheckedChange={(checked) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, enableDebugMode: checked },
-                                    })
+                                    updateDebug({ enableDebugMode: checked })
                                 }}
                                 label="Enable Debug Mode"
                                 description="Allows debugging messages in the log and test images to be created in the /temp/ folder."
                             />
 
-                            {bsc.settings.debug.enableDebugMode && (
+                            {debug.enableDebugMode && (
                                 <WarningContainer style={{ marginTop: 8 }}>⚠️ Significantly extends the average runtime of the bot due to increased IO operations.</WarningContainer>
                             )}
 
                             {/* Template Match Confidence Slider */}
                             <CustomSlider
                                 searchId="template-match-confidence"
-                                value={bsc.settings.debug.templateMatchConfidence}
-                                placeholder={bsc.defaultSettings.debug.templateMatchConfidence}
+                                value={debug.templateMatchConfidence}
+                                placeholder={defaultSettings.debug.templateMatchConfidence}
                                 onValueChange={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, templateMatchConfidence: value },
-                                    })
+                                    updateDebug({ templateMatchConfidence: value })
                                 }}
                                 onSlidingComplete={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, templateMatchConfidence: value },
-                                    })
+                                    updateDebug({ templateMatchConfidence: value })
                                 }}
                                 min={0.5}
                                 max={1.0}
@@ -211,19 +193,13 @@ const DebugSettings = () => {
                             {/* Template Match Custom Scale Slider */}
                             <CustomSlider
                                 searchId="template-match-custom-scale"
-                                value={bsc.settings.debug.templateMatchCustomScale}
-                                placeholder={bsc.defaultSettings.debug.templateMatchCustomScale}
+                                value={debug.templateMatchCustomScale}
+                                placeholder={defaultSettings.debug.templateMatchCustomScale}
                                 onValueChange={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, templateMatchCustomScale: value },
-                                    })
+                                    updateDebug({ templateMatchCustomScale: value })
                                 }}
                                 onSlidingComplete={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, templateMatchCustomScale: value },
-                                    })
+                                    updateDebug({ templateMatchCustomScale: value })
                                 }}
                                 min={0.5}
                                 max={3.0}
@@ -238,19 +214,13 @@ const DebugSettings = () => {
                             {/* OCR Threshold Slider */}
                             <CustomSlider
                                 searchId="ocr-threshold"
-                                value={bsc.settings.debug.ocrThreshold}
-                                placeholder={bsc.defaultSettings.debug.ocrThreshold}
+                                value={debug.ocrThreshold}
+                                placeholder={defaultSettings.debug.ocrThreshold}
                                 onValueChange={(value: number) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, ocrThreshold: value },
-                                    })
+                                    updateDebug({ ocrThreshold: value })
                                 }}
                                 onSlidingComplete={(value: number) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, ocrThreshold: value },
-                                    })
+                                    updateDebug({ ocrThreshold: value })
                                 }}
                                 min={100}
                                 max={255}
@@ -268,35 +238,26 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="settings-enable-remote-log-viewer"
-                                checked={bsc.settings.debug.enableRemoteLogViewer}
+                                checked={debug.enableRemoteLogViewer}
                                 onCheckedChange={(checked) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, enableRemoteLogViewer: checked },
-                                    })
+                                    updateDebug({ enableRemoteLogViewer: checked })
                                 }}
                                 label="Enable Remote Log Viewer"
                                 description="Starts an HTTP server on this device when the bot runs. Open the URL shown below in a browser on your computer to view logs in real-time."
                             />
 
-                            <View style={bsc.settings.debug.enableRemoteLogViewer ? {} : { display: "none" }}>
+                            <View style={debug.enableRemoteLogViewer ? {} : { display: "none" }}>
                                 <CustomSlider
                                     searchId="settings-remote-log-viewer-port"
-                                    searchCondition={bsc.settings.debug.enableRemoteLogViewer}
+                                    searchCondition={debug.enableRemoteLogViewer}
                                     parentId="settings-enable-remote-log-viewer"
-                                    value={bsc.settings.debug.remoteLogViewerPort}
-                                    placeholder={bsc.defaultSettings.debug.remoteLogViewerPort}
+                                    value={debug.remoteLogViewerPort}
+                                    placeholder={defaultSettings.debug.remoteLogViewerPort}
                                     onValueChange={(value) => {
-                                        bsc.setSettings({
-                                            ...bsc.settings,
-                                            debug: { ...bsc.settings.debug, remoteLogViewerPort: value },
-                                        })
+                                        updateDebug({ remoteLogViewerPort: value })
                                     }}
                                     onSlidingComplete={(value) => {
-                                        bsc.setSettings({
-                                            ...bsc.settings,
-                                            debug: { ...bsc.settings.debug, remoteLogViewerPort: value },
-                                        })
+                                        updateDebug({ remoteLogViewerPort: value })
                                     }}
                                     min={1024}
                                     max={65535}
@@ -312,9 +273,9 @@ const DebugSettings = () => {
                                         <Text style={styles.infoDescription}>📡 When the bot is running, open this URL in a browser:</Text>
                                         <Text
                                             style={[styles.infoLabel, { marginTop: 8, textDecorationLine: "underline" }]}
-                                            onPress={() => Linking.openURL(`http://${deviceIp === "10.0.2.15" ? "localhost" : deviceIp}:${bsc.settings.debug.remoteLogViewerPort}`)}
+                                            onPress={() => Linking.openURL(`http://${deviceIp === "10.0.2.15" ? "localhost" : deviceIp}:${debug.remoteLogViewerPort}`)}
                                         >
-                                            http://{deviceIp === "10.0.2.15" ? "localhost" : deviceIp}:{bsc.settings.debug.remoteLogViewerPort}
+                                            http://{deviceIp === "10.0.2.15" ? "localhost" : deviceIp}:{debug.remoteLogViewerPort}
                                         </Text>
                                         <Text style={[styles.infoDescription, { marginTop: 8 }]}>Both devices must be on the same WiFi network.</Text>
                                         <Text style={[styles.infoDescription, { marginTop: 8 }]}>
@@ -351,7 +312,7 @@ const DebugSettings = () => {
                                             <Text style={styles.infoDescription}>Run these commands on your computer (port may vary) to use your emulator's localhost URL:</Text>
                                             <Text style={[styles.infoLabel, { marginTop: 8 }]}>
                                                 adb connect localhost:5555{"\n"}
-                                                adb forward tcp:{bsc.settings.debug.remoteLogViewerPort} tcp:{bsc.settings.debug.remoteLogViewerPort}
+                                                adb forward tcp:{debug.remoteLogViewerPort} tcp:{debug.remoteLogViewerPort}
                                             </Text>
                                         </View>
                                     </View>
@@ -365,12 +326,9 @@ const DebugSettings = () => {
                             {/* Enable Screen Recording Checkbox */}
                             <CustomCheckbox
                                 searchId="enable-screen-recording"
-                                checked={bsc.settings.debug.enableScreenRecording}
+                                checked={debug.enableScreenRecording}
                                 onCheckedChange={(checked) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, enableScreenRecording: checked },
-                                    })
+                                    updateDebug({ enableScreenRecording: checked })
                                 }}
                                 label="Enable Screen Recording"
                                 description="Records the screen while the bot is running. The mp4 file will be saved to the /recordings folder of the app's data directory. Note that performance and battery life may be impacted while recording."
@@ -379,21 +337,15 @@ const DebugSettings = () => {
                             {/* Recording Bit Rate Slider */}
                             <CustomSlider
                                 searchId="recording-bit-rate"
-                                searchCondition={bsc.settings.debug.enableScreenRecording}
+                                searchCondition={debug.enableScreenRecording}
                                 parentId="enable-screen-recording"
-                                value={bsc.settings.debug.recordingBitRate}
-                                placeholder={bsc.defaultSettings.debug.recordingBitRate}
+                                value={debug.recordingBitRate}
+                                placeholder={defaultSettings.debug.recordingBitRate}
                                 onValueChange={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, recordingBitRate: value },
-                                    })
+                                    updateDebug({ recordingBitRate: value })
                                 }}
                                 onSlidingComplete={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, recordingBitRate: value },
-                                    })
+                                    updateDebug({ recordingBitRate: value })
                                 }}
                                 min={1}
                                 max={20}
@@ -408,19 +360,16 @@ const DebugSettings = () => {
                             {/* Recording Frame Rate Select */}
                             <CustomSelect
                                 searchId="recording-frame-rate"
-                                searchCondition={bsc.settings.debug.enableScreenRecording}
+                                searchCondition={debug.enableScreenRecording}
                                 parentId="enable-screen-recording"
-                                value={bsc.settings.debug.recordingFrameRate.toString()}
+                                value={debug.recordingFrameRate.toString()}
                                 options={[
                                     { value: "30", label: "30 FPS" },
                                     { value: "60", label: "60 FPS" },
                                 ]}
                                 onValueChange={(value) => {
                                     if (value) {
-                                        bsc.setSettings({
-                                            ...bsc.settings,
-                                            debug: { ...bsc.settings.debug, recordingFrameRate: parseInt(value, 10) },
-                                        })
+                                        updateDebug({ recordingFrameRate: parseInt(value, 10) })
                                     }
                                 }}
                                 label="Recording Frame Rate"
@@ -432,21 +381,15 @@ const DebugSettings = () => {
                             {/* Recording Resolution Scale Slider */}
                             <CustomSlider
                                 searchId="recording-resolution-scale"
-                                searchCondition={bsc.settings.debug.enableScreenRecording}
+                                searchCondition={debug.enableScreenRecording}
                                 parentId="enable-screen-recording"
-                                value={bsc.settings.debug.recordingResolutionScale}
-                                placeholder={bsc.defaultSettings.debug.recordingResolutionScale}
+                                value={debug.recordingResolutionScale}
+                                placeholder={defaultSettings.debug.recordingResolutionScale}
                                 onValueChange={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, recordingResolutionScale: value },
-                                    })
+                                    updateDebug({ recordingResolutionScale: value })
                                 }}
                                 onSlidingComplete={(value) => {
-                                    bsc.setSettings({
-                                        ...bsc.settings,
-                                        debug: { ...bsc.settings.debug, recordingResolutionScale: value },
-                                    })
+                                    updateDebug({ recordingResolutionScale: value })
                                 }}
                                 min={0.25}
                                 max={1.0}
@@ -510,7 +453,7 @@ const DebugSettings = () => {
                             {/* Checkboxes for enabling Debug Tests */}
                             <CustomCheckbox
                                 searchId="debug-template-matching-test"
-                                checked={bsc.settings.debug.debugMode_startTemplateMatchingTest}
+                                checked={debug.debugMode_startTemplateMatchingTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startTemplateMatchingTest", checked)}
                                 label="Start Basic Template Matching Test"
                                 description="Disables normal bot operations and starts the template match test. Only on the Home screen and will check if it can find certain essential buttons on the screen. It will also output what scale it had the most success with."
@@ -519,7 +462,7 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="debug-single-training-ocr-test"
-                                checked={bsc.settings.debug.debugMode_startSingleTrainingOCRTest}
+                                checked={debug.debugMode_startSingleTrainingOCRTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startSingleTrainingOCRTest", checked)}
                                 label="Start Single Training OCR Test"
                                 description="Disables normal bot operations and starts the single training OCR test. Only on the Training screen and tests the current training on display for stat gains and failure chances."
@@ -528,7 +471,7 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="debug-comprehensive-training-ocr-test"
-                                checked={bsc.settings.debug.debugMode_startComprehensiveTrainingOCRTest}
+                                checked={debug.debugMode_startComprehensiveTrainingOCRTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startComprehensiveTrainingOCRTest", checked)}
                                 label="Start Comprehensive Training OCR Test"
                                 description="Disables normal bot operations and starts the comprehensive training OCR test. Only on the Training screen and tests all 5 trainings for their stat gains and failure chances."
@@ -537,7 +480,7 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="debug-race-list-detection-test"
-                                checked={bsc.settings.debug.debugMode_startRaceListDetectionTest}
+                                checked={debug.debugMode_startRaceListDetectionTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startRaceListDetectionTest", checked)}
                                 label="Start Race List Detection Test"
                                 description="Disables normal bot operations and starts the Race List detection test. Only on the Race List screen and tests detecting the races with double star predictions currently on display."
@@ -546,7 +489,7 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="debug-main-screen-update-test"
-                                checked={bsc.settings.debug.debugMode_startMainScreenUpdateTest}
+                                checked={debug.debugMode_startMainScreenUpdateTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startMainScreenUpdateTest", checked)}
                                 label="Start Main Screen Update Test"
                                 description="Disables normal bot operations and starts the Main Screen update test. This test will go through all Main Screen updates and then print the Trainee information."
@@ -555,7 +498,7 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="debug-skill-list-buy-test"
-                                checked={bsc.settings.debug.debugMode_startSkillListBuyTest}
+                                checked={debug.debugMode_startSkillListBuyTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startSkillListBuyTest", checked)}
                                 label="Start Skill List Buy Test"
                                 description="Processes the list of skills in the Skills screen, reads all skills in the list, logs a summary and then logs another summary of which skills it will buy to bring down the current Skill Points as close to zero as possible and then it will stop there without actually doing the buying."
@@ -564,7 +507,7 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="debug-scrollbar-detection-test"
-                                checked={bsc.settings.debug.debugMode_startScrollBarDetectionTest}
+                                checked={debug.debugMode_startScrollBarDetectionTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startScrollBarDetectionTest", checked)}
                                 label="Start Scrollbar Detection Test"
                                 description="Disables normal bot operations and starts the Scrollbar detection test. Detects the scrollbar on the current screen and attempts to scroll it up and down to verify functionality."
@@ -573,7 +516,7 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="debug-trackblazer-race-selection-test"
-                                checked={bsc.settings.debug.debugMode_startTrackblazerRaceSelectionTest}
+                                checked={debug.debugMode_startTrackblazerRaceSelectionTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startTrackblazerRaceSelectionTest", checked)}
                                 label="Start Trackblazer Race Selection Test"
                                 description="Disables normal bot operations and starts the Trackblazer race selection test. Navigates to the Race List if on the Main Screen and identifies the best race to run, including Rivals."
@@ -582,7 +525,7 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="debug-trackblazer-inventory-sync-test"
-                                checked={bsc.settings.debug.debugMode_startTrackblazerInventorySyncTest}
+                                checked={debug.debugMode_startTrackblazerInventorySyncTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startTrackblazerInventorySyncTest", checked)}
                                 label="Start Trackblazer Inventory Sync Test"
                                 description="Disables normal bot operations and starts the Trackblazer inventory sync test. Opens the Training Items dialog if on the Main Screen and logs inventory contents and quick-use intentions."
@@ -591,7 +534,7 @@ const DebugSettings = () => {
 
                             <CustomCheckbox
                                 searchId="debug-trackblazer-buy-items-test"
-                                checked={bsc.settings.debug.debugMode_startTrackblazerBuyItemsTest}
+                                checked={debug.debugMode_startTrackblazerBuyItemsTest}
                                 onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startTrackblazerBuyItemsTest", checked)}
                                 label="Start Trackblazer Buy Items Test"
                                 description="Disables normal bot operations and starts the Trackblazer buy items test. Opens the Shop if on the Main Screen and logs shop contents and purchase intentions without actually buying anything."

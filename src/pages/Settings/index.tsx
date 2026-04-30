@@ -1,6 +1,6 @@
 import { useMemo, useContext, useEffect, useState, useRef, useCallback } from "react"
 import { SearchPageProvider } from "../../context/SearchPageContext"
-import { BotStateContext } from "../../context/BotStateContext"
+import { BotMetaContext, GeneralMiscContext } from "../../context/BotStateContext"
 import { ScrollView, StyleSheet, Text, View } from "react-native"
 import { Snackbar } from "react-native-paper"
 import { useNavigation } from "@react-navigation/native"
@@ -31,7 +31,8 @@ const Settings = () => {
     const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false)
     const scrollViewRef = useRef<ScrollView>(null)
 
-    const bsc = useContext(BotStateContext)
+    const { readyStatus, defaultSettings } = useContext(BotMetaContext)
+    const { general, misc, updateGeneral, updateMisc } = useContext(GeneralMiscContext)
     const { colors } = useTheme()
     const navigation = useNavigation()
 
@@ -60,7 +61,7 @@ const Settings = () => {
         // Manually set this flag to false as the snackbar autohiding does not set this to false automatically.
         setSnackbarOpen(true)
         setTimeout(() => setSnackbarOpen(false), 2500)
-    }, [bsc.readyStatus])
+    }, [readyStatus])
 
     /**
      * Reset the settings to their default values.
@@ -105,7 +106,7 @@ const Settings = () => {
 
     const handleStopAtDateChange = useCallback(
         (index: number, part: "year" | "month" | "phase", value: string) => {
-            const dates = [...bsc.settings.general.stopAtDates]
+            const dates = [...general.stopAtDates]
             const currentParts = dates[index].split(" ")
             let newYear = currentParts[0] || "Senior"
             let newMonth = currentParts[1] || "January"
@@ -116,30 +117,21 @@ const Settings = () => {
             if (part === "phase") newPhase = value
 
             dates[index] = `${newYear} ${newMonth} ${newPhase}`
-            bsc.setSettings({
-                ...bsc.settings,
-                general: { ...bsc.settings.general, stopAtDates: dates },
-            })
+            updateGeneral({ stopAtDates: dates })
         },
-        [bsc]
+        [general]
     )
 
     const handleAddStopAtDate = useCallback(() => {
-        bsc.setSettings({
-            ...bsc.settings,
-            general: { ...bsc.settings.general, stopAtDates: [...bsc.settings.general.stopAtDates, "Senior January Early"] },
-        })
-    }, [bsc])
+        updateGeneral({ stopAtDates: [...general.stopAtDates, "Senior January Early"] })
+    }, [general])
 
     const handleRemoveStopAtDate = useCallback(
         (index: number) => {
-            const dates = bsc.settings.general.stopAtDates.filter((_, i) => i !== index)
-            bsc.setSettings({
-                ...bsc.settings,
-                general: { ...bsc.settings.general, stopAtDates: dates.length > 0 ? dates : ["Senior January Early"] },
-            })
+            const dates = general.stopAtDates.filter((_, i) => i !== index)
+            updateGeneral({ stopAtDates: dates.length > 0 ? dates : ["Senior January Early"] })
         },
-        [bsc]
+        [general]
     )
 
     const renderTrainingLink = () => {
@@ -225,12 +217,9 @@ const Settings = () => {
 
                 <CustomCheckbox
                     searchId="settings-popup-check"
-                    checked={bsc.settings.general.enablePopupCheck}
+                    checked={general.enablePopupCheck}
                     onCheckedChange={(checked) => {
-                        bsc.setSettings({
-                            ...bsc.settings,
-                            general: { ...bsc.settings.general, enablePopupCheck: checked },
-                        })
+                        updateGeneral({ enablePopupCheck: checked })
                     }}
                     label="Stop on Unexpected Popups"
                     description="Stops the bot when an unexpected popup with a Cancel button is detected (e.g. lack of fans or trophies). You will need to dismiss the popup and restart the bot manually."
@@ -239,12 +228,9 @@ const Settings = () => {
 
                 <CustomCheckbox
                     searchId="settings-stop-before-finals"
-                    checked={bsc.settings.general.enableStopBeforeFinals}
+                    checked={general.enableStopBeforeFinals}
                     onCheckedChange={(checked) => {
-                        bsc.setSettings({
-                            ...bsc.settings,
-                            general: { ...bsc.settings.general, enableStopBeforeFinals: checked },
-                        })
+                        updateGeneral({ enableStopBeforeFinals: checked })
                     }}
                     label="Stop before Finals"
                     description="Stops the bot on turn 72 so you can purchase skills before the final races."
@@ -253,27 +239,24 @@ const Settings = () => {
 
                 <CustomCheckbox
                     searchId="settings-stop-at-date"
-                    checked={bsc.settings.general.enableStopAtDate}
+                    checked={general.enableStopAtDate}
                     onCheckedChange={(checked) => {
-                        bsc.setSettings({
-                            ...bsc.settings,
-                            general: { ...bsc.settings.general, enableStopAtDate: checked },
-                        })
+                        updateGeneral({ enableStopAtDate: checked })
                     }}
                     label="Stop at Date"
                     description="Stops the bot on one or more specified dates. The bot will stop at the earliest matching date it reaches."
                     className="mt-4"
                 />
 
-                {bsc.settings.general.enableStopAtDate && (
+                {general.enableStopAtDate && (
                     <SearchableItem id="settings-stop-at-date" title="Target Dates" description="Stops the bot on the specified dates." style={{ marginLeft: 16, marginTop: 8 }}>
-                        {bsc.settings.general.stopAtDates.map((dateStr, index) => {
+                        {general.stopAtDates.map((dateStr, index) => {
                             const parts = dateStr.split(" ")
                             return (
-                                <View key={index} style={{ marginBottom: index < bsc.settings.general.stopAtDates.length - 1 ? 12 : 0 }}>
+                                <View key={index} style={{ marginBottom: index < general.stopAtDates.length - 1 ? 12 : 0 }}>
                                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
                                         <Text style={{ fontSize: 14, fontWeight: "600", color: colors.foreground }}>Date {index + 1}</Text>
-                                        {bsc.settings.general.stopAtDates.length > 1 && (
+                                        {general.stopAtDates.length > 1 && (
                                             <CustomButton onPress={() => handleRemoveStopAtDate(index)} variant="destructive" size="sm" fontSize={12}>
                                                 Remove
                                             </CustomButton>
@@ -319,12 +302,9 @@ const Settings = () => {
 
                 <CustomCheckbox
                     searchId="settings-crane-game-attempt"
-                    checked={bsc.settings.general.enableCraneGameAttempt}
+                    checked={general.enableCraneGameAttempt}
                     onCheckedChange={(checked) => {
-                        bsc.setSettings({
-                            ...bsc.settings,
-                            general: { ...bsc.settings.general, enableCraneGameAttempt: checked },
-                        })
+                        updateGeneral({ enableCraneGameAttempt: checked })
                     }}
                     label="Enable Crane Game Attempt"
                     description="When enabled, the bot will attempt to complete the crane game. By default, the bot will stop when it is detected."
@@ -333,12 +313,9 @@ const Settings = () => {
 
                 <CustomCheckbox
                     searchId="settings-enable-settings-display"
-                    checked={bsc.settings.misc.enableSettingsDisplay}
+                    checked={misc.enableSettingsDisplay}
                     onCheckedChange={(checked) => {
-                        bsc.setSettings({
-                            ...bsc.settings,
-                            misc: { ...bsc.settings.misc, enableSettingsDisplay: checked },
-                        })
+                        updateMisc({ enableSettingsDisplay: checked })
                     }}
                     label="Enable Settings Display in Message Log"
                     description="Shows current bot configuration settings at the top of the message log."
@@ -347,12 +324,9 @@ const Settings = () => {
 
                 <CustomCheckbox
                     searchId="settings-enable-message-id-display"
-                    checked={bsc.settings.misc.enableMessageIdDisplay}
+                    checked={misc.enableMessageIdDisplay}
                     onCheckedChange={(checked) => {
-                        bsc.setSettings({
-                            ...bsc.settings,
-                            misc: { ...bsc.settings.misc, enableMessageIdDisplay: checked },
-                        })
+                        updateMisc({ enableMessageIdDisplay: checked })
                     }}
                     label="Enable Message ID Display"
                     description="Shows message IDs in the message log to help with debugging."
@@ -361,13 +335,13 @@ const Settings = () => {
 
                 <CustomSlider
                     searchId="settings-wait-delay"
-                    value={bsc.settings.general.waitDelay}
-                    placeholder={bsc.defaultSettings.general.waitDelay}
+                    value={general.waitDelay}
+                    placeholder={defaultSettings.general.waitDelay}
                     onValueChange={(value) => {
-                        bsc.setSettings({ ...bsc.settings, general: { ...bsc.settings.general, waitDelay: value } })
+                        updateGeneral({ waitDelay: value })
                     }}
                     onSlidingComplete={(value) => {
-                        bsc.setSettings({ ...bsc.settings, general: { ...bsc.settings.general, waitDelay: value } })
+                        updateGeneral({ waitDelay: value })
                     }}
                     min={0.0}
                     max={1.0}
@@ -381,13 +355,13 @@ const Settings = () => {
 
                 <CustomSlider
                     searchId="settings-dialog-wait-delay"
-                    value={bsc.settings.general.dialogWaitDelay}
-                    placeholder={bsc.defaultSettings.general.dialogWaitDelay}
+                    value={general.dialogWaitDelay}
+                    placeholder={defaultSettings.general.dialogWaitDelay}
                     onValueChange={(value) => {
-                        bsc.setSettings({ ...bsc.settings, general: { ...bsc.settings.general, dialogWaitDelay: value } })
+                        updateGeneral({ dialogWaitDelay: value })
                     }}
                     onSlidingComplete={(value) => {
-                        bsc.setSettings({ ...bsc.settings, general: { ...bsc.settings.general, dialogWaitDelay: value } })
+                        updateGeneral({ dialogWaitDelay: value })
                     }}
                     min={0.0}
                     max={1.0}
@@ -401,13 +375,13 @@ const Settings = () => {
 
                 <CustomSlider
                     searchId="settings-overlay-button-size"
-                    value={bsc.settings.misc.overlayButtonSizeDP}
-                    placeholder={bsc.defaultSettings.misc.overlayButtonSizeDP}
+                    value={misc.overlayButtonSizeDP}
+                    placeholder={defaultSettings.misc.overlayButtonSizeDP}
                     onValueChange={(value) => {
-                        bsc.setSettings({ ...bsc.settings, misc: { ...bsc.settings.misc, overlayButtonSizeDP: value } })
+                        updateMisc({ overlayButtonSizeDP: value })
                     }}
                     onSlidingComplete={(value) => {
-                        bsc.setSettings({ ...bsc.settings, misc: { ...bsc.settings.misc, overlayButtonSizeDP: value } })
+                        updateMisc({ overlayButtonSizeDP: value })
                     }}
                     min={30}
                     max={60}
@@ -487,9 +461,9 @@ const Settings = () => {
                         setSnackbarOpen(false)
                     },
                 }}
-                style={{ backgroundColor: bsc.readyStatus ? "green" : "red", borderRadius: 10 }}
+                style={{ backgroundColor: readyStatus ? "green" : "red", borderRadius: 10 }}
             >
-                {bsc.readyStatus ? "Bot is ready!" : "Bot is not ready!"}
+                {readyStatus ? "Bot is ready!" : "Bot is not ready!"}
             </Snackbar>
 
             {/* Restart Dialog */}

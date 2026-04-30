@@ -1,8 +1,8 @@
-import { useMemo, useContext, useRef } from "react"
+import { useMemo, useContext, useRef, useCallback } from "react"
 import { View, Text, TextInput, ScrollView, StyleSheet } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { useTheme } from "../../context/ThemeContext"
-import { BotStateContext, defaultSettings } from "../../context/BotStateContext"
+import { RacingContext, defaultSettings, Settings } from "../../context/BotStateContext"
 import { SearchPageProvider } from "../../context/SearchPageContext"
 import CustomCheckbox from "../../components/CustomCheckbox"
 import CustomSelect from "../../components/CustomSelect"
@@ -23,12 +23,11 @@ const RacingSettings = () => {
     usePerformanceLogging("RacingSettings")
     const { colors } = useTheme()
     const navigation = useNavigation()
-    const bsc = useContext(BotStateContext)
+    const { racing, updateRacing } = useContext(RacingContext)
     const scrollViewRef = useRef<ScrollView>(null)
 
-    const { settings, setSettings } = bsc
     // Merge current racing settings with defaults to handle missing properties.
-    const racingSettings = { ...defaultSettings.racing, ...settings.racing }
+    const racingSettings = { ...defaultSettings.racing, ...racing }
     const {
         enableFarmingFans,
         ignoreConsecutiveRaceWarning,
@@ -56,28 +55,22 @@ const RacingSettings = () => {
      * @param key The key of the setting to update.
      * @param value The value to set the setting to.
      */
-    const updateRacingSetting = (key: keyof typeof settings.racing, value: any) => {
-        if (key === "enableUserInGameRaceAgenda" && value) {
-            setSettings({
-                ...bsc.settings,
-                racing: {
+    const updateRacingSetting = useCallback(
+        (key: keyof Settings["racing"], value: any) => {
+            if (key === "enableUserInGameRaceAgenda" && value) {
+                updateRacing((prev) => ({
                     // Disable Farming Fans and the Smart Race Solver when User In Game Race Agenda is enabled.
-                    ...bsc.settings.racing,
+                    ...prev,
                     enableFarmingFans: false,
                     enableUserInGameRaceAgenda: true,
                     enableSmartRaceSolver: false,
-                },
-            })
-        } else {
-            setSettings({
-                ...bsc.settings,
-                racing: {
-                    ...bsc.settings.racing,
-                    [key]: value,
-                },
-            })
-        }
-    }
+                }))
+            } else {
+                updateRacing({ [key]: value } as Partial<Settings["racing"]>)
+            }
+        },
+        [updateRacing]
+    )
 
     const styles = useMemo(
         () =>

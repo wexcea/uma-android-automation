@@ -2,7 +2,7 @@ import React, { useMemo, useContext, useEffect, useState, useRef, useCallback } 
 import { View, Text, ScrollView, StyleSheet, Modal, TouchableOpacity, Dimensions } from "react-native"
 import { Snackbar } from "react-native-paper"
 import { useTheme } from "../../context/ThemeContext"
-import { BotStateContext, defaultSettings, Settings } from "../../context/BotStateContext"
+import { TrainingContext, GeneralMiscContext, BotMetaContext, defaultSettings, Settings } from "../../context/BotStateContext"
 import CustomButton from "../../components/CustomButton"
 import CustomSlider from "../../components/CustomSlider"
 import CustomCheckbox from "../../components/CustomCheckbox"
@@ -19,6 +19,7 @@ import PageHeader from "../../components/PageHeader"
 import { SearchPageProvider } from "../../context/SearchPageContext"
 import SearchableItem from "../../components/SearchableItem"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
+import { shallowArrayEqual } from "../../lib/utils"
 import WarningContainer from "../../components/WarningContainer"
 
 /**
@@ -29,27 +30,33 @@ import WarningContainer from "../../components/WarningContainer"
 const TrainingSettings = () => {
     usePerformanceLogging("TrainingSettings")
     const { colors } = useTheme()
-    const bsc = useContext(BotStateContext)
+    const { training, trainingStatTarget, updateTraining, updateTrainingStatTarget: updateStatTargetSlice } = useContext(TrainingContext)
+    const { misc, updateMisc } = useContext(GeneralMiscContext)
+    const { setSettings } = useContext(BotMetaContext)
     const scrollViewRef = useRef<ScrollView>(null)
     const { saveSettingsImmediate } = useSettings()
     const { currentProfileName } = useProfileManager()
     const [blacklistModalVisible, setBlacklistModalVisible] = useState(false)
     const [prioritizationModalVisible, setPrioritizationModalVisible] = useState(false)
+    const [eventChoicePrioritizationModalVisible, setEventChoicePrioritizationModalVisible] = useState(false)
+    const [summerTrainingPrioritizationModalVisible, setSummerTrainingPrioritizationModalVisible] = useState(false)
     const [sparkStatTargetModalVisible, setSparkStatTargetModalVisible] = useState(false)
     const [snackbarVisible, setSnackbarVisible] = useState(false)
     const [snackbarMessage, setSnackbarMessage] = useState("")
 
-    const { settings, setSettings } = bsc
-
     // Initialize local state from settings, with fallback to defaults.
     const [statPrioritizationItems, setStatPrioritizationItems] = useState<string[]>(() =>
-        settings.training?.statPrioritization !== undefined ? settings.training.statPrioritization : defaultSettings.training.statPrioritization
+        training?.statPrioritization !== undefined ? training.statPrioritization : defaultSettings.training.statPrioritization
     )
-    const [blacklistItems, setBlacklistItems] = useState<string[]>(() =>
-        settings.training?.trainingBlacklist !== undefined ? settings.training.trainingBlacklist : defaultSettings.training.trainingBlacklist
+    const [eventChoiceStatPriorityItems, setEventChoiceStatPriorityItems] = useState<string[]>(() =>
+        training?.eventChoiceStatPriority !== undefined ? training.eventChoiceStatPriority : defaultSettings.training.eventChoiceStatPriority
     )
+    const [summerTrainingStatPriorityItems, setSummerTrainingStatPriorityItems] = useState<string[]>(() =>
+        training?.summerTrainingStatPriority !== undefined ? training.summerTrainingStatPriority : defaultSettings.training.summerTrainingStatPriority
+    )
+    const [blacklistItems, setBlacklistItems] = useState<string[]>(() => (training?.trainingBlacklist !== undefined ? training.trainingBlacklist : defaultSettings.training.trainingBlacklist))
     const [sparkStatTargetItems, setSparkStatTargetItems] = useState<string[]>(() => {
-        const value = settings.training?.focusOnSparkStatTarget
+        const value = training?.focusOnSparkStatTarget
         // Ensure we always have an array (migration should handle this, but be safe).
         if (Array.isArray(value)) {
             return value
@@ -65,15 +72,17 @@ const TrainingSettings = () => {
     const trainingSettings = useMemo(
         () => ({
             ...defaultSettings.training,
-            ...settings.training,
+            ...training,
             trainingBlacklist: blacklistItems,
             statPrioritization: statPrioritizationItems,
+            eventChoiceStatPriority: eventChoiceStatPriorityItems,
+            summerTrainingStatPriority: summerTrainingStatPriorityItems,
             focusOnSparkStatTarget: sparkStatTargetItems,
         }),
-        [settings.training, blacklistItems, statPrioritizationItems, sparkStatTargetItems]
+        [training, blacklistItems, statPrioritizationItems, eventChoiceStatPriorityItems, summerTrainingStatPriorityItems, sparkStatTargetItems]
     )
 
-    const trainingStatTargetSettings = useMemo(() => ({ ...defaultSettings.trainingStatTarget, ...settings.trainingStatTarget }), [settings.trainingStatTarget])
+    const trainingStatTargetSettings = useMemo(() => ({ ...defaultSettings.trainingStatTarget, ...trainingStatTarget }), [trainingStatTarget])
 
     const {
         maximumFailureChance,
@@ -94,8 +103,7 @@ const TrainingSettings = () => {
     // We also verify that the values are actually different before triggering an update.
     useEffect(() => {
         if (isMounted.current) {
-            const currentVal = settings.training?.statPrioritization
-            if (JSON.stringify(currentVal) !== JSON.stringify(statPrioritizationItems)) {
+            if (!shallowArrayEqual(training?.statPrioritization, statPrioritizationItems)) {
                 updateTrainingSetting("statPrioritization", statPrioritizationItems)
             }
         }
@@ -103,8 +111,23 @@ const TrainingSettings = () => {
 
     useEffect(() => {
         if (isMounted.current) {
-            const currentVal = settings.training?.trainingBlacklist
-            if (JSON.stringify(currentVal) !== JSON.stringify(blacklistItems)) {
+            if (!shallowArrayEqual(training?.eventChoiceStatPriority, eventChoiceStatPriorityItems)) {
+                updateTrainingSetting("eventChoiceStatPriority", eventChoiceStatPriorityItems)
+            }
+        }
+    }, [eventChoiceStatPriorityItems])
+
+    useEffect(() => {
+        if (isMounted.current) {
+            if (!shallowArrayEqual(training?.summerTrainingStatPriority, summerTrainingStatPriorityItems)) {
+                updateTrainingSetting("summerTrainingStatPriority", summerTrainingStatPriorityItems)
+            }
+        }
+    }, [summerTrainingStatPriorityItems])
+
+    useEffect(() => {
+        if (isMounted.current) {
+            if (!shallowArrayEqual(training?.trainingBlacklist, blacklistItems)) {
                 updateTrainingSetting("trainingBlacklist", blacklistItems)
             }
         }
@@ -112,8 +135,7 @@ const TrainingSettings = () => {
 
     useEffect(() => {
         if (isMounted.current) {
-            const currentVal = settings.training?.focusOnSparkStatTarget
-            if (JSON.stringify(currentVal) !== JSON.stringify(sparkStatTargetItems)) {
+            if (!shallowArrayEqual(training?.focusOnSparkStatTarget, sparkStatTargetItems)) {
                 updateTrainingSetting("focusOnSparkStatTarget", sparkStatTargetItems)
             }
         }
@@ -126,39 +148,47 @@ const TrainingSettings = () => {
 
     // Sync local state when settings change (e.g., when switching profiles).
     useEffect(() => {
-        const newVal = settings.training?.trainingBlacklist
-        if (newVal !== undefined && JSON.stringify(newVal) !== JSON.stringify(blacklistItems)) {
+        const newVal = training?.trainingBlacklist
+        if (newVal !== undefined && !shallowArrayEqual(newVal, blacklistItems)) {
             setBlacklistItems(newVal)
         }
-    }, [settings.training?.trainingBlacklist])
+    }, [training?.trainingBlacklist])
 
     useEffect(() => {
-        const newVal = settings.training?.statPrioritization
-        if (newVal !== undefined && JSON.stringify(newVal) !== JSON.stringify(statPrioritizationItems)) {
+        const newVal = training?.statPrioritization
+        if (newVal !== undefined && !shallowArrayEqual(newVal, statPrioritizationItems)) {
             setStatPrioritizationItems(newVal)
         }
-    }, [settings.training?.statPrioritization])
+    }, [training?.statPrioritization])
 
     useEffect(() => {
-        const newVal = settings.training?.focusOnSparkStatTarget
-        if (newVal !== undefined && Array.isArray(newVal) && JSON.stringify(newVal) !== JSON.stringify(sparkStatTargetItems)) {
+        const newVal = training?.eventChoiceStatPriority
+        if (newVal !== undefined && !shallowArrayEqual(newVal, eventChoiceStatPriorityItems)) {
+            setEventChoiceStatPriorityItems(newVal)
+        }
+    }, [training?.eventChoiceStatPriority])
+
+    useEffect(() => {
+        const newVal = training?.summerTrainingStatPriority
+        if (newVal !== undefined && !shallowArrayEqual(newVal, summerTrainingStatPriorityItems)) {
+            setSummerTrainingStatPriorityItems(newVal)
+        }
+    }, [training?.summerTrainingStatPriority])
+
+    useEffect(() => {
+        const newVal = training?.focusOnSparkStatTarget
+        if (newVal !== undefined && Array.isArray(newVal) && !shallowArrayEqual(newVal, sparkStatTargetItems)) {
             setSparkStatTargetItems(newVal)
         }
-    }, [settings.training?.focusOnSparkStatTarget])
+    }, [training?.focusOnSparkStatTarget])
 
     // Sync currentProfileName from profile manager to settings context.
     // This is now purely for the BotStateContext as the ProfileContext is the source of truth for the UI.
     useEffect(() => {
         const syncProfileName = async () => {
             const profileName = currentProfileName || ""
-            if (settings.misc.currentProfileName !== profileName) {
-                setSettings((prev) => ({
-                    ...prev,
-                    misc: {
-                        ...prev.misc,
-                        currentProfileName: profileName,
-                    },
-                }))
+            if (misc.currentProfileName !== profileName) {
+                updateMisc({ currentProfileName: profileName })
             }
         }
         syncProfileName()
@@ -170,16 +200,10 @@ const TrainingSettings = () => {
      * @param value The value to set the setting to.
      */
     const updateTrainingSetting = useCallback(
-        (key: keyof typeof settings.training, value: any) => {
-            setSettings((prev) => ({
-                ...prev,
-                training: {
-                    ...prev.training,
-                    [key]: value,
-                },
-            }))
+        (key: keyof Settings["training"], value: any) => {
+            updateTraining({ [key]: value } as Partial<Settings["training"]>)
         },
-        [setSettings]
+        [updateTraining]
     )
 
     /**
@@ -201,7 +225,7 @@ const TrainingSettings = () => {
             } as Settings
 
             // Apply migrations to the merged settings.
-            const { settings: migratedSettings } = applyMigrations(mergedSettings)
+            const { settings: migratedSettings } = applyMigrations(mergedSettings, profileSettings)
 
             // Create the updated settings object with the migrated profile settings.
             const updatedSettings = {
@@ -224,20 +248,15 @@ const TrainingSettings = () => {
 
     /**
      * Update a training stat target setting in the global bot state.
+     * Wraps the slice updater so call sites can pass `(key, value)` rather than a partial object.
      * @param key The key of the stat target setting to update.
      * @param value The value to set the target to.
      */
     const updateTrainingStatTarget = useCallback(
-        (key: keyof typeof settings.trainingStatTarget, value: any) => {
-            setSettings((prev) => ({
-                ...prev,
-                trainingStatTarget: {
-                    ...prev.trainingStatTarget,
-                    [key]: value,
-                },
-            }))
+        (key: keyof Settings["trainingStatTarget"], value: any) => {
+            updateStatTargetSlice({ [key]: value } as Partial<Settings["trainingStatTarget"]>)
         },
-        [setSettings]
+        [updateStatTargetSlice]
     )
 
     const styles = useMemo(
@@ -496,6 +515,28 @@ const TrainingSettings = () => {
                             "Select the priority order of the stats. The stats will be trained in the order they are selected. If none are selected, then the default order will be used.",
                             "priority",
                             "training-prioritization"
+                        )}
+
+                        {renderStatSelector(
+                            "Event Choice Prioritization",
+                            eventChoiceStatPriorityItems,
+                            (value) => setEventChoiceStatPriorityItems(value),
+                            eventChoicePrioritizationModalVisible,
+                            setEventChoicePrioritizationModalVisible,
+                            "Select the priority order of stats used when scoring in-game event choices. Events typically grant flat stat gains, so a different ordering than regular training may be optimal.",
+                            "priority",
+                            "event-choice-stat-priority"
+                        )}
+
+                        {renderStatSelector(
+                            "Summer Training Prioritization",
+                            summerTrainingStatPriorityItems,
+                            (value) => setSummerTrainingStatPriorityItems(value),
+                            summerTrainingPrioritizationModalVisible,
+                            setSummerTrainingPrioritizationModalVisible,
+                            "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer with no facility progression, so a different ordering than regular training may be optimal.",
+                            "priority",
+                            "summer-training-stat-priority"
                         )}
 
                         <View style={styles.section}>
