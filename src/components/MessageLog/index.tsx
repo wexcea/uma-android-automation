@@ -257,6 +257,20 @@ const MessageLog = () => {
         const smartRaceSolverTargetCount = safeJsonLength(settings.racing.smartRaceSolverTargetEpithets)
         const smartRaceSolverForcedCount = safeJsonLength(settings.racing.smartRaceSolverForcedEpithets)
         const smartRaceSolverLockCount = safeJsonLength(settings.racing.smartRaceSolverManualLocks)
+        const smartRaceSolverWeightsObj = (() => {
+            try {
+                return JSON.parse(settings.racing.smartRaceSolverWeights || "{}") as Record<string, number | string>
+            } catch {
+                return {} as Record<string, number | string>
+            }
+        })()
+        const smartRaceSolverAptitudesObj = (() => {
+            try {
+                return JSON.parse(settings.racing.smartRaceSolverAptitudes || "{}") as Record<string, string>
+            } catch {
+                return {} as Record<string, string>
+            }
+        })()
 
         return `🏁 Campaign Selected: ${settings.general.scenario !== "" ? `${settings.general.scenario}` : "Please select one in the Select Campaign option"}
 👤 Profile Selected: ${settings.misc.currentProfileName ? `${settings.misc.currentProfileName}` : "Default Profile"}
@@ -343,6 +357,8 @@ ${longTargetsString}
 🎯 Classic/Senior Year Race Strategy: ${settings.racing.enablePerDistanceStrategy ? `[Short: ${settings.racing.originalPerDistanceStrategies?.Short ?? "Default"}, Mile: ${settings.racing.originalPerDistanceStrategies?.Mile ?? "Default"}, Medium: ${settings.racing.originalPerDistanceStrategies?.Medium ?? "Default"}, Long: ${settings.racing.originalPerDistanceStrategies?.Long ?? "Default"}]` : settings.racing.originalRaceStrategy}
 🤖 Enable Smart Race Solver: ${settings.racing.enableSmartRaceSolver ? "✅" : "❌"}
 🎭 Solver Character Preset: ${settings.racing.smartRaceSolverCharacterPreset || "(none)"}
+🐎 Solver Aptitudes: Spr ${smartRaceSolverAptitudesObj.Sprint ?? "?"}, Mile ${smartRaceSolverAptitudesObj.Mile ?? "?"}, Med ${smartRaceSolverAptitudesObj.Medium ?? "?"}, Lng ${smartRaceSolverAptitudesObj.Long ?? "?"}, Trf ${smartRaceSolverAptitudesObj.Turf ?? "?"}, Drt ${smartRaceSolverAptitudesObj.Dirt ?? "?"}
+⚖️ Solver Weights: race ${smartRaceSolverWeightsObj.raceValue ?? "?"}, epithet ${smartRaceSolverWeightsObj.epithetValue ?? "?"}, hint ${smartRaceSolverWeightsObj.hintWeight ?? "?"}, consec −${smartRaceSolverWeightsObj.consecutiveRacePenalty ?? "?"}, summer −${smartRaceSolverWeightsObj.summerPenalty ?? "?"}, raceBonus ${smartRaceSolverWeightsObj.raceBonusPct ?? "?"}%, raceCost ${smartRaceSolverWeightsObj.raceCostPct ?? "?"}%, threshold ${smartRaceSolverWeightsObj.aptitudeThreshold ?? "?"}, includeOP ${smartRaceSolverWeightsObj.includeOpAndPreOp ? "✅" : "❌"}, summerRacing ${smartRaceSolverWeightsObj.allowSummerRacing ? "✅" : "❌"}
 🎯 Solver Target Epithets: ${smartRaceSolverTargetCount} selected
 🚨 Solver Forced Epithets: ${smartRaceSolverForcedCount} selected
 🔒 Solver Manual Turn Locks: ${smartRaceSolverLockCount} locked turn(s)
@@ -419,9 +435,9 @@ ${longTargetsString}
     }, [])
 
     // Debounced state for the formatted settings banner. Recomputing the ~30-line template
-    // literal (including `JSON.parse(racingPlan)` and `Object.keys(...)` over each override map)
-    // synchronously on every settings change was making toggles feel sluggish once the user
-    // imported a populated settings file. We now compute it 250ms after the last settings
+    // literal (including `JSON.parse` calls on the smart-race-solver fields and `Object.keys(...)`
+    // over each override map) synchronously on every settings change was making toggles feel
+    // sluggish once the user imported a populated settings file. We now compute it 250ms after the last settings
     // change, off the toggle's render commit. The intro/log path keeps using the previous
     // value until the new one lands; downstream memos bail out via `Object.is`.
     const [formattedSettingsString, setFormattedSettingsString] = useState<string>(() => buildFormattedSettings(bsc.settings))
