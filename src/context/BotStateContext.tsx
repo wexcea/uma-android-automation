@@ -127,6 +127,8 @@ export interface Settings {
     training: {
         trainingBlacklist: string[]
         statPrioritization: string[]
+        eventChoiceStatPriority: string[]
+        summerTrainingStatPriority: string[]
         maximumFailureChance: number
         disableTrainingOnMaxedStat: boolean
         focusOnSparkStatTarget: string[]
@@ -368,6 +370,8 @@ export const defaultSettings: Settings = {
     training: {
         trainingBlacklist: [],
         statPrioritization: ["Speed", "Stamina", "Power", "Wit", "Guts"],
+        eventChoiceStatPriority: ["Speed", "Stamina", "Power", "Wit", "Guts"],
+        summerTrainingStatPriority: ["Speed", "Stamina", "Power", "Wit", "Guts"],
         maximumFailureChance: 20,
         disableTrainingOnMaxedStat: true,
         focusOnSparkStatTarget: ["Speed", "Stamina", "Power"],

@@ -621,7 +621,7 @@ class TrainingEvent(private val game: Game, private val campaign: Campaign) {
                                 selectionWeight[rewardIndex] += finalSkillPoints
                             } else {
                                 // Apply inflated weights to the prioritized stats based on their order.
-                                campaign.training.statPrioritization.forEachIndexed { index, stat ->
+                                campaign.training.eventChoiceStatPriority.forEachIndexed { index, stat ->
                                     if (line.lowercase().contains(stat.name.lowercase())) {
                                         // Calculate weight bonus based on position (higher priority = higher bonus).
                                         val priorityBonus =

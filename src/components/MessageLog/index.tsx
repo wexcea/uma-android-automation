@@ -285,6 +285,16 @@ const MessageLog = () => {
 📊 Stat Prioritization: ${
             settings.training.statPrioritization.length === 0 ? "Using Default Stat Prioritization: Speed, Stamina, Power, Wit, Guts" : `${settings.training.statPrioritization.join(", ")}`
         }
+🎴 Event Choice Stat Priority: ${
+            settings.training.eventChoiceStatPriority.length === 0
+                ? "Using Default Event Choice Stat Priority: Speed, Stamina, Power, Wit, Guts"
+                : `${settings.training.eventChoiceStatPriority.join(", ")}`
+        }
+☀️ Summer Training Stat Priority: ${
+            settings.training.summerTrainingStatPriority.length === 0
+                ? "Using Default Summer Training Stat Priority: Speed, Stamina, Power, Wit, Guts"
+                : `${settings.training.summerTrainingStatPriority.join(", ")}`
+        }
 🔍 Maximum Failure Chance Allowed: ${settings.training.maximumFailureChance}%
 ⚠️ Enable Riskier Training: ${settings.training.enableRiskyTraining ? "✅" : "❌"}${
             settings.training.enableRiskyTraining

@@ -38,6 +38,8 @@ const TrainingSettings = () => {
     const { currentProfileName } = useProfileManager()
     const [blacklistModalVisible, setBlacklistModalVisible] = useState(false)
     const [prioritizationModalVisible, setPrioritizationModalVisible] = useState(false)
+    const [eventChoicePrioritizationModalVisible, setEventChoicePrioritizationModalVisible] = useState(false)
+    const [summerTrainingPrioritizationModalVisible, setSummerTrainingPrioritizationModalVisible] = useState(false)
     const [sparkStatTargetModalVisible, setSparkStatTargetModalVisible] = useState(false)
     const [snackbarVisible, setSnackbarVisible] = useState(false)
     const [snackbarMessage, setSnackbarMessage] = useState("")
@@ -45,6 +47,12 @@ const TrainingSettings = () => {
     // Initialize local state from settings, with fallback to defaults.
     const [statPrioritizationItems, setStatPrioritizationItems] = useState<string[]>(() =>
         training?.statPrioritization !== undefined ? training.statPrioritization : defaultSettings.training.statPrioritization
+    )
+    const [eventChoiceStatPriorityItems, setEventChoiceStatPriorityItems] = useState<string[]>(() =>
+        training?.eventChoiceStatPriority !== undefined ? training.eventChoiceStatPriority : defaultSettings.training.eventChoiceStatPriority
+    )
+    const [summerTrainingStatPriorityItems, setSummerTrainingStatPriorityItems] = useState<string[]>(() =>
+        training?.summerTrainingStatPriority !== undefined ? training.summerTrainingStatPriority : defaultSettings.training.summerTrainingStatPriority
     )
     const [blacklistItems, setBlacklistItems] = useState<string[]>(() => (training?.trainingBlacklist !== undefined ? training.trainingBlacklist : defaultSettings.training.trainingBlacklist))
     const [sparkStatTargetItems, setSparkStatTargetItems] = useState<string[]>(() => {
@@ -67,9 +75,11 @@ const TrainingSettings = () => {
             ...training,
             trainingBlacklist: blacklistItems,
             statPrioritization: statPrioritizationItems,
+            eventChoiceStatPriority: eventChoiceStatPriorityItems,
+            summerTrainingStatPriority: summerTrainingStatPriorityItems,
             focusOnSparkStatTarget: sparkStatTargetItems,
         }),
-        [training, blacklistItems, statPrioritizationItems, sparkStatTargetItems]
+        [training, blacklistItems, statPrioritizationItems, eventChoiceStatPriorityItems, summerTrainingStatPriorityItems, sparkStatTargetItems]
     )
 
     const trainingStatTargetSettings = useMemo(() => ({ ...defaultSettings.trainingStatTarget, ...trainingStatTarget }), [trainingStatTarget])
@@ -98,6 +108,22 @@ const TrainingSettings = () => {
             }
         }
     }, [statPrioritizationItems])
+
+    useEffect(() => {
+        if (isMounted.current) {
+            if (!shallowArrayEqual(training?.eventChoiceStatPriority, eventChoiceStatPriorityItems)) {
+                updateTrainingSetting("eventChoiceStatPriority", eventChoiceStatPriorityItems)
+            }
+        }
+    }, [eventChoiceStatPriorityItems])
+
+    useEffect(() => {
+        if (isMounted.current) {
+            if (!shallowArrayEqual(training?.summerTrainingStatPriority, summerTrainingStatPriorityItems)) {
+                updateTrainingSetting("summerTrainingStatPriority", summerTrainingStatPriorityItems)
+            }
+        }
+    }, [summerTrainingStatPriorityItems])
 
     useEffect(() => {
         if (isMounted.current) {
@@ -134,6 +160,20 @@ const TrainingSettings = () => {
             setStatPrioritizationItems(newVal)
         }
     }, [training?.statPrioritization])
+
+    useEffect(() => {
+        const newVal = training?.eventChoiceStatPriority
+        if (newVal !== undefined && !shallowArrayEqual(newVal, eventChoiceStatPriorityItems)) {
+            setEventChoiceStatPriorityItems(newVal)
+        }
+    }, [training?.eventChoiceStatPriority])
+
+    useEffect(() => {
+        const newVal = training?.summerTrainingStatPriority
+        if (newVal !== undefined && !shallowArrayEqual(newVal, summerTrainingStatPriorityItems)) {
+            setSummerTrainingStatPriorityItems(newVal)
+        }
+    }, [training?.summerTrainingStatPriority])
 
     useEffect(() => {
         const newVal = training?.focusOnSparkStatTarget
@@ -185,7 +225,7 @@ const TrainingSettings = () => {
             } as Settings
 
             // Apply migrations to the merged settings.
-            const { settings: migratedSettings } = applyMigrations(mergedSettings)
+            const { settings: migratedSettings } = applyMigrations(mergedSettings, profileSettings)
 
             // Create the updated settings object with the migrated profile settings.
             const updatedSettings = {
@@ -475,6 +515,28 @@ const TrainingSettings = () => {
                             "Select the priority order of the stats. The stats will be trained in the order they are selected. If none are selected, then the default order will be used.",
                             "priority",
                             "training-prioritization"
+                        )}
+
+                        {renderStatSelector(
+                            "Event Choice Prioritization",
+                            eventChoiceStatPriorityItems,
+                            (value) => setEventChoiceStatPriorityItems(value),
+                            eventChoicePrioritizationModalVisible,
+                            setEventChoicePrioritizationModalVisible,
+                            "Select the priority order of stats used when scoring in-game event choices. Events typically grant flat stat gains, so a different ordering than regular training may be optimal.",
+                            "priority",
+                            "event-choice-stat-priority"
+                        )}
+
+                        {renderStatSelector(
+                            "Summer Training Prioritization",
+                            summerTrainingStatPriorityItems,
+                            (value) => setSummerTrainingStatPriorityItems(value),
+                            summerTrainingPrioritizationModalVisible,
+                            setSummerTrainingPrioritizationModalVisible,
+                            "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer with no facility progression, so a different ordering than regular training may be optimal.",
+                            "priority",
+                            "summer-training-stat-priority"
                         )}
 
                         <View style={styles.section}>

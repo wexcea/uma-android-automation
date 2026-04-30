@@ -47,10 +47,12 @@ export const convertSettingsToBatch = (settings: Record<string, any>) => {
 
 /**
  * Applies all registered migrations to the Settings object.
- * @param settings - The Settings object to apply migrations to.
+ * @param settings - The Settings object to apply migrations to (already merged with defaults).
+ * @param rawSettings - Optional raw settings (pre-merge) used to detect fields that were absent in the persisted store.
+ *   Required by migrations that need to distinguish "user never set this" from "user set this to the default value".
  * @returns An object containing the migrated Settings object and a boolean indicating whether any migrations were applied.
  */
-export const applyMigrations = (settings: any): { settings: any; anyMigrated: boolean } => {
+export const applyMigrations = (settings: any, rawSettings?: any): { settings: any; anyMigrated: boolean } => {
     let anyMigrated = false
     let migratedSettings = settings
 
@@ -89,6 +91,24 @@ export const applyMigrations = (settings: any): { settings: any; anyMigrated: bo
     // After moving all OCR settings, delete the empty ocr object.
     if (migratedSettings && (migratedSettings as any).ocr && Object.keys((migratedSettings as any).ocr).length === 0) {
         delete (migratedSettings as any).ocr
+    }
+
+    // Migration: Mirror statPrioritization into eventChoiceStatPriority and summerTrainingStatPriority for users
+    // upgrading from a version that only had a single stat priority list. The new keys are absent in the persisted
+    // settings, so deepMerge fills them with the canonical default — but we want them to match the user's main list.
+    const rawTraining = rawSettings?.training as any
+    const training = migratedSettings.training as any
+    if (training && rawTraining) {
+        if (rawTraining.eventChoiceStatPriority === undefined && Array.isArray(training.statPrioritization)) {
+            training.eventChoiceStatPriority = [...training.statPrioritization]
+            anyMigrated = true
+            logWithTimestamp("[SettingsManager] Mirrored statPrioritization into eventChoiceStatPriority for upgrade.")
+        }
+        if (rawTraining.summerTrainingStatPriority === undefined && Array.isArray(training.statPrioritization)) {
+            training.summerTrainingStatPriority = [...training.statPrioritization]
+            anyMigrated = true
+            logWithTimestamp("[SettingsManager] Mirrored statPrioritization into summerTrainingStatPriority for upgrade.")
+        }
     }
 
     // Migration: Convert single stopAtDate string to stopAtDates array.
