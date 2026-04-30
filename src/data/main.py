@@ -1284,8 +1284,28 @@ class CharacterPresetScraper(BaseScraper):
     def __init__(self):
         super().__init__("https://gametora.com/umamusume/characters", "characterPresets.json")
 
+    def _load_released_en_names(self) -> Optional[set]:
+        """Fetches the gametora characters manifest and returns the set of EN-playable names.
+
+        Gametora ships a static JSON dataset at `data/umamusume/characters.<hash>.json`; each
+        entry has a `playable_en` flag indicating whether the character is on the EN/global
+        server. Returns None on any failure so the caller can fall back to scraping every
+        character page (the legacy behaviour) without crashing.
+        """
+        try:
+            manifest = requests.get(GAMETORA_MANIFESTS_URL, timeout=15).json()
+            char_hash = manifest.get("characters")
+            if not char_hash:
+                return None
+            url = f"{GAMETORA_MANIFEST_DATA_BASE_URL}/characters.{char_hash}.json"
+            chars = requests.get(url, timeout=20).json()
+            return set(c["en_name"] for c in chars if c.get("playable_en") and c.get("en_name"))
+        except Exception as e:
+            logging.warning(f"Failed to fetch released-EN character list from manifest: {e}")
+            return None
+
     def start(self):
-        """Walks every character page and extracts the aptitude grades."""
+        """Walks every released-EN character page and extracts the aptitude grades."""
         driver = create_chromedriver()
         driver.get(self.url)
         time.sleep(5)
@@ -1300,6 +1320,13 @@ class CharacterPresetScraper(BaseScraper):
 
         all_links = character_grid.find_elements(By.CSS_SELECTOR, "a[href^='/umamusume/characters/']")
         character_links = [item.get_attribute("href") for item in all_links if item.is_displayed()]
+
+        # Filter to only characters that are playable on the EN/global server. Without this,
+        # the scraper produces presets for ~150 characters including JP-only / unreleased ones
+        # that the user can never actually pick in their game.
+        released_en = self._load_released_en_names()
+        if released_en is not None:
+            logging.info(f"Loaded {len(released_en)} EN-playable character names from manifest.")
 
         if IS_DELTA:
             character_links = character_links[:DELTA_BACKLOG_COUNT]
@@ -1317,6 +1344,10 @@ class CharacterPresetScraper(BaseScraper):
                 name = name.replace("(Original)", "").strip()
                 name = re.sub(r"\s*\(.*?\)", "", name).strip()
                 if not name:
+                    continue
+
+                if released_en is not None and name not in released_en:
+                    logging.info(f"Skipping {name}: not playable on EN server.")
                     continue
 
                 aptitudes = self._extract_aptitudes(driver)
