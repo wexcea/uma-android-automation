@@ -51,97 +51,6 @@
             "Dirt": "G"
         }
     },
-    "Air Messiah": {
-        "name": "Air Messiah",
-        "distanceAptitudes": {
-            "Sprint": "C",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Air Shakur": {
-        "name": "Air Shakur",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "E",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Almond Eye": {
-        "name": "Almond Eye",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "F"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Aston Machan": {
-        "name": "Aston Machan",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "B",
-            "Medium": "G",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Bamboo Memory": {
-        "name": "Bamboo Memory",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "A",
-            "Medium": "C",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "D"
-        }
-    },
-    "Believe": {
-        "name": "Believe",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "D",
-            "Medium": "G",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Biko Pegasus": {
-        "name": "Biko Pegasus",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "B",
-            "Medium": "G",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "E"
-        }
-    },
     "Biwa Hayahide": {
         "name": "Biwa Hayahide",
         "distanceAptitudes": {
@@ -153,97 +62,6 @@
         "surfaceAptitudes": {
             "Turf": "A",
             "Dirt": "F"
-        }
-    },
-    "Bubble Gum Fellow": {
-        "name": "Bubble Gum Fellow",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Buena Vista": {
-        "name": "Buena Vista",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "C"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "F"
-        }
-    },
-    "Calstone Light O": {
-        "name": "Calstone Light O",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "D",
-            "Medium": "G",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Cesario": {
-        "name": "Cesario",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "F"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Cheval Grand": {
-        "name": "Cheval Grand",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "G",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Chrono Genesis": {
-        "name": "Chrono Genesis",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Copano Rickey": {
-        "name": "Copano Rickey",
-        "distanceAptitudes": {
-            "Sprint": "C",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "F",
-            "Dirt": "A"
         }
     },
     "Curren Chan": {
@@ -259,32 +77,6 @@
             "Dirt": "F"
         }
     },
-    "Daiichi Ruby": {
-        "name": "Daiichi Ruby",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "A",
-            "Medium": "C",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Daitaku Helios": {
-        "name": "Daitaku Helios",
-        "distanceAptitudes": {
-            "Sprint": "B",
-            "Mile": "A",
-            "Medium": "B",
-            "Long": "E"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Daiwa Scarlet": {
         "name": "Daiwa Scarlet",
         "distanceAptitudes": {
@@ -292,58 +84,6 @@
             "Mile": "A",
             "Medium": "A",
             "Long": "B"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Dantsu Flame": {
-        "name": "Dantsu Flame",
-        "distanceAptitudes": {
-            "Sprint": "E",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "D"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "F"
-        }
-    },
-    "Dream Journey": {
-        "name": "Dream Journey",
-        "distanceAptitudes": {
-            "Sprint": "F",
-            "Mile": "C",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Duramente": {
-        "name": "Duramente",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "C"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Durandal": {
-        "name": "Durandal",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "A",
-            "Medium": "F",
-            "Long": "G"
         },
         "surfaceAptitudes": {
             "Turf": "A",
@@ -376,32 +116,6 @@
             "Dirt": "B"
         }
     },
-    "Espoir City": {
-        "name": "Espoir City",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "A",
-            "Medium": "B",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "E",
-            "Dirt": "A"
-        }
-    },
-    "Fenomeno": {
-        "name": "Fenomeno",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "G",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Fine Motion": {
         "name": "Fine Motion",
         "distanceAptitudes": {
@@ -428,45 +142,6 @@
             "Dirt": "F"
         }
     },
-    "Furioso": {
-        "name": "Furioso",
-        "distanceAptitudes": {
-            "Sprint": "F",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "F"
-        },
-        "surfaceAptitudes": {
-            "Turf": "G",
-            "Dirt": "A"
-        }
-    },
-    "Fusaichi Pandora": {
-        "name": "Fusaichi Pandora",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "E"
-        }
-    },
-    "Gentildonna": {
-        "name": "Gentildonna",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Gold City": {
         "name": "Gold City",
         "distanceAptitudes": {
@@ -487,19 +162,6 @@
             "Mile": "C",
             "Medium": "A",
             "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Gran Alegria": {
-        "name": "Gran Alegria",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "A",
-            "Medium": "C",
-            "Long": "G"
         },
         "surfaceAptitudes": {
             "Turf": "A",
@@ -558,58 +220,6 @@
             "Dirt": "E"
         }
     },
-    "Hishi Miracle": {
-        "name": "Hishi Miracle",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "G",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Hokko Tarumae": {
-        "name": "Hokko Tarumae",
-        "distanceAptitudes": {
-            "Sprint": "F",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "E"
-        },
-        "surfaceAptitudes": {
-            "Turf": "G",
-            "Dirt": "A"
-        }
-    },
-    "Ikuno Dictus": {
-        "name": "Ikuno Dictus",
-        "distanceAptitudes": {
-            "Sprint": "D",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "D"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Inari One": {
-        "name": "Inari One",
-        "distanceAptitudes": {
-            "Sprint": "F",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "A"
-        }
-    },
     "Ines Fujin": {
         "name": "Ines Fujin",
         "distanceAptitudes": {
@@ -617,45 +227,6 @@
             "Mile": "A",
             "Medium": "A",
             "Long": "C"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Jungle Pocket": {
-        "name": "Jungle Pocket",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "C",
-            "Medium": "A",
-            "Long": "B"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "K.S.Miracle": {
-        "name": "K.S.Miracle",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "B",
-            "Medium": "G",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Katsuragi Ace": {
-        "name": "Katsuragi Ace",
-        "distanceAptitudes": {
-            "Sprint": "E",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "B"
         },
         "surfaceAptitudes": {
             "Turf": "A",
@@ -688,19 +259,6 @@
             "Dirt": "G"
         }
     },
-    "Kiseki": {
-        "name": "Kiseki",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "C",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Kitasan Black": {
         "name": "Kitasan Black",
         "distanceAptitudes": {
@@ -708,19 +266,6 @@
             "Mile": "C",
             "Medium": "A",
             "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Loves Only You": {
-        "name": "Loves Only You",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "C",
-            "Medium": "A",
-            "Long": "F"
         },
         "surfaceAptitudes": {
             "Turf": "A",
@@ -751,19 +296,6 @@
         "surfaceAptitudes": {
             "Turf": "A",
             "Dirt": "D"
-        }
-    },
-    "Marvelous Sunday": {
-        "name": "Marvelous Sunday",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "C",
-            "Medium": "A",
-            "Long": "B"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "F"
         }
     },
     "Matikanefukukitaru": {
@@ -870,32 +402,6 @@
             "Dirt": "E"
         }
     },
-    "Mejiro Palmer": {
-        "name": "Mejiro Palmer",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "F",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Mejiro Ramonu": {
-        "name": "Mejiro Ramonu",
-        "distanceAptitudes": {
-            "Sprint": "B",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "E"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "F"
-        }
-    },
     "Mejiro Ryan": {
         "name": "Mejiro Ryan",
         "distanceAptitudes": {
@@ -914,32 +420,6 @@
         "distanceAptitudes": {
             "Sprint": "C",
             "Mile": "B",
-            "Medium": "A",
-            "Long": "B"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Mr. C.B.": {
-        "name": "Mr. C.B.",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Nakayama Festa": {
-        "name": "Nakayama Festa",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "C",
             "Medium": "A",
             "Long": "B"
         },
@@ -974,32 +454,6 @@
             "Dirt": "G"
         }
     },
-    "Narita Top Road": {
-        "name": "Narita Top Road",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "C",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Neo Universe": {
-        "name": "Neo Universe",
-        "distanceAptitudes": {
-            "Sprint": "F",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "B"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Nice Nature": {
         "name": "Nice Nature",
         "distanceAptitudes": {
@@ -1026,32 +480,6 @@
             "Dirt": "F"
         }
     },
-    "No Reason": {
-        "name": "No Reason",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "C"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "North Flight": {
-        "name": "North Flight",
-        "distanceAptitudes": {
-            "Sprint": "C",
-            "Mile": "A",
-            "Medium": "B",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Oguri Cap": {
         "name": "Oguri Cap",
         "distanceAptitudes": {
@@ -1065,32 +493,6 @@
             "Dirt": "B"
         }
     },
-    "Orfevre": {
-        "name": "Orfevre",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "C",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "D"
-        }
-    },
-    "Rhein Kraft": {
-        "name": "Rhein Kraft",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "A",
-            "Medium": "B",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Rice Shower": {
         "name": "Rice Shower",
         "distanceAptitudes": {
@@ -1098,19 +500,6 @@
             "Mile": "C",
             "Medium": "A",
             "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Royce and Royce": {
-        "name": "Royce and Royce",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "E"
         },
         "surfaceAptitudes": {
             "Turf": "A",
@@ -1143,32 +532,6 @@
             "Dirt": "G"
         }
     },
-    "Sakura Laurel": {
-        "name": "Sakura Laurel",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "C",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "E"
-        }
-    },
-    "Satono Crown": {
-        "name": "Satono Crown",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "E"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Satono Diamond": {
         "name": "Satono Diamond",
         "distanceAptitudes": {
@@ -1180,19 +543,6 @@
         "surfaceAptitudes": {
             "Turf": "A",
             "Dirt": "G"
-        }
-    },
-    "Seeking the Pearl": {
-        "name": "Seeking the Pearl",
-        "distanceAptitudes": {
-            "Sprint": "A",
-            "Mile": "A",
-            "Medium": "E",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "F"
         }
     },
     "Seiun Sky": {
@@ -1208,19 +558,6 @@
             "Dirt": "G"
         }
     },
-    "Shinko Windy": {
-        "name": "Shinko Windy",
-        "distanceAptitudes": {
-            "Sprint": "C",
-            "Mile": "A",
-            "Medium": "B",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "F",
-            "Dirt": "A"
-        }
-    },
     "Silence Suzuka": {
         "name": "Silence Suzuka",
         "distanceAptitudes": {
@@ -1228,19 +565,6 @@
             "Mile": "A",
             "Medium": "A",
             "Long": "E"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Sirius Symboli": {
-        "name": "Sirius Symboli",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "B",
-            "Medium": "A",
-            "Long": "C"
         },
         "surfaceAptitudes": {
             "Turf": "A",
@@ -1260,19 +584,6 @@
             "Dirt": "A"
         }
     },
-    "Sounds of Earth": {
-        "name": "Sounds of Earth",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "F",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Special Week": {
         "name": "Special Week",
         "distanceAptitudes": {
@@ -1286,63 +597,11 @@
             "Dirt": "G"
         }
     },
-    "Stay Gold": {
-        "name": "Stay Gold",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "G",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Still in Love": {
-        "name": "Still in Love",
-        "distanceAptitudes": {
-            "Sprint": "C",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Super Creek": {
         "name": "Super Creek",
         "distanceAptitudes": {
             "Sprint": "G",
             "Mile": "G",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Sweep Tosho": {
-        "name": "Sweep Tosho",
-        "distanceAptitudes": {
-            "Sprint": "E",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "D"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Symboli Kris S": {
-        "name": "Symboli Kris S",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "E",
             "Medium": "A",
             "Long": "A"
         },
@@ -1403,32 +662,6 @@
             "Dirt": "F"
         }
     },
-    "Tanino Gimlet": {
-        "name": "Tanino Gimlet",
-        "distanceAptitudes": {
-            "Sprint": "F",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "F"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "F"
-        }
-    },
-    "Tap Dance City": {
-        "name": "Tap Dance City",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "E",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Tokai Teio": {
         "name": "Tokai Teio",
         "distanceAptitudes": {
@@ -1455,71 +688,6 @@
             "Dirt": "G"
         }
     },
-    "Transcend": {
-        "name": "Transcend",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "F",
-            "Dirt": "A"
-        }
-    },
-    "Tsurumaru Tsuyoshi": {
-        "name": "Tsurumaru Tsuyoshi",
-        "distanceAptitudes": {
-            "Sprint": "F",
-            "Mile": "D",
-            "Medium": "A",
-            "Long": "C"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "F"
-        }
-    },
-    "Twin Turbo": {
-        "name": "Twin Turbo",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "E"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "F"
-        }
-    },
-    "Verxina": {
-        "name": "Verxina",
-        "distanceAptitudes": {
-            "Sprint": "D",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Vivlos": {
-        "name": "Vivlos",
-        "distanceAptitudes": {
-            "Sprint": "E",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
     "Vodka": {
         "name": "Vodka",
         "distanceAptitudes": {
@@ -1527,19 +695,6 @@
             "Mile": "A",
             "Medium": "A",
             "Long": "F"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
-        }
-    },
-    "Win Variation": {
-        "name": "Win Variation",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "E",
-            "Medium": "A",
-            "Long": "A"
         },
         "surfaceAptitudes": {
             "Turf": "A",
@@ -1559,19 +714,6 @@
             "Dirt": "G"
         }
     },
-    "Wonder Acute": {
-        "name": "Wonder Acute",
-        "distanceAptitudes": {
-            "Sprint": "D",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "E"
-        },
-        "surfaceAptitudes": {
-            "Turf": "G",
-            "Dirt": "A"
-        }
-    },
     "Yaeno Muteki": {
         "name": "Yaeno Muteki",
         "distanceAptitudes": {
@@ -1583,45 +725,6 @@
         "surfaceAptitudes": {
             "Turf": "A",
             "Dirt": "E"
-        }
-    },
-    "Yamanin Zephyr": {
-        "name": "Yamanin Zephyr",
-        "distanceAptitudes": {
-            "Sprint": "B",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "G"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "D"
-        }
-    },
-    "Yukino Bijin": {
-        "name": "Yukino Bijin",
-        "distanceAptitudes": {
-            "Sprint": "D",
-            "Mile": "A",
-            "Medium": "A",
-            "Long": "E"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "B"
-        }
-    },
-    "Zenno Rob Roy": {
-        "name": "Zenno Rob Roy",
-        "distanceAptitudes": {
-            "Sprint": "G",
-            "Mile": "E",
-            "Medium": "A",
-            "Long": "A"
-        },
-        "surfaceAptitudes": {
-            "Turf": "A",
-            "Dirt": "G"
         }
     }
 }
