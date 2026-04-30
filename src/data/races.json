@@ -189,11 +189,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3800,
         "turnNumber": 34,
-        "nameFormatted": "Kyoto Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Kyoto Turf 1200m (Sprint) Right / Inner"
     },
     "Arima Kinen (Classic Class December, Second Half)": {
         "name": "Arima Kinen",
@@ -315,11 +315,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 46,
-        "nameFormatted": "Kyoto Dirt 1200m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1200m (Sprint) Right"
     },
     "Autumn Leaf Stakes (Senior Class November, Second Half)": {
         "name": "Autumn Leaf Stakes",
@@ -329,11 +329,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 70,
-        "nameFormatted": "Kyoto Dirt 1200m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1200m (Sprint) Right"
     },
     "Azuchijo Stakes (Senior Class May, Second Half)": {
         "name": "Azuchijo Stakes",
@@ -343,11 +343,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2500,
         "turnNumber": 58,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "Azumakofuji Stakes (Senior Class April, First Half)": {
         "name": "Azumakofuji Stakes",
@@ -483,11 +483,11 @@
         "direction": "Left",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3900,
         "turnNumber": 37,
-        "nameFormatted": "Chukyo Turf 1200m (Short) Left"
+        "nameFormatted": "Chukyo Turf 1200m (Sprint) Left"
     },
     "CBC Sho (Senior Class July, First Half)": {
         "name": "CBC Sho",
@@ -497,11 +497,11 @@
         "direction": "Left",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3900,
         "turnNumber": 61,
-        "nameFormatted": "Chukyo Turf 1200m (Short) Left"
+        "nameFormatted": "Chukyo Turf 1200m (Sprint) Left"
     },
     "Canna Stakes (Junior Class September, Second Half)": {
         "name": "Canna Stakes",
@@ -511,11 +511,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 1600,
         "turnNumber": 18,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "Capella Stakes (Classic Class December, First Half)": {
         "name": "Capella Stakes",
@@ -525,11 +525,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3600,
         "turnNumber": 47,
-        "nameFormatted": "Nakayama Dirt 1200m (Short) Right"
+        "nameFormatted": "Nakayama Dirt 1200m (Sprint) Right"
     },
     "Capella Stakes (Senior Class December, First Half)": {
         "name": "Capella Stakes",
@@ -539,11 +539,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3600,
         "turnNumber": 71,
-        "nameFormatted": "Nakayama Dirt 1200m (Short) Right"
+        "nameFormatted": "Nakayama Dirt 1200m (Sprint) Right"
     },
     "Capital Stakes (Classic Class November, Second Half)": {
         "name": "Capital Stakes",
@@ -581,11 +581,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 49,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "Cassiopeia Stakes (Classic Class October, Second Half)": {
         "name": "Cassiopeia Stakes",
@@ -637,11 +637,11 @@
         "direction": "Right",
         "grade": "G2",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 5900,
         "turnNumber": 41,
-        "nameFormatted": "Hanshin Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1200m (Sprint) Right / Inner"
     },
     "Centaur Stakes (Senior Class September, First Half)": {
         "name": "Centaur Stakes",
@@ -651,11 +651,11 @@
         "direction": "Right",
         "grade": "G2",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 5900,
         "turnNumber": 65,
-        "nameFormatted": "Hanshin Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1200m (Sprint) Right / Inner"
     },
     "Challenge Cup (Classic Class December, First Half)": {
         "name": "Challenge Cup",
@@ -721,11 +721,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 54,
-        "nameFormatted": "Nakayama Dirt 1200m (Short) Right"
+        "nameFormatted": "Nakayama Dirt 1200m (Sprint) Right"
     },
     "Christmas Rose Stakes (Junior Class December, Second Half)": {
         "name": "Christmas Rose Stakes",
@@ -735,11 +735,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 1600,
         "turnNumber": 24,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "Chukyo Junior Stakes (Junior Class July, Second Half)": {
         "name": "Chukyo Junior Stakes",
@@ -861,11 +861,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2300,
         "turnNumber": 55,
-        "nameFormatted": "Hanshin Dirt 1400m (Short) Right"
+        "nameFormatted": "Hanshin Dirt 1400m (Sprint) Right"
     },
     "Cosmos Sho (Junior Class August, First Half)": {
         "name": "Cosmos Sho",
@@ -889,11 +889,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2000,
         "turnNumber": 26,
-        "nameFormatted": "Tokyo Turf 1400m (Short) Left"
+        "nameFormatted": "Tokyo Turf 1400m (Sprint) Left"
     },
     "Dahlia Sho (Junior Class August, First Half)": {
         "name": "Dahlia Sho",
@@ -903,11 +903,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1600,
         "turnNumber": 15,
-        "nameFormatted": "Niigata Turf 1400m (Short) Left / Inner"
+        "nameFormatted": "Niigata Turf 1400m (Sprint) Left / Inner"
     },
     "Daily Hai Junior Stakes (Junior Class November, First Half)": {
         "name": "Daily Hai Junior Stakes",
@@ -1015,11 +1015,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2300,
         "turnNumber": 41,
-        "nameFormatted": "Hanshin Dirt 1400m (Short) Right"
+        "nameFormatted": "Hanshin Dirt 1400m (Sprint) Right"
     },
     "Enif Stakes (Senior Class September, First Half)": {
         "name": "Enif Stakes",
@@ -1029,11 +1029,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2300,
         "turnNumber": 65,
-        "nameFormatted": "Hanshin Dirt 1400m (Short) Right"
+        "nameFormatted": "Hanshin Dirt 1400m (Sprint) Right"
     },
     "Epsom Cup (Classic Class June, First Half)": {
         "name": "Epsom Cup",
@@ -1099,11 +1099,11 @@
         "direction": "Left",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 3800,
         "turnNumber": 30,
-        "nameFormatted": "Chukyo Turf 1400m (Short) Left"
+        "nameFormatted": "Chukyo Turf 1400m (Sprint) Left"
     },
     "Fantasy Stakes (Junior Class November, First Half)": {
         "name": "Fantasy Stakes",
@@ -1113,11 +1113,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2900,
         "turnNumber": 21,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "February Stakes (Senior Class February, Second Half)": {
         "name": "February Stakes",
@@ -1141,11 +1141,11 @@
         "direction": "Right",
         "grade": "G2",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 5200,
         "turnNumber": 29,
-        "nameFormatted": "Hanshin Turf 1400m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1400m (Sprint) Right / Inner"
     },
     "Flora Stakes (Classic Class April, Second Half)": {
         "name": "Flora Stakes",
@@ -1253,11 +1253,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 1600,
         "turnNumber": 21,
-        "nameFormatted": "Fukushima Turf 1200m (Short) Right"
+        "nameFormatted": "Fukushima Turf 1200m (Sprint) Right"
     },
     "Fukushima Kinen (Classic Class November, First Half)": {
         "name": "Fukushima Kinen",
@@ -1337,11 +1337,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 38,
-        "nameFormatted": "Fukushima Turf 1200m (Short) Right"
+        "nameFormatted": "Fukushima Turf 1200m (Sprint) Right"
     },
     "Fukushima TV Open (Senior Class July, Second Half)": {
         "name": "Fukushima TV Open",
@@ -1351,11 +1351,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 62,
-        "nameFormatted": "Fukushima Turf 1200m (Short) Right"
+        "nameFormatted": "Fukushima Turf 1200m (Sprint) Right"
     },
     "Fukushima Umamusume Stakes (Senior Class April, Second Half)": {
         "name": "Fukushima Umamusume Stakes",
@@ -1393,11 +1393,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2200,
         "turnNumber": 48,
-        "nameFormatted": "Hanshin Dirt 1400m (Short) Right"
+        "nameFormatted": "Hanshin Dirt 1400m (Sprint) Right"
     },
     "Galaxy Stakes (Senior Class December, Second Half)": {
         "name": "Galaxy Stakes",
@@ -1407,11 +1407,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2200,
         "turnNumber": 72,
-        "nameFormatted": "Hanshin Dirt 1400m (Short) Right"
+        "nameFormatted": "Hanshin Dirt 1400m (Sprint) Right"
     },
     "Green Channel Cup (Classic Class October, First Half)": {
         "name": "Green Channel Cup",
@@ -1421,11 +1421,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2300,
         "turnNumber": 43,
-        "nameFormatted": "Tokyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Tokyo Dirt 1400m (Sprint) Left"
     },
     "Green Channel Cup (Senior Class October, First Half)": {
         "name": "Green Channel Cup",
@@ -1435,11 +1435,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2300,
         "turnNumber": 67,
-        "nameFormatted": "Tokyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Tokyo Dirt 1400m (Sprint) Left"
     },
     "Habotan Sho (Junior Class November, Second Half)": {
         "name": "Habotan Sho",
@@ -1477,11 +1477,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3100,
         "turnNumber": 14,
-        "nameFormatted": "Hakodate Turf 1200m (Short) Right"
+        "nameFormatted": "Hakodate Turf 1200m (Sprint) Right"
     },
     "Hakodate Kinen (Classic Class July, First Half)": {
         "name": "Hakodate Kinen",
@@ -1519,11 +1519,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3900,
         "turnNumber": 36,
-        "nameFormatted": "Hakodate Turf 1200m (Short) Right"
+        "nameFormatted": "Hakodate Turf 1200m (Sprint) Right"
     },
     "Hakodate Sprint Stakes (Senior Class June, Second Half)": {
         "name": "Hakodate Sprint Stakes",
@@ -1533,11 +1533,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3900,
         "turnNumber": 60,
-        "nameFormatted": "Hakodate Turf 1200m (Short) Right"
+        "nameFormatted": "Hakodate Turf 1200m (Sprint) Right"
     },
     "Hankyu Hai (Senior Class February, Second Half)": {
         "name": "Hankyu Hai",
@@ -1547,11 +1547,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 4100,
         "turnNumber": 52,
-        "nameFormatted": "Hanshin Turf 1400m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1400m (Sprint) Right / Inner"
     },
     "Hanshin Cup (Classic Class December, Second Half)": {
         "name": "Hanshin Cup",
@@ -1561,11 +1561,11 @@
         "direction": "Right",
         "grade": "G2",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 6700,
         "turnNumber": 48,
-        "nameFormatted": "Hanshin Turf 1400m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1400m (Sprint) Right / Inner"
     },
     "Hanshin Cup (Senior Class December, Second Half)": {
         "name": "Hanshin Cup",
@@ -1575,11 +1575,11 @@
         "direction": "Right",
         "grade": "G2",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 6700,
         "turnNumber": 72,
-        "nameFormatted": "Hanshin Turf 1400m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1400m (Sprint) Right / Inner"
     },
     "Hanshin Daishoten (Senior Class March, Second Half)": {
         "name": "Hanshin Daishoten",
@@ -1715,11 +1715,11 @@
         "direction": "Left",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1000,
         "fans": 3900,
         "turnNumber": 38,
-        "nameFormatted": "Niigata Turf 1000m (Short) Left"
+        "nameFormatted": "Niigata Turf 1000m (Sprint) Left"
     },
     "Ibis Summer Dash (Senior Class July, Second Half)": {
         "name": "Ibis Summer Dash",
@@ -1729,11 +1729,11 @@
         "direction": "Left",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1000,
         "fans": 3900,
         "turnNumber": 62,
-        "nameFormatted": "Niigata Turf 1000m (Short) Left"
+        "nameFormatted": "Niigata Turf 1000m (Sprint) Left"
     },
     "Idaten Stakes (Senior Class May, Second Half)": {
         "name": "Idaten Stakes",
@@ -1743,11 +1743,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1000,
         "fans": 2300,
         "turnNumber": 58,
-        "nameFormatted": "Niigata Turf 1000m (Short) Left"
+        "nameFormatted": "Niigata Turf 1000m (Sprint) Left"
     },
     "Ivy Stakes (Junior Class October, Second Half)": {
         "name": "Ivy Stakes",
@@ -1827,11 +1827,11 @@
         "direction": "Right",
         "grade": "G1",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 6000,
         "turnNumber": 45,
-        "nameFormatted": "Ooi Dirt 1200m (Short) Right"
+        "nameFormatted": "Ooi Dirt 1200m (Sprint) Right"
     },
     "JBC Sprint (Senior Class November, First Half)": {
         "name": "JBC Sprint",
@@ -1841,11 +1841,11 @@
         "direction": "Right",
         "grade": "G1",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 6000,
         "turnNumber": 69,
-        "nameFormatted": "Ooi Dirt 1200m (Short) Right"
+        "nameFormatted": "Ooi Dirt 1200m (Sprint) Right"
     },
     "January Stakes (Senior Class January, First Half)": {
         "name": "January Stakes",
@@ -1855,11 +1855,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 49,
-        "nameFormatted": "Nakayama Dirt 1200m (Short) Right"
+        "nameFormatted": "Nakayama Dirt 1200m (Sprint) Right"
     },
     "Japan Cup (Classic Class November, Second Half)": {
         "name": "Japan Cup",
@@ -1967,11 +1967,11 @@
         "direction": "Left",
         "grade": "Pre-OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1000,
         "turnNumber": 23,
-        "nameFormatted": "Chukyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Chukyo Dirt 1400m (Sprint) Left"
     },
     "Keeneland Cup (Classic Class August, Second Half)": {
         "name": "Keeneland Cup",
@@ -1981,11 +1981,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 4100,
         "turnNumber": 40,
-        "nameFormatted": "Sapporo Turf 1200m (Short) Right"
+        "nameFormatted": "Sapporo Turf 1200m (Sprint) Right"
     },
     "Keeneland Cup (Senior Class August, Second Half)": {
         "name": "Keeneland Cup",
@@ -1995,11 +1995,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 4100,
         "turnNumber": 64,
-        "nameFormatted": "Sapporo Turf 1200m (Short) Right"
+        "nameFormatted": "Sapporo Turf 1200m (Sprint) Right"
     },
     "Keihan Hai (Classic Class November, Second Half)": {
         "name": "Keihan Hai",
@@ -2009,11 +2009,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3900,
         "turnNumber": 46,
-        "nameFormatted": "Kyoto Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Kyoto Turf 1200m (Sprint) Right / Inner"
     },
     "Keihan Hai (Senior Class November, Second Half)": {
         "name": "Keihan Hai",
@@ -2023,11 +2023,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3900,
         "turnNumber": 70,
-        "nameFormatted": "Kyoto Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Kyoto Turf 1200m (Sprint) Right / Inner"
     },
     "Keio Hai Junior Stakes (Junior Class November, First Half)": {
         "name": "Keio Hai Junior Stakes",
@@ -2037,11 +2037,11 @@
         "direction": "Left",
         "grade": "G2",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 3800,
         "turnNumber": 21,
-        "nameFormatted": "Tokyo Turf 1400m (Short) Left"
+        "nameFormatted": "Tokyo Turf 1400m (Sprint) Left"
     },
     "Keio Hai Spring Cup (Senior Class May, First Half)": {
         "name": "Keio Hai Spring Cup",
@@ -2051,11 +2051,11 @@
         "direction": "Left",
         "grade": "G2",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 5900,
         "turnNumber": 57,
-        "nameFormatted": "Tokyo Turf 1400m (Short) Left"
+        "nameFormatted": "Tokyo Turf 1400m (Sprint) Left"
     },
     "Keisei Hai (Classic Class January, First Half)": {
         "name": "Keisei Hai",
@@ -2107,11 +2107,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 55,
-        "nameFormatted": "Nakayama Dirt 1200m (Short) Right"
+        "nameFormatted": "Nakayama Dirt 1200m (Sprint) Right"
     },
     "Keyaki Stakes (Senior Class May, Second Half)": {
         "name": "Keyaki Stakes",
@@ -2121,11 +2121,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2200,
         "turnNumber": 58,
-        "nameFormatted": "Tokyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Tokyo Dirt 1400m (Sprint) Left"
     },
     "Kigiku Sho (Junior Class November, First Half)": {
         "name": "Kigiku Sho",
@@ -2163,11 +2163,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1600,
         "turnNumber": 18,
-        "nameFormatted": "Hanshin Turf 1400m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1400m (Sprint) Right / Inner"
     },
     "Kimmokusei Tokubetsu (Junior Class November, First Half)": {
         "name": "Kimmokusei Tokubetsu",
@@ -2219,11 +2219,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3900,
         "turnNumber": 40,
-        "nameFormatted": "Kokura Turf 1200m (Short) Right"
+        "nameFormatted": "Kokura Turf 1200m (Sprint) Right"
     },
     "Kitakyushu Kinen (Senior Class August, Second Half)": {
         "name": "Kitakyushu Kinen",
@@ -2233,11 +2233,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3900,
         "turnNumber": 64,
-        "nameFormatted": "Kokura Turf 1200m (Short) Right"
+        "nameFormatted": "Kokura Turf 1200m (Sprint) Right"
     },
     "Kitakyushu Tankyori Stakes (Senior Class February, Second Half)": {
         "name": "Kitakyushu Tankyori Stakes",
@@ -2247,11 +2247,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 52,
-        "nameFormatted": "Kokura Turf 1200m (Short) Right"
+        "nameFormatted": "Kokura Turf 1200m (Sprint) Right"
     },
     "Kobai Stakes (Classic Class January, First Half)": {
         "name": "Kobai Stakes",
@@ -2261,11 +2261,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2000,
         "turnNumber": 25,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "Kobe Shimbun Hai (Classic Class September, Second Half)": {
         "name": "Kobe Shimbun Hai",
@@ -2317,11 +2317,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3100,
         "turnNumber": 17,
-        "nameFormatted": "Kokura Turf 1200m (Short) Right"
+        "nameFormatted": "Kokura Turf 1200m (Sprint) Right"
     },
     "Kokura Kinen (Classic Class August, First Half)": {
         "name": "Kokura Kinen",
@@ -2401,11 +2401,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 57,
-        "nameFormatted": "Kyoto Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Kyoto Turf 1200m (Sprint) Right / Inner"
     },
     "Kuromatsu Sho (Junior Class December, First Half)": {
         "name": "Kuromatsu Sho",
@@ -2415,11 +2415,11 @@
         "direction": "Right",
         "grade": "Pre-OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 1000,
         "turnNumber": 23,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "Kyodo News Hai (Classic Class February, First Half)": {
         "name": "Kyodo News Hai",
@@ -2527,11 +2527,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 3600,
         "turnNumber": 52,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "Lapis Lazuli Stakes (Classic Class December, First Half)": {
         "name": "Lapis Lazuli Stakes",
@@ -2541,11 +2541,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2500,
         "turnNumber": 47,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "Lapis Lazuli Stakes (Senior Class December, First Half)": {
         "name": "Lapis Lazuli Stakes",
@@ -2555,11 +2555,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2500,
         "turnNumber": 71,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "Leopard Stakes (Classic Class August, First Half)": {
         "name": "Leopard Stakes",
@@ -2597,11 +2597,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1000,
         "fans": 2500,
         "turnNumber": 44,
-        "nameFormatted": "Niigata Turf 1000m (Short) Left"
+        "nameFormatted": "Niigata Turf 1000m (Sprint) Left"
     },
     "Lumiere Autumn Dash (Senior Class October, Second Half)": {
         "name": "Lumiere Autumn Dash",
@@ -2611,11 +2611,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1000,
         "fans": 2500,
         "turnNumber": 68,
-        "nameFormatted": "Niigata Turf 1000m (Short) Left"
+        "nameFormatted": "Niigata Turf 1000m (Sprint) Left"
     },
     "Mainichi Hai (Classic Class March, Second Half)": {
         "name": "Mainichi Hai",
@@ -2667,11 +2667,11 @@
         "direction": "Right",
         "grade": "Pre-OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1000,
         "turnNumber": 23,
-        "nameFormatted": "Hanshin Turf 1400m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1400m (Sprint) Right / Inner"
     },
     "Manyo Stakes (Senior Class January, First Half)": {
         "name": "Manyo Stakes",
@@ -2709,11 +2709,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2000,
         "turnNumber": 28,
-        "nameFormatted": "Hanshin Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1200m (Sprint) Right / Inner"
     },
     "Marine Stakes (Classic Class July, First Half)": {
         "name": "Marine Stakes",
@@ -2947,11 +2947,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1600,
         "turnNumber": 19,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "Muromachi Stakes (Classic Class October, Second Half)": {
         "name": "Muromachi Stakes",
@@ -2961,11 +2961,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 44,
-        "nameFormatted": "Kyoto Dirt 1200m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1200m (Sprint) Right"
     },
     "Muromachi Stakes (Senior Class October, Second Half)": {
         "name": "Muromachi Stakes",
@@ -2975,11 +2975,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 68,
-        "nameFormatted": "Kyoto Dirt 1200m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1200m (Sprint) Right"
     },
     "Musashino Stakes (Classic Class November, First Half)": {
         "name": "Musashino Stakes",
@@ -3031,11 +3031,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 40,
-        "nameFormatted": "Niigata Dirt 1200m (Short) Left"
+        "nameFormatted": "Niigata Dirt 1200m (Sprint) Left"
     },
     "NST Sho (Senior Class August, Second Half)": {
         "name": "NST Sho",
@@ -3045,11 +3045,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 64,
-        "nameFormatted": "Niigata Dirt 1200m (Short) Left"
+        "nameFormatted": "Niigata Dirt 1200m (Sprint) Left"
     },
     "Nadeshiko Sho (Junior Class October, Second Half)": {
         "name": "Nadeshiko Sho",
@@ -3059,11 +3059,11 @@
         "direction": "Right",
         "grade": "Pre-OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1000,
         "turnNumber": 20,
-        "nameFormatted": "Kyoto Dirt 1400m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1400m (Sprint) Right"
     },
     "Nagatsuki Stakes (Classic Class September, Second Half)": {
         "name": "Nagatsuki Stakes",
@@ -3073,11 +3073,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 42,
-        "nameFormatted": "Nakayama Dirt 1200m (Short) Right"
+        "nameFormatted": "Nakayama Dirt 1200m (Sprint) Right"
     },
     "Nagatsuki Stakes (Senior Class September, Second Half)": {
         "name": "Nagatsuki Stakes",
@@ -3087,11 +3087,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 66,
-        "nameFormatted": "Nakayama Dirt 1200m (Short) Right"
+        "nameFormatted": "Nakayama Dirt 1200m (Sprint) Right"
     },
     "Nakayama Kimpai (Senior Class January, First Half)": {
         "name": "Nakayama Kimpai",
@@ -3171,11 +3171,11 @@
         "direction": "Left",
         "grade": "G3",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 3800,
         "turnNumber": 50,
-        "nameFormatted": "Tokyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Tokyo Dirt 1400m (Sprint) Left"
     },
     "New Year Stakes (Senior Class January, First Half)": {
         "name": "New Year Stakes",
@@ -3339,11 +3339,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 4100,
         "turnNumber": 53,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "October Stakes (Classic Class October, First Half)": {
         "name": "October Stakes",
@@ -3423,11 +3423,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2500,
         "turnNumber": 43,
-        "nameFormatted": "Kyoto Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Kyoto Turf 1200m (Sprint) Right / Inner"
     },
     "Opal Stakes (Senior Class October, First Half)": {
         "name": "Opal Stakes",
@@ -3437,11 +3437,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2500,
         "turnNumber": 67,
-        "nameFormatted": "Kyoto Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Kyoto Turf 1200m (Sprint) Right / Inner"
     },
     "Oro Cup (Classic Class November, First Half)": {
         "name": "Oro Cup",
@@ -3451,11 +3451,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2500,
         "turnNumber": 45,
-        "nameFormatted": "Tokyo Turf 1400m (Short) Left"
+        "nameFormatted": "Tokyo Turf 1400m (Sprint) Left"
     },
     "Oro Cup (Senior Class November, First Half)": {
         "name": "Oro Cup",
@@ -3465,11 +3465,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2500,
         "turnNumber": 69,
-        "nameFormatted": "Tokyo Turf 1400m (Short) Left"
+        "nameFormatted": "Tokyo Turf 1400m (Sprint) Left"
     },
     "Osaka Hai (Senior Class March, Second Half)": {
         "name": "Osaka Hai",
@@ -3507,11 +3507,11 @@
         "direction": "Left",
         "grade": "Pre-OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1000,
         "turnNumber": 21,
-        "nameFormatted": "Tokyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Tokyo Dirt 1400m (Sprint) Left"
     },
     "Paradise Stakes (Classic Class June, Second Half)": {
         "name": "Paradise Stakes",
@@ -3521,11 +3521,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2500,
         "turnNumber": 36,
-        "nameFormatted": "Tokyo Turf 1400m (Short) Left"
+        "nameFormatted": "Tokyo Turf 1400m (Sprint) Left"
     },
     "Paradise Stakes (Senior Class June, Second Half)": {
         "name": "Paradise Stakes",
@@ -3535,11 +3535,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2500,
         "turnNumber": 60,
-        "nameFormatted": "Tokyo Turf 1400m (Short) Left"
+        "nameFormatted": "Tokyo Turf 1400m (Sprint) Left"
     },
     "Phoenix Sho (Junior Class August, First Half)": {
         "name": "Phoenix Sho",
@@ -3549,11 +3549,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 1600,
         "turnNumber": 15,
-        "nameFormatted": "Kokura Turf 1200m (Short) Right"
+        "nameFormatted": "Kokura Turf 1200m (Sprint) Right"
     },
     "Platanus Sho (Junior Class October, First Half)": {
         "name": "Platanus Sho",
@@ -3577,11 +3577,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2200,
         "turnNumber": 53,
-        "nameFormatted": "Hanshin Dirt 1400m (Short) Right"
+        "nameFormatted": "Hanshin Dirt 1400m (Sprint) Right"
     },
     "Pollux Stakes (Senior Class January, First Half)": {
         "name": "Pollux Stakes",
@@ -3647,11 +3647,11 @@
         "direction": "Left",
         "grade": "G3",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 3600,
         "turnNumber": 37,
-        "nameFormatted": "Chukyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Chukyo Dirt 1400m (Sprint) Left"
     },
     "Procyon Stakes (Senior Class July, First Half)": {
         "name": "Procyon Stakes",
@@ -3661,11 +3661,11 @@
         "direction": "Left",
         "grade": "G3",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 3600,
         "turnNumber": 61,
-        "nameFormatted": "Chukyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Chukyo Dirt 1400m (Sprint) Left"
     },
     "Queen Cup (Classic Class February, First Half)": {
         "name": "Queen Cup",
@@ -3829,11 +3829,11 @@
         "direction": "Right",
         "grade": "Pre-OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1000,
         "turnNumber": 19,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "Ritto Stakes (Senior Class May, First Half)": {
         "name": "Ritto Stakes",
@@ -3843,11 +3843,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2300,
         "turnNumber": 57,
-        "nameFormatted": "Kyoto Dirt 1400m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1400m (Sprint) Right"
     },
     "Rokko Stakes (Senior Class March, Second Half)": {
         "name": "Rokko Stakes",
@@ -4025,11 +4025,11 @@
         "direction": "Right",
         "grade": "Pre-OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 1000,
         "turnNumber": 23,
-        "nameFormatted": "Hanshin Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1200m (Sprint) Right / Inner"
     },
     "Seiryu Stakes (Classic Class May, First Half)": {
         "name": "Seiryu Stakes",
@@ -4109,11 +4109,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2200,
         "turnNumber": 46,
-        "nameFormatted": "Tokyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Tokyo Dirt 1400m (Sprint) Left"
     },
     "Shimotsuki Stakes (Senior Class November, Second Half)": {
         "name": "Shimotsuki Stakes",
@@ -4123,11 +4123,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2200,
         "turnNumber": 70,
-        "nameFormatted": "Tokyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Tokyo Dirt 1400m (Sprint) Left"
     },
     "Shinetsu Stakes (Classic Class October, First Half)": {
         "name": "Shinetsu Stakes",
@@ -4137,11 +4137,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2500,
         "turnNumber": 43,
-        "nameFormatted": "Niigata Turf 1400m (Short) Left / Inner"
+        "nameFormatted": "Niigata Turf 1400m (Sprint) Left / Inner"
     },
     "Shinetsu Stakes (Senior Class October, First Half)": {
         "name": "Shinetsu Stakes",
@@ -4151,11 +4151,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2500,
         "turnNumber": 67,
-        "nameFormatted": "Niigata Turf 1400m (Short) Left / Inner"
+        "nameFormatted": "Niigata Turf 1400m (Sprint) Left / Inner"
     },
     "Shinzan Kinen (Classic Class January, First Half)": {
         "name": "Shinzan Kinen",
@@ -4263,11 +4263,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1800,
         "turnNumber": 29,
-        "nameFormatted": "Chukyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Chukyo Dirt 1400m (Sprint) Left"
     },
     "Shuka Sho (Classic Class October, Second Half)": {
         "name": "Shuka Sho",
@@ -4291,11 +4291,11 @@
         "direction": "Right",
         "grade": "Pre-OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1000,
         "turnNumber": 22,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "Shunrai Stakes (Senior Class April, First Half)": {
         "name": "Shunrai Stakes",
@@ -4305,11 +4305,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2500,
         "turnNumber": 55,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "Silk Road Stakes (Senior Class January, Second Half)": {
         "name": "Silk Road Stakes",
@@ -4319,11 +4319,11 @@
         "direction": "Right",
         "grade": "G3",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 3900,
         "turnNumber": 50,
-        "nameFormatted": "Kyoto Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Kyoto Turf 1200m (Sprint) Right / Inner"
     },
     "Sirius Stakes (Classic Class September, Second Half)": {
         "name": "Sirius Stakes",
@@ -4417,11 +4417,11 @@
         "direction": "Right",
         "grade": "G1",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 13000,
         "turnNumber": 42,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "Sprinters Stakes (Senior Class September, Second Half)": {
         "name": "Sprinters Stakes",
@@ -4431,11 +4431,11 @@
         "direction": "Right",
         "grade": "G1",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 13000,
         "turnNumber": 66,
-        "nameFormatted": "Nakayama Turf 1200m (Short) Right / Outer"
+        "nameFormatted": "Nakayama Turf 1200m (Sprint) Right / Outer"
     },
     "St. Lite Kinen (Classic Class September, Second Half)": {
         "name": "St. Lite Kinen",
@@ -4487,11 +4487,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2300,
         "turnNumber": 50,
-        "nameFormatted": "Kyoto Dirt 1400m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1400m (Sprint) Right"
     },
     "Sumire Stakes (Classic Class February, Second Half)": {
         "name": "Sumire Stakes",
@@ -4515,11 +4515,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 1600,
         "turnNumber": 17,
-        "nameFormatted": "Sapporo Turf 1200m (Short) Right"
+        "nameFormatted": "Sapporo Turf 1200m (Sprint) Right"
     },
     "Swan Stakes (Classic Class October, Second Half)": {
         "name": "Swan Stakes",
@@ -4529,11 +4529,11 @@
         "direction": "Right",
         "grade": "G2",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 5900,
         "turnNumber": 44,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "Swan Stakes (Senior Class October, Second Half)": {
         "name": "Swan Stakes",
@@ -4543,11 +4543,11 @@
         "direction": "Right",
         "grade": "G2",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 5900,
         "turnNumber": 68,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "Sweetpea Stakes (Classic Class April, Second Half)": {
         "name": "Sweetpea Stakes",
@@ -4571,11 +4571,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2000,
         "turnNumber": 32,
-        "nameFormatted": "Kyoto Turf 1400m (Short) Right / Outer"
+        "nameFormatted": "Kyoto Turf 1400m (Sprint) Right / Outer"
     },
     "Takamatsunomiya Kinen (Senior Class March, Second Half)": {
         "name": "Takamatsunomiya Kinen",
@@ -4585,11 +4585,11 @@
         "direction": "Left",
         "grade": "G1",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 13000,
         "turnNumber": 54,
-        "nameFormatted": "Chukyo Turf 1200m (Short) Left"
+        "nameFormatted": "Chukyo Turf 1200m (Sprint) Left"
     },
     "Takarazuka Kinen (Classic Class June, Second Half)": {
         "name": "Takarazuka Kinen",
@@ -4683,11 +4683,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1800,
         "turnNumber": 32,
-        "nameFormatted": "Kyoto Dirt 1400m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1400m (Sprint) Right"
     },
     "Tanigawadake Stakes (Senior Class May, First Half)": {
         "name": "Tanigawadake Stakes",
@@ -4711,11 +4711,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 47,
-        "nameFormatted": "Hanshin Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1200m (Sprint) Right / Inner"
     },
     "Tanzanite Stakes (Senior Class December, First Half)": {
         "name": "Tanzanite Stakes",
@@ -4725,11 +4725,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 71,
-        "nameFormatted": "Hanshin Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Hanshin Turf 1200m (Sprint) Right / Inner"
     },
     "Teio Sho (Senior Class June, Second Half)": {
         "name": "Teio Sho",
@@ -4753,11 +4753,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2200,
         "turnNumber": 35,
-        "nameFormatted": "Hanshin Dirt 1400m (Short) Right"
+        "nameFormatted": "Hanshin Dirt 1400m (Sprint) Right"
     },
     "Tempozan Stakes (Senior Class June, First Half)": {
         "name": "Tempozan Stakes",
@@ -4767,11 +4767,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2200,
         "turnNumber": 59,
-        "nameFormatted": "Hanshin Dirt 1400m (Short) Right"
+        "nameFormatted": "Hanshin Dirt 1400m (Sprint) Right"
     },
     "Tenno Sho (Autumn) (Classic Class October, Second Half)": {
         "name": "Tenno Sho (Autumn)",
@@ -4823,11 +4823,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 56,
-        "nameFormatted": "Kyoto Dirt 1200m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1200m (Sprint) Right"
     },
     "Tokai Stakes (Senior Class January, Second Half)": {
         "name": "Tokai Stakes",
@@ -4851,11 +4851,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2500,
         "turnNumber": 40,
-        "nameFormatted": "Niigata Turf 1400m (Short) Left / Inner"
+        "nameFormatted": "Niigata Turf 1400m (Sprint) Left / Inner"
     },
     "Toki Stakes (Senior Class August, Second Half)": {
         "name": "Toki Stakes",
@@ -4865,11 +4865,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2500,
         "turnNumber": 64,
-        "nameFormatted": "Niigata Turf 1400m (Short) Left / Inner"
+        "nameFormatted": "Niigata Turf 1400m (Sprint) Left / Inner"
     },
     "Tokyo Daishoten (Classic Class December, Second Half)": {
         "name": "Tokyo Daishoten",
@@ -4977,11 +4977,11 @@
         "direction": "Left",
         "grade": "Pre-OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 1000,
         "turnNumber": 23,
-        "nameFormatted": "Chukyo Turf 1400m (Short) Left"
+        "nameFormatted": "Chukyo Turf 1400m (Sprint) Left"
     },
     "Tulip Sho (Classic Class March, First Half)": {
         "name": "Tulip Sho",
@@ -5033,11 +5033,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 39,
-        "nameFormatted": "Sapporo Turf 1200m (Short) Right"
+        "nameFormatted": "Sapporo Turf 1200m (Sprint) Right"
     },
     "UHB Sho (Senior Class August, First Half)": {
         "name": "UHB Sho",
@@ -5047,11 +5047,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2300,
         "turnNumber": 63,
-        "nameFormatted": "Sapporo Turf 1200m (Short) Right"
+        "nameFormatted": "Sapporo Turf 1200m (Sprint) Right"
     },
     "Unicorn Stakes (Classic Class June, Second Half)": {
         "name": "Unicorn Stakes",
@@ -5103,11 +5103,11 @@
         "direction": "Left",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1400,
         "fans": 2200,
         "turnNumber": 51,
-        "nameFormatted": "Tokyo Dirt 1400m (Short) Left"
+        "nameFormatted": "Tokyo Dirt 1400m (Sprint) Left"
     },
     "Victoria Mile (Senior Class May, First Half)": {
         "name": "Victoria Mile",
@@ -5173,11 +5173,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Dirt",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2200,
         "turnNumber": 51,
-        "nameFormatted": "Kyoto Dirt 1200m (Short) Right"
+        "nameFormatted": "Kyoto Dirt 1200m (Sprint) Right"
     },
     "Yasuda Kinen (Classic Class June, First Half)": {
         "name": "Yasuda Kinen",
@@ -5229,11 +5229,11 @@
         "direction": "Right",
         "grade": "OP",
         "terrain": "Turf",
-        "distanceType": "Short",
+        "distanceType": "Sprint",
         "distanceMeters": 1200,
         "fans": 2500,
         "turnNumber": 49,
-        "nameFormatted": "Kyoto Turf 1200m (Short) Right / Inner"
+        "nameFormatted": "Kyoto Turf 1200m (Sprint) Right / Inner"
     },
     "Yonago Stakes (Classic Class June, Second Half)": {
         "name": "Yonago Stakes",
