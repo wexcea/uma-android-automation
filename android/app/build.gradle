@@ -254,9 +254,15 @@ dependencies {
     // Unit testing.
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
+    // Real org.json implementation so unit tests can parse races.json / epithets.json without
+    // the Android-stubbed JSONObject returning default values.
+    testImplementation("org.json:json:20240303")
 
     // ONNX Runtime for YOLOv8 inference and on-device doc embedding for the documentation chatbot.
     implementation(libs.onnxruntime)
+
+    // ojAlgo for the Smart Race Solver's MILP backend. Pure JVM, no native deps.
+    implementation("org.ojalgo:ojalgo:55.1.1")
 
 }
 
