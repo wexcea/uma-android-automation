@@ -10,8 +10,7 @@ package com.steve1316.uma_android_automation.bot.solver
  * by the race key string when constructed by the wiring layer.
  */
 object Heuristic {
-
-    const val DEFAULT_BEAM_WIDTH: Int = 8
+    const val DEFAULT_BEAM_WIDTH: Int = 32
     const val LAST_TURN: TurnNumber = 72
 
     /**
@@ -27,8 +26,9 @@ object Heuristic {
             beams = keepTopK(expanded, beamWidth, state)
             if (beams.isEmpty()) break
         }
-        val best = beams.maxByOrNull { it.score }
-            ?: return Schedule(emptyMap(), emptySet(), 0.0)
+        val best =
+            beams.maxByOrNull { it.score }
+                ?: return Schedule(emptyMap(), emptySet(), 0.0)
         return Schedule(
             decisions = best.decisions.toMap(),
             projectedEpithets = best.completedEpithets,
@@ -36,13 +36,14 @@ object Heuristic {
         )
     }
 
-    private fun initialBeam(state: SolverState): Beam = Beam(
-        decisions = emptyList(),
-        raceHistory = state.raceHistory,
-        completedEpithets = state.completedEpithets,
-        consecutiveRaces = countTrailingRaces(state.raceHistory, state.currentTurn - 1),
-        score = 0.0,
-    )
+    private fun initialBeam(state: SolverState): Beam =
+        Beam(
+            decisions = emptyList(),
+            raceHistory = state.raceHistory,
+            completedEpithets = state.completedEpithets,
+            consecutiveRaces = countTrailingRaces(state.raceHistory, state.currentTurn - 1),
+            score = 0.0,
+        )
 
     /** Counts how many consecutive races end at [endTurn] in the existing history. */
     private fun countTrailingRaces(history: List<RaceWin>, endTurn: TurnNumber): Int {
@@ -63,9 +64,10 @@ object Heuristic {
         if (lock != null) return listOf(applyDecision(beam, turn, lock, state))
 
         val alreadyWon = beam.raceHistory.mapTo(HashSet()) { it.raceKey }
-        val racesHere = state.racesByTurn[turn].orEmpty()
-            .filter { ScoringFunctions.isEligible(it, state) }
-            .filter { it.key !in alreadyWon }
+        val racesHere =
+            state.racesByTurn[turn].orEmpty()
+                .filter { ScoringFunctions.isEligible(it, state) }
+                .filter { it.key !in alreadyWon }
 
         val children = ArrayList<Beam>(racesHere.size + 2)
         for (race in racesHere) {
@@ -81,19 +83,22 @@ object Heuristic {
         turn: TurnNumber,
         decision: Decision,
         state: SolverState,
-    ): Beam = when (decision) {
-        is Decision.RaceDecision -> applyRace(beam, turn, decision, state)
-        Decision.Train -> beam.copy(
-            decisions = beam.decisions + (turn to decision),
-            consecutiveRaces = 0,
-            score = beam.score + ScoringFunctions.trainValue(state.weights),
-        )
-        Decision.Rest -> beam.copy(
-            decisions = beam.decisions + (turn to decision),
-            consecutiveRaces = 0,
-            score = beam.score + ScoringFunctions.restValue(state.weights),
-        )
-    }
+    ): Beam =
+        when (decision) {
+            is Decision.RaceDecision -> applyRace(beam, turn, decision, state)
+            Decision.Train ->
+                beam.copy(
+                    decisions = beam.decisions + (turn to decision),
+                    consecutiveRaces = 0,
+                    score = beam.score + ScoringFunctions.trainValue(state.weights),
+                )
+            Decision.Rest ->
+                beam.copy(
+                    decisions = beam.decisions + (turn to decision),
+                    consecutiveRaces = 0,
+                    score = beam.score + ScoringFunctions.restValue(state.weights),
+                )
+        }
 
     private fun applyRace(
         beam: Beam,
@@ -101,33 +106,37 @@ object Heuristic {
         decision: Decision.RaceDecision,
         state: SolverState,
     ): Beam {
-        val race = state.racesByTurn[turn]?.firstOrNull { it.key == decision.raceKey }
-            ?: return beam.copy(decisions = beam.decisions + (turn to decision))
+        val race =
+            state.racesByTurn[turn]?.firstOrNull { it.key == decision.raceKey }
+                ?: return beam.copy(decisions = beam.decisions + (turn to decision))
 
         val newHistory = beam.raceHistory + RaceWin(race.key, race.name, race.classYear, turn)
         val newConsec = beam.consecutiveRaces + 1
 
         // Re-evaluate epithet completions with the new history (already-completed epithets are
         // not re-checked since their matchers are monotonically satisfied).
-        val syntheticState = state.copy(
-            raceHistory = newHistory,
-            completedEpithets = beam.completedEpithets,
-        )
-        val newlyCompleted = state.epithets.filter { epithet ->
-            epithet.name !in beam.completedEpithets &&
-                epithet.name !in state.deadEpithets &&
-                EpithetTracker.isCompleted(epithet, syntheticState)
-        }
+        val syntheticState =
+            state.copy(
+                raceHistory = newHistory,
+                completedEpithets = beam.completedEpithets,
+            )
+        val newlyCompleted =
+            state.epithets.filter { epithet ->
+                epithet.name !in beam.completedEpithets &&
+                    epithet.name !in state.deadEpithets &&
+                    EpithetTracker.isCompleted(epithet, syntheticState)
+            }
 
         val baseScore = ScoringFunctions.raceValue(race, state.weights)
-        // Only target/forced epithets contribute to the score so the solver doesn't pursue free
-        // upside; non-targeted completions still appear in [completedEpithets] for the projection
-        // panel but don't bias the schedule toward racing.
-        val epithetGain = newlyCompleted
-            .filter { it.name in state.targetEpithets || it.name in state.forcedEpithets }
-            .sumOf { ScoringFunctions.epithetContribution(it, state.weights) }
+        // Mirror the reference Trackblazer solver: every epithet completion contributes its
+        // reward to the objective. This is what makes G2/G3 races (which net zero on grade-
+        // and-cost alone) competitive — a free epithet reward tips the balance over Train.
+        // Forced epithets are still surfaced via the feasibility check in [keepTopK]; targeted
+        // epithets get an additional weight boost via [Weights.epithetValue].
+        val epithetGain =
+            newlyCompleted.sumOf { ScoringFunctions.epithetContribution(it, state.weights) }
         val summer = ScoringFunctions.summerBlockPenalty(turn, state)
-        val consec = ScoringFunctions.consecutiveRacePenalty(newConsec, state.weights)
+        val consec = ScoringFunctions.consecutiveRacePenalty(newConsec, turn, state.weights)
 
         return beam.copy(
             decisions = beam.decisions + (turn to decision),
@@ -144,11 +153,12 @@ object Heuristic {
      */
     private fun keepTopK(beams: List<Beam>, k: Int, state: SolverState): List<Beam> {
         if (beams.isEmpty()) return beams
-        val viable = beams.filter { beam ->
-            state.forcedEpithets.all { name ->
-                name in beam.completedEpithets || canStillComplete(name, state)
+        val viable =
+            beams.filter { beam ->
+                state.forcedEpithets.all { name ->
+                    name in beam.completedEpithets || canStillComplete(name, state)
+                }
             }
-        }
         return viable.sortedWith(compareByDescending<Beam> { it.score }.thenBy { it.decisions.size })
             .take(k)
     }
