@@ -216,7 +216,7 @@ def download_image(url: str, out_fp: str):
         with open(out_fp, "wb") as f_out:
             f_out.write(response.content)
     except requests.exceptions.RequestException as exc:
-        print(f"An error occurred when downloading image: {e}")
+        print(f"An error occurred when downloading image: {exc}")
 
 
 def fetch_gametora_manifest_data(manifest_name: str) -> dict:
