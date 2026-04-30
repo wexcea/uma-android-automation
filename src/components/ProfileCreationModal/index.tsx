@@ -151,6 +151,8 @@ const ProfileCreationModal: React.FC<ProfileCreationModalProps> = ({ visible, on
         const settings: string[] = []
         settings.push(`Blacklist: ${currentTrainingSettings.trainingBlacklist.length > 0 ? currentTrainingSettings.trainingBlacklist.join(", ") : "None"}`)
         settings.push(`Prioritization: ${currentTrainingSettings.statPrioritization.length > 0 ? currentTrainingSettings.statPrioritization.join(", ") : "None"}`)
+        settings.push(`Event Choice Priority: ${currentTrainingSettings.eventChoiceStatPriority.length > 0 ? currentTrainingSettings.eventChoiceStatPriority.join(", ") : "None"}`)
+        settings.push(`Summer Training Priority: ${currentTrainingSettings.summerTrainingStatPriority.length > 0 ? currentTrainingSettings.summerTrainingStatPriority.join(", ") : "None"}`)
         settings.push(`Max Failure Chance: ${currentTrainingSettings.maximumFailureChance}%`)
         settings.push(`Disable on Maxed: ${currentTrainingSettings.disableTrainingOnMaxedStat ? "Yes" : "No"}`)
         settings.push(`Focus on Sparks: ${currentTrainingSettings.focusOnSparkStatTarget ? "Yes" : "No"}`)
