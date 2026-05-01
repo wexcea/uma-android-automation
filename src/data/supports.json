@@ -1002,6 +1002,26 @@
             "Energy -10\nPower +5\nGuts +5\nFront Runner Straightaways ○ hint +1\nMihono Bourbon bond +5"
         ]
     },
+    "Mr. C.B.": {
+        "The Paths that Beckon": [
+            "Energy +10\nSkill points +10\nMr. C.B. bond +5",
+            "Power +20\nMr. C.B. bond +5"
+        ],
+        "Even if I Ruffle Feathers": [
+            "Wit +15\nMr. C.B. bond +5",
+            "Early Start hint +1\nMr. C.B. bond +5"
+        ],
+        "(❯)\nParty Ditcher": [
+            "Wit +10\nSkill points +10\nMr. C.B. bond +5"
+        ],
+        "(❯❯)\nThinking Freely": [
+            "Randomly either\n----------\nEnergy +20\nCorner Recovery ○ hint +2\nMr. C.B. bond +10\n----------\n\n----------\nEnergy +15\nMr. C.B. bond +5",
+            "Power +10\nIntense Gaze hint +1\nMr. C.B. bond +5"
+        ],
+        "(❯❯❯)\nOverwhelming Freedom": [
+            "Power +10\nWit +20\nDaring Strike hint +1\nMr. C.B. bond +5"
+        ]
+    },
     "Nakayama Festa": {
         "Sundown Showdown": [
             "Energy +15\nNakayama Festa bond +5",
@@ -1896,6 +1916,13 @@
         ],
         "(❯❯❯)\nLegendary Act": [
             "Energy +10\nSpeed +5\nRushing Gale! hint +1\nTokai Teio bond +5"
+        ],
+        "(❯)\nA Selfish (?) Desire": [
+            "Maximum Energy +4\nSkill points +10\nTokai Teio bond +5"
+        ],
+        "(❯❯)\nSpreading the Love of Dance!": [
+            "Skill points +15\nMedium Corners ○ hint +1\nTokai Teio bond +5",
+            "Energy +20\nTokai Teio bond +5"
         ]
     },
     "Tosen Jordan": {
