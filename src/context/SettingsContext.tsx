@@ -20,8 +20,6 @@ interface SettingsContextType {
     resetSettings: () => Promise<boolean>
     /** Opens the app's data directory in the device's file manager. */
     openDataDirectory: () => Promise<void>
-    /** Whether a save operation is currently in progress. */
-    isSaving: boolean
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
@@ -39,7 +37,6 @@ interface SettingsProviderProps {
  */
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) => {
     const settingsManager = useSettingsManager()
-
     return <SettingsContext.Provider value={settingsManager}>{children}</SettingsContext.Provider>
 }
 
