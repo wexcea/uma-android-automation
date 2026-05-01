@@ -1433,8 +1433,9 @@ if __name__ == "__main__":
     support_card_scraper = SupportCardScraper()
     support_card_scraper.start()
 
-    race_scraper = RaceScraper()
-    race_scraper.start()
+    # Races are static so no need to re-scrape every time.
+    # race_scraper = RaceScraper()
+    # race_scraper.start()
 
     epithet_scraper = EpithetScraper()
     epithet_scraper.start()
