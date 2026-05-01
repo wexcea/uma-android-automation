@@ -42,8 +42,12 @@ export interface PerformanceMetric {
  * Provides detailed timing information for debugging performance issues.
  */
 export class PerformanceLogger {
-    public static ENABLED = false
-    public static SUPPRESS_LOGGING = true
+    // Currently ON in all builds while we're hunting the navigation/settings perf regression. The
+    // measurement harness (`scripts/perf-nav-test.ts`) parses `[PERF]` lines out of logcat, and
+    // production bundles ship with `__DEV__ = false`, so the previous dev-only gate left the
+    // harness blind. Flip back to `__DEV__` once perf is back to baseline.
+    public static ENABLED: boolean = true
+    public static SUPPRESS_LOGGING = false
 
     private metrics: PerformanceMetric[] = []
     private maxMetricsHistory = 100
@@ -93,6 +97,30 @@ export class PerformanceLogger {
     markNavigationStart(target: string) {
         if (!PerformanceLogger.ENABLED) return
         this.pendingNavigations.set(target, performance.now())
+    }
+
+    /**
+     * Mark an intermediate phase between [markNavigationStart] and [markNavigationEnd]. Records
+     * the cumulative time from tap to this phase without consuming the start timestamp, so the
+     * standard mount-end timing keeps working. Used to break "tap → page mounted" into actionable
+     * buckets (tap → drawer-close, drawer-close → dispatch, dispatch → first-commit, first-commit → first-effect).
+     *
+     * @param target The navigation target (route name).
+     * @param phase Free-form phase label (e.g. "dispatch", "first_commit").
+     */
+    markNavigationPhase(target: string, phase: string) {
+        if (!PerformanceLogger.ENABLED) return
+        const startTime = this.pendingNavigations.get(target)
+        if (startTime === undefined) return
+
+        const duration = performance.now() - startTime
+        const metric: PerformanceMetric = {
+            operation: `navigation_to_${target}_${phase}`,
+            duration,
+            timestamp: Date.now(),
+            category: "ui",
+        }
+        this.recordMetric(metric)
     }
 
     /**
@@ -157,4 +185,35 @@ export const performanceLogger = new PerformanceLogger()
 // Export convenience functions.
 export const startTiming = (operation: string, category?: PerformanceMetric["category"]) => performanceLogger.startTiming(operation, category)
 export const markNavigationStart = (target: string) => performanceLogger.markNavigationStart(target)
+export const markNavigationPhase = (target: string, phase: string) => performanceLogger.markNavigationPhase(target, phase)
 export const markNavigationEnd = (target: string, category?: PerformanceMetric["category"]) => performanceLogger.markNavigationEnd(target, category)
+
+/**
+ * Probe that detects long JS-thread blocks. Schedules a ~16 ms timer; whenever the actual gap
+ * between fires exceeds [thresholdMs], logs a `[BLOCK]` warning with the duration. Cheap when
+ * the thread is idle (one timer per frame) and self-suppressing under sustained load (the
+ * timer simply won't fire). Start it once at app bootstrap.
+ *
+ * @param thresholdMs Minimum gap (ms) to log. Defaults to 100 ms (≈ 6 dropped frames).
+ * @returns A cleanup function that stops the probe.
+ */
+export const startJsThreadBlockDetector = (thresholdMs = 100): (() => void) => {
+    if (!PerformanceLogger.ENABLED) return () => {}
+    let last = performance.now()
+    let stopped = false
+    const tick = () => {
+        if (stopped) return
+        const now = performance.now()
+        const gap = now - last
+        if (gap >= thresholdMs) {
+            // eslint-disable-next-line no-console
+            console.warn(`[BLOCK] JS thread blocked for ${gap.toFixed(0)}ms`)
+        }
+        last = now
+        setTimeout(tick, 16)
+    }
+    setTimeout(tick, 16)
+    return () => {
+        stopped = true
+    }
+}

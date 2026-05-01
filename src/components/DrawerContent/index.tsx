@@ -4,7 +4,7 @@ import { DrawerContentScrollView, DrawerContentComponentProps, useDrawerStatus }
 import { CommonActions } from "@react-navigation/native"
 import { Ionicons } from "@expo/vector-icons"
 import { Avatar, AvatarImage } from "../ui/avatar"
-import { markNavigationStart } from "../../lib/performanceLogger"
+import { markNavigationStart, markNavigationPhase } from "../../lib/performanceLogger"
 import { useTheme } from "../../context/ThemeContext"
 import { ChatContext, BotMetaContext } from "../../context/BotStateContext"
 import { skillPlanSettingsPages } from "../../pages/SkillPlanSettings/config"
@@ -372,10 +372,12 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
         // Close the drawer immediately to start the transition.
         // This achieves the effect of hiding the initial lag of mounting and rendering the target page while we are transitioning to it.
         navigation.closeDrawer()
+        markNavigationPhase(routeName, "drawer_closed")
 
         // Defer the heavy navigation until the drawer closing animation has been scheduled.
         // This prevents the target page's heavy mount/render from stuttering the drawer animation.
         setTimeout(() => {
+            markNavigationPhase(routeName, "dispatch")
             if (routeName === "Home") {
                 // Navigate to Home drawer screen.
                 navigation.dispatch(CommonActions.navigate({ name: "Home" }))

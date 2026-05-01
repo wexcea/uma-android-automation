@@ -19,16 +19,67 @@ export const deepMerge = <T extends Record<string, any>>(target: T, source: Part
 }
 
 /**
- * Settings whose persisted value is owned by a dedicated writer outside the React-state-mirrored
- * `Settings` object. Including them in the batch would let stale in-memory values overwrite the
- * fresh DB rows the dedicated writer just wrote. `misc.formattedSettingsString` is built and
- * persisted directly by `MessageLog`'s debounced effect; the React-state copy is intentionally
- * never updated, so it must be skipped here.
+ * Persisted settings whose canonical owner is *not* the React-state `Settings` object. They live
+ * in SQLite and are read directly by Kotlin (or by a dedicated JS writer) — round-tripping them
+ * through React state inflates re-renders and the auto-save batch by ~1 MB on a populated profile.
+ *
+ * Each entry is filtered out on **both** directions:
+ * - Save path (`convertSettingsToBatch`): never re-write rows React shouldn't own.
+ * - Load path (`stripDbOwnedKeys` invoked by `loadSettings`): never absorb them into React state.
+ *
+ * Categories of entries:
+ * - `misc.formattedSettingsString` — built and persisted directly by `MessageLog`'s debounced effect.
+ * - `racing.{racesData,epithetsData,characterPresetsData}` — bundled JSON assets written once at
+ *   bootstrap by `populateSolverData`; only consumed by Kotlin via `SettingsHelper.getStringSetting`.
+ * - `trainingEvent.{characterEventData,supportEventData,scenarioEventData}` — bundled JSON event data
+ *   written once at bootstrap by `populateEventData`; only consumed by Kotlin.
+ * - Orphaned rows (`skills.skillPlanData`, `racing.racingPlanData`, `scenarioOverrides.trackblazerEpithetData`,
+ *   `epithets.epithetData`) — persisted by older builds, no current source reference. Cleaned up
+ *   at bootstrap by `cleanupOrphanedSettings`.
  */
-const DB_BATCH_EXCLUDED: ReadonlyArray<readonly [string, string]> = [["misc", "formattedSettingsString"]]
+export const DB_OWNED_KEYS: ReadonlyArray<readonly [string, string]> = [
+    ["misc", "formattedSettingsString"],
+    ["racing", "racesData"],
+    ["racing", "epithetsData"],
+    ["racing", "characterPresetsData"],
+    ["trainingEvent", "characterEventData"],
+    ["trainingEvent", "supportEventData"],
+    ["trainingEvent", "scenarioEventData"],
+    ["skills", "skillPlanData"],
+    ["racing", "racingPlanData"],
+    ["scenarioOverrides", "trackblazerEpithetData"],
+    ["epithets", "epithetData"],
+]
+
+const isDbOwned = (category: string, key: string): boolean => DB_OWNED_KEYS.some(([c, k]) => c === category && k === key)
+
+/**
+ * Returns a per-category shallow copy of `settings` with all `DB_OWNED_KEYS` removed. Used on the
+ * load path to keep Kotlin-owned blobs out of React state.
+ *
+ * @param settings - The nested `category -> key -> value` map returned by `loadAllSettings`.
+ * @returns A new map with the same structure, minus DB-owned keys.
+ */
+export const stripDbOwnedKeys = (settings: Record<string, any>): Record<string, any> => {
+    const out: Record<string, any> = {}
+    for (const [category, categorySettings] of Object.entries(settings)) {
+        if (!categorySettings || typeof categorySettings !== "object") {
+            out[category] = categorySettings
+            continue
+        }
+        const filtered: Record<string, any> = {}
+        for (const [key, value] of Object.entries(categorySettings as Record<string, any>)) {
+            if (isDbOwned(category, key)) continue
+            filtered[key] = value
+        }
+        out[category] = filtered
+    }
+    return out
+}
 
 /**
  * Converts `Settings` object to database batch format.
+ *
  * @param settings - The `Settings` object to convert.
  * @returns An array of objects in the format `{ category: string; key: string; value: any }`.
  */
@@ -37,7 +88,7 @@ export const convertSettingsToBatch = (settings: Record<string, any>) => {
 
     Object.entries(settings).forEach(([category, categorySettings]) => {
         Object.entries(categorySettings).forEach(([key, value]) => {
-            if (DB_BATCH_EXCLUDED.some(([c, k]) => c === category && k === key)) return
+            if (isDbOwned(category, key)) return
             batch.push({ category, key, value })
         })
     })

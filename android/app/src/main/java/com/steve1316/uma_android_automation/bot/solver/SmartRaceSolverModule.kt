@@ -4,6 +4,10 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
  * React Native bridge for the Smart Race Solver. Exposes the solver to JS so the settings UI can
@@ -12,6 +16,14 @@ import com.facebook.react.bridge.ReactMethod
  * @property reactContext Injected by React Native's module loader.
  */
 class SmartRaceSolverModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+    /**
+     * Solver work runs on a CPU-bound dispatcher rather than the bridge's calling thread. The
+     * preview takes ~700 ms on a populated profile and was previously blocking the JS thread
+     * (every `NativeModules.X.method(...)` call waits on the same thread the bridge dispatched
+     * on, by default). Resolving the `Promise` from a coroutine releases JS to keep responding.
+     */
+    private val solverScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     override fun getName(): String = MODULE_NAME
 
     /**
@@ -25,10 +37,12 @@ class SmartRaceSolverModule(reactContext: ReactApplicationContext) : ReactContex
      */
     @ReactMethod
     fun previewSchedule(configJson: String, promise: Promise) {
-        try {
-            promise.resolve(SmartRaceSolverIntegration.previewSchedule(configJson))
-        } catch (t: Throwable) {
-            promise.reject("E_SOLVER", t.message ?: "preview failed", t)
+        solverScope.launch {
+            try {
+                promise.resolve(SmartRaceSolverIntegration.previewSchedule(configJson))
+            } catch (t: Throwable) {
+                promise.reject("E_SOLVER", t.message ?: "preview failed", t)
+            }
         }
     }
 

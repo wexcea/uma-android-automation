@@ -1,8 +1,5 @@
 import { createContext, useState, useMemo, useCallback } from "react"
 import { startTiming } from "../lib/performanceLogger"
-import racesData from "../data/races.json"
-import epithetsData from "../data/epithets.json"
-import characterPresetsData from "../data/characterPresets.json"
 import { skillPlanSettingsPages } from "../pages/SkillPlanSettings/config"
 
 /**
@@ -61,16 +58,18 @@ export interface Settings {
         juniorYearPerDistanceStrategies: Record<string, string>
         originalPerDistanceStrategies: Record<string, string>
         // Smart Race Solver — beam-search-based race scheduler driven by epithet completions.
+        // The static bundled assets (`racesData`, `epithetsData`, `characterPresetsData`) are
+        // intentionally NOT in this interface: they're written once at bootstrap by
+        // `populateSolverData` and read directly from SQLite by Kotlin. Round-tripping them
+        // through React state inflated re-renders by ~160 KB and made every toggle re-write the
+        // blobs to SQLite via the auto-save effect.
         enableSmartRaceSolver: boolean
-        racesData: string
         smartRaceSolverCharacterPreset: string
         smartRaceSolverAptitudes: string
         smartRaceSolverTargetEpithets: string
         smartRaceSolverForcedEpithets: string
         smartRaceSolverManualLocks: string
         smartRaceSolverWeights: string
-        epithetsData: string
-        characterPresetsData: string
     }
 
     // Skill Settings
@@ -272,9 +271,6 @@ export const defaultSettings: Settings = {
             includeOpAndPreOp: false,
             allowSummerRacing: false,
         }),
-        epithetsData: JSON.stringify(epithetsData),
-        characterPresetsData: JSON.stringify(characterPresetsData),
-        racesData: JSON.stringify(racesData),
     },
     skills: {
         enableSkillPointCheck: false,

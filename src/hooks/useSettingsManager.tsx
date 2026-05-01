@@ -6,7 +6,7 @@ import { defaultSettings, Settings, BotStateContext } from "../context/BotStateC
 import { databaseManager } from "../lib/database"
 import { startTiming } from "../lib/performanceLogger"
 import { logWithTimestamp, logErrorWithTimestamp } from "../lib/logger"
-import { deepMerge, convertSettingsToBatch, applyMigrations } from "../lib/settingsUtils"
+import { deepMerge, convertSettingsToBatch, applyMigrations, stripDbOwnedKeys } from "../lib/settingsUtils"
 
 export { deepMerge, convertSettingsToBatch, applyMigrations }
 
@@ -147,8 +147,13 @@ export const useSettingsManager = () => {
             try {
                 const dbSettings = await databaseManager.loadAllSettings()
                 rawDbSettings = dbSettings
+                // Drop Kotlin-owned blobs (races/epithets/character data, orphaned rows, etc.) before
+                // they reach React state. Loading them inflates the settings tree by ~1 MB on a
+                // populated profile and forces the auto-save effect to re-write all of it on every
+                // toggle — see `DB_OWNED_KEYS` in `settingsUtils.ts` for the rationale per-key.
+                const reactOwnedDbSettings = stripDbOwnedKeys(dbSettings)
                 // Use deep merge to preserve nested default values.
-                newSettings = deepMerge(defaultSettings, dbSettings as Partial<Settings>)
+                newSettings = deepMerge(defaultSettings, reactOwnedDbSettings as Partial<Settings>)
                 logWithTimestamp(`[SettingsManager] Settings loaded from SQLite database ${context}.`)
             } catch (sqliteError) {
                 logWithTimestamp(`[SettingsManager] Failed to load from SQLite ${context}, using defaults:`)
@@ -321,16 +326,12 @@ export const useSettingsManager = () => {
                 logErrorWithTimestamp("[SettingsManager] Error exporting profiles (continuing with settings export):", profileError)
             }
 
-            // Create export object with settings and profiles, excluding large data fields.
+            // Create export object with settings and profiles. Large Kotlin-owned blobs are now
+            // filtered out at the load boundary (`stripDbOwnedKeys`) so they're never present on
+            // `bsc.settings` to begin with — only the user-owned fields remain to be deep-cloned.
             const settingsForExport = JSON.parse(JSON.stringify(bsc.settings))
 
-            // Remove unnecessary fields before export.
-            delete settingsForExport.racing.epithetsData
-            delete settingsForExport.racing.characterPresetsData
-            delete settingsForExport.racing.racesData
-            delete settingsForExport.trainingEvent.characterEventData
-            delete settingsForExport.trainingEvent.supportEventData
-            delete settingsForExport.misc.formattedSettingsString
+            // Drop fields that are export-irrelevant but still live in React state.
             delete settingsForExport.misc.currentProfileName
 
             // Remove sensitive Discord credentials from export.
