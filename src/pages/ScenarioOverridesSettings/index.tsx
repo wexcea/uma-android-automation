@@ -174,6 +174,24 @@ const ScenarioOverridesSettings = () => {
                         </View>
 
                         <View style={styles.section}>
+                            <CustomSlider
+                                searchId="trackblazer-low-main-stat-gain-item-floor"
+                                value={scenarioOverrides.trackblazerLowMainStatGainItemFloor}
+                                placeholder={defaultSettings.scenarioOverrides.trackblazerLowMainStatGainItemFloor}
+                                onValueChange={(value) => updateOverrideSetting("trackblazerLowMainStatGainItemFloor", value)}
+                                onSlidingComplete={(value) => updateOverrideSetting("trackblazerLowMainStatGainItemFloor", value)}
+                                min={0}
+                                max={50}
+                                step={1}
+                                label="Low Main Stat Gain Item Floor"
+                                labelUnit=""
+                                showValue={true}
+                                showLabels={true}
+                                description="When mood is BAD or AWFUL, refuse to use Reset Whistle / Good-Luck Charm / Megaphone if main-stat gain is below this floor. Prevents wasting items on structurally low-return turns where the mood multiplier caps the stat gains."
+                            />
+                        </View>
+
+                        <View style={styles.section}>
                             <CustomCheckbox
                                 searchId="trackblazer-enable-irregular-training"
                                 checked={scenarioOverrides.trackblazerEnableIrregularTraining}

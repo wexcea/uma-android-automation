@@ -219,6 +219,7 @@ export interface Settings {
         trackblazerEnergyThreshold: number
         trackblazerShopCheckGrades: string[]
         trackblazerMinStatGainForCharm: number
+        trackblazerLowMainStatGainItemFloor: number
         trackblazerMaxRetriesPerRace: number
         trackblazerWhistleForcesTraining: boolean
         trackblazerRetryRacesBeforeFinalGrades: string[]
@@ -445,6 +446,7 @@ export const defaultSettings: Settings = {
         trackblazerEnergyThreshold: 40,
         trackblazerShopCheckGrades: ["G1", "G2", "G3"],
         trackblazerMinStatGainForCharm: 30,
+        trackblazerLowMainStatGainItemFloor: 15,
         trackblazerMaxRetriesPerRace: 1,
         trackblazerWhistleForcesTraining: true,
         trackblazerRetryRacesBeforeFinalGrades: ["G1", "G2", "G3"],
