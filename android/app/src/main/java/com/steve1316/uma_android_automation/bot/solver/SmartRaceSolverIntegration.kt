@@ -118,6 +118,52 @@ object SmartRaceSolverIntegration {
     }
 
     /**
+     * Peeks at the solver's planned race key for [currentTurn] without requiring on-screen
+     * candidates. Used by callers that need to know whether the solver will race this turn
+     * before opening the race-list UI (e.g. Trackblazer's pre-check, Racing's early-exit OCR
+     * scan).
+     *
+     * @param currentTurn The bot's current turn number.
+     * @param scenario Active scenario name from `settings.general.scenario`.
+     * @return The planned race key (matches [RaceCandidate.key]), or null when the solver
+     *   cannot or should not influence this turn (feature disabled, missing data, or solver
+     *   picked Train/Rest).
+     */
+    fun peekRaceKeyForTurn(currentTurn: TurnNumber, scenario: String): String? {
+        if (!SettingsHelper.getBooleanSetting("racing", "enableSmartRaceSolver")) return null
+        val epithets = loadEpithets() ?: return null
+        val racesByTurn = loadAllRaces() ?: return null
+
+        val state =
+            SolverState(
+                currentTurn = currentTurn,
+                scenario = scenario,
+                characterPreset = SettingsHelper.getStringSetting("racing", "smartRaceSolverCharacterPreset").ifEmpty { null },
+                aptitudes = readUserAptitudes(),
+                racesByTurn = racesByTurn,
+                epithets = epithets,
+                raceHistory = synchronized(raceHistory) { raceHistory.toList() },
+                forcedEpithets = readStringSet("smartRaceSolverForcedEpithets"),
+                targetEpithets = readStringSet("smartRaceSolverTargetEpithets"),
+                weights = readWeights(),
+            )
+        val schedule = SmartRaceSolver.solve(state)
+        val decision = schedule.decisionAt(currentTurn)
+        return (decision as? Decision.RaceDecision)?.raceKey
+    }
+
+    /**
+     * True when [raceData] resolves to the same race as the supplied solver [raceKey]. Mirrors
+     * the matching logic used inside [pickRace] so callers can match candidates against a key
+     * returned by [peekRaceKeyForTurn] without re-implementing the comparison.
+     *
+     * @param raceData On-screen race resolved by [Racing.lookupRaceInDatabase].
+     * @param raceKey Solver race key returned by [peekRaceKeyForTurn].
+     * @return True when the on-screen race matches the solver's key.
+     */
+    fun isRaceKeyMatch(raceData: RaceData, raceKey: String): Boolean = raceData.name == raceKey || raceData.name == raceNameFromKey(raceKey)
+
+    /**
      * Computes a preview schedule from the user-supplied [configJson], without consulting any
      * runtime race history. Used by the settings UI to render a calendar preview of what the
      * solver would do if a fresh run started today with the current configuration.
@@ -201,6 +247,9 @@ object SmartRaceSolverIntegration {
         candidates: List<RaceData>,
     ): SolverState? {
         val racesForTurn = candidates.map { it.toRaceCandidate(currentTurn) }
+        // TODO: completedEpithets defaults to emptySet() — never populated from runtime
+        //  EpithetTracker. Causes "projected epithets: []" in pickRace() logs because the
+        //  beam search starts blind to prior wins. Fix tracked separately.
         return SolverState(
             currentTurn = currentTurn,
             scenario = scenario,
