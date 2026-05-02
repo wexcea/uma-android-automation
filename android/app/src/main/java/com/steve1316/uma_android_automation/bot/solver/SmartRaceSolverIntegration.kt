@@ -102,6 +102,26 @@ object SmartRaceSolverIntegration {
     }
 
     /**
+     * Idempotent per-run hook that logs the Preview-equivalent schedule and (on a mid-run
+     * restart) seeds [raceHistory] with assumed wins for turns before [currentTurn]. Safe
+     * to call repeatedly: only the first call after [reset] does any work. Designed to be
+     * invoked from the campaign loop right after the date is detected so the schedule log
+     * appears before shop/item dialogs rather than later when [peekRaceKeyForTurn] eventually
+     * runs.
+     *
+     * @param currentTurn The turn the bot is on.
+     * @param scenario Active scenario name from `settings.general.scenario`.
+     */
+    fun runStartupHooks(currentTurn: TurnNumber, scenario: String) {
+        if (historySeeded) return
+        if (!SettingsHelper.getBooleanSetting("racing", "enableSmartRaceSolver")) return
+        val epithets = loadEpithets() ?: return
+        val racesByTurn = loadAllRaces() ?: return
+        seedHistoryFromPreview(currentTurn, scenario, epithets, racesByTurn)
+        historySeeded = true
+    }
+
+    /**
      * Commits the most recent [markPendingRace] entry to [raceHistory] when [won] is true,
      * or discards it when false (e.g. retries disabled or exhausted). No-op when no race
      * is pending. Idempotent on `(raceKey, turnNumber)` via [recordRaceWon].
@@ -117,7 +137,65 @@ object SmartRaceSolverIntegration {
         }
         recordRaceWon(pending.raceKey, pending.name, pending.classYear, pending.turnNumber)
         MessageLog.i(TAG, "Race \"${pending.name}\" on turn ${pending.turnNumber} confirmed 1st; added to history.")
+        logEpithetProgressAfterWin(pending.name)
     }
+
+    /**
+     * Logs the epithets whose matchers reference [raceName] alongside their post-win status
+     * and per-matcher progress. Called only on confirmed wins so losses generate no noise.
+     * Filter-based matchers (e.g. [EpithetMatcher.WinCount]) are skipped to keep the affected
+     * list narrow to epithets that explicitly name this race.
+     *
+     * @param raceName The just-confirmed race name (matches [RaceCandidate.name]).
+     */
+    private fun logEpithetProgressAfterWin(raceName: String) {
+        val epithets = cachedEpithets ?: loadEpithets() ?: return
+        val racesByTurn = cachedRaces ?: loadAllRaces() ?: return
+        val affected = epithets.filter { epi -> epi.matchers.any { matcherReferencesRace(it, raceName) } }
+        if (affected.isEmpty()) return
+        val state =
+            SolverState(
+                currentTurn = 1,
+                scenario = "",
+                characterPreset = null,
+                aptitudes = readUserAptitudes(),
+                racesByTurn = racesByTurn,
+                epithets = epithets,
+                raceHistory = synchronized(raceHistory) { raceHistory.toList() },
+                forcedEpithets = readStringSet("smartRaceSolverForcedEpithets"),
+                targetEpithets = readStringSet("smartRaceSolverTargetEpithets"),
+                weights = readWeights(),
+            )
+        val sb = StringBuilder()
+        sb.append("Race \"$raceName\" updated ${affected.size} epithet(s):")
+        for (epi in affected) {
+            val status = EpithetTracker.classify(epi, state)
+            val percents = epi.matchers.joinToString(", ") { "${(EpithetTracker.progress(it, state) * 100).toInt()}%" }
+            sb.append("\n  - \"${epi.name}\" → $status (matchers: $percents)")
+        }
+        MessageLog.i(TAG, sb.toString())
+    }
+
+    /**
+     * True when [matcher] explicitly references [raceName] by name. Filter-based
+     * ([EpithetMatcher.WinCount]) and epithet-dependency matchers
+     * ([EpithetMatcher.EpithetAnyOf], [EpithetMatcher.EpithetAll]) are excluded so
+     * post-win logging only flags epithets that name the race directly.
+     *
+     * @param matcher Matcher to inspect.
+     * @param raceName Race name (matches [RaceCandidate.name]).
+     * @return True when the matcher names the race.
+     */
+    private fun matcherReferencesRace(matcher: EpithetMatcher, raceName: String): Boolean =
+        when (matcher) {
+            is EpithetMatcher.WinRace -> matcher.name == raceName
+            is EpithetMatcher.WinRaceTimes -> matcher.name == raceName
+            is EpithetMatcher.WinAnyOf -> raceName in matcher.names
+            is EpithetMatcher.WinAtLeast -> raceName in matcher.names
+            is EpithetMatcher.WinCount -> false
+            is EpithetMatcher.EpithetAnyOf -> false
+            is EpithetMatcher.EpithetAll -> false
+        }
 
     /**
      * Picks the on-screen race the solver's schedule prefers for [currentTurn], or returns
@@ -169,15 +247,26 @@ object SmartRaceSolverIntegration {
      *   cannot or should not influence this turn (feature disabled, missing data, or solver
      *   picked Train/Rest).
      */
-    fun peekRaceKeyForTurn(currentTurn: TurnNumber, scenario: String): String? {
+    fun peekRaceKeyForTurn(currentTurn: TurnNumber, scenario: String): String? =
+        (peekDecisionForTurn(currentTurn, scenario) as? Decision.RaceDecision)?.raceKey
+
+    /**
+     * Peeks at the solver's planned [Decision] for [currentTurn] without requiring on-screen
+     * candidates. Returns the full decision shape — `Train`, `Rest`, or `RaceDecision` —
+     * so callers can route the bot's per-turn action to match the solver's plan instead of
+     * falling through to legacy heuristics on non-Race turns.
+     *
+     * @param currentTurn The bot's current turn number.
+     * @param scenario Active scenario name from `settings.general.scenario`.
+     * @return The planned [Decision], or null when the solver cannot influence this turn
+     *   (feature disabled or required data missing).
+     */
+    fun peekDecisionForTurn(currentTurn: TurnNumber, scenario: String): Decision? {
         if (!SettingsHelper.getBooleanSetting("racing", "enableSmartRaceSolver")) return null
         val epithets = loadEpithets() ?: return null
         val racesByTurn = loadAllRaces() ?: return null
 
-        if (!historySeeded) {
-            seedHistoryFromPreview(currentTurn, scenario, epithets, racesByTurn)
-            historySeeded = true
-        }
+        runStartupHooks(currentTurn, scenario)
 
         val state =
             SolverState(
@@ -193,8 +282,7 @@ object SmartRaceSolverIntegration {
                 weights = readWeights(),
             )
         val schedule = SmartRaceSolver.solve(state)
-        val decision = schedule.decisionAt(currentTurn)
-        return (decision as? Decision.RaceDecision)?.raceKey
+        return schedule.decisionAt(currentTurn)
     }
 
     /**
@@ -310,15 +398,15 @@ object SmartRaceSolverIntegration {
     }
 
     /**
-     * Replays the Preview's schedule for turns before [currentTurn] into [raceHistory] under
-     * the assumption that every Race-decision was won. Used when the bot starts mid-career
-     * and there is no persisted ground-truth race history to recover from. The schedule is
+     * Computes the Preview-equivalent schedule for the current configuration, logs it, and
+     * (when [currentTurn] > 1) replays its Race-decisions for turns before [currentTurn]
+     * into [raceHistory] as assumed wins for mid-run restart recovery. The schedule is
      * computed with the same inputs [previewSchedule] uses (currentTurn=1, empty raceHistory,
-     * `manualLocks` from settings) so the seeded history matches what the user has been
+     * `manualLocks` from settings) so what the runtime expects matches what the user has been
      * watching in the UI.
      *
      * @param currentTurn The turn the bot is currently on; only turns strictly before this
-     *   are seeded.
+     *   are seeded into history.
      * @param scenario Active scenario name from `settings.general.scenario`.
      * @param epithets Full list of epithets parsed from settings.
      * @param racesByTurn Full race calendar from settings.
@@ -329,7 +417,6 @@ object SmartRaceSolverIntegration {
         epithets: List<Epithet>,
         racesByTurn: Map<TurnNumber, List<RaceCandidate>>,
     ) {
-        if (currentTurn <= 1) return
         val manualLocksJson = SettingsHelper.getStringSetting("racing", "smartRaceSolverManualLocks")
         val manualLocksObj = runCatching { if (manualLocksJson.isEmpty()) null else JSONObject(manualLocksJson) }.getOrNull()
         val state =
@@ -346,6 +433,8 @@ object SmartRaceSolverIntegration {
                 weights = readWeights(),
             )
         val schedule = SmartRaceSolver.solve(state)
+        logPreviewSchedule(schedule, racesByTurn)
+        if (currentTurn <= 1) return
         var seeded = 0
         for ((turn, decision) in schedule.decisions) {
             if (turn >= currentTurn) continue
@@ -359,6 +448,34 @@ object SmartRaceSolverIntegration {
         if (seeded > 0) {
             MessageLog.i(TAG, "Seeded raceHistory with $seeded assumed wins from Preview for turns 1..${currentTurn - 1} (mid-run restart recovery).")
         }
+    }
+
+    /**
+     * Logs a one-line-per-race summary of the Preview's schedule plus the projected epithets
+     * the solver expects to complete. Intended to fire once per bot run so the operator can
+     * compare actual play to the planned schedule.
+     *
+     * @param schedule The solved schedule to summarize.
+     * @param racesByTurn Race calendar used to resolve race keys back to names.
+     */
+    private fun logPreviewSchedule(schedule: Schedule, racesByTurn: Map<TurnNumber, List<RaceCandidate>>) {
+        val raceTurns = schedule.decisions.entries.filter { it.value is Decision.RaceDecision }.sortedBy { it.key }
+        val sb = StringBuilder()
+        sb.append("Smart Race Solver Preview Schedule (${raceTurns.size} races, score=${"%.2f".format(schedule.totalScore)}, projected epithets: ${schedule.projectedEpithets}):")
+        if (raceTurns.isEmpty()) {
+            sb.append("\n  (no races planned)")
+        } else {
+            for ((turn, decision) in raceTurns) {
+                val raceKey = (decision as Decision.RaceDecision).raceKey
+                val candidate = racesByTurn[turn]?.firstOrNull { it.key == raceKey }
+                val name = candidate?.name ?: raceNameFromKey(raceKey)
+                val grade = candidate?.grade?.name ?: "?"
+                val date = candidate?.date?.takeIf { it.isNotBlank() }
+                val datePrefix = if (date != null) "$date — " else ""
+                sb.append("\n  Turn $turn (${datePrefix}$name, $grade)")
+            }
+        }
+        MessageLog.i(TAG, sb.toString())
     }
 
     /**
