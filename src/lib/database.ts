@@ -592,6 +592,27 @@ export class DatabaseManager {
     }
 
     /**
+     * Delete a single setting row by category and key. Idempotent: missing rows are a no-op.
+     *
+     * @param category - The category of the setting to delete.
+     * @param key - The key of the setting to delete.
+     * @returns A promise that resolves once the delete completes.
+     */
+    async deleteSetting(category: string, key: string): Promise<void> {
+        const endTiming = startTiming("database_delete_setting", "database")
+        this.ensureInitialized()
+
+        try {
+            await this.db!.runAsync(`DELETE FROM ${this.TABLE_SETTINGS} WHERE category = ? AND key = ?`, [category, key])
+            endTiming({ status: "success", category, key })
+        } catch (error) {
+            logErrorWithTimestamp(`[DB] Failed to delete setting ${category}.${key}:`, error)
+            endTiming({ status: "error", category, key, error: error instanceof Error ? error.message : String(error) })
+            throw error
+        }
+    }
+
+    /**
      * Load all settings from database.
      * @returns A promise that resolves with a record of settings organized by category and key.
      */

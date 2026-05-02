@@ -22,7 +22,8 @@
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
         "test:kt": "cd android && ./gradlew test",
-        "build:doc-index": "tsx scripts/build-doc-index.ts"
+        "build:doc-index": "tsx scripts/build-doc-index.ts",
+        "perf:nav": "tsx scripts/perf-nav-test.ts"
     },
     "dependencies": {
         "@expo/vector-icons": "^15.0.3",

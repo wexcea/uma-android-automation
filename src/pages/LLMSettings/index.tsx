@@ -9,6 +9,7 @@ import CustomSlider from "../../components/CustomSlider"
 import PageHeader from "../../components/PageHeader"
 import WarningContainer from "../../components/WarningContainer"
 import InfoContainer from "../../components/InfoContainer"
+import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import { databaseManager } from "../../lib/database"
 import { DEFAULTS as TUNING_DEFAULTS, saveTuning } from "../../lib/chat/chatSettings"
 import { ACTIVE_MODEL_SETTING } from "../../lib/chat/activeModel"
@@ -101,6 +102,7 @@ interface DownloadedModel {
  * of what happens here.
  */
 const LLMSettings = () => {
+    usePerformanceLogging("LLMSettings")
     const { colors } = useTheme()
     const { chat, updateChat } = useContext(ChatContext)
     const enableAskTheDocs = chat?.enableAskTheDocs ?? false

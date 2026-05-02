@@ -1,6 +1,6 @@
 import { useContext, useState, useMemo, useCallback, memo, useEffect, useRef } from "react"
 import { MessageLogContext } from "../../context/MessageLogContext"
-import { BotStateContext } from "../../context/BotStateContext"
+import { BotMetaContext, Settings, useSettingsSnapshot } from "../../context/BotStateContext"
 import { useSettings } from "../../context/SettingsContext"
 import { databaseManager } from "../../lib/database"
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Animated } from "react-native"
@@ -192,7 +192,8 @@ const LogItem = memo(({ item, fontSize, onLongPress, enableMessageIdDisplay }: {
  */
 const MessageLog = () => {
     const mlc = useContext(MessageLogContext)
-    const bsc = useContext(BotStateContext)
+    const { appName, appVersion, setSettings } = useContext(BotMetaContext)
+    const settings = useSettingsSnapshot()
     const { saveSettingsImmediate } = useSettings()
     const [searchQuery, setSearchQuery] = useState("")
     const [showErrorDialog, setShowErrorDialog] = useState(false)
@@ -203,7 +204,7 @@ const MessageLog = () => {
     const [contentHeight, setContentHeight] = useState(0)
     const [viewportHeight, setViewportHeight] = useState(0)
 
-    const fontSize = bsc.settings.misc.messageLogFontSize
+    const fontSize = settings.misc.messageLogFontSize
     const maxFontSize = 24
     const minFontSize = 8
 
@@ -238,7 +239,7 @@ const MessageLog = () => {
     // Build the formatted settings welcome banner. Pure function of the settings snapshot;
     // the surrounding effect defers invocation so the heavy template-literal work stays off
     // the synchronous toggle path.
-    const buildFormattedSettings = useCallback((settings: typeof bsc.settings): string => {
+    const buildFormattedSettings = useCallback((settings: Settings): string => {
         // Training stat targets by distance.
         const sprintTargetsString = `Sprint: \n\t\tSpeed: ${settings.trainingStatTarget.trainingSprintStatTarget_speedStatTarget}\t\tStamina: ${settings.trainingStatTarget.trainingSprintStatTarget_staminaStatTarget}\t\tPower: ${settings.trainingStatTarget.trainingSprintStatTarget_powerStatTarget}\n\t\tGuts: ${settings.trainingStatTarget.trainingSprintStatTarget_gutsStatTarget}\t\t\tWit: ${settings.trainingStatTarget.trainingSprintStatTarget_witStatTarget}`
         const mileTargetsString = `Mile: \n\t\tSpeed: ${settings.trainingStatTarget.trainingMileStatTarget_speedStatTarget}\t\tStamina: ${settings.trainingStatTarget.trainingMileStatTarget_staminaStatTarget}\t\tPower: ${settings.trainingStatTarget.trainingMileStatTarget_powerStatTarget}\n\t\tGuts: ${settings.trainingStatTarget.trainingMileStatTarget_gutsStatTarget}\t\t\tWit: ${settings.trainingStatTarget.trainingMileStatTarget_witStatTarget}`
@@ -424,18 +425,18 @@ ${longTargetsString}
     // imported a populated settings file. We now compute it 250ms after the last settings
     // change, off the toggle's render commit. The intro/log path keeps using the previous
     // value until the new one lands; downstream memos bail out via `Object.is`.
-    const [formattedSettingsString, setFormattedSettingsString] = useState<string>(() => buildFormattedSettings(bsc.settings))
+    const [formattedSettingsString, setFormattedSettingsString] = useState<string>(() => buildFormattedSettings(settings))
     const formattedStringTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     useEffect(() => {
         if (formattedStringTimerRef.current) clearTimeout(formattedStringTimerRef.current)
         formattedStringTimerRef.current = setTimeout(() => {
-            const next = buildFormattedSettings(bsc.settings)
+            const next = buildFormattedSettings(settings)
             setFormattedSettingsString((prev) => (prev === next ? prev : next))
         }, 250)
         return () => {
             if (formattedStringTimerRef.current) clearTimeout(formattedStringTimerRef.current)
         }
-    }, [bsc.settings, buildFormattedSettings])
+    }, [settings, buildFormattedSettings])
 
     // Persist the formatted string directly to SQLite. The Kotlin runtime is the only consumer
     // (via SettingsHelper.getStringSetting), so writing through `setSettings` would just trigger
@@ -457,7 +458,7 @@ ${longTargetsString}
      */
     const introMessage = useMemo(() => {
         const hasLogs = mlc.messageLog.length > 0
-        const baseMessage = `****************************************\nWelcome to ${bsc.appName} v${bsc.appVersion}\n****************************************`
+        const baseMessage = `****************************************\nWelcome to ${appName} v${appVersion}\n****************************************`
 
         // Don't add formattedSettingsString if logs are already present (Android already copied it).
         if (hasLogs) {
@@ -466,8 +467,8 @@ ${longTargetsString}
         }
 
         // Only include settings string if enabled and no logs exist yet.
-        return bsc.settings.misc.enableSettingsDisplay ? `${baseMessage}\n\n${formattedSettingsString}` : baseMessage
-    }, [bsc.appName, bsc.appVersion, bsc.settings.misc.enableSettingsDisplay, formattedSettingsString, mlc.messageLog.length])
+        return settings.misc.enableSettingsDisplay ? `${baseMessage}\n\n${formattedSettingsString}` : baseMessage
+    }, [appName, appVersion, settings.misc.enableSettingsDisplay, formattedSettingsString, mlc.messageLog.length])
 
     /**
      * Process log messages with color coding and virtualization while sorting them by timestamp.
@@ -724,12 +725,12 @@ ${longTargetsString}
     const increaseFontSize = useCallback(async () => {
         const newFontSize = Math.min(fontSize + 1, maxFontSize)
         const updatedSettings = {
-            ...bsc.settings,
-            misc: { ...bsc.settings.misc, messageLogFontSize: newFontSize },
+            ...settings,
+            misc: { ...settings.misc, messageLogFontSize: newFontSize },
         }
-        bsc.setSettings(updatedSettings)
+        setSettings(updatedSettings)
         await saveSettingsImmediate(updatedSettings)
-    }, [fontSize, bsc.settings, bsc.setSettings, saveSettingsImmediate])
+    }, [fontSize, settings, setSettings, saveSettingsImmediate])
 
     /**
      * Decrease font size and then save it to the settings.
@@ -737,12 +738,12 @@ ${longTargetsString}
     const decreaseFontSize = useCallback(async () => {
         const newFontSize = Math.max(fontSize - 1, minFontSize)
         const updatedSettings = {
-            ...bsc.settings,
-            misc: { ...bsc.settings.misc, messageLogFontSize: newFontSize },
+            ...settings,
+            misc: { ...settings.misc, messageLogFontSize: newFontSize },
         }
-        bsc.setSettings(updatedSettings)
+        setSettings(updatedSettings)
         await saveSettingsImmediate(updatedSettings)
-    }, [fontSize, bsc.settings, bsc.setSettings, saveSettingsImmediate])
+    }, [fontSize, settings, setSettings, saveSettingsImmediate])
 
     /**
      * Clear search query.
@@ -784,8 +785,8 @@ ${longTargetsString}
      * @returns The rendered log item.
      */
     const renderLogItem = useCallback(
-        ({ item }: { item: LogMessage }) => <LogItem item={item} fontSize={fontSize} onLongPress={handleLongPress} enableMessageIdDisplay={bsc.settings.misc.enableMessageIdDisplay} />,
-        [fontSize, handleLongPress, bsc.settings.misc.enableMessageIdDisplay]
+        ({ item }: { item: LogMessage }) => <LogItem item={item} fontSize={fontSize} onLongPress={handleLongPress} enableMessageIdDisplay={settings.misc.enableMessageIdDisplay} />,
+        [fontSize, handleLongPress, settings.misc.enableMessageIdDisplay]
     )
 
     /**

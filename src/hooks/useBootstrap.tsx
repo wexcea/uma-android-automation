@@ -5,6 +5,7 @@ import { MessageLogContext, MessageLogProviderProps } from "../context/MessageLo
 import { useSettings } from "../context/SettingsContext"
 import { logWithTimestamp, logErrorWithTimestamp } from "../lib/logger"
 import { databaseManager, DatabaseRace, DatabaseSkill } from "../lib/database"
+import { startJsThreadBlockDetector } from "../lib/performanceLogger"
 
 /**
  * Manages app initialization, settings persistence, and message handling.
@@ -28,7 +29,14 @@ export const useBootstrap = () => {
             mlc.addMessageToLog(data.id, data.message)
         })
 
-        return () => messageLogSubscription.remove()
+        // Start the JS-thread block detector so any sustained > 100 ms blocks surface in logcat
+        // as `[BLOCK]` warnings. Cheap when idle; gated by `PerformanceLogger.ENABLED`.
+        const stopBlockDetector = startJsThreadBlockDetector(100)
+
+        return () => {
+            messageLogSubscription.remove()
+            stopBlockDetector()
+        }
     }, [])
 
     // Initialize database and populate data after the first paint so the splash can render.

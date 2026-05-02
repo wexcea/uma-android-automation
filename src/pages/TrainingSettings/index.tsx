@@ -1,5 +1,5 @@
 import React, { useMemo, useContext, useEffect, useState, useRef, useCallback } from "react"
-import { View, Text, ScrollView, StyleSheet, Modal, TouchableOpacity, Dimensions } from "react-native"
+import { View, Text, ScrollView, StyleSheet, Modal, TouchableOpacity, Dimensions, InteractionManager } from "react-native"
 import { Snackbar } from "react-native-paper"
 import { useTheme } from "../../context/ThemeContext"
 import { TrainingContext, GeneralMiscContext, BotMetaContext, defaultSettings, Settings } from "../../context/BotStateContext"
@@ -66,6 +66,20 @@ const TrainingSettings = () => {
 
     // Use a ref to track if the initial mount sync has been done to avoid redundant updates.
     const isMounted = useRef(false)
+
+    // Two-phase mount. First paint renders the page header + profile selector (~100 ms baseline)
+    // so the user sees the page immediately; the heavy body — stat selectors, ~20 stat target
+    // sliders, and the rest of the checkbox grid — commits one tick later, after the navigator
+    // animation has painted. Mirrors the deferral pattern that cut the Settings hub first_commit
+    // by 27 % and is needed here because TrainingSettings's first_commit was ~485 ms (over the
+    // 350 ms budget) on the harness.
+    const [showHeavySections, setShowHeavySections] = useState(false)
+    useEffect(() => {
+        const handle = InteractionManager.runAfterInteractions(() => {
+            setShowHeavySections(true)
+        })
+        return () => handle.cancel()
+    }, [])
 
     // Merge current training settings with defaults to handle missing properties.
     // Include local state values to ensure blacklist and prioritization are current.
@@ -495,577 +509,582 @@ const TrainingSettings = () => {
                             />
                         </SearchableItem>
 
-                        {renderStatSelector(
-                            "Blacklist",
-                            blacklistItems,
-                            (value) => setBlacklistItems(value),
-                            blacklistModalVisible,
-                            setBlacklistModalVisible,
-                            "Select which stats to exclude from training. These stats will be skipped during training sessions.",
-                            "checkbox",
-                            "training-blacklist"
+                        {showHeavySections && (
+                            <>
+                                {renderStatSelector(
+                                    "Blacklist",
+                                    blacklistItems,
+                                    (value) => setBlacklistItems(value),
+                                    blacklistModalVisible,
+                                    setBlacklistModalVisible,
+                                    "Select which stats to exclude from training. These stats will be skipped during training sessions.",
+                                    "checkbox",
+                                    "training-blacklist"
+                                )}
+
+                                {renderStatSelector(
+                                    "Prioritization",
+                                    statPrioritizationItems,
+                                    (value) => setStatPrioritizationItems(value),
+                                    prioritizationModalVisible,
+                                    setPrioritizationModalVisible,
+                                    "Select the priority order of the stats. The stats will be trained in the order they are selected. If none are selected, then the default order will be used.",
+                                    "priority",
+                                    "training-prioritization"
+                                )}
+
+                                {renderStatSelector(
+                                    "Event Choice Prioritization",
+                                    eventChoiceStatPriorityItems,
+                                    (value) => setEventChoiceStatPriorityItems(value),
+                                    eventChoicePrioritizationModalVisible,
+                                    setEventChoicePrioritizationModalVisible,
+                                    "Select the priority order of stats used when scoring in-game event choices. Events typically grant flat stat gains, so a different ordering than regular training may be optimal.",
+                                    "priority",
+                                    "event-choice-stat-priority"
+                                )}
+
+                                {renderStatSelector(
+                                    "Summer Training Prioritization",
+                                    summerTrainingStatPriorityItems,
+                                    (value) => setSummerTrainingStatPriorityItems(value),
+                                    summerTrainingPrioritizationModalVisible,
+                                    setSummerTrainingPrioritizationModalVisible,
+                                    "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer with no facility progression, so a different ordering than regular training may be optimal.",
+                                    "priority",
+                                    "summer-training-stat-priority"
+                                )}
+
+                                <View style={styles.section}>
+                                    <CustomCheckbox
+                                        checked={disableTrainingOnMaxedStat}
+                                        onCheckedChange={(checked) => updateTrainingSetting("disableTrainingOnMaxedStat", checked)}
+                                        label="Disable Training on Maxed Stats"
+                                        description="When enabled, training will be skipped for stats that have reached their maximum value."
+                                        className="my-2"
+                                        searchId="disable-training-on-maxed-stats"
+                                    />
+                                </View>
+
+                                <View style={styles.section}>
+                                    <CustomSlider
+                                        value={maximumFailureChance}
+                                        placeholder={defaultSettings.training.maximumFailureChance}
+                                        onValueChange={(value) => updateTrainingSetting("maximumFailureChance", value)}
+                                        min={5}
+                                        max={95}
+                                        step={5}
+                                        label="Set Maximum Failure Chance"
+                                        labelUnit="%"
+                                        showValue={true}
+                                        showLabels={true}
+                                        description="Set the maximum acceptable failure chance for training sessions. Training with higher failure rates will be avoided."
+                                        searchId="maximum-failure-chance"
+                                    />
+                                </View>
+
+                                <View style={styles.section}>
+                                    <CustomCheckbox
+                                        checked={enableRiskyTraining}
+                                        onCheckedChange={(checked) => updateTrainingSetting("enableRiskyTraining", checked)}
+                                        label="Enable Riskier Training"
+                                        description="When enabled, trainings with high main stat gains will use a separate, higher maximum failure chance threshold."
+                                        className="my-2"
+                                        searchId="enable-riskier-training"
+                                    />
+                                    <CustomSlider
+                                        value={riskyTrainingMinStatGain || defaultSettings.training.riskyTrainingMinStatGain}
+                                        placeholder={defaultSettings.training.riskyTrainingMinStatGain}
+                                        onValueChange={(value) => updateTrainingSetting("riskyTrainingMinStatGain", value)}
+                                        min={20}
+                                        max={100}
+                                        step={5}
+                                        label="Minimum Main Stat Gain Threshold"
+                                        labelUnit=""
+                                        showValue={true}
+                                        showLabels={true}
+                                        description="When a training's main stat gain meets or exceeds this value, it will be considered for risky training."
+                                        searchId="risky-training-min-stat-gain"
+                                        searchCondition={enableRiskyTraining}
+                                        parentId="enable-riskier-training"
+                                    />
+                                    <CustomSlider
+                                        value={riskyTrainingMaxFailureChance || defaultSettings.training.riskyTrainingMaxFailureChance}
+                                        placeholder={defaultSettings.training.riskyTrainingMaxFailureChance}
+                                        onValueChange={(value) => updateTrainingSetting("riskyTrainingMaxFailureChance", value)}
+                                        min={5}
+                                        max={95}
+                                        step={5}
+                                        label="Risky Training Maximum Failure Chance"
+                                        labelUnit="%"
+                                        showValue={true}
+                                        showLabels={true}
+                                        description="Set the maximum acceptable failure chance for risky training sessions with high main stat gains."
+                                        searchId="risky-training-max-failure-chance"
+                                        searchCondition={enableRiskyTraining}
+                                        parentId="enable-riskier-training"
+                                    />
+                                </View>
+
+                                {renderStatSelector(
+                                    "Focus on Sparks",
+                                    sparkStatTargetItems,
+                                    (value) => setSparkStatTargetItems(value),
+                                    sparkStatTargetModalVisible,
+                                    setSparkStatTargetModalVisible,
+                                    "Select which stats should receive priority to get to at least 600 to get the best chance to receive 3* sparks.",
+                                    "checkbox",
+                                    "focus-on-sparks"
+                                )}
+
+                                <View style={styles.section}>
+                                    <CustomCheckbox
+                                        checked={enablePrioritizeSkillHints}
+                                        onCheckedChange={(checked) => updateTrainingSetting("enablePrioritizeSkillHints", checked)}
+                                        label="Prioritize Skill Hints"
+                                        description="When enabled, the bot will prioritize acquiring skill hints, bypassing stat prioritization and blacklist, while still being constrained by the failure chance thresholds."
+                                        className="my-2"
+                                        searchId="enable-prioritize-skill-hints"
+                                    />
+                                </View>
+
+                                <View style={styles.section}>
+                                    <CustomCheckbox
+                                        checked={mustRestBeforeSummer}
+                                        onCheckedChange={(checked) => updateTrainingSetting("mustRestBeforeSummer", checked)}
+                                        label="Must Rest before Summer"
+                                        description="Optimizes June Late Phase in Classic and Senior Years for Summer Training. If Energy < 70%, it will Rest. If Energy >= 70% and Mood < Great, it will recover Mood. If Energy >= 70% and Mood is Great, it will train Wit."
+                                        className="my-2"
+                                        searchId="must-rest-before-summer"
+                                    />
+                                </View>
+
+                                <View style={styles.section}>
+                                    <CustomCheckbox
+                                        checked={trainWitDuringFinale}
+                                        onCheckedChange={(checked) => updateTrainingSetting("trainWitDuringFinale", checked)}
+                                        label="Train Wit During Finale"
+                                        description="When enabled, the bot will train Wit during URA finale turns (73, 74, 75) instead of recovering energy or mood, even if the failure chance is high."
+                                        className="my-2"
+                                        searchId="train-wit-during-finale"
+                                    />
+                                </View>
+
+                                <View style={styles.section}>
+                                    <CustomCheckbox
+                                        checked={enableRainbowTrainingBonus}
+                                        onCheckedChange={(checked) => updateTrainingSetting("enableRainbowTrainingBonus", checked)}
+                                        label="Enable Rainbow Training Bonus"
+                                        description="When enabled (Year 2+), rainbow trainings receive a significant bonus to their score, making them more likely to be selected. This is highly dependent on device configuration and may result in false positives."
+                                        className="my-2"
+                                        searchId="enable-rainbow-training-bonus"
+                                    />
+                                </View>
+
+                                <View style={styles.section}>
+                                    <CustomCheckbox
+                                        checked={enableTrainingAnalysisValidation}
+                                        onCheckedChange={(checked) => updateTrainingSetting("enableTrainingAnalysisValidation", checked)}
+                                        label="Enable Training Analysis Validation"
+                                        description="When enabled, the bot will validate the current selected stat during training analysis. This helps prevent the bot from accidentally training a stat during analysis at the cost of a significant increase in scenario completion time."
+                                        className="my-2"
+                                        searchId="enable-training-analysis-validation"
+                                    />
+                                    {enableTrainingAnalysisValidation && (
+                                        <WarningContainer style={{ marginTop: 0 }}>
+                                            ⚠️ Warning: Enabling this option will prevent accidental trainings at the cost of a significant increase in the time it takes to complete a scenario.
+                                        </WarningContainer>
+                                    )}
+                                </View>
+                                <View style={styles.section}>
+                                    <CustomCheckbox
+                                        checked={enableYoloStatDetection}
+                                        onCheckedChange={(checked) => updateTrainingSetting("enableYoloStatDetection", checked)}
+                                        label="Enable YOLO Stat Detection"
+                                        description="When enabled, the bot will use a custom YOLOv8 model for high-precision stat gain detection. This replaces the standard OCR/Template matching for stat gains."
+                                        className="my-2"
+                                        searchId="enable-yolo-stat-detection"
+                                    />
+                                </View>
+
+                                <View style={styles.section}>
+                                    <View style={styles.row}>
+                                        <Text style={styles.label}>Preferred Distance Override</Text>
+                                        <CustomSelect
+                                            value={preferredDistanceOverride}
+                                            onValueChange={(value) => updateTrainingSetting("preferredDistanceOverride", value)}
+                                            options={[
+                                                { label: "Auto", value: "Auto" },
+                                                { label: "Sprint", value: "Sprint" },
+                                                { label: "Mile", value: "Mile" },
+                                                { label: "Medium", value: "Medium" },
+                                                { label: "Long", value: "Long" },
+                                            ]}
+                                            placeholder="Select distance"
+                                            width={200}
+                                            searchId="preferred-distance-override"
+                                            searchTitle="Preferred Distance Override"
+                                            searchDescription="Set the preferred race distance for training targets."
+                                        />
+                                    </View>
+                                    <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>
+                                        Set the preferred race distance for training targets. "Auto" will automatically determine based on character aptitudes reading from left to right (S {">"} A
+                                        priority).
+                                        {"\n\n"}
+                                        For example, if Gold Ship has an aptitude of A for both Medium and Long, Auto will use Medium as the preferred distance. Whereas if Medium is A and Long is S,
+                                        then Auto will instead use Long as the preferred distance.
+                                    </Text>
+                                </View>
+
+                                {/* Stat Target Settings */}
+                                <View style={styles.section}>
+                                    <CustomTitle
+                                        title="Stat Targets by Distance"
+                                        description="Set target values for each stat based on race distance. These stat targets are derived from past Champion Meetings. The bot will prioritize training stats that are below these targets."
+                                        searchId="stat-targets-by-distance"
+                                    />
+
+                                    {/* Distance Stat Targets Accordion */}
+                                    <CustomAccordion
+                                        type="single"
+                                        sections={[
+                                            {
+                                                value: "sprint",
+                                                title: "Sprint Distance",
+                                                children: (
+                                                    <>
+                                                        <CustomSlider
+                                                            value={trainingStatTargetSettings.trainingSprintStatTarget_speedStatTarget}
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_speedStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_speedStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Sprint Speed Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_staminaStatTarget}
+                                                            value={trainingStatTargetSettings.trainingSprintStatTarget_staminaStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_staminaStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Sprint Stamina Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_powerStatTarget}
+                                                            value={trainingStatTargetSettings.trainingSprintStatTarget_powerStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_powerStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Sprint Power Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_gutsStatTarget}
+                                                            value={trainingStatTargetSettings.trainingSprintStatTarget_gutsStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_gutsStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Sprint Guts Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_witStatTarget}
+                                                            value={trainingStatTargetSettings.trainingSprintStatTarget_witStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_witStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Sprint Wit Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                    </>
+                                                ),
+                                            },
+                                            {
+                                                value: "mile",
+                                                title: "Mile Distance",
+                                                children: (
+                                                    <>
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_speedStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMileStatTarget_speedStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_speedStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Mile Speed Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_staminaStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMileStatTarget_staminaStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_staminaStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Mile Stamina Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_powerStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMileStatTarget_powerStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_powerStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Mile Power Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_gutsStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMileStatTarget_gutsStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_gutsStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Mile Guts Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_witStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMileStatTarget_witStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_witStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Mile Wit Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                    </>
+                                                ),
+                                            },
+                                            {
+                                                value: "medium",
+                                                title: "Medium Distance",
+                                                children: (
+                                                    <>
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_speedStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMediumStatTarget_speedStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_speedStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Medium Speed Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_staminaStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMediumStatTarget_staminaStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_staminaStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Medium Stamina Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_powerStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMediumStatTarget_powerStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_powerStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Medium Power Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_gutsStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMediumStatTarget_gutsStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_gutsStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Medium Guts Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_witStatTarget}
+                                                            value={trainingStatTargetSettings.trainingMediumStatTarget_witStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_witStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Medium Wit Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                    </>
+                                                ),
+                                            },
+                                            {
+                                                value: "long",
+                                                title: "Long Distance",
+                                                children: (
+                                                    <>
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_speedStatTarget}
+                                                            value={trainingStatTargetSettings.trainingLongStatTarget_speedStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_speedStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Long Speed Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_staminaStatTarget}
+                                                            value={trainingStatTargetSettings.trainingLongStatTarget_staminaStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_staminaStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Long Stamina Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_powerStatTarget}
+                                                            value={trainingStatTargetSettings.trainingLongStatTarget_powerStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_powerStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Long Power Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_gutsStatTarget}
+                                                            value={trainingStatTargetSettings.trainingLongStatTarget_gutsStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_gutsStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Long Guts Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                        <CustomSlider
+                                                            placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_witStatTarget}
+                                                            value={trainingStatTargetSettings.trainingLongStatTarget_witStatTarget}
+                                                            onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_witStatTarget", value)}
+                                                            min={100}
+                                                            max={1200}
+                                                            step={10}
+                                                            label="Long Wit Target"
+                                                            labelUnit=""
+                                                            showValue={true}
+                                                            showLabels={true}
+                                                        />
+                                                    </>
+                                                ),
+                                            },
+                                        ]}
+                                    />
+                                </View>
+
+                                {/* Training Year Milestone Targets */}
+                                <View style={styles.section}>
+                                    <CustomTitle
+                                        title="Training Year Milestone Targets"
+                                        description={
+                                            `Controls how aggressively the bot paces stat training during the Pre-Debut, Junior and Classic Years.\n\n` +
+                                            `The bot will target a scaled percentage of your stat targets prior to the Senior Year, ` +
+                                            `ramping up to the full stat targets by the Finale. For example, with milestone targets of 33% / 66%, a Speed ` +
+                                            `target of 1200 becomes ~396 in Junior Year and ~792 in Classic Year. This optimizes early-career statlines for better starting race results.\n\n` +
+                                            `Set both sliders to 100% to disable milestone pacing and always target the full statline.`
+                                        }
+                                        searchId="training-year-milestone-targets"
+                                    />
+                                    <SearchableItem
+                                        id="classic-milestone-percent"
+                                        title="End of Junior Year Milestone"
+                                        description="Percentage of the primary stat targets to aim for by the end of Junior Year."
+                                    >
+                                        <CustomSlider
+                                            value={trainingSettings.classicMilestonePercent}
+                                            placeholder={defaultSettings.training.classicMilestonePercent}
+                                            onValueChange={(value) => updateTrainingSetting("classicMilestonePercent", value)}
+                                            min={0}
+                                            max={100}
+                                            step={1}
+                                            label="End of Junior Year Milestone"
+                                            labelUnit="%"
+                                            showValue={true}
+                                            showLabels={true}
+                                        />
+                                    </SearchableItem>
+                                    <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>
+                                        The bot will aim for this % of your stat targets during Junior Year. Default: 33%.
+                                    </Text>
+                                </View>
+
+                                <View style={styles.section}>
+                                    <SearchableItem
+                                        id="senior-milestone-percent"
+                                        title="End of Classic Year Milestone"
+                                        description="Percentage of the primary stat targets to aim for by the end of Classic Year."
+                                    >
+                                        <CustomSlider
+                                            value={trainingSettings.seniorMilestonePercent}
+                                            placeholder={defaultSettings.training.seniorMilestonePercent}
+                                            onValueChange={(value) => updateTrainingSetting("seniorMilestonePercent", value)}
+                                            min={0}
+                                            max={100}
+                                            step={1}
+                                            label="End of Classic Year Milestone"
+                                            labelUnit="%"
+                                            showValue={true}
+                                            showLabels={true}
+                                        />
+                                    </SearchableItem>
+                                    <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>
+                                        The bot will aim for this % of your stat targets during Classic Year. Default: 66%.
+                                    </Text>
+                                </View>
+                            </>
                         )}
-
-                        {renderStatSelector(
-                            "Prioritization",
-                            statPrioritizationItems,
-                            (value) => setStatPrioritizationItems(value),
-                            prioritizationModalVisible,
-                            setPrioritizationModalVisible,
-                            "Select the priority order of the stats. The stats will be trained in the order they are selected. If none are selected, then the default order will be used.",
-                            "priority",
-                            "training-prioritization"
-                        )}
-
-                        {renderStatSelector(
-                            "Event Choice Prioritization",
-                            eventChoiceStatPriorityItems,
-                            (value) => setEventChoiceStatPriorityItems(value),
-                            eventChoicePrioritizationModalVisible,
-                            setEventChoicePrioritizationModalVisible,
-                            "Select the priority order of stats used when scoring in-game event choices. Events typically grant flat stat gains, so a different ordering than regular training may be optimal.",
-                            "priority",
-                            "event-choice-stat-priority"
-                        )}
-
-                        {renderStatSelector(
-                            "Summer Training Prioritization",
-                            summerTrainingStatPriorityItems,
-                            (value) => setSummerTrainingStatPriorityItems(value),
-                            summerTrainingPrioritizationModalVisible,
-                            setSummerTrainingPrioritizationModalVisible,
-                            "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer with no facility progression, so a different ordering than regular training may be optimal.",
-                            "priority",
-                            "summer-training-stat-priority"
-                        )}
-
-                        <View style={styles.section}>
-                            <CustomCheckbox
-                                checked={disableTrainingOnMaxedStat}
-                                onCheckedChange={(checked) => updateTrainingSetting("disableTrainingOnMaxedStat", checked)}
-                                label="Disable Training on Maxed Stats"
-                                description="When enabled, training will be skipped for stats that have reached their maximum value."
-                                className="my-2"
-                                searchId="disable-training-on-maxed-stats"
-                            />
-                        </View>
-
-                        <View style={styles.section}>
-                            <CustomSlider
-                                value={maximumFailureChance}
-                                placeholder={defaultSettings.training.maximumFailureChance}
-                                onValueChange={(value) => updateTrainingSetting("maximumFailureChance", value)}
-                                min={5}
-                                max={95}
-                                step={5}
-                                label="Set Maximum Failure Chance"
-                                labelUnit="%"
-                                showValue={true}
-                                showLabels={true}
-                                description="Set the maximum acceptable failure chance for training sessions. Training with higher failure rates will be avoided."
-                                searchId="maximum-failure-chance"
-                            />
-                        </View>
-
-                        <View style={styles.section}>
-                            <CustomCheckbox
-                                checked={enableRiskyTraining}
-                                onCheckedChange={(checked) => updateTrainingSetting("enableRiskyTraining", checked)}
-                                label="Enable Riskier Training"
-                                description="When enabled, trainings with high main stat gains will use a separate, higher maximum failure chance threshold."
-                                className="my-2"
-                                searchId="enable-riskier-training"
-                            />
-                            <CustomSlider
-                                value={riskyTrainingMinStatGain || defaultSettings.training.riskyTrainingMinStatGain}
-                                placeholder={defaultSettings.training.riskyTrainingMinStatGain}
-                                onValueChange={(value) => updateTrainingSetting("riskyTrainingMinStatGain", value)}
-                                min={20}
-                                max={100}
-                                step={5}
-                                label="Minimum Main Stat Gain Threshold"
-                                labelUnit=""
-                                showValue={true}
-                                showLabels={true}
-                                description="When a training's main stat gain meets or exceeds this value, it will be considered for risky training."
-                                searchId="risky-training-min-stat-gain"
-                                searchCondition={enableRiskyTraining}
-                                parentId="enable-riskier-training"
-                            />
-                            <CustomSlider
-                                value={riskyTrainingMaxFailureChance || defaultSettings.training.riskyTrainingMaxFailureChance}
-                                placeholder={defaultSettings.training.riskyTrainingMaxFailureChance}
-                                onValueChange={(value) => updateTrainingSetting("riskyTrainingMaxFailureChance", value)}
-                                min={5}
-                                max={95}
-                                step={5}
-                                label="Risky Training Maximum Failure Chance"
-                                labelUnit="%"
-                                showValue={true}
-                                showLabels={true}
-                                description="Set the maximum acceptable failure chance for risky training sessions with high main stat gains."
-                                searchId="risky-training-max-failure-chance"
-                                searchCondition={enableRiskyTraining}
-                                parentId="enable-riskier-training"
-                            />
-                        </View>
-
-                        {renderStatSelector(
-                            "Focus on Sparks",
-                            sparkStatTargetItems,
-                            (value) => setSparkStatTargetItems(value),
-                            sparkStatTargetModalVisible,
-                            setSparkStatTargetModalVisible,
-                            "Select which stats should receive priority to get to at least 600 to get the best chance to receive 3* sparks.",
-                            "checkbox",
-                            "focus-on-sparks"
-                        )}
-
-                        <View style={styles.section}>
-                            <CustomCheckbox
-                                checked={enablePrioritizeSkillHints}
-                                onCheckedChange={(checked) => updateTrainingSetting("enablePrioritizeSkillHints", checked)}
-                                label="Prioritize Skill Hints"
-                                description="When enabled, the bot will prioritize acquiring skill hints, bypassing stat prioritization and blacklist, while still being constrained by the failure chance thresholds."
-                                className="my-2"
-                                searchId="enable-prioritize-skill-hints"
-                            />
-                        </View>
-
-                        <View style={styles.section}>
-                            <CustomCheckbox
-                                checked={mustRestBeforeSummer}
-                                onCheckedChange={(checked) => updateTrainingSetting("mustRestBeforeSummer", checked)}
-                                label="Must Rest before Summer"
-                                description="Optimizes June Late Phase in Classic and Senior Years for Summer Training. If Energy < 70%, it will Rest. If Energy >= 70% and Mood < Great, it will recover Mood. If Energy >= 70% and Mood is Great, it will train Wit."
-                                className="my-2"
-                                searchId="must-rest-before-summer"
-                            />
-                        </View>
-
-                        <View style={styles.section}>
-                            <CustomCheckbox
-                                checked={trainWitDuringFinale}
-                                onCheckedChange={(checked) => updateTrainingSetting("trainWitDuringFinale", checked)}
-                                label="Train Wit During Finale"
-                                description="When enabled, the bot will train Wit during URA finale turns (73, 74, 75) instead of recovering energy or mood, even if the failure chance is high."
-                                className="my-2"
-                                searchId="train-wit-during-finale"
-                            />
-                        </View>
-
-                        <View style={styles.section}>
-                            <CustomCheckbox
-                                checked={enableRainbowTrainingBonus}
-                                onCheckedChange={(checked) => updateTrainingSetting("enableRainbowTrainingBonus", checked)}
-                                label="Enable Rainbow Training Bonus"
-                                description="When enabled (Year 2+), rainbow trainings receive a significant bonus to their score, making them more likely to be selected. This is highly dependent on device configuration and may result in false positives."
-                                className="my-2"
-                                searchId="enable-rainbow-training-bonus"
-                            />
-                        </View>
-
-                        <View style={styles.section}>
-                            <CustomCheckbox
-                                checked={enableTrainingAnalysisValidation}
-                                onCheckedChange={(checked) => updateTrainingSetting("enableTrainingAnalysisValidation", checked)}
-                                label="Enable Training Analysis Validation"
-                                description="When enabled, the bot will validate the current selected stat during training analysis. This helps prevent the bot from accidentally training a stat during analysis at the cost of a significant increase in scenario completion time."
-                                className="my-2"
-                                searchId="enable-training-analysis-validation"
-                            />
-                            {enableTrainingAnalysisValidation && (
-                                <WarningContainer style={{ marginTop: 0 }}>
-                                    ⚠️ Warning: Enabling this option will prevent accidental trainings at the cost of a significant increase in the time it takes to complete a scenario.
-                                </WarningContainer>
-                            )}
-                        </View>
-                        <View style={styles.section}>
-                            <CustomCheckbox
-                                checked={enableYoloStatDetection}
-                                onCheckedChange={(checked) => updateTrainingSetting("enableYoloStatDetection", checked)}
-                                label="Enable YOLO Stat Detection"
-                                description="When enabled, the bot will use a custom YOLOv8 model for high-precision stat gain detection. This replaces the standard OCR/Template matching for stat gains."
-                                className="my-2"
-                                searchId="enable-yolo-stat-detection"
-                            />
-                        </View>
-
-                        <View style={styles.section}>
-                            <View style={styles.row}>
-                                <Text style={styles.label}>Preferred Distance Override</Text>
-                                <CustomSelect
-                                    value={preferredDistanceOverride}
-                                    onValueChange={(value) => updateTrainingSetting("preferredDistanceOverride", value)}
-                                    options={[
-                                        { label: "Auto", value: "Auto" },
-                                        { label: "Sprint", value: "Sprint" },
-                                        { label: "Mile", value: "Mile" },
-                                        { label: "Medium", value: "Medium" },
-                                        { label: "Long", value: "Long" },
-                                    ]}
-                                    placeholder="Select distance"
-                                    width={200}
-                                    searchId="preferred-distance-override"
-                                    searchTitle="Preferred Distance Override"
-                                    searchDescription="Set the preferred race distance for training targets."
-                                />
-                            </View>
-                            <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>
-                                Set the preferred race distance for training targets. "Auto" will automatically determine based on character aptitudes reading from left to right (S {">"} A priority).
-                                {"\n\n"}
-                                For example, if Gold Ship has an aptitude of A for both Medium and Long, Auto will use Medium as the preferred distance. Whereas if Medium is A and Long is S, then Auto
-                                will instead use Long as the preferred distance.
-                            </Text>
-                        </View>
-
-                        {/* Stat Target Settings */}
-                        <View style={styles.section}>
-                            <CustomTitle
-                                title="Stat Targets by Distance"
-                                description="Set target values for each stat based on race distance. These stat targets are derived from past Champion Meetings. The bot will prioritize training stats that are below these targets."
-                                searchId="stat-targets-by-distance"
-                            />
-
-                            {/* Distance Stat Targets Accordion */}
-                            <CustomAccordion
-                                type="single"
-                                sections={[
-                                    {
-                                        value: "sprint",
-                                        title: "Sprint Distance",
-                                        children: (
-                                            <>
-                                                <CustomSlider
-                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_speedStatTarget}
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_speedStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_speedStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Sprint Speed Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_staminaStatTarget}
-                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_staminaStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_staminaStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Sprint Stamina Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_powerStatTarget}
-                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_powerStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_powerStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Sprint Power Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_gutsStatTarget}
-                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_gutsStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_gutsStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Sprint Guts Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingSprintStatTarget_witStatTarget}
-                                                    value={trainingStatTargetSettings.trainingSprintStatTarget_witStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingSprintStatTarget_witStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Sprint Wit Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                            </>
-                                        ),
-                                    },
-                                    {
-                                        value: "mile",
-                                        title: "Mile Distance",
-                                        children: (
-                                            <>
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_speedStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMileStatTarget_speedStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_speedStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Mile Speed Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_staminaStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMileStatTarget_staminaStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_staminaStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Mile Stamina Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_powerStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMileStatTarget_powerStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_powerStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Mile Power Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_gutsStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMileStatTarget_gutsStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_gutsStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Mile Guts Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMileStatTarget_witStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMileStatTarget_witStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMileStatTarget_witStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Mile Wit Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                            </>
-                                        ),
-                                    },
-                                    {
-                                        value: "medium",
-                                        title: "Medium Distance",
-                                        children: (
-                                            <>
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_speedStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_speedStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_speedStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Medium Speed Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_staminaStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_staminaStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_staminaStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Medium Stamina Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_powerStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_powerStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_powerStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Medium Power Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_gutsStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_gutsStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_gutsStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Medium Guts Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingMediumStatTarget_witStatTarget}
-                                                    value={trainingStatTargetSettings.trainingMediumStatTarget_witStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingMediumStatTarget_witStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Medium Wit Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                            </>
-                                        ),
-                                    },
-                                    {
-                                        value: "long",
-                                        title: "Long Distance",
-                                        children: (
-                                            <>
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_speedStatTarget}
-                                                    value={trainingStatTargetSettings.trainingLongStatTarget_speedStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_speedStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Long Speed Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_staminaStatTarget}
-                                                    value={trainingStatTargetSettings.trainingLongStatTarget_staminaStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_staminaStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Long Stamina Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_powerStatTarget}
-                                                    value={trainingStatTargetSettings.trainingLongStatTarget_powerStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_powerStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Long Power Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_gutsStatTarget}
-                                                    value={trainingStatTargetSettings.trainingLongStatTarget_gutsStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_gutsStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Long Guts Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                                <CustomSlider
-                                                    placeholder={defaultSettings.trainingStatTarget.trainingLongStatTarget_witStatTarget}
-                                                    value={trainingStatTargetSettings.trainingLongStatTarget_witStatTarget}
-                                                    onValueChange={(value) => updateTrainingStatTarget("trainingLongStatTarget_witStatTarget", value)}
-                                                    min={100}
-                                                    max={1200}
-                                                    step={10}
-                                                    label="Long Wit Target"
-                                                    labelUnit=""
-                                                    showValue={true}
-                                                    showLabels={true}
-                                                />
-                                            </>
-                                        ),
-                                    },
-                                ]}
-                            />
-                        </View>
-
-                        {/* Training Year Milestone Targets */}
-                        <View style={styles.section}>
-                            <CustomTitle
-                                title="Training Year Milestone Targets"
-                                description={
-                                    `Controls how aggressively the bot paces stat training during the Pre-Debut, Junior and Classic Years.\n\n` +
-                                    `The bot will target a scaled percentage of your stat targets prior to the Senior Year, ` +
-                                    `ramping up to the full stat targets by the Finale. For example, with milestone targets of 33% / 66%, a Speed ` +
-                                    `target of 1200 becomes ~396 in Junior Year and ~792 in Classic Year. This optimizes early-career statlines for better starting race results.\n\n` +
-                                    `Set both sliders to 100% to disable milestone pacing and always target the full statline.`
-                                }
-                                searchId="training-year-milestone-targets"
-                            />
-                            <SearchableItem
-                                id="classic-milestone-percent"
-                                title="End of Junior Year Milestone"
-                                description="Percentage of the primary stat targets to aim for by the end of Junior Year."
-                            >
-                                <CustomSlider
-                                    value={trainingSettings.classicMilestonePercent}
-                                    placeholder={defaultSettings.training.classicMilestonePercent}
-                                    onValueChange={(value) => updateTrainingSetting("classicMilestonePercent", value)}
-                                    min={0}
-                                    max={100}
-                                    step={1}
-                                    label="End of Junior Year Milestone"
-                                    labelUnit="%"
-                                    showValue={true}
-                                    showLabels={true}
-                                />
-                            </SearchableItem>
-                            <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>
-                                The bot will aim for this % of your stat targets during Junior Year. Default: 33%.
-                            </Text>
-                        </View>
-
-                        <View style={styles.section}>
-                            <SearchableItem
-                                id="senior-milestone-percent"
-                                title="End of Classic Year Milestone"
-                                description="Percentage of the primary stat targets to aim for by the end of Classic Year."
-                            >
-                                <CustomSlider
-                                    value={trainingSettings.seniorMilestonePercent}
-                                    placeholder={defaultSettings.training.seniorMilestonePercent}
-                                    onValueChange={(value) => updateTrainingSetting("seniorMilestonePercent", value)}
-                                    min={0}
-                                    max={100}
-                                    step={1}
-                                    label="End of Classic Year Milestone"
-                                    labelUnit="%"
-                                    showValue={true}
-                                    showLabels={true}
-                                />
-                            </SearchableItem>
-                            <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>
-                                The bot will aim for this % of your stat targets during Classic Year. Default: 66%.
-                            </Text>
-                        </View>
                     </View>
                 </ScrollView>
             </SearchPageProvider>
