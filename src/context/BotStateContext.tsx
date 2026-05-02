@@ -635,7 +635,10 @@ export const BotStateProvider = ({ children }: any): React.ReactElement => {
                                 <DebugContext.Provider value={debugValue}>
                                     <DiscordContext.Provider value={discordValue}>
                                         <ChatContext.Provider value={chatValue}>
-                                            <ScenarioOverridesContext.Provider value={scenarioOverridesValue}>{children}</ScenarioOverridesContext.Provider>
+                                            <ScenarioOverridesContext.Provider value={scenarioOverridesValue}>
+                                                <SettingsSnapshotPublisher />
+                                                {children}
+                                            </ScenarioOverridesContext.Provider>
                                         </ChatContext.Provider>
                                     </DiscordContext.Provider>
                                 </DebugContext.Provider>
@@ -671,4 +674,25 @@ export const useSettingsSnapshot = (): Settings => {
         () => ({ general, racing, skills, trainingEvent, misc, training, trainingStatTarget, debug, discord, chat, scenarioOverrides }),
         [general, racing, skills, trainingEvent, misc, training, trainingStatTarget, debug, discord, chat, scenarioOverrides]
     )
+}
+
+/**
+ * Module-level lazy getter for the latest aggregated `Settings` snapshot. Populated by the
+ * mounted `BotStateProvider` (see `useSettingsSnapshotPublisher` below) and read by callers that
+ * only need the value at user-action time (e.g. import / export handlers). Reading it does NOT
+ * subscribe to any context, so call sites don't re-render when slices change.
+ *
+ * Falls back to `defaultSettings` if no provider is mounted (test environments).
+ */
+let _latestSettingsSnapshot: Settings = defaultSettings
+export const getLatestSettingsSnapshot = (): Settings => _latestSettingsSnapshot
+
+/**
+ * Internal: publishes the live snapshot to `_latestSettingsSnapshot` so non-rendering callers
+ * can read it via `getLatestSettingsSnapshot()`. Mounted once inside `BotStateProvider`.
+ */
+const SettingsSnapshotPublisher = (): null => {
+    const snapshot = useSettingsSnapshot()
+    _latestSettingsSnapshot = snapshot
+    return null
 }

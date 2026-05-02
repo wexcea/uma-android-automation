@@ -4,7 +4,7 @@ import * as Sharing from "expo-sharing"
 import * as FileSystem from "expo-file-system"
 import { useNavigation } from "@react-navigation/native"
 import { useSettings } from "../context/SettingsContext"
-import { Settings, defaultSettings, useSettingsSnapshot } from "../context/BotStateContext"
+import { Settings, defaultSettings, getLatestSettingsSnapshot } from "../context/BotStateContext"
 import { logErrorWithTimestamp } from "../lib/logger"
 import { deepMerge } from "../lib/settingsUtils"
 
@@ -132,7 +132,11 @@ export const useSettingsFileManager = () => {
     const [pendingImportUri, setPendingImportUri] = useState<string | null>(null)
 
     const { importSettings, exportSettings } = useSettings()
-    const settings = useSettingsSnapshot()
+    // Snapshot is read lazily inside the import handler via `getLatestSettingsSnapshot()`. The
+    // hook used to call `useSettingsSnapshot()` here, which subscribed to every slice context
+    // and forced this hook (and `Settings` hub via [src/pages/Settings/index.tsx](src/pages/Settings/index.tsx))
+    // to re-render on every aptitude / epithet / weight change inside the Smart Race Solver
+    // page — adding ~340 ms of wasted commit per tap. The lazy getter has zero render cost.
     const navigation = useNavigation()
 
     /**
@@ -173,7 +177,7 @@ export const useSettingsFileManager = () => {
     const compareAndPreviewSettings = async (fileUri: string) => {
         try {
             const importedSettings = await loadFromJSONFile(fileUri)
-            const changes = compareSettings(settings, importedSettings)
+            const changes = compareSettings(getLatestSettingsSnapshot(), importedSettings)
 
             const formattedChanges = changes.map((change) => ({
                 ...change,
