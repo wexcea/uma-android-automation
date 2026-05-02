@@ -1855,9 +1855,9 @@ class Trackblazer(game: Game) : Campaign(game) {
                                 (isEnergy && trainee != null && trainee.energy <= 100) ||
                                 // We might want any energy item if not full.
                                 (isMood && trainee != null && trainee.mood < Mood.GREAT) ||
-                                (isMegaphone && trainee != null && trainingSelected != null && trainee.megaphoneTurnCounter == 0) ||
+                                (isMegaphone && trainee != null && trainingSelected != null && trainee.megaphoneTurnCounter == 0 && !shouldConserveTrainingEffectItems(trainingSelected, trainee)) ||
                                 (isAnkleWeight && trainee != null && trainingSelected != null) ||
-                                (isCharm && trainee != null && trainingSelected != null)
+                                (isCharm && trainee != null && trainingSelected != null && !shouldConserveTrainingEffectItems(trainingSelected, trainee))
 
                         isUseful
                     }.keys
@@ -2089,15 +2089,13 @@ class Trackblazer(game: Game) : Campaign(game) {
         if (date.day >= 13 && !bUsedCharmToday && failureChance >= 20 && itemName == "Good-Luck Charm") {
             // When mood is below NORMAL, the mood multiplier structurally caps stat gain. Burning Charm on a
             // low-gain training squanders its 0%-failure benefit — conserve for a higher-gain turn instead.
-            if (trainee.mood < Mood.NORMAL && trainingSelected != null) {
+            if (shouldConserveTrainingEffectItems(trainingSelected, trainee)) {
                 val selectedMainGain = training.cachedAnalysisResults?.firstOrNull { it.name == trainingSelected }?.statGains?.get(trainingSelected) ?: 0
-                if (selectedMainGain < lowMainStatGainItemFloor) {
-                    MessageLog.i(
-                        TAG,
-                        "[TRACKBLAZER] Skipping Good-Luck Charm: mood=${trainee.mood}, selected $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor). Conserving Charm for a higher-gain turn.",
-                    )
-                    return null
-                }
+                MessageLog.i(
+                    TAG,
+                    "[TRACKBLAZER] Skipping Good-Luck Charm: mood=${trainee.mood}, selected $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor). Conserving Charm for a higher-gain turn.",
+                )
+                return null
             }
             val reason = "Setting training failure chance to 0%."
             if (clickItemPlusButton(itemName, entry, "[TRACKBLAZER] Queuing Good-Luck Charm via inline pass.", nextInventory, reason = reason)) {
@@ -2190,15 +2188,13 @@ class Trackblazer(game: Game) : Campaign(game) {
         if (trainee.megaphoneTurnCounter == 0 && trainingSelected != null && megaphoneNames.contains(itemName)) {
             // When mood is below NORMAL, the mood multiplier caps gain. Megaphones multiply gain across multiple
             // turns, so squandering one on a low-gain selected training is worse than conserving for a better turn.
-            if (trainee.mood < Mood.NORMAL) {
+            if (shouldConserveTrainingEffectItems(trainingSelected, trainee)) {
                 val selectedMainGain = training.cachedAnalysisResults?.firstOrNull { it.name == trainingSelected }?.statGains?.get(trainingSelected) ?: 0
-                if (selectedMainGain < lowMainStatGainItemFloor) {
-                    MessageLog.i(
-                        TAG,
-                        "[TRACKBLAZER] Skipping $itemName: mood=${trainee.mood}, selected $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor). Conserving Megaphone for a higher-gain turn.",
-                    )
-                    return null
-                }
+                MessageLog.i(
+                    TAG,
+                    "[TRACKBLAZER] Skipping $itemName: mood=${trainee.mood}, selected $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor). Conserving Megaphone for a higher-gain turn.",
+                )
+                return null
             }
 
             // Check if there is a better megaphone in inventory that we haven't seen yet OR that we know is disabled.
@@ -2246,6 +2242,23 @@ class Trackblazer(game: Game) : Campaign(game) {
     }
 
     /**
+     * Returns true when training-effect items (Megaphones, Good-Luck Charm) should be conserved this turn
+     * because the trainee mood is below NORMAL AND the selected training's main stat gain is below the
+     * user-configured floor. Mirrors the inline conservation checks in `handleInlineUsage()` so the
+     * Training Items dialog can be short-circuited upfront when these items would be skipped anyway.
+     *
+     * @param trainingSelected The training the bot is about to execute (null = no selection).
+     * @param trainee The current trainee snapshot (mood is read).
+     * @return True if Megaphone/Charm should be skipped this turn.
+     */
+    private fun shouldConserveTrainingEffectItems(trainingSelected: StatName?, trainee: Trainee?): Boolean {
+        if (trainingSelected == null || trainee == null) return false
+        if (trainee.mood >= Mood.NORMAL) return false
+        val selectedMainGain = training.cachedAnalysisResults?.firstOrNull { it.name == trainingSelected }?.statGains?.get(trainingSelected) ?: 0
+        return selectedMainGain < lowMainStatGainItemFloor
+    }
+
+    /**
      * Orchestrates the usage of items based on dynamic conditions and updates internal inventory.
      *
      * @param trainee Reference to the trainee's state.
@@ -2266,8 +2279,10 @@ class Trackblazer(game: Game) : Campaign(game) {
         val hasBadConditionItems = currentInventory.any { (name, count) -> count > 0 && shopList.badConditionHealItemNames.contains(name) }
         val hasStatItems = currentInventory.any { (name, count) -> count > 0 && shopList.statItemNames.contains(name) }
 
+        val skipTrainingEffectItems = shouldConserveTrainingEffectItems(trainingSelected, trainee)
         val hasMegaphones =
-            trainingSelected != null &&
+            !skipTrainingEffectItems &&
+                trainingSelected != null &&
                 trainee.megaphoneTurnCounter == 0 &&
                 currentInventory.any { (name, count) ->
                     count > 0 && (name == "Empowering Megaphone" || name == "Motivating Megaphone" || name == "Coaching Megaphone")
@@ -2286,7 +2301,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                         }
                 }
         val failureChance = if (trainingSelected != null) training.trainingMap[trainingSelected]?.failureChance ?: 0 else 0
-        val hasCharm = trainingSelected != null && !bUsedCharmToday && failureChance >= 20 && (currentInventory["Good-Luck Charm"] ?: 0) > 0
+        val hasCharm = !skipTrainingEffectItems && trainingSelected != null && !bUsedCharmToday && failureChance >= 20 && (currentInventory["Good-Luck Charm"] ?: 0) > 0
 
         val potentialUse =
             (trainee.energy <= energyThresholdToUseEnergyItems && hasEnergyItems) ||
