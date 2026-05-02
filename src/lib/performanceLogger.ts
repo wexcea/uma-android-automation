@@ -44,9 +44,9 @@ export interface PerformanceMetric {
 export class PerformanceLogger {
     // Currently ON in all builds while we're hunting the navigation/settings perf regression. The
     // measurement harness (`scripts/perf-nav-test.ts`) parses `[PERF]` lines out of logcat, and
-    // production bundles ship with `__DEV__ = false`, so the previous dev-only gate left the
-    // harness blind. Flip back to `__DEV__` once perf is back to baseline.
-    public static ENABLED: boolean = true
+    // Dev-only by default. The harness needs this on, so set the env var `PERF_LOGGER=1` (or
+    // flip locally to `true`) when running release builds against `yarn perf:nav`.
+    public static ENABLED: boolean = __DEV__
     public static SUPPRESS_LOGGING = false
 
     private metrics: PerformanceMetric[] = []

@@ -1,10 +1,10 @@
-import { useState, useContext } from "react"
+import { useState } from "react"
 import * as DocumentPicker from "expo-document-picker"
 import * as Sharing from "expo-sharing"
 import * as FileSystem from "expo-file-system"
 import { useNavigation } from "@react-navigation/native"
 import { useSettings } from "../context/SettingsContext"
-import { BotStateContext, Settings, defaultSettings } from "../context/BotStateContext"
+import { Settings, defaultSettings, useSettingsSnapshot } from "../context/BotStateContext"
 import { logErrorWithTimestamp } from "../lib/logger"
 import { deepMerge } from "../lib/settingsUtils"
 
@@ -132,7 +132,7 @@ export const useSettingsFileManager = () => {
     const [pendingImportUri, setPendingImportUri] = useState<string | null>(null)
 
     const { importSettings, exportSettings } = useSettings()
-    const bsc = useContext(BotStateContext)
+    const settings = useSettingsSnapshot()
     const navigation = useNavigation()
 
     /**
@@ -173,7 +173,7 @@ export const useSettingsFileManager = () => {
     const compareAndPreviewSettings = async (fileUri: string) => {
         try {
             const importedSettings = await loadFromJSONFile(fileUri)
-            const changes = compareSettings(bsc.settings, importedSettings)
+            const changes = compareSettings(settings, importedSettings)
 
             const formattedChanges = changes.map((change) => ({
                 ...change,

@@ -1,4 +1,4 @@
-import { createContext, useState, useMemo, useCallback } from "react"
+import { createContext, useState, useMemo, useCallback, useContext } from "react"
 import { startTiming } from "../lib/performanceLogger"
 import { skillPlanSettingsPages } from "../pages/SkillPlanSettings/config"
 
@@ -449,37 +449,6 @@ export const defaultSettings: Settings = {
 }
 
 /**
- * Context value interface for the BotState provider.
- * Exposes application-wide state including readiness, settings, and app metadata.
- * Kept for the three full-settings consumers (`useSettingsManager`, `useSettingsFileManager`,
- * `MessageLog`'s formatted-string memo). Per-page consumers should subscribe to a slice
- * context (`RacingContext`, `TrainingContext`, ...) so a single-domain edit doesn't
- * re-render every page tree.
- */
-export interface BotStateProviderProps {
-    /** Whether the bot/app is ready (initialized and settings loaded). */
-    readyStatus: boolean
-    /** Setter for the ready status. */
-    setReadyStatus: (readyStatus: boolean) => void
-    /** The default settings used for reset and comparison. */
-    defaultSettings: Settings
-    /** The current application settings. */
-    settings: Settings
-    /** Setter for the application settings. */
-    setSettings: (settings: Settings | ((prev: Settings) => Settings)) => void
-    /** The application name. */
-    appName: string
-    /** Setter for the application name. */
-    setAppName: (appName: string) => void
-    /** The application version string. */
-    appVersion: string
-    /** Setter for the application version. */
-    setAppVersion: (appVersion: string) => void
-}
-
-export const BotStateContext = createContext<BotStateProviderProps>({} as BotStateProviderProps)
-
-/**
  * Slice updater accepts either a partial slice (merged shallowly) or a functional updater
  * that receives the previous slice and returns the next. Functional callers always see the
  * latest slice value, eliminating stale-closure races on rapid taps.
@@ -630,22 +599,6 @@ export const BotStateProvider = ({ children }: any): React.ReactElement => {
     const updateChat = useMemo(() => makeSliceUpdater("chat"), [makeSliceUpdater])
     const updateScenarioOverrides = useMemo(() => makeSliceUpdater("scenarioOverrides"), [makeSliceUpdater])
 
-    // Aggregate (legacy) context value — only the three full-settings consumers should subscribe.
-    const providerValues = useMemo<BotStateProviderProps>(
-        () => ({
-            readyStatus,
-            setReadyStatus,
-            defaultSettings,
-            settings,
-            setSettings: setSettingsWithLogging,
-            appName,
-            setAppName,
-            appVersion,
-            setAppVersion,
-        }),
-        [readyStatus, settings, appName, appVersion, setSettingsWithLogging]
-    )
-
     // Per-slice values memoized on their own slice reference. An untouched slice keeps a
     // stable identity across renders, so consumers of that slice's context skip re-rendering
     // when an unrelated domain mutates.
@@ -673,26 +626,49 @@ export const BotStateProvider = ({ children }: any): React.ReactElement => {
     )
 
     return (
-        <BotStateContext.Provider value={providerValues}>
-            <BotMetaContext.Provider value={metaValue}>
-                <GeneralMiscContext.Provider value={generalMiscValue}>
-                    <RacingContext.Provider value={racingValue}>
-                        <SkillsContext.Provider value={skillsValue}>
-                            <TrainingContext.Provider value={trainingValue}>
-                                <TrainingEventContext.Provider value={trainingEventValue}>
-                                    <DebugContext.Provider value={debugValue}>
-                                        <DiscordContext.Provider value={discordValue}>
-                                            <ChatContext.Provider value={chatValue}>
-                                                <ScenarioOverridesContext.Provider value={scenarioOverridesValue}>{children}</ScenarioOverridesContext.Provider>
-                                            </ChatContext.Provider>
-                                        </DiscordContext.Provider>
-                                    </DebugContext.Provider>
-                                </TrainingEventContext.Provider>
-                            </TrainingContext.Provider>
-                        </SkillsContext.Provider>
-                    </RacingContext.Provider>
-                </GeneralMiscContext.Provider>
-            </BotMetaContext.Provider>
-        </BotStateContext.Provider>
+        <BotMetaContext.Provider value={metaValue}>
+            <GeneralMiscContext.Provider value={generalMiscValue}>
+                <RacingContext.Provider value={racingValue}>
+                    <SkillsContext.Provider value={skillsValue}>
+                        <TrainingContext.Provider value={trainingValue}>
+                            <TrainingEventContext.Provider value={trainingEventValue}>
+                                <DebugContext.Provider value={debugValue}>
+                                    <DiscordContext.Provider value={discordValue}>
+                                        <ChatContext.Provider value={chatValue}>
+                                            <ScenarioOverridesContext.Provider value={scenarioOverridesValue}>{children}</ScenarioOverridesContext.Provider>
+                                        </ChatContext.Provider>
+                                    </DiscordContext.Provider>
+                                </DebugContext.Provider>
+                            </TrainingEventContext.Provider>
+                        </TrainingContext.Provider>
+                    </SkillsContext.Provider>
+                </RacingContext.Provider>
+            </GeneralMiscContext.Provider>
+        </BotMetaContext.Provider>
+    )
+}
+
+/**
+ * Subscribes to every slice context and returns a `Settings` snapshot. Used by the
+ * three remaining full-settings consumers (`useSettingsManager`, `useSettingsFileManager`,
+ * `MessageLog`'s formatted-string memo) that genuinely need cross-slice reads. The
+ * returned object identity changes whenever any slice changes, mirroring the legacy
+ * aggregate `BotStateContext.settings` it replaces.
+ *
+ * @returns A `Settings` object assembled from every slice context's current value.
+ */
+export const useSettingsSnapshot = (): Settings => {
+    const { general, misc } = useContext(GeneralMiscContext)
+    const { racing } = useContext(RacingContext)
+    const { skills } = useContext(SkillsContext)
+    const { training, trainingStatTarget } = useContext(TrainingContext)
+    const { trainingEvent } = useContext(TrainingEventContext)
+    const { debug } = useContext(DebugContext)
+    const { discord } = useContext(DiscordContext)
+    const { chat } = useContext(ChatContext)
+    const { scenarioOverrides } = useContext(ScenarioOverridesContext)
+    return useMemo(
+        () => ({ general, racing, skills, trainingEvent, misc, training, trainingStatTarget, debug, discord, chat, scenarioOverrides }),
+        [general, racing, skills, trainingEvent, misc, training, trainingStatTarget, debug, discord, chat, scenarioOverrides]
     )
 }

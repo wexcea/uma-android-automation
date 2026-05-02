@@ -30,7 +30,7 @@ export const useBootstrap = () => {
         })
 
         // Start the JS-thread block detector so any sustained > 100 ms blocks surface in logcat
-        // as `[BLOCK]` warnings. Cheap when idle; no-op in release builds.
+        // as `[BLOCK]` warnings. Cheap when idle; gated by `PerformanceLogger.ENABLED`.
         const stopBlockDetector = startJsThreadBlockDetector(100)
 
         return () => {
@@ -48,8 +48,6 @@ export const useBootstrap = () => {
                 await populateRacesData()
                 await populateSkillsData()
                 await populateEventData()
-                await populateSolverData()
-                await cleanupOrphanedSettings()
 
                 // Load settings after database initialization but before marking app as ready.
                 // Skip the initialization check since we know the database is ready.
@@ -198,67 +196,6 @@ export const useBootstrap = () => {
         } catch (error) {
             logErrorWithTimestamp("[Bootstrap] Error populating event data:", error)
             throw error
-        }
-    }
-
-    /**
-     * Persist the bundled Smart Race Solver JSON datasets directly to SQLite. Mirrors
-     * `populateEventData` so the data is owned by the DB rather than React state — Kotlin
-     * reads these via `SettingsHelper.getStringSetting("racing", "<key>")` and the JS
-     * preview bridge ships its own module-scoped JSON, so React never needs them in state.
-     *
-     * @returns A promise that resolves when the solver data has been written.
-     */
-    const populateSolverData = async (): Promise<void> => {
-        try {
-            logWithTimestamp("[Bootstrap] Starting solver data population...")
-
-            const racesData = require("../data/races.json")
-            await yieldToFrame()
-            await databaseManager.saveSetting("racing", "racesData", racesData, true)
-            logWithTimestamp(`[Bootstrap] Successfully saved racesData (${Object.keys(racesData).length} races) to SQLite`)
-            await yieldToFrame()
-
-            const epithetsData = require("../data/epithets.json")
-            await yieldToFrame()
-            await databaseManager.saveSetting("racing", "epithetsData", epithetsData, true)
-            logWithTimestamp(`[Bootstrap] Successfully saved epithetsData (${Object.keys(epithetsData).length} epithets) to SQLite`)
-            await yieldToFrame()
-
-            const characterPresetsData = require("../data/characterPresets.json")
-            await yieldToFrame()
-            await databaseManager.saveSetting("racing", "characterPresetsData", characterPresetsData, true)
-            logWithTimestamp(`[Bootstrap] Successfully saved characterPresetsData (${Object.keys(characterPresetsData).length} presets) to SQLite`)
-
-            logWithTimestamp("[Bootstrap] Solver data population complete")
-        } catch (error) {
-            logErrorWithTimestamp("[Bootstrap] Error populating solver data:", error)
-            throw error
-        }
-    }
-
-    /**
-     * Delete persisted SQLite rows that are not referenced anywhere in the current source tree.
-     * They were written by older builds, never get read, and inflate `loadAllSettings` /
-     * the auto-save batch by hundreds of KB. Idempotent: rows that don't exist are no-ops.
-     *
-     * @returns A promise that resolves when the cleanup completes.
-     */
-    const cleanupOrphanedSettings = async (): Promise<void> => {
-        const orphans: ReadonlyArray<readonly [string, string]> = [
-            ["skills", "skillPlanData"],
-            ["racing", "racingPlanData"],
-            ["scenarioOverrides", "trackblazerEpithetData"],
-            ["epithets", "epithetData"],
-        ]
-        try {
-            for (const [category, key] of orphans) {
-                await databaseManager.deleteSetting(category, key)
-            }
-            logWithTimestamp(`[Bootstrap] Orphan settings cleanup complete (${orphans.length} keys checked).`)
-        } catch (error) {
-            logErrorWithTimestamp("[Bootstrap] Error cleaning up orphan settings:", error)
-            // Non-fatal: keep booting.
         }
     }
 

@@ -21,7 +21,8 @@ export const deepMerge = <T extends Record<string, any>>(target: T, source: Part
 /**
  * Persisted settings whose canonical owner is *not* the React-state `Settings` object. They live
  * in SQLite and are read directly by Kotlin (or by a dedicated JS writer) — round-tripping them
- * through React state inflates re-renders and the auto-save batch by ~1 MB on a populated profile.
+ * through React state inflates re-renders and the auto-save batch by hundreds of KB on a populated
+ * profile.
  *
  * Each entry is filtered out on **both** directions:
  * - Save path (`convertSettingsToBatch`): never re-write rows React shouldn't own.
@@ -29,33 +30,23 @@ export const deepMerge = <T extends Record<string, any>>(target: T, source: Part
  *
  * Categories of entries:
  * - `misc.formattedSettingsString` — built and persisted directly by `MessageLog`'s debounced effect.
- * - `racing.{racesData,epithetsData,characterPresetsData}` — bundled JSON assets written once at
- *   bootstrap by `populateSolverData`; only consumed by Kotlin via `SettingsHelper.getStringSetting`.
- * - `trainingEvent.{characterEventData,supportEventData,scenarioEventData}` — bundled JSON event data
- *   written once at bootstrap by `populateEventData`; only consumed by Kotlin.
- * - Orphaned rows (`skills.skillPlanData`, `racing.racingPlanData`, `scenarioOverrides.trackblazerEpithetData`,
- *   `epithets.epithetData`) — persisted by older builds, no current source reference. Cleaned up
- *   at bootstrap by `cleanupOrphanedSettings`.
+ * - `racing.racingPlanData` — bundled racing plan blob written by the racing-plan generator;
+ *   only consumed by Kotlin via `SettingsHelper.getStringSetting`.
+ * - `trainingEvent.{characterEventData,supportEventData}` — bundled JSON event data written once
+ *   at bootstrap by `populateEventData`; only consumed by Kotlin.
  */
 export const DB_OWNED_KEYS: ReadonlyArray<readonly [string, string]> = [
     ["misc", "formattedSettingsString"],
-    ["racing", "racesData"],
-    ["racing", "epithetsData"],
-    ["racing", "characterPresetsData"],
+    ["racing", "racingPlanData"],
     ["trainingEvent", "characterEventData"],
     ["trainingEvent", "supportEventData"],
-    ["trainingEvent", "scenarioEventData"],
-    ["skills", "skillPlanData"],
-    ["racing", "racingPlanData"],
-    ["scenarioOverrides", "trackblazerEpithetData"],
-    ["epithets", "epithetData"],
 ]
 
 const isDbOwned = (category: string, key: string): boolean => DB_OWNED_KEYS.some(([c, k]) => c === category && k === key)
 
 /**
  * Returns a per-category shallow copy of `settings` with all `DB_OWNED_KEYS` removed. Used on the
- * load path to keep Kotlin-owned blobs out of React state.
+ * load path to keep large Kotlin-owned blobs out of React state.
  *
  * @param settings - The nested `category -> key -> value` map returned by `loadAllSettings`.
  * @returns A new map with the same structure, minus DB-owned keys.

@@ -1,8 +1,8 @@
-import { useState, useEffect, useContext, useMemo, useRef } from "react"
+import { useState, useEffect, useContext, useMemo, useRef, useCallback } from "react"
 import * as FileSystem from "expo-file-system"
 import * as Sharing from "expo-sharing"
 import { startActivityAsync } from "expo-intent-launcher"
-import { defaultSettings, Settings, BotStateContext } from "../context/BotStateContext"
+import { defaultSettings, Settings, BotMetaContext, useSettingsSnapshot } from "../context/BotStateContext"
 import { databaseManager } from "../lib/database"
 import { startTiming } from "../lib/performanceLogger"
 import { logWithTimestamp, logErrorWithTimestamp } from "../lib/logger"
@@ -19,10 +19,11 @@ export const useSettingsManager = () => {
     const [isSaving, setIsSaving] = useState(false)
     const [migrationCompleted, setMigrationCompleted] = useState(false)
 
-    const bsc = useContext(BotStateContext)
+    const { setSettings, setReadyStatus } = useContext(BotMetaContext)
+    const settings = useSettingsSnapshot()
 
     // Ref to always track the latest settings, avoiding stale closure issues.
-    const settingsRef = useRef<Settings>(bsc.settings)
+    const settingsRef = useRef<Settings>(settings)
 
     // Track whether the initial load from database has completed.
     const hasLoadedRef = useRef(false)
@@ -30,10 +31,16 @@ export const useSettingsManager = () => {
     // Debounce timer for auto-saving settings.
     const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+    // Snapshot of the settings as last persisted to SQLite. Used to compute a per-slice diff so
+    // each toggle only writes the slice it touched (~10 rows) instead of the full 175-row batch.
+    // Slice-level identity is reliable because slice context updates always replace the slice
+    // object (e.g. `updateMisc({ ...misc, foo: bar })`).
+    const lastSavedSettingsRef = useRef<Settings | null>(null)
+
     // Keep the ref in sync with the latest settings.
     useEffect(() => {
-        settingsRef.current = bsc.settings
-    }, [bsc.settings])
+        settingsRef.current = settings
+    }, [settings])
 
     // Direct database operations.
     const isSQLiteInitialized = databaseManager.isInitialized()
@@ -62,8 +69,28 @@ export const useSettingsManager = () => {
         // Debounce the save to batch rapid changes.
         autoSaveTimerRef.current = setTimeout(async () => {
             try {
-                logWithTimestamp("[SettingsManager] Auto-saving settings to database...")
-                await databaseManager.saveSettingsBatch(convertSettingsToBatch(settingsRef.current))
+                const current = settingsRef.current
+                const last = lastSavedSettingsRef.current
+                // First save after load: persist everything. Subsequent saves: only the slices
+                // whose top-level reference changed since the last persisted snapshot.
+                let toPersist: Record<string, any>
+                if (last == null) {
+                    toPersist = current
+                } else {
+                    toPersist = {}
+                    for (const key of Object.keys(current) as Array<keyof Settings>) {
+                        if (current[key] !== last[key]) {
+                            toPersist[key as string] = current[key]
+                        }
+                    }
+                }
+                const batch = convertSettingsToBatch(toPersist)
+                if (batch.length === 0) {
+                    return
+                }
+                logWithTimestamp(`[SettingsManager] Auto-saving ${batch.length} settings (slices: ${Object.keys(toPersist).join(", ")}).`)
+                await databaseManager.saveSettingsBatch(batch)
+                lastSavedSettingsRef.current = current
                 logWithTimestamp("[SettingsManager] Auto-save completed.")
             } catch (error) {
                 logErrorWithTimestamp(`[SettingsManager] Auto-save failed: ${error}`)
@@ -75,14 +102,14 @@ export const useSettingsManager = () => {
                 clearTimeout(autoSaveTimerRef.current)
             }
         }
-    }, [bsc.settings, isSQLiteInitialized])
+    }, [settings, isSQLiteInitialized])
 
     /**
      * Save settings to `SQLite` database.
      * @param newSettings - The `Settings` object to save. If not provided, the current settings from the `BotStateContext` will be used.
      * @returns A promise that resolves when the settings are saved.
      */
-    const saveSettings = async (newSettings?: Settings) => {
+    const saveSettings = useCallback(async (newSettings?: Settings) => {
         const endTiming = startTiming("settings_manager_save_settings", "settings")
 
         setIsSaving(true)
@@ -91,6 +118,7 @@ export const useSettingsManager = () => {
             // Read from the ref to always get the latest settings.
             const localSettings: Settings = newSettings ? newSettings : settingsRef.current
             await databaseManager.saveSettingsBatch(convertSettingsToBatch(localSettings))
+            lastSavedSettingsRef.current = localSettings
             endTiming({ status: "success", hasNewSettings: !!newSettings })
         } catch (error) {
             logErrorWithTimestamp(`Error saving settings: ${error}`)
@@ -98,14 +126,14 @@ export const useSettingsManager = () => {
         } finally {
             setIsSaving(false)
         }
-    }
+    }, [])
 
     /**
      * Save settings immediately without debouncing (for background/exit saves).
      * @param newSettings - The `Settings` object to save. If not provided, the current settings from the `BotStateContext` will be used.
      * @returns A promise that resolves when the settings are saved.
      */
-    const saveSettingsImmediate = async (newSettings?: Settings) => {
+    const saveSettingsImmediate = useCallback(async (newSettings?: Settings) => {
         const endTiming = startTiming("settings_manager_save_settings_immediate", "settings")
 
         setIsSaving(true)
@@ -114,6 +142,7 @@ export const useSettingsManager = () => {
             // Read from the ref to always get the latest settings.
             const localSettings: Settings = newSettings ? newSettings : settingsRef.current
             await databaseManager.saveSettingsBatch(convertSettingsToBatch(localSettings))
+            lastSavedSettingsRef.current = localSettings
             endTiming({ status: "success", hasNewSettings: !!newSettings, immediate: true })
         } catch (error) {
             logErrorWithTimestamp(`Error saving settings immediately: ${error}`)
@@ -121,72 +150,79 @@ export const useSettingsManager = () => {
         } finally {
             setIsSaving(false)
         }
-    }
+    }, [])
 
     /**
      * Load settings from `SQLite` database.
      * @param skipInitializationCheck - Whether to skip the SQLite initialization check.
      * @returns A promise that resolves when the settings are loaded.
      */
-    const loadSettings = async (skipInitializationCheck: boolean = false) => {
-        const timingName = skipInitializationCheck ? "settings_manager_load_settings_bootstrap" : "settings_manager_load_settings"
-        const endTiming = startTiming(timingName, "settings")
-        const context = skipInitializationCheck ? "during bootstrap" : ""
+    const loadSettings = useCallback(
+        async (skipInitializationCheck: boolean = false) => {
+            const timingName = skipInitializationCheck ? "settings_manager_load_settings_bootstrap" : "settings_manager_load_settings"
+            const endTiming = startTiming(timingName, "settings")
+            const context = skipInitializationCheck ? "during bootstrap" : ""
 
-        try {
-            // Wait for SQLite to be initialized (unless explicitly skipped).
-            if (!skipInitializationCheck && !isSQLiteInitialized) {
-                logWithTimestamp("[SettingsManager] Waiting for SQLite initialization...")
-                endTiming({ status: "skipped", reason: "sqlite_not_initialized" })
-                return
-            }
-
-            // Load from SQLite database.
-            let newSettings: Settings = JSON.parse(JSON.stringify(defaultSettings))
-            let rawDbSettings: any = undefined
             try {
-                const dbSettings = await databaseManager.loadAllSettings()
-                rawDbSettings = dbSettings
-                // Drop Kotlin-owned blobs (races/epithets/character data, orphaned rows, etc.) before
-                // they reach React state. Loading them inflates the settings tree by ~1 MB on a
-                // populated profile and forces the auto-save effect to re-write all of it on every
-                // toggle — see `DB_OWNED_KEYS` in `settingsUtils.ts` for the rationale per-key.
-                const reactOwnedDbSettings = stripDbOwnedKeys(dbSettings)
-                // Use deep merge to preserve nested default values.
-                newSettings = deepMerge(defaultSettings, reactOwnedDbSettings as Partial<Settings>)
-                logWithTimestamp(`[SettingsManager] Settings loaded from SQLite database ${context}.`)
-            } catch (sqliteError) {
-                logWithTimestamp(`[SettingsManager] Failed to load from SQLite ${context}, using defaults:`)
-                console.warn(sqliteError)
-            }
-
-            // Apply all migrations to the settings.
-            const { settings: migratedSettings, anyMigrated } = applyMigrations(newSettings, rawDbSettings)
-            newSettings = migratedSettings
-
-            // If any migration occurred, save the migrated settings back to the database.
-            if (anyMigrated) {
-                try {
-                    await databaseManager.saveSettingsBatch(convertSettingsToBatch(newSettings))
-                    logWithTimestamp("[SettingsManager] Saved migrated settings to database.")
-                } catch (migrationSaveError) {
-                    logErrorWithTimestamp("[SettingsManager] Error saving migrated settings:", migrationSaveError)
+                // Wait for SQLite to be initialized (unless explicitly skipped).
+                if (!skipInitializationCheck && !databaseManager.isInitialized()) {
+                    logWithTimestamp("[SettingsManager] Waiting for SQLite initialization...")
+                    endTiming({ status: "skipped", reason: "sqlite_not_initialized" })
+                    return
                 }
-            }
 
-            bsc.setSettings(newSettings)
-            // Mark that the initial load has completed so auto-save can begin.
-            hasLoadedRef.current = true
-            logWithTimestamp(`[SettingsManager] Settings loaded and applied to context ${context}.`)
-            logWithTimestamp(`[SettingsManager] Scenario value after load: "${newSettings.general.scenario}"`)
-            endTiming({ status: "success", usedDefaults: newSettings === defaultSettings })
-        } catch (error) {
-            logErrorWithTimestamp(`[SettingsManager] Error loading settings${context}:`, error)
-            bsc.setSettings(JSON.parse(JSON.stringify(defaultSettings)))
-            bsc.setReadyStatus(false)
-            endTiming({ status: "error", error: error instanceof Error ? error.message : String(error) })
-        }
-    }
+                // Load from SQLite database.
+                let newSettings: Settings = JSON.parse(JSON.stringify(defaultSettings))
+                let rawDbSettings: any = undefined
+                try {
+                    const dbSettings = await databaseManager.loadAllSettings()
+                    rawDbSettings = dbSettings
+                    // Drop Kotlin-owned blobs (racing plan, character/support event data) before they
+                    // reach React state. Loading them inflates the settings tree and forces the
+                    // auto-save effect to re-write all of it on every toggle — see `DB_OWNED_KEYS`
+                    // in `settingsUtils.ts`.
+                    const reactOwnedDbSettings = stripDbOwnedKeys(dbSettings)
+                    // Use deep merge to preserve nested default values.
+                    newSettings = deepMerge(defaultSettings, reactOwnedDbSettings as Partial<Settings>)
+                    logWithTimestamp(`[SettingsManager] Settings loaded from SQLite database ${context}.`)
+                } catch (sqliteError) {
+                    logWithTimestamp(`[SettingsManager] Failed to load from SQLite ${context}, using defaults:`)
+                    console.warn(sqliteError)
+                }
+
+                // Apply all migrations to the settings.
+                const { settings: migratedSettings, anyMigrated } = applyMigrations(newSettings, rawDbSettings)
+                newSettings = migratedSettings
+
+                // If any migration occurred, save the migrated settings back to the database.
+                if (anyMigrated) {
+                    try {
+                        await databaseManager.saveSettingsBatch(convertSettingsToBatch(newSettings))
+                        lastSavedSettingsRef.current = newSettings
+                        logWithTimestamp("[SettingsManager] Saved migrated settings to database.")
+                    } catch (migrationSaveError) {
+                        logErrorWithTimestamp("[SettingsManager] Error saving migrated settings:", migrationSaveError)
+                    }
+                }
+
+                setSettings(newSettings)
+                // The DB now matches React state, so the next auto-save can diff against it
+                // and skip writing slices that haven't changed.
+                lastSavedSettingsRef.current = newSettings
+                // Mark that the initial load has completed so auto-save can begin.
+                hasLoadedRef.current = true
+                logWithTimestamp(`[SettingsManager] Settings loaded and applied to context ${context}.`)
+                logWithTimestamp(`[SettingsManager] Scenario value after load: "${newSettings.general.scenario}"`)
+                endTiming({ status: "success", usedDefaults: newSettings === defaultSettings })
+            } catch (error) {
+                logErrorWithTimestamp(`[SettingsManager] Error loading settings${context}:`, error)
+                setSettings(JSON.parse(JSON.stringify(defaultSettings)))
+                setReadyStatus(false)
+                endTiming({ status: "error", error: error instanceof Error ? error.message : String(error) })
+            }
+        },
+        [setSettings, setReadyStatus]
+    )
 
     /**
      * Import settings from a JSON file.
@@ -230,88 +266,92 @@ export const useSettingsManager = () => {
      * @param fileUri - The URI/path to the JSON settings file.
      * @returns A promise that resolves with a boolean indicating whether the import was successful.
      */
-    const importSettings = async (fileUri: string): Promise<boolean> => {
-        const endTiming = startTiming("settings_manager_import_settings", "settings")
+    const importSettings = useCallback(
+        async (fileUri: string): Promise<boolean> => {
+            const endTiming = startTiming("settings_manager_import_settings", "settings")
 
-        try {
-            setIsSaving(true)
-
-            // Ensure database is initialized before saving.
-            logWithTimestamp("Ensuring database is initialized before saving...")
-            if (!isSQLiteInitialized) {
-                logWithTimestamp("Database not initialized, triggering initialization...")
-                await databaseManager.initialize()
-            }
-
-            // Check for current active profile name before importing profiles.
-            let previousActiveProfileName: string | null = null
             try {
-                previousActiveProfileName = await databaseManager.getCurrentProfileName()
-            } catch (error) {
-                logErrorWithTimestamp("[SettingsManager] Error getting current profile name (continuing with import):", error)
-            }
+                setIsSaving(true)
 
-            // Load settings and profiles from JSON file.
-            const { settings: importedSettings, profiles } = await loadFromJSONFile(fileUri)
-
-            // Save settings to SQLite database.
-            await databaseManager.saveSettingsBatch(convertSettingsToBatch(importedSettings))
-            bsc.setSettings(importedSettings)
-
-            // Import profiles if they exist.
-            if (profiles && Array.isArray(profiles) && profiles.length > 0) {
-                try {
-                    // Delete all existing profiles.
-                    const existingProfiles = await databaseManager.getAllProfiles()
-                    for (const profile of existingProfiles) {
-                        await databaseManager.deleteProfile(profile.id)
-                    }
-                    logWithTimestamp(`[SettingsManager] Deleted ${existingProfiles.length} existing profiles.`)
-
-                    // Import all profiles from the JSON file.
-                    for (const profile of profiles) {
-                        await databaseManager.saveProfile({
-                            name: profile.name,
-                            settings: profile.settings,
-                        })
-                    }
-                    logWithTimestamp(`[SettingsManager] Imported ${profiles.length} profiles.`)
-
-                    // If there was a previously active profile and at least one profile was imported, set active profile to the first imported profile.
-                    if (previousActiveProfileName && profiles.length > 0) {
-                        await databaseManager.setCurrentProfileName(profiles[0].name)
-                        logWithTimestamp(`[SettingsManager] Set active profile to first imported profile: ${profiles[0].name}`)
-                    }
-                } catch (profileError) {
-                    logErrorWithTimestamp("[SettingsManager] Error importing profiles (settings import succeeded):", profileError)
+                // Ensure database is initialized before saving. Read live so the closure stays stable.
+                logWithTimestamp("Ensuring database is initialized before saving...")
+                if (!databaseManager.isInitialized()) {
+                    logWithTimestamp("Database not initialized, triggering initialization...")
+                    await databaseManager.initialize()
                 }
+
+                // Check for current active profile name before importing profiles.
+                let previousActiveProfileName: string | null = null
+                try {
+                    previousActiveProfileName = await databaseManager.getCurrentProfileName()
+                } catch (error) {
+                    logErrorWithTimestamp("[SettingsManager] Error getting current profile name (continuing with import):", error)
+                }
+
+                // Load settings and profiles from JSON file.
+                const { settings: importedSettings, profiles } = await loadFromJSONFile(fileUri)
+
+                // Save settings to SQLite database.
+                await databaseManager.saveSettingsBatch(convertSettingsToBatch(importedSettings))
+                lastSavedSettingsRef.current = importedSettings
+                setSettings(importedSettings)
+
+                // Import profiles if they exist.
+                if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+                    try {
+                        // Delete all existing profiles.
+                        const existingProfiles = await databaseManager.getAllProfiles()
+                        for (const profile of existingProfiles) {
+                            await databaseManager.deleteProfile(profile.id)
+                        }
+                        logWithTimestamp(`[SettingsManager] Deleted ${existingProfiles.length} existing profiles.`)
+
+                        // Import all profiles from the JSON file.
+                        for (const profile of profiles) {
+                            await databaseManager.saveProfile({
+                                name: profile.name,
+                                settings: profile.settings,
+                            })
+                        }
+                        logWithTimestamp(`[SettingsManager] Imported ${profiles.length} profiles.`)
+
+                        // If there was a previously active profile and at least one profile was imported, set active profile to the first imported profile.
+                        if (previousActiveProfileName && profiles.length > 0) {
+                            await databaseManager.setCurrentProfileName(profiles[0].name)
+                            logWithTimestamp(`[SettingsManager] Set active profile to first imported profile: ${profiles[0].name}`)
+                        }
+                    } catch (profileError) {
+                        logErrorWithTimestamp("[SettingsManager] Error importing profiles (settings import succeeded):", profileError)
+                    }
+                }
+
+                logWithTimestamp("Settings imported successfully.")
+
+                endTiming({ status: "success", fileUri, profilesImported: profiles?.length || 0 })
+                return true
+            } catch (error) {
+                logErrorWithTimestamp("Error importing settings:", error)
+                endTiming({ status: "error", fileUri, error: error instanceof Error ? error.message : String(error) })
+                return false
+            } finally {
+                setIsSaving(false)
             }
-
-            logWithTimestamp("Settings imported successfully.")
-
-            endTiming({ status: "success", fileUri, profilesImported: profiles?.length || 0 })
-            return true
-        } catch (error) {
-            logErrorWithTimestamp("Error importing settings:", error)
-            endTiming({ status: "error", fileUri, error: error instanceof Error ? error.message : String(error) })
-            return false
-        } finally {
-            setIsSaving(false)
-        }
-    }
+        },
+        [setSettings]
+    )
 
     /**
      * Export current settings to a JSON file which includes stripping large fields.
      * @returns A promise that resolves with the file URI of the exported settings, or null if the export failed.
      */
-    const exportSettings = async (): Promise<string | null> => {
+    const exportSettings = useCallback(async (): Promise<string | null> => {
         const endTiming = startTiming("settings_manager_export_settings", "settings")
 
         try {
             // Fetch all profiles from database.
             let profiles: Array<{ id: number; name: string; settings: any; created_at: string; updated_at: string }> = []
             try {
-                if (isSQLiteInitialized) {
+                if (databaseManager.isInitialized()) {
                     const dbProfiles = await databaseManager.getAllProfiles()
                     profiles = dbProfiles.map((p) => ({
                         id: p.id,
@@ -326,10 +366,12 @@ export const useSettingsManager = () => {
                 logErrorWithTimestamp("[SettingsManager] Error exporting profiles (continuing with settings export):", profileError)
             }
 
-            // Create export object with settings and profiles. Large Kotlin-owned blobs are now
-            // filtered out at the load boundary (`stripDbOwnedKeys`) so they're never present on
-            // `bsc.settings` to begin with — only the user-owned fields remain to be deep-cloned.
-            const settingsForExport = JSON.parse(JSON.stringify(bsc.settings))
+            // Create export object with settings and profiles. The large Kotlin-owned blobs
+            // (`racing.racingPlanData`, `trainingEvent.{characterEventData,supportEventData}`,
+            // `misc.formattedSettingsString`) are now filtered out at the load boundary
+            // (`stripDbOwnedKeys`) so they never reach React state to begin with — only the
+            // user-owned fields remain to be deep-cloned here.
+            const settingsForExport = JSON.parse(JSON.stringify(settingsRef.current))
 
             // Drop fields that are export-irrelevant but still live in React state.
             delete settingsForExport.misc.currentProfileName
@@ -363,13 +405,13 @@ export const useSettingsManager = () => {
             endTiming({ status: "error", error: error instanceof Error ? error.message : String(error) })
             return null
         }
-    }
+    }, [])
 
     /**
      * Open the app's data directory using Storage Access Framework or fallback to file explorer.
      * @returns A promise that resolves when the data directory is opened.
      */
-    const openDataDirectory = async () => {
+    const openDataDirectory = useCallback(async () => {
         const endTiming = startTiming("settings_manager_open_data_dir", "settings")
         // Get the app's package name from the document directory path.
         const packageName = "com.steve1316.uma_android_automation"
@@ -423,21 +465,21 @@ export const useSettingsManager = () => {
             logErrorWithTimestamp(`Error opening app data directory: ${error}`)
             endTiming({ status: "error", error: error instanceof Error ? error.message : String(error) })
         }
-    }
+    }, [])
 
     /**
      * Reset settings to default values.
      * @returns A promise that resolves with a boolean indicating whether the reset was successful.
      */
-    const resetSettings = async (): Promise<boolean> => {
+    const resetSettings = useCallback(async (): Promise<boolean> => {
         const endTiming = startTiming("settings_manager_reset_settings", "settings")
 
         try {
             setIsSaving(true)
 
-            // Ensure database is initialized before saving.
+            // Ensure database is initialized before saving. Read live so the closure stays stable.
             logWithTimestamp("Ensuring database is initialized before resetting...")
-            if (!isSQLiteInitialized) {
+            if (!databaseManager.isInitialized()) {
                 logWithTimestamp("Database not initialized, triggering initialization...")
                 await databaseManager.initialize()
             }
@@ -447,10 +489,11 @@ export const useSettingsManager = () => {
 
             // Save default settings to SQLite database.
             await databaseManager.saveSettingsBatch(convertSettingsToBatch(defaultSettingsCopy))
+            lastSavedSettingsRef.current = defaultSettingsCopy
 
             // Update the current settings in context.
-            bsc.setSettings(defaultSettingsCopy)
-            bsc.setReadyStatus(false)
+            setSettings(defaultSettingsCopy)
+            setReadyStatus(false)
 
             logWithTimestamp("Settings reset to defaults successfully.")
 
@@ -463,7 +506,7 @@ export const useSettingsManager = () => {
         } finally {
             setIsSaving(false)
         }
-    }
+    }, [setSettings, setReadyStatus])
 
     return useMemo(
         () => ({
@@ -474,8 +517,7 @@ export const useSettingsManager = () => {
             exportSettings,
             resetSettings,
             openDataDirectory,
-            isSaving: isSaving || isSQLiteSaving,
         }),
-        [saveSettings, saveSettingsImmediate, loadSettings, importSettings, exportSettings, resetSettings, openDataDirectory, isSaving, isSQLiteSaving]
+        [saveSettings, saveSettingsImmediate, loadSettings, importSettings, exportSettings, resetSettings, openDataDirectory]
     )
 }
