@@ -215,6 +215,12 @@ class Trackblazer(game: Game) : Campaign(game) {
     /** Flag to bypass conservation and force-use the reserved energy item. */
     private var bForceUseReservedItem: Boolean = false
 
+    /**
+     * When mood is below NORMAL (BAD or AWFUL), training resources (Reset Whistle reshuffle, Good-Luck Charm, and Megaphones) refuse to fire if main-stat gain is below this floor.
+     * Prevents wasting items on structurally low-return turns where the mood multiplier caps the gain.
+     */
+    private val lowMainStatGainItemFloor: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerLowMainStatGainItemFloor", 20)
+
     /** The frequency to check the shop after a race. */
     private val shopCheckFrequency: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerShopCheckFrequency", 3)
 
@@ -1532,7 +1538,33 @@ class Trackblazer(game: Game) : Campaign(game) {
         // Limit automated whistle usage to during summer or near end of senior (Turns 37-40, >60)
         if ((date.day in 37..40 || date.day > 60) && !bUsedWhistleToday && trainingSelected == null && !bIsIrregularTraining && !training.needsEnergyRecovery) {
             val hasWhistle = (currentInventory["Reset Whistle"] ?: 0) > 0
-            if (hasWhistle) {
+
+            // Whistle viability gate: when mood is below NORMAL, the mood multiplier structurally caps gains.
+            // Reshuffling trainings won't recover from that — so refuse to consume the Whistle if enough
+            // non-blacklisted trainings already show low main-stat gain. The required count scales with the
+            // blacklist size: 0 blacklisted -> 3-of-5, 1 blacklisted -> 2-of-4, 2+ blacklisted -> 1 (clamped).
+            val whistleGateBlocks =
+                if (trainee.mood < Mood.NORMAL) {
+                    val blacklistSize = training.blacklist.filterNotNull().size
+                    val requiredLowGainCount = (3 - blacklistSize).coerceAtLeast(1)
+                    val results = training.cachedAnalysisResults ?: emptyList()
+                    val nonBlacklisted = results.filter { it.name !in training.blacklist }
+                    val lowGainCount = nonBlacklisted.count { (it.statGains[it.name] ?: 0) < lowMainStatGainItemFloor }
+                    val blocks = lowGainCount >= requiredLowGainCount
+                    if (blocks) {
+                        MessageLog.i(
+                            TAG,
+                            "[TRACKBLAZER] Refusing Reset Whistle reshuffle: mood=${trainee.mood}, $lowGainCount of ${nonBlacklisted.size} non-blacklisted trainings have main gain below floor ($lowMainStatGainItemFloor). Reshuffling won't recover from the mood penalty.",
+                        )
+                    }
+                    blocks
+                } else {
+                    false
+                }
+
+            if (whistleGateBlocks) {
+                // Whistle usage was skipped such that trainingSelected stays null and the existing recovery branch below fires.
+            } else if (hasWhistle) {
                 MessageLog.i(TAG, "[TRACKBLAZER] No suitable training found. Using Reset Whistle.")
                 if (shopList.openTrainingItemsDialog()) {
                     if (shopList.useSpecificItems(listOf("Reset Whistle"), reason = "No suitable training found.").isNotEmpty()) {
@@ -1545,6 +1577,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                         MessageLog.i(TAG, "[TRACKBLAZER] Re-analyzing trainings after Reset Whistle.")
                         training.analyzeTrainings(mapOf("ignoreFailureChance" to hasCharm, "minStatGainForCharm" to minCharmGain))
                         trainingSelected = training.recommendTraining(forceSelection = whistleForcesTraining)
+
                         when {
                             trainingSelected == null ->
                                 MessageLog.i(TAG, "[TRACKBLAZER] Reset Whistle re-analysis returned no training; nothing to execute.")
@@ -2028,7 +2061,10 @@ class Trackblazer(game: Game) : Campaign(game) {
         remainingItemsOfInterest: Set<String>,
         passStartEnergy: Int,
     ): String? {
-        if (isDisabled) return null
+        if (isDisabled) {
+            MessageLog.v(TAG, "[TRACKBLAZER] Item \"$itemName\" read as disabled in dialog, so skipping its usage.")
+            return null
+        }
 
         // Ankle Weights Check.
         if (date.day >= 13 && trainingSelected != null) {
@@ -2051,6 +2087,18 @@ class Trackblazer(game: Game) : Campaign(game) {
         // Good-Luck Charm Check.
         val failureChance = training.trainingMap[trainingSelected]?.failureChance ?: 0
         if (date.day >= 13 && !bUsedCharmToday && failureChance >= 20 && itemName == "Good-Luck Charm") {
+            // When mood is below NORMAL, the mood multiplier structurally caps stat gain. Burning Charm on a
+            // low-gain training squanders its 0%-failure benefit — conserve for a higher-gain turn instead.
+            if (trainee.mood < Mood.NORMAL && trainingSelected != null) {
+                val selectedMainGain = training.cachedAnalysisResults?.firstOrNull { it.name == trainingSelected }?.statGains?.get(trainingSelected) ?: 0
+                if (selectedMainGain < lowMainStatGainItemFloor) {
+                    MessageLog.i(
+                        TAG,
+                        "[TRACKBLAZER] Skipping Good-Luck Charm: mood=${trainee.mood}, selected $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor). Conserving Charm for a higher-gain turn.",
+                    )
+                    return null
+                }
+            }
             val reason = "Setting training failure chance to 0%."
             if (clickItemPlusButton(itemName, entry, "[TRACKBLAZER] Queuing Good-Luck Charm via inline pass.", nextInventory, reason = reason)) {
                 bUsedCharmToday = true
@@ -2140,6 +2188,19 @@ class Trackblazer(game: Game) : Campaign(game) {
         // Megaphone Check.
         val megaphoneNames = listOf("Empowering Megaphone", "Motivating Megaphone", "Coaching Megaphone")
         if (trainee.megaphoneTurnCounter == 0 && trainingSelected != null && megaphoneNames.contains(itemName)) {
+            // When mood is below NORMAL, the mood multiplier caps gain. Megaphones multiply gain across multiple
+            // turns, so squandering one on a low-gain selected training is worse than conserving for a better turn.
+            if (trainee.mood < Mood.NORMAL) {
+                val selectedMainGain = training.cachedAnalysisResults?.firstOrNull { it.name == trainingSelected }?.statGains?.get(trainingSelected) ?: 0
+                if (selectedMainGain < lowMainStatGainItemFloor) {
+                    MessageLog.i(
+                        TAG,
+                        "[TRACKBLAZER] Skipping $itemName: mood=${trainee.mood}, selected $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor). Conserving Megaphone for a higher-gain turn.",
+                    )
+                    return null
+                }
+            }
+
             // Check if there is a better megaphone in inventory that we haven't seen yet OR that we know is disabled.
             val betterMegaphones =
                 when (itemName) {
