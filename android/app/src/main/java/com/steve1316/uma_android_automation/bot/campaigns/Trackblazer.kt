@@ -2270,6 +2270,19 @@ class Trackblazer(game: Game) : Campaign(game) {
     }
 
     /**
+     * Returns the energy item name currently being conserved as the last-resort emergency-race-recovery stash.
+     *
+     * Mirrors the conservation logic inside `isBestEnergyItemToUse` so the dialog-open gate predicts the same outcome the dialog scan would reach.
+     *
+     * @param inventory The inventory snapshot to evaluate.
+     * @return The conserved item name, or `null` if conservation is bypassed or no conservable item is in inventory.
+     */
+    private fun getConservedEnergyItem(inventory: Map<String, Int>): String? {
+        if (bForceUseReservedItem) return null
+        return energyItemConservationOrder.firstOrNull { (inventory[it] ?: 0) > 0 }
+    }
+
+    /**
      * Orchestrates the usage of items based on dynamic conditions and updates internal inventory.
      *
      * @param trainee Reference to the trainee's state.
@@ -2279,8 +2292,12 @@ class Trackblazer(game: Game) : Campaign(game) {
         if (date.day < 13) return
 
         val needSync = !bInventorySynced
+        val conservedEnergyItem = getConservedEnergyItem(currentInventory)
         val hasEnergyItems =
-            currentInventory.any { (name, count) -> count > 0 && shopList.energyItemNames.contains(name) } ||
+            currentInventory.any { (name, count) ->
+                val effectiveCount = if (name == conservedEnergyItem) count - 1 else count
+                effectiveCount > 0 && shopList.energyItemNames.contains(name)
+            } ||
                 ((currentInventory["Royal Kale Juice"] ?: 0) > 0)
         val hasMoodItems = currentInventory.any { (name, count) -> count > 0 && (name == "Berry Sweet Cupcake" || name == "Plain Cupcake") }
         val hasBadConditionItems = currentInventory.any { (name, count) -> count > 0 && shopList.badConditionHealItemNames.contains(name) }
