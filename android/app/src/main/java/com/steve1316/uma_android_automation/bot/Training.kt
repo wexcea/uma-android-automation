@@ -76,7 +76,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
     private var restrictedTrainingNames: MutableSet<StatName> = mutableSetOf()
 
     /** List of analysis results cached for reuse during the current turn. */
-    private var cachedAnalysisResults: List<TrainingAnalysisResult>? = null
+    var cachedAnalysisResults: List<TrainingAnalysisResult>? = null
+        private set
 
     /** The current training scenario name. */
     private val scenario = game.scenario

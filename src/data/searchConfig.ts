@@ -644,6 +644,13 @@ const searchConfig: SearchOption[] = [
         page: "ScenarioOverridesSettings",
     },
     {
+        id: "trackblazer-low-main-stat-gain-item-floor",
+        title: "Trackblazer Low Main Stat Gain Item Floor",
+        description:
+            "When mood is BAD or AWFUL, refuse to use Reset Whistle, Good-Luck Charm, or Megaphone if main-stat gain is below this floor. Prevents wasting items on structurally low-return turns where the mood multiplier caps the stat gains.",
+        page: "ScenarioOverridesSettings",
+    },
+    {
         id: "trackblazer-max-retries-per-race",
         title: "Trackblazer Max Retries per Race",
         description: "Sets the maximum number of retries allowed for a single race in the Trackblazer scenario.",
