@@ -66,6 +66,10 @@ object LabelScheduledRace : ComponentInterface {
     override val template = Template("components/label/scheduled_race", region = Region.bottomHalf)
 }
 
+object LabelStrategy : ComponentInterface {
+    override val template = Template("components/label/strategy")
+}
+
 object LabelTrainingCannotPerform : ComponentInterface {
     override val template = Template("components/label/training_cannot_perform", region = Region.middle)
 }

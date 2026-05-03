@@ -42,6 +42,10 @@ object ButtonCancel : ButtonInterface {
     override val template = Template("components/button/cancel", region = Region.bottomHalf)
 }
 
+object ButtonCareer : ButtonInterface {
+    override val template = Template("components/button/career")
+}
+
 object ButtonChangeRunningStyle : ButtonInterface {
     override val template = Template("components/button/change")
 }

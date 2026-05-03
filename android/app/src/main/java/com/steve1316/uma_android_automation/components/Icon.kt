@@ -66,6 +66,10 @@ object IconRaceDayRibbon : ComponentInterface {
     override val template = Template("components/icon/race_day_ribbon", region = Region.bottomHalf)
 }
 
+object IconRaceHistory1st : ComponentInterface {
+    override val template = Template("components/icon/race_history_1st")
+}
+
 object IconGoalRibbon : ComponentInterface {
     override val template = Template("components/icon/goal_ribbon", region = Region.leftHalf)
 }
