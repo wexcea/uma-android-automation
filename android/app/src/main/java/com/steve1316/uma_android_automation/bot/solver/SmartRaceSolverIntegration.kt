@@ -127,52 +127,155 @@ object SmartRaceSolverIntegration {
             MessageLog.i(TAG, "Race \"${pending.name}\" on turn ${pending.turnNumber} did not finish 1st; not adding to history.")
             return
         }
+        val historyBefore = synchronized(raceHistory) { raceHistory.toList() }
         recordRaceWon(pending.raceKey, pending.name, pending.classYear, pending.turnNumber)
+        val historyAfter = synchronized(raceHistory) { raceHistory.toList() }
         MessageLog.i(TAG, "Race \"${pending.name}\" on turn ${pending.turnNumber} confirmed 1st; added to history.")
-        logEpithetProgressAfterWin(pending.name)
+        logEpithetProgressAfterWin(pending.name, pending.turnNumber, historyBefore, historyAfter)
     }
 
     /**
-     * Logs the epithets this race directly named, with their post-win status and per-matcher
-     * progress. Generic matchers (win counts, dependencies on other epithets) are skipped so
-     * the line stays focused on epithets the race actually moved.
+     * Logs the epithets the just-confirmed race progresses, with each epithet's aggregated
+     * `(satisfied / required)` count both before and after the win so the contribution of
+     * this race is obvious. Aggregation matches the frontend popover (sums per-matcher
+     * `(current, required)` across non-dependency matchers).
      *
      * @param raceName The just-confirmed race name (matches [RaceCandidate.name]).
+     * @param turnNumber Turn the race ran on; used to look up the [RaceCandidate] for filter checks.
+     * @param historyBefore Snapshot of [raceHistory] before [recordRaceWon] added this win.
+     * @param historyAfter Snapshot of [raceHistory] after [recordRaceWon] added this win.
      */
-    private fun logEpithetProgressAfterWin(raceName: String) {
+    private fun logEpithetProgressAfterWin(
+        raceName: String,
+        turnNumber: TurnNumber,
+        historyBefore: List<RaceWin>,
+        historyAfter: List<RaceWin>,
+    ) {
         val epithets = cachedEpithets ?: loadEpithets() ?: return
         val racesByTurn = cachedRaces ?: loadAllRaces() ?: return
-        val affected = epithets.filter { epi -> epi.matchers.any { matcherReferencesRace(it, raceName) } }
+        val race = racesByTurn[turnNumber]?.firstOrNull { it.name == raceName }
+        val affected = epithets.filter { epi -> epi.matchers.any { matcherReferencesRace(it, raceName, race) } }
         if (affected.isEmpty()) return
-        val state = newSolverState(currentTurn = 1, scenario = "", epithets = epithets, racesByTurn = racesByTurn)
+        val stateBefore = newSolverState(currentTurn = 1, scenario = "", epithets = epithets, racesByTurn = racesByTurn, raceHistorySnapshot = historyBefore)
+        val stateAfter = newSolverState(currentTurn = 1, scenario = "", epithets = epithets, racesByTurn = racesByTurn, raceHistorySnapshot = historyAfter)
         val sb = StringBuilder()
         sb.append("Race \"$raceName\" updated ${affected.size} epithet(s):")
         for (epi in affected) {
-            val status = EpithetTracker.classify(epi, state)
-            val percents = epi.matchers.joinToString(", ") { "${(EpithetTracker.progress(it, state) * 100).toInt()}%" }
-            sb.append("\n  - \"${epi.name}\" → $status (matchers: $percents)")
+            val status = EpithetTracker.classify(epi, stateAfter)
+            val before = epithetFraction(epi, stateBefore)
+            val after = epithetFraction(epi, stateAfter)
+            val total = after?.second ?: before?.second ?: 0
+            val beforeC = before?.first ?: 0
+            val afterC = after?.first ?: 0
+            sb.append("\n  - \"${epi.name}\" → $status ($beforeC/$total) -> ($afterC/$total)")
         }
         MessageLog.i(TAG, sb.toString())
     }
 
     /**
-     * True when the matcher names this specific race. Generic count and dependency matchers
-     * return false so they are not flagged on a single win.
+     * True when the matcher progresses on this specific race. Direct-name matchers compare
+     * by name; [EpithetMatcher.WinCount] matchers evaluate their filter against [race] when
+     * available. Dependency matchers ([EpithetMatcher.EpithetAnyOf] / [EpithetMatcher.EpithetAll])
+     * are skipped because they hinge on other epithets, not this race.
      *
      * @param matcher Matcher to inspect.
      * @param raceName Race name (matches [RaceCandidate.name]).
-     * @return True when the matcher names the race.
+     * @param race Looked-up [RaceCandidate] for the win, or null when the lookup missed.
+     * @return True when the matcher counts this race as progress.
      */
-    private fun matcherReferencesRace(matcher: EpithetMatcher, raceName: String): Boolean =
+    private fun matcherReferencesRace(matcher: EpithetMatcher, raceName: String, race: RaceCandidate?): Boolean =
         when (matcher) {
             is EpithetMatcher.WinRace -> matcher.name == raceName
             is EpithetMatcher.WinRaceTimes -> matcher.name == raceName
             is EpithetMatcher.WinAnyOf -> raceName in matcher.names
             is EpithetMatcher.WinAtLeast -> raceName in matcher.names
-            is EpithetMatcher.WinCount -> false
+            is EpithetMatcher.WinCount -> race != null && raceMatchesFilter(race, matcher.filter)
             is EpithetMatcher.EpithetAnyOf -> false
             is EpithetMatcher.EpithetAll -> false
         }
+
+    /**
+     * Mirrors `EpithetTracker.matchesFilter` and `MilpSolver.matchesFilter` for the win-progress
+     * log. Keep the three copies in sync — visibility on the originals is `private` so they
+     * cannot be called from here directly.
+     *
+     * @param race Race to test.
+     * @param filter Filter predicate.
+     * @return True when every non-null / non-empty field of [filter] accepts [race].
+     */
+    private fun raceMatchesFilter(race: RaceCandidate, filter: EpithetFilter): Boolean {
+        if (filter.terrain != null && race.terrain != filter.terrain) return false
+        if (filter.grade != null && race.grade != filter.grade) return false
+        if (filter.gradeAtLeastOpen && race.grade.ordinal < RaceGrade.OP.ordinal) return false
+        if (filter.gradedOnly && race.grade !in setOf(RaceGrade.G1, RaceGrade.G2, RaceGrade.G3)) return false
+        if (filter.distanceTypes.isNotEmpty() && race.distanceType !in filter.distanceTypes) return false
+        if (filter.raceTracks.isNotEmpty() && race.raceTrack !in filter.raceTracks) return false
+        if (filter.nameContains != null && !race.name.contains(filter.nameContains, ignoreCase = true)) return false
+        if (filter.nameContainsCountry && !EpithetFilters.nameContainsCountry(race.name)) return false
+        return true
+    }
+
+    /**
+     * Returns the (current, required) tally this matcher contributes toward its epithet's
+     * aggregated progress, or null for dependency matchers ([EpithetMatcher.EpithetAnyOf] /
+     * [EpithetMatcher.EpithetAll]) which gate on other epithets rather than on race wins.
+     *
+     * @param matcher Matcher to evaluate.
+     * @param state Solver state whose [SolverState.raceHistory] supplies the win counts.
+     * @return Pair of (current, required), capped so current never exceeds required.
+     */
+    private fun matcherFraction(matcher: EpithetMatcher, state: SolverState): Pair<Int, Int>? =
+        when (matcher) {
+            is EpithetMatcher.WinRace ->
+                if (EpithetTracker.isMatcherSatisfied(matcher, state)) 1 to 1 else 0 to 1
+            is EpithetMatcher.WinRaceTimes -> {
+                val have = state.raceHistory.count { it.name == matcher.name }.coerceAtMost(matcher.times)
+                have to matcher.times
+            }
+            is EpithetMatcher.WinAnyOf -> {
+                val have =
+                    state.raceHistory
+                        .count { win ->
+                            win.name in matcher.names &&
+                                (matcher.atClass == null || win.classYear.equals(matcher.atClass, ignoreCase = true))
+                        }.coerceAtMost(matcher.count)
+                have to matcher.count
+            }
+            is EpithetMatcher.WinAtLeast -> {
+                val have = state.raceHistory.map { it.name }.toSet().intersect(matcher.names.toSet()).size.coerceAtMost(matcher.count)
+                have to matcher.count
+            }
+            is EpithetMatcher.WinCount -> {
+                val have =
+                    state.raceHistory
+                        .count { win ->
+                            val race = state.racesByTurn[win.turnNumber]?.firstOrNull { it.name == win.name }
+                            race != null && raceMatchesFilter(race, matcher.filter)
+                        }.coerceAtMost(matcher.count)
+                have to matcher.count
+            }
+            is EpithetMatcher.EpithetAnyOf, is EpithetMatcher.EpithetAll -> null
+        }
+
+    /**
+     * Sum of [matcherFraction] across this epithet's non-dependency matchers. Returns null
+     * when every matcher is a dependency (no race-win progress to report). Mirrors the
+     * frontend's `epithetProgress` aggregation in `src/lib/solver/scoring.ts`.
+     *
+     * @param epi Epithet to aggregate.
+     * @param state Solver state supplying win counts.
+     * @return Pair of (sumCurrent, sumRequired), or null when no progress-trackable matchers exist.
+     */
+    private fun epithetFraction(epi: Epithet, state: SolverState): Pair<Int, Int>? {
+        var sumCurrent = 0
+        var sumTotal = 0
+        for (m in epi.matchers) {
+            val (c, t) = matcherFraction(m, state) ?: continue
+            sumCurrent += c
+            sumTotal += t
+        }
+        return if (sumTotal == 0) null else sumCurrent to sumTotal
+    }
 
     /**
      * Picks the on-screen race the solver's schedule prefers for [currentTurn], or returns
@@ -267,9 +370,7 @@ object SmartRaceSolverIntegration {
      *   either `{type:"Train"}`, `{type:"Rest"}`, or `{type:"Race", raceKey, name, grade}`.
      */
     fun previewSchedule(configJson: String): String {
-        val tStart = System.nanoTime()
         val config = runCatching { JSONObject(configJson) }.getOrElse { JSONObject() }
-        val tConfigParsed = System.nanoTime()
         // Prefer the JS-provided races/epithets payload (always present from the bundled JSON
         // imports) and fall back to SettingsHelper. This avoids depending on persistence timing
         // for users whose profiles predate these settings.
@@ -288,7 +389,6 @@ object SmartRaceSolverIntegration {
             parseEpithetsJsonField(config.optStringOrNull("epithetsDataJson"))
                 ?: loadEpithets()
                 ?: emptyList()
-        val tDataParsed = System.nanoTime()
 
         val state =
             SolverState(
@@ -304,22 +404,8 @@ object SmartRaceSolverIntegration {
                 weights = parseWeightsObj(config.optJSONObject("weights")),
             )
 
-        val tStateBuilt = System.nanoTime()
         val schedule = SmartRaceSolver.solve(state)
-        val tSolved = System.nanoTime()
-        val out = serializeSchedule(schedule, racesByTurn)
-        val tSerialized = System.nanoTime()
-        MessageLog.i(
-            TAG,
-            "previewSchedule timings (ms): " +
-                "configParse=${(tConfigParsed - tStart) / 1_000_000}, " +
-                "dataParse=${(tDataParsed - tConfigParsed) / 1_000_000}, " +
-                "stateBuild=${(tStateBuilt - tDataParsed) / 1_000_000}, " +
-                "solve=${(tSolved - tStateBuilt) / 1_000_000}, " +
-                "serialize=${(tSerialized - tSolved) / 1_000_000}, " +
-                "total=${(tSerialized - tStart) / 1_000_000}",
-        )
-        return out
+        return serializeSchedule(schedule, racesByTurn)
     }
 
     /**
