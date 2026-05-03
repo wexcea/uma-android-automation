@@ -1848,10 +1848,11 @@ class Trackblazer(game: Game) : Campaign(game) {
                         val isCharm = name == "Good-Luck Charm" && failureChance >= 20
 
                         // Determine if this item is actually useful right now.
+                        // isBad items are also isQuick, but they must clear the condition-match gate; let the isBad clause own them.
                         val isUseful =
                             isStat ||
-                                isBad ||
-                                isQuick ||
+                                (isBad && trainee != null && canHealActiveNegativeStatus(name, trainee)) ||
+                                (isQuick && !isBad) ||
                                 (isEnergy && trainee != null && trainee.energy <= 100) ||
                                 // We might want any energy item if not full.
                                 (isMood && trainee != null && trainee.mood < Mood.GREAT) ||
@@ -2259,6 +2260,21 @@ class Trackblazer(game: Game) : Campaign(game) {
     }
 
     /**
+     * Returns true when the given heal item targets at least one of the trainee's currently active negative statuses.
+     * Miracle Cure heals every status; every other entry in `badConditionMap` heals exactly one specific status.
+     * Used to short-circuit the Training Items dialog when no inventory item can actually clear an active condition.
+     *
+     * @param itemName The name of the item to check.
+     * @param trainee The current trainee snapshot (currentNegativeStatuses is read).
+     * @return True if the item can heal an active negative status; false otherwise.
+     */
+    private fun canHealActiveNegativeStatus(itemName: String, trainee: Trainee): Boolean {
+        if (itemName == "Miracle Cure") return true
+        val target = badConditionMap[itemName] ?: return false
+        return trainee.currentNegativeStatuses.contains(target)
+    }
+
+    /**
      * Orchestrates the usage of items based on dynamic conditions and updates internal inventory.
      *
      * @param trainee Reference to the trainee's state.
@@ -2276,7 +2292,7 @@ class Trackblazer(game: Game) : Campaign(game) {
             } ||
                 ((currentInventory["Royal Kale Juice"] ?: 0) > 0)
         val hasMoodItems = currentInventory.any { (name, count) -> count > 0 && (name == "Berry Sweet Cupcake" || name == "Plain Cupcake") }
-        val hasBadConditionItems = currentInventory.any { (name, count) -> count > 0 && shopList.badConditionHealItemNames.contains(name) }
+        val hasBadConditionItems = currentInventory.any { (name, count) -> count > 0 && shopList.badConditionHealItemNames.contains(name) && canHealActiveNegativeStatus(name, trainee) }
         val hasStatItems = currentInventory.any { (name, count) -> count > 0 && shopList.statItemNames.contains(name) }
 
         val skipTrainingEffectItems = shouldConserveTrainingEffectItems(trainingSelected, trainee)
