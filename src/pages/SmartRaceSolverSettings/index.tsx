@@ -2,6 +2,24 @@ import { memo, useMemo, useContext, useState, useEffect, useRef, useCallback } f
 import { InteractionManager, View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native"
 import { Divider } from "react-native-paper"
 import { previewSchedule, SchedulePreview, ScheduleEntry, SolverConfigSnapshot } from "../../lib/solver/preview"
+import {
+    APTITUDE_RANKS,
+    APT_ORDER,
+    AptitudeMap,
+    CharacterPresetEntry,
+    DEFAULT_APTITUDES,
+    DEFAULT_WEIGHTS,
+    EpithetEntry,
+    EpithetWithMatchers,
+    GRADE_COLORS,
+    RaceEntry,
+    shortenRaceName,
+    TRAIN_LOCK_SENTINEL,
+    turnDateLabel,
+    WeightsMap,
+    YEAR_LABELS,
+} from "../../lib/solver/constants"
+import { computePreviewStats, epithetProgress, epithetsForRace, isRaceEligible } from "../../lib/solver/scoring"
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover"
 import { useTheme } from "../../context/ThemeContext"
 import { RacingContext, GeneralMiscContext, defaultSettings } from "../../context/BotStateContext"
@@ -17,55 +35,6 @@ import PageHeader from "../../components/PageHeader"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import SearchableItem from "../../components/SearchableItem"
 
-interface RaceEntry {
-    name: string
-    date: string
-    turnNumber: number
-    grade: string
-    terrain: string
-    distanceType: string
-    distanceMeters: number
-    fans: number
-    raceTrack: string
-}
-
-interface EpithetEntry {
-    name: string
-    category: string
-    reward_text: string
-    condition_text: string
-}
-
-interface CharacterPresetEntry {
-    name: string
-    distanceAptitudes: { Sprint: string; Mile: string; Medium: string; Long: string }
-    surfaceAptitudes: { Turf: string; Dirt: string }
-}
-
-interface AptitudeMap {
-    Sprint: string
-    Mile: string
-    Medium: string
-    Long: string
-    Turf: string
-    Dirt: string
-}
-
-interface WeightsMap {
-    raceValue: number
-    epithetValue: number
-    statWeight: number
-    spWeight: number
-    hintWeight: number
-    consecutiveRacePenalty: number
-    summerPenalty: number
-    raceBonusPct: number
-    raceCostPct: number
-    aptitudeThreshold: string
-    includeOpAndPreOp: boolean
-    allowSummerRacing: boolean
-}
-
 // Stringify the bundled JSON once at module load so we don't pay the serialisation cost on
 // every debounced preview call.
 const RACES_DATA_JSON = JSON.stringify(racesData)
@@ -80,8 +49,6 @@ let lastPreviewCache: { key: string; preview: SchedulePreview } | null = null
 // Kotlin caches parsed races/epithets across calls; once we've shipped the bundled JSON once we
 // can omit it from subsequent bridge payloads, dropping ~150KB of marshalling per call.
 let bridgeDataPrimed = false
-
-const APTITUDE_RANKS = ["S", "A", "B", "C", "D", "E", "F", "G"]
 
 /**
  * Memoized aptitude row. Six of these mount simultaneously (Sprint, Mile, Medium, Long, Turf,
@@ -152,69 +119,6 @@ const EpithetChip = memo(({ epithet, selected, onToggle, styles }: EpithetChipPr
     </TouchableOpacity>
 ))
 EpithetChip.displayName = "EpithetChip"
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-const YEAR_LABELS: Array<{ name: string; startTurn: number }> = [
-    { name: "Junior", startTurn: 1 },
-    { name: "Classic", startTurn: 25 },
-    { name: "Senior", startTurn: 49 },
-]
-
-/**
- * In-game date label for a turn (1-72). Year is `startTurn`; turn is the 24-turn
- * (Jan Early → Dec Late) offset within the year. e.g. turn 14 → "Late Jul" within Junior year.
- */
-const turnDateLabel = (turnInYear: number): string => {
-    const month = MONTH_LABELS[Math.floor(turnInYear / 2)]
-    const half = turnInYear % 2 === 0 ? "Early" : "Late"
-    return `${half} ${month}`
-}
-
-// Reference Trackblazer scoring breakdown (matches `solver-browser.js` BASE_REWARD).
-const BASE_STAT_BY_GRADE: Record<string, number> = { G1: 10, G2: 8, G3: 8, OP: 5, PRE_OP: 5 }
-const BASE_SP_BY_GRADE: Record<string, number> = { G1: 35, G2: 25, G3: 25, OP: 15, PRE_OP: 10 }
-const GRADE_COLORS: Record<string, string> = {
-    G1: "#2563eb",
-    G2: "#ec4899",
-    G3: "#16a34a",
-    OP: "#ca8a04",
-    PRE_OP: "#a16207",
-    MAIDEN: "#6b7280",
-    DEBUT: "#6b7280",
-    FINALE: "#7c3aed",
-    EX: "#7c3aed",
-}
-const DEFAULT_APTITUDES: AptitudeMap = { Sprint: "A", Mile: "A", Medium: "A", Long: "A", Turf: "A", Dirt: "A" }
-const DEFAULT_WEIGHTS: WeightsMap = {
-    raceValue: 1.0,
-    epithetValue: 1.0,
-    statWeight: 1.0,
-    spWeight: 1.0,
-    hintWeight: 8.0,
-    consecutiveRacePenalty: 3.0,
-    summerPenalty: 5.0,
-    raceBonusPct: 50.0,
-    raceCostPct: 100.0,
-    aptitudeThreshold: "C",
-    includeOpAndPreOp: false,
-    allowSummerRacing: false,
-}
-
-/** The sentinel a manual-lock entry takes to lock a turn to Train / no race. The Kotlin
- *  parser understands this as `Decision.Train`. Keep in sync with `TRAIN_LOCK_SENTINEL`
- *  in `SmartRaceSolverIntegration.kt`. */
-const TRAIN_LOCK_SENTINEL = "__TRAIN__"
-
-/** Aptitude rank ordering G…S. Lower index = weaker. Used for the eligibility check on the
- *  TS side so we don't have to round-trip to Kotlin to know which alternative races are valid. */
-const APT_ORDER: Record<string, number> = { G: 0, F: 1, E: 2, D: 3, C: 4, B: 5, A: 6, S: 7 }
-
-const OP_GRADES = new Set(["OP", "PRE_OP", "Pre-OP", "PreOP"])
-
-/** Mirror of `EpithetFilters.COUNTRY_NAMES` in `Epithet.kt`. Used by the `nameContainsCountry`
- *  branch of the `winCount` filter (Globe-Trotter epithet). Keep these two lists in sync.
- *  Trailing space on `"Japan "` is intentional — prevents false matches on "Japanese …" races. */
-const COUNTRY_NAMES = ["Saudi Arabia", "Argentina", "American", "New Zealand", "Japan "]
-const nameContainsCountry = (name: string) => COUNTRY_NAMES.some((c) => name.includes(c))
 
 /**
  * Smart Race Solver settings page. Lets the user configure aptitudes, target/forced epithets,
@@ -242,7 +146,11 @@ const SmartRaceSolverSettings = () => {
         smartRaceSolverWeights,
     } = racingSettings
 
-    // -------- Parsed state --------
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // Parsed state
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
     const aptitudes: AptitudeMap = useMemo(() => {
         try {
@@ -288,7 +196,11 @@ const SmartRaceSolverSettings = () => {
     const allPresets = useMemo<CharacterPresetEntry[]>(() => Object.values(characterPresetsData) as CharacterPresetEntry[], [])
     const allRaces = useMemo<RaceEntry[]>(() => Object.values(racesData) as RaceEntry[], [])
 
-    // -------- Local input state for decimals --------
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // Local input state for decimals
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
     const [raceValueInput, setRaceValueInput] = useState(weights.raceValue.toString())
     const [epithetValueInput, setEpithetValueInput] = useState(weights.epithetValue.toString())
@@ -330,7 +242,11 @@ const SmartRaceSolverSettings = () => {
         return () => handle.cancel()
     }, [])
 
-    // -------- Derived filters --------
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // Derived filters
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
     const filteredPresets = useMemo(() => {
         if (!presetSearch) return allPresets
@@ -350,7 +266,11 @@ const SmartRaceSolverSettings = () => {
         return allEpithets.filter((e) => e.name.toLowerCase().includes(q) || e.reward_text.toLowerCase().includes(q))
     }, [allEpithets, forcedEpithetSearch])
 
-    // -------- Setters --------
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // Setters
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Update a single racing setting, preserving the rest of the racing block.
@@ -452,7 +372,11 @@ const SmartRaceSolverSettings = () => {
         updateRacingSetting("smartRaceSolverWeights", JSON.stringify({ ...weights, [key]: value }))
     }
 
-    // -------- Preview --------
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // Preview
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
     const buildSnapshot = (): SolverConfigSnapshot => ({
         scenario: general?.scenario || "Trackblazer",
@@ -466,16 +390,6 @@ const SmartRaceSolverSettings = () => {
         racesDataJson: bridgeDataPrimed ? undefined : RACES_DATA_JSON,
         epithetsDataJson: bridgeDataPrimed ? undefined : EPITHETS_DATA_JSON,
     })
-
-    /**
-     * `dirty` becomes true when any solver-relevant setting changes. The Recalculate button is
-     * the only path that triggers a fresh `previewSchedule` call; auto-recalculate was removed
-     * because picking epithets etc. caused noticeable bridge lag on every keystroke.
-     */
-    // Derived from the snapshot-key comparison below. Storing this as state used to require an
-    // extra useEffect → setDirty(true) hop, which committed the entire SRS subtree a SECOND time
-    // on every aptitude/epithet tap (~411 ms × 2 in the harness). Deriving it inline removes
-    // that round trip — the page still renders once with the new dirty value, but only once.
 
     /** Snapshot key of the settings that produced [preview]. Used to detect whether the
      *  current preview is stale relative to the live settings. */
@@ -495,9 +409,12 @@ const SmartRaceSolverSettings = () => {
         [general?.scenario, smartRaceSolverCharacterPreset, aptitudes, targetEpithets, forcedEpithets, manualLocks, weights]
     )
 
-    // Mark the preview stale whenever the settings diverge from what produced the current
-    // preview. Tapping Recalculate (which calls `setPreviewSnapshotKey(currentSnapshotKey)`)
-    // makes this falsy again automatically.
+    /**
+     * True when any solver-relevant setting has changed since the last preview. Recalculate is
+     * the only path that triggers a fresh `previewSchedule` call (auto-recalculate was removed
+     * because it caused noticeable bridge lag on every keystroke); tapping it sets
+     * `previewSnapshotKey = currentSnapshotKey` and clears this flag automatically.
+     */
     const dirty = previewSnapshotKey != null && currentSnapshotKey !== previewSnapshotKey
 
     /** Force a fresh solve. Surfaced as the Recalculate button in the Schedule Preview section. */
@@ -548,7 +465,11 @@ const SmartRaceSolverSettings = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [enableSmartRaceSolver])
 
-    // -------- Styles --------
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // Styles
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
     const styles = useMemo(
         () =>
@@ -759,28 +680,13 @@ const SmartRaceSolverSettings = () => {
         [colors]
     )
 
-    // -------- Helpers --------
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // Helpers
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
     const renderAptitudeRow = (slot: keyof AptitudeMap, label: string) => <AptitudeRow key={slot} slot={slot} label={label} currentRank={aptitudes[slot]} onChange={setAptitude} styles={styles} />
-
-    const shortenRaceName = (name: string): string => {
-        // Strip the trailing parenthetical "(Junior Class December, Second Half)" if present so we
-        // only show the race name itself; the date already comes from the cell's row.
-        const stripped = name.replace(/\s*\(.*\)\s*$/, "").trim()
-        // A few common races whose canonical name is too long for the cell.
-        const ABBR: Record<string, string> = {
-            "Hanshin Juvenile Fillies": "Hanshin Juv. F.",
-            "Mile Championship": "Mile Champ.",
-            "Takarazuka Kinen": "Takarazuka K.",
-            "Saudi Arabia Royal Cup": "Saudi Arabia P.",
-            "Tokyo Sports Hai Niko Sai Sho": "Tokyo Sports",
-            "Niigata Junior Stakes": "Niigata Jr. S.",
-            "Kokura Junior Stakes": "Kokura Jr. S.",
-            "Sprinters Stakes": "Sprinters S.",
-            "Asahi Hai Futurity Stakes": "Asahi Hai F. S.",
-        }
-        return ABBR[stripped] ?? stripped
-    }
 
     /**
      * Popover content shown on every clickable calendar cell. Top section describes the
@@ -817,7 +723,7 @@ const SmartRaceSolverSettings = () => {
                             <Text style={styles.popoverEmpty}>None — this race does not match any tracked epithet matcher.</Text>
                         ) : (
                             matched.map((ep) => {
-                                const prog = epithetProgress(turn, ep as EpithetEntry & { matchers?: Array<Record<string, unknown>> })
+                                const prog = preview ? epithetProgress(turn, ep as EpithetWithMatchers, preview, racesByKey) : null
                                 const progLabel = prog ? `(${prog.current}/${prog.required}) ` : ""
                                 return (
                                     <Text key={ep.name} style={styles.popoverEpithet}>
@@ -939,28 +845,11 @@ const SmartRaceSolverSettings = () => {
 
     const racesByKey = racesData as unknown as Record<string, RaceEntry>
 
-    /**
-     * TS mirror of `ScoringFunctions.isEligible`. A race is eligible iff:
-     *   - distance and surface aptitudes both meet the threshold
-     *   - the race is not OP/Pre-OP, OR the user opted into OP races
-     * Used by the in-popover "switch to alternative" list so we can build it without a bridge round-trip.
-     */
-    const isRaceEligible = (race: RaceEntry): boolean => {
-        if (OP_GRADES.has(race.grade) && !weights.includeOpAndPreOp) return false
-        const threshold = APT_ORDER[weights.aptitudeThreshold] ?? 4
-        const distKey = race.distanceType === "Sprint" ? "Sprint" : race.distanceType === "Mile" ? "Mile" : race.distanceType === "Medium" ? "Medium" : race.distanceType === "Long" ? "Long" : null
-        const surfKey = race.terrain === "Turf" ? "Turf" : race.terrain === "Dirt" ? "Dirt" : null
-        if (!distKey || !surfKey) return false
-        const distApt = APT_ORDER[(aptitudes as any)[distKey]] ?? 0
-        const surfApt = APT_ORDER[(aptitudes as any)[surfKey]] ?? 0
-        return distApt >= threshold && surfApt >= threshold
-    }
-
     /** Returns all races available on a given turn that pass the eligibility filter. */
     const eligibleRacesForTurn = useMemo(() => {
         const byTurn = new Map<number, RaceEntry[]>()
         for (const race of allRaces) {
-            if (!isRaceEligible(race)) continue
+            if (!isRaceEligible(race, aptitudes, weights)) continue
             const list = byTurn.get(race.turnNumber) ?? []
             list.push(race)
             byTurn.set(race.turnNumber, list)
@@ -974,174 +863,7 @@ const SmartRaceSolverSettings = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [allRaces, aptitudes, weights.aptitudeThreshold, weights.includeOpAndPreOp])
 
-    /**
-     * Aggregate stats for the reference Trackblazer-style summary panel: race count, epithet
-     * count, total race stats (BASE_STAT × (1 + raceBonusPct/100)), race SP, epithet stats, and
-     * hint count. Returns null while no preview is available.
-     */
-    const previewStats = useMemo(() => {
-        if (!preview) return null
-        const epithetsAll = epithetsData as unknown as Record<string, EpithetEntry & { reward_kind?: string; amount?: number }>
-        const rb = Math.max(0, weights.raceBonusPct) / 100
-        let races = 0
-        let raceStats = 0
-        let raceSp = 0
-        for (const [, entry] of Object.entries(preview.decisions)) {
-            if (entry.type !== "Race") continue
-            races += 1
-            const race = entry.raceKey ? racesByKey[entry.raceKey] : undefined
-            const grade = (race?.grade ?? entry.grade ?? "").replace("-", "_")
-            raceStats += Math.floor((BASE_STAT_BY_GRADE[grade] ?? 0) * (1 + rb))
-            raceSp += Math.floor((BASE_SP_BY_GRADE[grade] ?? 0) * (1 + rb))
-        }
-        let epithetStats = 0
-        let hints = 0
-        for (const name of preview.projectedEpithets) {
-            const ep = epithetsAll[name]
-            if (!ep) continue
-            if (ep.reward_kind === "stat") epithetStats += ep.amount ?? 0
-            else if (ep.reward_kind === "hint") hints += 1
-        }
-        return { races, epithets: preview.projectedEpithets.length, raceStats, raceSp, epithetStats, hints }
-    }, [preview, weights.raceBonusPct, racesByKey])
-
-    /**
-     * Computes how much progress an epithet's matcher has accumulated up to and including
-     * `upToTurn`, based on the current preview's race decisions. Returns null when the matcher
-     * type isn't progress-trackable. `current` is capped at `required` so the COMPLETE label
-     * only ever shows once. Used by the popover's per-epithet progress readout.
-     */
-    const matcherProgress = (upToTurn: number, matcher: Record<string, unknown>): { current: number; required: number } | null => {
-        if (!preview) return null
-        const decisions = preview.decisions
-        const isGraded = (g: string) => g === "G1" || g === "G2" || g === "G3"
-        const isOpenOrAbove = (g: string) => isGraded(g) || g === "OP" || g === "FINALE" || g === "EX"
-        const winsUpTo: Array<{ turn: number; race: RaceEntry }> = []
-        for (const [turnStr, dec] of Object.entries(decisions)) {
-            const t = parseInt(turnStr, 10)
-            if (Number.isNaN(t) || t > upToTurn) continue
-            if (dec.type !== "Race") continue
-            const r = dec.raceKey ? racesByKey[dec.raceKey] : undefined
-            if (!r) continue
-            winsUpTo.push({ turn: t, race: r })
-        }
-
-        const type = matcher["type"] as string
-        switch (type) {
-            case "winRace": {
-                const name = matcher["name"] as string
-                const hit = winsUpTo.some((w) => w.race.name === name)
-                return { current: hit ? 1 : 0, required: 1 }
-            }
-            case "winRaceTimes": {
-                const name = matcher["name"] as string
-                const required = (matcher["times"] as number) ?? 1
-                const current = winsUpTo.filter((w) => w.race.name === name).length
-                return { current: Math.min(current, required), required }
-            }
-            case "winAnyOf": {
-                const names = (matcher["names"] as string[]) ?? []
-                const required = (matcher["count"] as number) ?? names.length
-                const current = winsUpTo.filter((w) => names.includes(w.race.name)).length
-                return { current: Math.min(current, required), required }
-            }
-            case "winAtLeast": {
-                const names = (matcher["names"] as string[]) ?? []
-                const required = (matcher["count"] as number) ?? names.length
-                const distinct = new Set(winsUpTo.filter((w) => names.includes(w.race.name)).map((w) => w.race.name))
-                return { current: Math.min(distinct.size, required), required }
-            }
-            case "winCount": {
-                const f = (matcher["filter"] as Record<string, unknown>) ?? {}
-                const required = (matcher["count"] as number) ?? 1
-                let current = 0
-                for (const w of winsUpTo) {
-                    if (f["terrain"] && f["terrain"] !== w.race.terrain) continue
-                    if (f["grade"] && f["grade"] !== w.race.grade) continue
-                    if (f["gradedOnly"] && !isGraded(w.race.grade)) continue
-                    if (f["gradeAtLeastOpen"] && !isOpenOrAbove(w.race.grade)) continue
-                    const dts = f["distanceTypes"] as string[] | undefined
-                    if (dts && dts.length > 0 && !dts.includes(w.race.distanceType)) continue
-                    const tracks = f["raceTracks"] as string[] | undefined
-                    if (tracks && tracks.length > 0 && !tracks.includes(w.race.raceTrack)) continue
-                    const nameContains = f["nameContains"] as string | undefined
-                    if (nameContains && !w.race.name.toLowerCase().includes(nameContains.toLowerCase())) continue
-                    if (f["nameContainsCountry"] && !nameContainsCountry(w.race.name)) continue
-                    current++
-                }
-                return { current: Math.min(current, required), required }
-            }
-            default:
-                // epithetAll / epithetAnyOf intentionally fall through — they don't progress per-race wins.
-                return null
-        }
-    }
-
-    /**
-     * Aggregate progress across ALL of an epithet's matchers as of `upToTurn`. The popover label
-     * needs this rather than a single-matcher progress because epithets like Turf Tussler use
-     * one `winCount` matcher per distance category — winning a single Turf Sprint race satisfies
-     * the Sprint matcher (1/1) but not the epithet (which needs all four distances). Summing
-     * `(current, required)` across matchers gives an honest "(satisfied conditions)" readout:
-     * Globe-Trotter renders as `(1/3) → (3/3)`, Turf Tussler as `(1/4) → (4/4)`. Returns null
-     * when no matchers are progress-trackable (e.g. a Legendary-style epithet whose matchers are
-     * all `epithetAll` / `epithetAnyOf` dependencies).
-     */
-    const epithetProgress = (upToTurn: number, ep: EpithetEntry & { matchers?: Array<Record<string, unknown>> }): { current: number; required: number } | null => {
-        let totalCurrent = 0
-        let totalRequired = 0
-        for (const m of ep.matchers ?? []) {
-            const p = matcherProgress(upToTurn, m)
-            if (!p) continue
-            totalCurrent += p.current
-            totalRequired += p.required
-        }
-        if (totalRequired === 0) return null
-        return { current: totalCurrent, required: totalRequired }
-    }
-
-    const epithetsForRace = (race: RaceEntry): EpithetEntry[] => {
-        const all = epithetsData as unknown as Record<string, EpithetEntry & { matchers?: Array<Record<string, unknown>> }>
-        const out: EpithetEntry[] = []
-        const isGraded = race.grade === "G1" || race.grade === "G2" || race.grade === "G3"
-        const isOpenOrAbove = isGraded || race.grade === "OP" || race.grade === "FINALE" || race.grade === "EX"
-        for (const ep of Object.values(all)) {
-            const matchers = ep.matchers ?? []
-            const matched = matchers.some((m) => {
-                const type = m["type"] as string
-                const name = m["name"] as string | undefined
-                const names = (m["names"] as string[] | undefined) ?? []
-                switch (type) {
-                    case "winRace":
-                    case "winRaceTimes":
-                        return name != null && name === race.name
-                    case "winAnyOf":
-                    case "winAtLeast":
-                        return names.includes(race.name)
-                    case "winCount": {
-                        const f = (m["filter"] as Record<string, unknown> | undefined) ?? {}
-                        if (f["terrain"] && f["terrain"] !== race.terrain) return false
-                        if (f["grade"] && f["grade"] !== race.grade) return false
-                        if (f["gradedOnly"] && !isGraded) return false
-                        if (f["gradeAtLeastOpen"] && !isOpenOrAbove) return false
-                        const dts = f["distanceTypes"] as string[] | undefined
-                        if (dts && dts.length > 0 && !dts.includes(race.distanceType)) return false
-                        const tracks = f["raceTracks"] as string[] | undefined
-                        if (tracks && tracks.length > 0 && !tracks.includes(race.raceTrack)) return false
-                        const nameContains = f["nameContains"] as string | undefined
-                        if (nameContains && !race.name.toLowerCase().includes(nameContains.toLowerCase())) return false
-                        if (f["nameContainsCountry"] && !nameContainsCountry(race.name)) return false
-                        return true
-                    }
-                    // epithetAll / epithetAnyOf intentionally fall through — they don't progress per-race wins.
-                    default:
-                        return false
-                }
-            })
-            if (matched) out.push(ep)
-        }
-        return out
-    }
+    const previewStats = useMemo(() => (preview ? computePreviewStats(preview, weights, racesByKey) : null), [preview, weights, racesByKey])
 
     /**
      * 4-column × 6-row layout, row-major: row 0 = Jan Early, Jan Late, Feb Early, Feb Late;
@@ -1173,7 +895,11 @@ const SmartRaceSolverSettings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const calendarYearCards = useMemo(() => YEAR_LABELS.map(renderYearCard), [preview, manualLocks, weights.allowSummerRacing, highlightedEpithet])
 
-    // -------- Render --------
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // Render
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
     const sectionsDisabledStyle = enableSmartRaceSolver ? undefined : ({ opacity: 0.4 } as const)
 
