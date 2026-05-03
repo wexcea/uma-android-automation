@@ -52,9 +52,6 @@ class Game(val myContext: Context) {
     /** Whether debug mode is enabled for additional logging and saving debugging images to storage. */
     val debugMode: Boolean = SettingsHelper.getBooleanSetting("debug", "enableDebugMode")
 
-    /** Whether to check for certain popups to stop at during execution. */
-    val enablePopupCheck: Boolean = SettingsHelper.getBooleanSetting("general", "enablePopupCheck")
-
     /** The default wait delay between common actions. */
     val waitDelay: Double = SettingsHelper.getDoubleSetting("general", "waitDelay")
 

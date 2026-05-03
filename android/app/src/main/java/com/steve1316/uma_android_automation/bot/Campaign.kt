@@ -1520,21 +1520,14 @@ abstract class Campaign(game: Game) : Task(game) {
     /**
      * Performs miscellaneous checks to resolve instances where the bot might be stuck.
      *
-     * @return True if the checks passed, false if the bot encountered a warning popup and needs to exit.
+     * @return True if a misc check handled the current screen, false otherwise.
      */
     open fun performMiscChecks(): Boolean {
         MessageLog.i(TAG, "\n[MISC] Beginning check for misc cases...")
 
         val sourceBitmap = game.imageUtils.getSourceBitmap()
 
-        if (game.enablePopupCheck && ButtonCancel.check(game.imageUtils, sourceBitmap = sourceBitmap)) {
-            MessageLog.v(TAG, "\n[END] Bot may have encountered a warning popup. Exiting now...")
-            game.notificationMessage = "Bot may have encountered a warning popup"
-            if (DiscordUtils.enableDiscordNotifications) {
-                DiscordUtils.queue.add("```diff\n- ${MessageLog.getSystemTimeString()} Bot may have encountered a warning popup. Exiting now...\n```")
-            }
-            throw CampaignBreakpointException(game.notificationMessage)
-        } else if (ButtonNext.click(game.imageUtils, sourceBitmap = sourceBitmap)) {
+        if (ButtonNext.click(game.imageUtils, sourceBitmap = sourceBitmap)) {
             // Now confirm the completion of a Training Goal popup.
             MessageLog.i(TAG, "[MISC] Popup detected that needs to be dismissed with the \"Next\" button.")
             game.wait(2.0)
