@@ -17,7 +17,15 @@ import {
     WeightsMap,
     YEAR_LABELS,
 } from "../../lib/solver/constants"
-import { charactersForEpithet, computePreviewStats, epithetProgress, epithetsForRace, isRaceEligible, scenariosForEpithet } from "../../lib/solver/scoring"
+import {
+    charactersForEpithet,
+    computePreviewStats,
+    epithetProgress,
+    epithetsForRace,
+    isRaceEligible,
+    scenariosForEpithet,
+    turnsContributingToEpithet,
+} from "../../lib/solver/scoring"
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover"
 import { useTheme } from "../../context/ThemeContext"
 import { RacingContext, GeneralMiscContext, defaultSettings } from "../../context/BotStateContext"
@@ -856,7 +864,7 @@ const SmartRaceSolverSettings = () => {
         const isSummerBlocked = !weights.allowSummerRacing && ((turn >= 37 && turn <= 40) || (turn >= 61 && turn <= 64))
         const isLocked = manualLocks[String(turn)] != null
         const cellRace = isRace && entry?.raceKey ? racesByKey[entry.raceKey] : undefined
-        const highlightHit = !!(cellRace && highlightedEpithet && epithetsForRace(cellRace).some((e) => e.name === highlightedEpithet))
+        const highlightHit = isRace && contributingTurnsForHighlight.has(turn)
 
         if (isPreDebut || isSummerBlocked) {
             return (
@@ -924,6 +932,14 @@ const SmartRaceSolverSettings = () => {
 
     const previewStats = useMemo(() => (preview ? computePreviewStats(preview, weights, racesByKey) : null), [preview, weights, racesByKey])
 
+    /** Turns whose scheduled race actually counts toward completing the highlighted epithet, capped at each matcher's required count. */
+    const contributingTurnsForHighlight = useMemo<Set<number>>(() => {
+        if (!highlightedEpithet || !preview) return new Set<number>()
+        const ep = (epithetsData as unknown as Record<string, EpithetEntry>)[highlightedEpithet]
+        if (!ep) return new Set<number>()
+        return turnsContributingToEpithet(ep, preview, racesByKey)
+    }, [highlightedEpithet, preview, racesByKey])
+
     /**
      * 4-column × 6-row layout, row-major: row 0 = Jan Early, Jan Late, Feb Early, Feb Late;
      * row 5 = Nov Early, Nov Late, Dec Early, Dec Late. Mirrors the in-game calendar layout.
@@ -952,7 +968,7 @@ const SmartRaceSolverSettings = () => {
      * longer rebuilds.
      */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const calendarYearCards = useMemo(() => YEAR_LABELS.map(renderYearCard), [preview, manualLocks, weights.allowSummerRacing, highlightedEpithet])
+    const calendarYearCards = useMemo(() => YEAR_LABELS.map(renderYearCard), [preview, manualLocks, weights.allowSummerRacing, highlightedEpithet, contributingTurnsForHighlight])
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////
     // //////////////////////////////////////////////////////////////////////////////////////////////////

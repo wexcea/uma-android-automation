@@ -250,6 +250,108 @@ export const epithetProgress = (upToTurn: number, ep: EpithetEntry, preview: Sch
 }
 
 /**
+ * Set of turn numbers whose race actually counts toward completing `ep`, walked chronologically and capped at each matcher's required count.
+ * Used by the calendar-cell highlight: a race that *could* satisfy a matcher's filter but exceeds the required count is NOT in the set.
+ *
+ * @param ep Epithet entry to evaluate.
+ * @param preview Schedule preview that supplies the win history.
+ * @param racesByKey Lookup table from race key to race entry.
+ * @returns Turns whose scheduled race contributes to completing the epithet.
+ */
+export const turnsContributingToEpithet = (ep: EpithetEntry, preview: SchedulePreview, racesByKey: Record<string, RaceEntry>): Set<number> => {
+    const contributing = new Set<number>()
+    const winsOrdered: Array<{ turn: number; race: RaceEntry }> = []
+    for (const [turnStr, dec] of Object.entries(preview.decisions)) {
+        const t = parseInt(turnStr, 10)
+        if (Number.isNaN(t)) continue
+        if (dec.type !== "Race") continue
+        const r = dec.raceKey ? racesByKey[dec.raceKey] : undefined
+        if (!r) continue
+        winsOrdered.push({ turn: t, race: r })
+    }
+    winsOrdered.sort((a, b) => a.turn - b.turn)
+
+    for (const matcher of ep.matchers ?? []) {
+        const type = matcher["type"] as string
+        switch (type) {
+            case "winRace": {
+                const name = matcher["name"] as string
+                for (const w of winsOrdered) {
+                    if (w.race.name === name) {
+                        contributing.add(w.turn)
+                        break
+                    }
+                }
+                break
+            }
+            case "winRaceTimes": {
+                const name = matcher["name"] as string
+                const required = (matcher["times"] as number) ?? 1
+                let counted = 0
+                for (const w of winsOrdered) {
+                    if (counted >= required) break
+                    if (w.race.name === name) {
+                        contributing.add(w.turn)
+                        counted++
+                    }
+                }
+                break
+            }
+            case "winAnyOf": {
+                const names = (matcher["names"] as string[]) ?? []
+                const required = (matcher["count"] as number) ?? names.length
+                let counted = 0
+                for (const w of winsOrdered) {
+                    if (counted >= required) break
+                    if (names.includes(w.race.name)) {
+                        contributing.add(w.turn)
+                        counted++
+                    }
+                }
+                break
+            }
+            case "winAtLeast": {
+                const names = (matcher["names"] as string[]) ?? []
+                const required = (matcher["count"] as number) ?? names.length
+                const distinctSeen = new Set<string>()
+                for (const w of winsOrdered) {
+                    if (distinctSeen.size >= required) break
+                    if (names.includes(w.race.name) && !distinctSeen.has(w.race.name)) {
+                        contributing.add(w.turn)
+                        distinctSeen.add(w.race.name)
+                    }
+                }
+                break
+            }
+            case "winCount": {
+                const f = (matcher["filter"] as Record<string, unknown>) ?? {}
+                const required = (matcher["count"] as number) ?? 1
+                let counted = 0
+                for (const w of winsOrdered) {
+                    if (counted >= required) break
+                    if (f["terrain"] && f["terrain"] !== w.race.terrain) continue
+                    if (f["grade"] && f["grade"] !== w.race.grade) continue
+                    if (f["gradedOnly"] && !isGradedRace(w.race.grade)) continue
+                    if (f["gradeAtLeastOpen"] && !isOpenOrAboveRace(w.race.grade)) continue
+                    const dts = f["distanceTypes"] as string[] | undefined
+                    if (dts && dts.length > 0 && !dts.includes(w.race.distanceType)) continue
+                    const tracks = f["raceTracks"] as string[] | undefined
+                    if (tracks && tracks.length > 0 && !tracks.includes(w.race.raceTrack)) continue
+                    const nameContains = f["nameContains"] as string | undefined
+                    if (nameContains && !w.race.name.toLowerCase().includes(nameContains.toLowerCase())) continue
+                    if (f["nameContainsCountry"] && !nameContainsCountry(w.race.name)) continue
+                    contributing.add(w.turn)
+                    counted++
+                }
+                break
+            }
+        }
+    }
+
+    return contributing
+}
+
+/**
  * Aggregate stats for the reference Trackblazer-style summary panel: race count, epithet count,
  * total race stats (BASE_STAT × (1 + raceBonusPct/100)), race SP, epithet stats, and hint count.
  */
