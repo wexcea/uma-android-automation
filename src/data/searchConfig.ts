@@ -758,6 +758,18 @@ const searchConfig: SearchOption[] = [
         page: "DebugSettings",
     },
     {
+        id: "debug-overlay-permission-check",
+        title: "Overlay Permission Check",
+        description: "The Overlay (Display over other apps) permission is required for the bot to render its on-screen control overlay. Check the current grant status here.",
+        page: "DebugSettings",
+    },
+    {
+        id: "debug-battery-optimization-check",
+        title: "Battery Optimization Check",
+        description: "Disabling battery optimization for this app prevents Android from killing the bot during long-running automation runs. Check the current status here.",
+        page: "DebugSettings",
+    },
+    {
         id: "debug-template-matching-test",
         title: "Start Basic Template Matching Test",
         description:

@@ -9,13 +9,13 @@ import { Snackbar } from "react-native-paper"
 import { MessageLogContext } from "../../context/MessageLogContext"
 import { useTheme } from "../../context/ThemeContext"
 import { Text } from "../../components/ui/text"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../../components/ui/alert-dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../../components/ui/alert-dialog"
 import { Ionicons } from "@expo/vector-icons"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip"
 import PageHeader from "../../components/PageHeader"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import SelectButton from "../../components/SelectButton"
-import { useNavigation } from "@react-navigation/native"
+import PermissionSetupDialog from "../../components/PermissionSetupDialog"
 
 const styles = StyleSheet.create({
     root: {
@@ -71,10 +71,7 @@ const Home = () => {
     const [snackbarMessage, setSnackbarMessage] = useState<string>("")
     const [deviceMetrics, setDeviceMetrics] = useState<{ width: number; height: number; dpi: number } | null>(null)
     const [unsupportedReason, setUnsupportedReason] = useState<string | null>(null)
-    const [showAccessibilityDialog, setShowAccessibilityDialog] = useState<boolean>(false)
-    const [accessibilityRequirement, setAccessibilityRequirement] = useState<"enable" | "restart" | null>(null)
-
-    const navigation = useNavigation()
+    const [showPermissionDialog, setShowPermissionDialog] = useState<boolean>(false)
 
     const { readyStatus, setReadyStatus, setAppName, setAppVersion } = useContext(BotMetaContext)
     const { general, updateGeneral } = useContext(GeneralMiscContext)
@@ -174,43 +171,49 @@ const Home = () => {
     }
 
     /**
+     * Saves settings then starts the native bot service. Shared by both the inline start path and the
+     * post-permission-grant chain from PermissionSetupDialog.
+     */
+    const proceedToStart = async () => {
+        logWithTimestamp("[Home] Saving settings before starting bot...")
+        try {
+            await saveSettings()
+            logWithTimestamp("[Home] Settings saved successfully, starting bot...")
+        } catch (error) {
+            logErrorWithTimestamp("[Home] Failed to save settings:", error)
+            setSnackbarMessage(`Failed to save settings before starting: ${error}`)
+            setSnackbarOpen(true)
+        }
+        StartModule.start()
+    }
+
+    /**
      * Handles the button press for starting or stopping the bot.
      */
     const handleButtonPress = async () => {
         if (isRunning) {
             StartModule.stop()
-        } else if (readyStatus) {
-            // Check accessibility status first.
-            try {
-                const status = await StartModule.getAccessibilityStatus()
-                if (!status.enabled) {
-                    setAccessibilityRequirement("enable")
-                    setShowAccessibilityDialog(true)
-                    return
-                } else if (!status.active) {
-                    setAccessibilityRequirement("restart")
-                    setShowAccessibilityDialog(true)
-                    return
-                }
-            } catch (error) {
-                logErrorWithTimestamp("[Home] Failed to check accessibility status:", error)
-            }
-
-            // Save settings before starting the bot.
-            // Also has the added benefit of only writing to the SQLite database when the bot is started instead of every time the settings are changed.
-            logWithTimestamp("[Home] Saving settings before starting bot...")
-            try {
-                await saveSettings()
-                logWithTimestamp("[Home] Settings saved successfully, starting bot...")
-            } catch (error) {
-                logErrorWithTimestamp("[Home] Failed to save settings:", error)
-                setSnackbarMessage(`Failed to save settings before starting: ${error}`)
-                setSnackbarOpen(true)
-            }
-            StartModule.start()
-        } else {
-            setShowNotReadyDialog(true)
+            return
         }
+        if (!readyStatus) {
+            setShowNotReadyDialog(true)
+            return
+        }
+
+        // Gate the start on all 3 system permissions (accessibility, overlay, battery optimization).
+        // If any are missing, surface the unified PermissionSetupDialog and let it chain back into proceedToStart.
+        try {
+            const [accessibility, overlay, battery] = await Promise.all([StartModule.getAccessibilityStatus(), StartModule.getOverlayStatus(), StartModule.getBatteryOptimizationStatus()])
+            const allGranted = accessibility.enabled && accessibility.active && overlay.enabled && battery.enabled
+            if (!allGranted) {
+                setShowPermissionDialog(true)
+                return
+            }
+        } catch (error) {
+            logErrorWithTimestamp("[Home] Failed to check permission statuses:", error)
+        }
+
+        await proceedToStart()
     }
 
     /** Gets the appropriate icon name for the SelectButton based on device state. */
@@ -335,7 +338,7 @@ where width and height of the screen is in pixels, and diagonal is the diagonal 
                 <AlertDialogContent onDismiss={() => setShowNotReadyDialog(false)}>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Not Ready</AlertDialogTitle>
-                        <AlertDialogDescription>A scenario must be selected before starting the bot. Please go to Settings to select a scenario.</AlertDialogDescription>
+                        <AlertDialogDescription>A scenario must be selected before starting the bot. Tap the dropdown on this Start button to pick one.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogAction onPress={() => setShowNotReadyDialog(false)}>
@@ -345,34 +348,7 @@ where width and height of the screen is in pixels, and diagonal is the diagonal 
                 </AlertDialogContent>
             </AlertDialog>
 
-            <AlertDialog open={showAccessibilityDialog} onOpenChange={setShowAccessibilityDialog}>
-                <AlertDialogContent onDismiss={() => setShowAccessibilityDialog(false)}>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>{accessibilityRequirement === "enable" ? "Accessibility Service Disabled" : "Accessibility Service Error"}</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {accessibilityRequirement === "enable"
-                                ? "The Accessibility Service must be enabled in system settings for the bot to perform clicks and gestures."
-                                : "The Accessibility Service is enabled but seems to have been killed by Android in the background. It needs to be toggled off and back on to restart."}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onPress={() => setShowAccessibilityDialog(false)}>
-                            <Text>Cancel</Text>
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            onPress={() => {
-                                setShowAccessibilityDialog(false)
-                                ;(navigation.navigate as any)("Settings", {
-                                    screen: "DebugSettings",
-                                    params: { targetId: "debug-accessibility-service-check" },
-                                })
-                            }}
-                        >
-                            <Text>Go to Settings</Text>
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <PermissionSetupDialog open={showPermissionDialog} onOpenChange={setShowPermissionDialog} onAllGranted={proceedToStart} />
 
             <Snackbar
                 visible={snackbarOpen}

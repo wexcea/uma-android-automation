@@ -115,12 +115,15 @@ class TrainingEvent(private val game: Game, private val campaign: Campaign) {
      *
      * @property selectedOption The name of the option to select.
      * @property requiresConfirmation Whether the selection requires a confirmation dialog.
-     * @property enableEnergyBasedSelection Whether to dynamically pick options based on trainee energy.
+     * @property enableEnergyBasedSelection Whether to swap to the other (unselected) option at <=20% trainee energy.
      */
     data class EventOverride(val selectedOption: String, val requiresConfirmation: Boolean, val enableEnergyBasedSelection: Boolean = false)
 
     companion object {
         private val TAG: String = "[${MainActivity.loggerTag}]TrainingEvent"
+
+        /** Events that swap to the other (unselected) option when trainee energy is <=20%. */
+        private val energyAwareEvents = setOf("Victory!", "Solid Showing", "Defeat")
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,13 +144,6 @@ class TrainingEvent(private val game: Game, private val campaign: Campaign) {
                 if (matches) {
                     MessageLog.v(TAG, "[TRAINING_EVENT] Detected special event: $eventName")
 
-                    // Energy-based selection: pick Option 1 at 0-20% energy, otherwise Option 2.
-                    if (override.enableEnergyBasedSelection) {
-                        val optionIndex = if (campaign.trainee.energy <= 20) 0 else 1
-                        MessageLog.v(TAG, "[TRAINING_EVENT] Energy-based selection for $eventName: energy=${campaign.trainee.energy}%, picking Option ${optionIndex + 1}.")
-                        return Pair(optionIndex, override.requiresConfirmation)
-                    }
-
                     // Parse the option number from the setting (e.g., "Option 5: Energy +10" -> 5).
                     val optionIndex =
                         if (override.selectedOption == "Default") {
@@ -164,6 +160,13 @@ class TrainingEvent(private val game: Game, private val campaign: Campaign) {
                                 0
                             }
                         }
+
+                    // Energy-aware swap (opt-in via setting): at <=20% energy, pick the other (unselected) option of the two.
+                    if (override.enableEnergyBasedSelection && eventName in energyAwareEvents && campaign.trainee.energy <= 20) {
+                        val swapped = 1 - optionIndex
+                        MessageLog.v(TAG, "[TRAINING_EVENT] Energy-aware swap for $eventName: energy=${campaign.trainee.energy}%, swapping from Option ${optionIndex + 1} to Option ${swapped + 1}.")
+                        return Pair(swapped, override.requiresConfirmation)
+                    }
 
                     return Pair(optionIndex, override.requiresConfirmation)
                 }

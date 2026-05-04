@@ -229,6 +229,78 @@ class StartModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
         }
     }
 
+    /**
+     * Opens this app's "App Info" page in system settings. Needed on recent Android versions where the Accessibility Service toggle is greyed out
+     * until the user taps the 3-dot menu in App Info and enables "Allow restricted settings".
+     */
+    @ReactMethod
+    fun openAppInfoSettings() {
+        Log.d(TAG, "Opening App Info Settings...")
+        val uri = "package:${reactApplicationContext.packageName}".toUri()
+        val intent =
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+        this.reactApplicationContext.currentActivity?.startActivity(intent)
+    }
+
+    /** Opens the system "Display over other apps" settings page for this app so the user can toggle the overlay permission. */
+    @ReactMethod
+    fun openOverlaySettings() {
+        Log.d(TAG, "Opening Overlay Settings...")
+        val uri = "package:${reactApplicationContext.packageName}".toUri()
+        val intent =
+            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, uri).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+        this.reactApplicationContext.currentActivity?.startActivity(intent)
+    }
+
+    /**
+     * Checks whether the app currently has the overlay (SYSTEM_ALERT_WINDOW) permission.
+     *
+     * @param promise The React Native promise that resolves a WritableMap with an `enabled` boolean.
+     */
+    @ReactMethod
+    fun getOverlayStatus(promise: Promise) {
+        try {
+            val enabled = Settings.canDrawOverlays(reactApplicationContext)
+            Log.d(TAG, "Overlay permission enabled: $enabled")
+            val map = Arguments.createMap()
+            map.putBoolean("enabled", enabled)
+            promise.resolve(map)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to retrieve overlay status: ${e.message}")
+            promise.reject("OVERLAY_STATUS_ERROR", "Failed to retrieve overlay status: ${e.message}")
+        }
+    }
+
+    /** Opens the system battery optimization settings page so the user can exempt this app. */
+    @ReactMethod
+    fun openBatteryOptimizationSettings() {
+        Log.d(TAG, "Opening Battery Optimization Settings...")
+        BatteryOptimizationUtils.requestIgnoreBatteryOptimizations(context)
+    }
+
+    /**
+     * Checks whether the app is currently ignoring battery optimizations.
+     *
+     * @param promise The React Native promise that resolves a WritableMap with an `enabled` boolean (true means battery optimization is disabled for this app).
+     */
+    @ReactMethod
+    fun getBatteryOptimizationStatus(promise: Promise) {
+        try {
+            val enabled = BatteryOptimizationUtils.isIgnoringBatteryOptimizations(context)
+            Log.d(TAG, "Battery optimization disabled (ignoring): $enabled")
+            val map = Arguments.createMap()
+            map.putBoolean("enabled", enabled)
+            promise.resolve(map)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to retrieve battery optimization status: ${e.message}")
+            promise.reject("BATTERY_OPTIMIZATION_STATUS_ERROR", "Failed to retrieve battery optimization status: ${e.message}")
+        }
+    }
+
     // //////////////////////////////////////////////////////////////////
     // //////////////////////////////////////////////////////////////////
     // Permissions

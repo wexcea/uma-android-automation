@@ -266,3 +266,24 @@ dependencies {
 
 }
 
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Clean Hardening
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Delete `build/` and `.cxx/` before `externalNativeBuildClean<variant>` runs. Without this,
+// gradlew clean invokes ninja clean against a stale `.cxx/` cache, which forces CMake to
+// re-configure and trips a GLOB mismatch on missing RN codegen sources (RNLlamaSpec,
+// RNCSlider, etc.). Removing `.cxx/` up front means there is nothing for ninja to clean.
+tasks.register('cleanBuildArtifacts', Delete) {
+    delete("${projectDir}/build")
+    delete("${projectDir}/.cxx")
+}
+
+clean.dependsOn(cleanBuildArtifacts)
+
+tasks.matching { it.name.startsWith('externalNativeBuildClean') }.configureEach {
+    mustRunAfter('cleanBuildArtifacts')
+}
+

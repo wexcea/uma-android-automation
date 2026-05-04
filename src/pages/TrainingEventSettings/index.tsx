@@ -100,7 +100,7 @@ const TrainingEventSettings = () => {
     ]
     const victoryOptions = [
         { value: "Option 1: Energy -15 and random stat gain", label: "Option 1: Energy -15 and random stat gain" },
-        { value: "Option 2: Energy -5 and random stat gain", label: "Option 2: Energy -5 and random stat gain" },
+        { value: "Option 2: Energy -5/-20 and random stat gain", label: "Option 2: Energy -5/-20 and random stat gain" },
     ]
     const solidShowingOptions = [
         { value: "Option 1: Energy -15 and random stat gain", label: "Option 1: Energy -15 and random stat gain" },
@@ -110,6 +110,7 @@ const TrainingEventSettings = () => {
         { value: "Option 1: Energy -25 and random stat gain", label: "Option 1: Energy -25 and random stat gain" },
         { value: "Option 2: Energy -15/-35 and random stat gain", label: "Option 2: Energy -15/-35 and random stat gain" },
     ]
+    const energyAwareHint = "When enabled, picks this option at 21-100% energy and swaps to the other option at <=20% energy."
     const getWellSoonOptions = [
         { value: "Option 1: Mood -1 / Stat decrease / Get Practice Poor negative status", label: "Option 1: Mood -1 / Stat decrease / Get Practice Poor negative status" },
         { value: "Option 2: (Random) Mood -1 / Stat decrease / Get Practice Poor negative status", label: "Option 2: (Random) Mood -1 / Stat decrease / Get Practice Poor negative status" },
@@ -730,14 +731,13 @@ const TrainingEventSettings = () => {
                                                     onValueChange={(value) => updateSpecialEventOverride("Victory!", "selectedOption", value)}
                                                     placeholder="Select Option"
                                                     width="100%"
-                                                    disabled={specialEventOverrides["Victory!"]?.enableEnergyBasedSelection || false}
                                                 />
                                                 <CustomCheckbox
                                                     style={{ marginTop: 12 }}
                                                     checked={specialEventOverrides["Victory!"]?.enableEnergyBasedSelection || false}
                                                     onCheckedChange={(checked) => updateSpecialEventOverride("Victory!", "enableEnergyBasedSelection", checked)}
-                                                    label="Energy-based selection"
-                                                    description="Pick Option 1 at 0-20% energy, otherwise Option 2."
+                                                    label="Energy-aware swap"
+                                                    description={energyAwareHint}
                                                 />
                                             </View>
 
@@ -749,14 +749,13 @@ const TrainingEventSettings = () => {
                                                     onValueChange={(value) => updateSpecialEventOverride("Solid Showing", "selectedOption", value)}
                                                     placeholder="Select Option"
                                                     width="100%"
-                                                    disabled={specialEventOverrides["Solid Showing"]?.enableEnergyBasedSelection || false}
                                                 />
                                                 <CustomCheckbox
                                                     style={{ marginTop: 12 }}
                                                     checked={specialEventOverrides["Solid Showing"]?.enableEnergyBasedSelection || false}
                                                     onCheckedChange={(checked) => updateSpecialEventOverride("Solid Showing", "enableEnergyBasedSelection", checked)}
-                                                    label="Energy-based selection"
-                                                    description="Pick Option 1 at 0-20% energy, otherwise Option 2."
+                                                    label="Energy-aware swap"
+                                                    description={energyAwareHint}
                                                 />
                                             </View>
 
@@ -768,14 +767,13 @@ const TrainingEventSettings = () => {
                                                     onValueChange={(value) => updateSpecialEventOverride("Defeat", "selectedOption", value)}
                                                     placeholder="Select Option"
                                                     width="100%"
-                                                    disabled={specialEventOverrides["Defeat"]?.enableEnergyBasedSelection || false}
                                                 />
                                                 <CustomCheckbox
                                                     style={{ marginTop: 12 }}
                                                     checked={specialEventOverrides["Defeat"]?.enableEnergyBasedSelection || false}
                                                     onCheckedChange={(checked) => updateSpecialEventOverride("Defeat", "enableEnergyBasedSelection", checked)}
-                                                    label="Energy-based selection"
-                                                    description="Pick Option 1 at 0-20% energy, otherwise Option 2."
+                                                    label="Energy-aware swap"
+                                                    description={energyAwareHint}
                                                 />
                                             </View>
                                         </View>

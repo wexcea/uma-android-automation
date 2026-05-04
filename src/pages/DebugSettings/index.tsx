@@ -63,7 +63,11 @@ const DebugSettings = () => {
 
     const [deviceIp, setDeviceIp] = useState<string>("<phone-ip>")
     const [accessibilityStatus, setAccessibilityStatus] = useState<{ enabled: boolean; active: boolean } | null>(null)
+    const [overlayStatus, setOverlayStatus] = useState<{ enabled: boolean } | null>(null)
+    const [batteryStatus, setBatteryStatus] = useState<{ enabled: boolean } | null>(null)
     const [isRefreshing, setIsRefreshing] = useState(false)
+    const [isRefreshingOverlay, setIsRefreshingOverlay] = useState(false)
+    const [isRefreshingBattery, setIsRefreshingBattery] = useState(false)
 
     /** Checks with the native module if the Accessibility Service is currently running. */
     const checkAccessibilityStatus = () => {
@@ -91,6 +95,50 @@ const DebugSettings = () => {
             })
     }
 
+    /** Checks with the native module if the Overlay (Display over other apps) permission is granted. */
+    const checkOverlayStatus = () => {
+        setIsRefreshingOverlay(true)
+        const startTime = Date.now()
+
+        NativeModules.StartModule.getOverlayStatus()
+            .then((status: { enabled: boolean }) => {
+                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
+                setTimeout(() => {
+                    setOverlayStatus(status)
+                    setIsRefreshingOverlay(false)
+                }, remainingTime)
+            })
+            .catch(() => {
+                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
+                setTimeout(() => {
+                    setOverlayStatus({ enabled: false })
+                    setIsRefreshingOverlay(false)
+                }, remainingTime)
+            })
+    }
+
+    /** Checks with the native module if the app is currently ignoring battery optimizations. */
+    const checkBatteryStatus = () => {
+        setIsRefreshingBattery(true)
+        const startTime = Date.now()
+
+        NativeModules.StartModule.getBatteryOptimizationStatus()
+            .then((status: { enabled: boolean }) => {
+                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
+                setTimeout(() => {
+                    setBatteryStatus(status)
+                    setIsRefreshingBattery(false)
+                }, remainingTime)
+            })
+            .catch(() => {
+                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
+                setTimeout(() => {
+                    setBatteryStatus({ enabled: false })
+                    setIsRefreshingBattery(false)
+                }, remainingTime)
+            })
+    }
+
     useEffect(() => {
         if (debug.enableRemoteLogViewer) {
             NativeModules.StartModule.getDeviceIpAddress()
@@ -101,11 +149,15 @@ const DebugSettings = () => {
 
     useEffect(() => {
         checkAccessibilityStatus()
+        checkOverlayStatus()
+        checkBatteryStatus()
 
-        // Refresh accessibility status whenever the app comes back into the foreground.
+        // Refresh all permission statuses whenever the app comes back into the foreground.
         const subscription = AppState.addEventListener("change", (nextAppState: AppStateStatus) => {
             if (nextAppState === "active") {
                 checkAccessibilityStatus()
+                checkOverlayStatus()
+                checkBatteryStatus()
             }
         })
 
@@ -435,6 +487,60 @@ const DebugSettings = () => {
                                             Refresh Status
                                         </CustomButton>
                                         <CustomButton variant="default" onPress={() => NativeModules.StartModule.openAccessibilitySettings()}>
+                                            Open Settings
+                                        </CustomButton>
+                                    </View>
+                                </View>
+                            </InfoContainer>
+
+                            <CustomTitle
+                                searchId="debug-overlay-permission-check"
+                                title="Overlay Permission Check"
+                                description="The Overlay (Display over other apps) permission allows the bot to render its on-screen control overlay."
+                                style={{ marginTop: 16 }}
+                            />
+
+                            <InfoContainer style={{ marginTop: 0 }}>
+                                <View>
+                                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                                        <Text style={styles.infoLabel}>Display over other apps: </Text>
+                                        <Text style={[styles.infoLabel, { color: overlayStatus?.enabled ? colors.success : colors.error }]}>
+                                            {overlayStatus === null ? "Checking..." : overlayStatus.enabled ? "✅ Granted" : "❌ Not Granted"}
+                                        </Text>
+                                    </View>
+
+                                    <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
+                                        <CustomButton variant="outline" onPress={() => checkOverlayStatus()} isLoading={isRefreshingOverlay} disabled={isRefreshingOverlay}>
+                                            Refresh Status
+                                        </CustomButton>
+                                        <CustomButton variant="default" onPress={() => NativeModules.StartModule.openOverlaySettings()}>
+                                            Open Settings
+                                        </CustomButton>
+                                    </View>
+                                </View>
+                            </InfoContainer>
+
+                            <CustomTitle
+                                searchId="debug-battery-optimization-check"
+                                title="Battery Optimization Check"
+                                description="Disabling battery optimization for this app prevents Android from killing the bot during long-running automation runs."
+                                style={{ marginTop: 16 }}
+                            />
+
+                            <InfoContainer style={{ marginTop: 0 }}>
+                                <View>
+                                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                                        <Text style={styles.infoLabel}>Ignoring battery optimization: </Text>
+                                        <Text style={[styles.infoLabel, { color: batteryStatus?.enabled ? colors.success : colors.error }]}>
+                                            {batteryStatus === null ? "Checking..." : batteryStatus.enabled ? "✅ Yes" : "❌ No"}
+                                        </Text>
+                                    </View>
+
+                                    <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
+                                        <CustomButton variant="outline" onPress={() => checkBatteryStatus()} isLoading={isRefreshingBattery} disabled={isRefreshingBattery}>
+                                            Refresh Status
+                                        </CustomButton>
+                                        <CustomButton variant="default" onPress={() => NativeModules.StartModule.openBatteryOptimizationSettings()}>
                                             Open Settings
                                         </CustomButton>
                                     </View>
