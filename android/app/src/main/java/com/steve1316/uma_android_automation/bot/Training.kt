@@ -2236,7 +2236,9 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
      */
     private fun appendTrainingDetails(sb: StringBuilder, blacklist: List<StatName?> = emptyList(), selected: TrainingOption? = null) {
         if (trainingMap.isEmpty() && skippedTrainingMap.isEmpty()) {
-            if (trainWitDuringFinale && campaign.date.day > 72) {
+            if (!needsEnergyRecovery) {
+                sb.appendLine("Could not confirm bot is on the Training screen. No analysis performed.")
+            } else if (trainWitDuringFinale && campaign.date.day > 72) {
                 sb.appendLine("Energy recovery needed. No analysis performed. Bot will force Wit training during Finale.")
             } else {
                 sb.appendLine("Energy recovery needed. No analysis performed.")
