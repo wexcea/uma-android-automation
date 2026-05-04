@@ -767,7 +767,8 @@ const SmartRaceSolverSettings = () => {
         const fullDateLabel = `${yearName} ${turnDateLabel(turnYearOffset)}`
         const isRace = entry?.type === "Race"
         const race = isRace && entry?.raceKey ? racesByKey[entry.raceKey] : undefined
-        const matched = race ? epithetsForRace(race) : []
+        // Only list epithets this race actually contributes to: drop ones whose required count is already satisfied earlier in the schedule.
+        const matched = race && preview ? epithetsForRace(race).filter((ep) => turnsContributingToEpithet(ep, preview, racesByKey).has(turn)) : []
         const lockedValue: string | undefined = manualLocks[String(turn)]
         const isLocked = lockedValue != null
         const alternatives = (eligibleRacesForTurn.get(turn) ?? []).filter((r) => !race || r.name !== race.name)
