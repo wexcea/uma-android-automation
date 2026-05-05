@@ -212,10 +212,12 @@ object SmartRaceSolverIntegration {
         val epithets = cachedEpithets ?: loadEpithets() ?: return
         val racesByTurn = cachedRaces ?: loadAllRaces() ?: return
         val race = racesByTurn[turnNumber]?.firstOrNull { it.name == raceName }
-        val affected = epithets.filter { epi -> epi.matchers.any { matcherReferencesRace(it, raceName, race) } }
-        if (affected.isEmpty()) return
+        val candidates = epithets.filter { epi -> epi.matchers.any { matcherReferencesRace(it, raceName, race) } }
+        if (candidates.isEmpty()) return
         val stateBefore = newSolverState(currentTurn = 1, scenario = "", epithets = epithets, racesByTurn = racesByTurn, raceHistorySnapshot = historyBefore)
         val stateAfter = newSolverState(currentTurn = 1, scenario = "", epithets = epithets, racesByTurn = racesByTurn, raceHistorySnapshot = historyAfter)
+        val affected = candidates.filter { epi -> epithetFraction(epi, stateBefore) != epithetFraction(epi, stateAfter) }
+        if (affected.isEmpty()) return
         val sb = StringBuilder()
         sb.append("Race \"$raceName\" updated ${affected.size} epithet(s):")
         for (epi in affected) {
@@ -226,6 +228,31 @@ object SmartRaceSolverIntegration {
             val beforeC = before?.first ?: 0
             val afterC = after?.first ?: 0
             sb.append("\n  - \"${epi.name}\" -> $status ($beforeC/$total) -> ($afterC/$total)")
+            val seenLabels = mutableSetOf<String>()
+            for (m in epi.matchers) {
+                if (!matcherReferencesRace(m, raceName, race)) continue
+                val mBefore = matcherFraction(m, stateBefore) ?: continue
+                val mAfter = matcherFraction(m, stateAfter) ?: continue
+                if (mBefore == mAfter) continue
+                val label = if (race != null) matcherConditionLabel(m, race, epi.bullets) else null
+                if (label != null && seenLabels.add(label)) sb.append("\n      * $label")
+            }
+            if (status != EpithetStatus.COMPLETED) {
+                val seenPending = mutableSetOf<String>()
+                for (m in epi.matchers) {
+                    val pending: List<String> =
+                        when (m) {
+                            is EpithetMatcher.EpithetAnyOf -> if (m.names.any { isDepCompleted(it, epithets, stateAfter) }) emptyList() else m.names
+                            is EpithetMatcher.EpithetAll -> m.names.filter { !isDepCompleted(it, epithets, stateAfter) }
+                            else -> emptyList()
+                        }
+                    for (name in pending) {
+                        if (!seenPending.add(name)) continue
+                        val bullet = epi.bullets.firstOrNull { it.lowercase().contains(name.lowercase()) }
+                        sb.append("\n      * Still pending: ${bullet ?: "Get the $name epithet"}")
+                    }
+                }
+            }
         }
         MessageLog.i(TAG, sb.toString())
     }
@@ -241,6 +268,20 @@ object SmartRaceSolverIntegration {
      * @param race Looked-up [RaceCandidate] for the win, or null when the lookup missed.
      * @return True when the matcher counts this race as progress.
      */
+
+    /**
+     * Resolves a dependency epithet by name and reports whether it is currently complete in [state].
+     *
+     * @param depName Epithet name referenced by an [EpithetMatcher.EpithetAnyOf] / [EpithetMatcher.EpithetAll] matcher.
+     * @param epithets All epithets, used for the name lookup.
+     * @param state State in which to evaluate the dependency.
+     * @return True when [depName] resolves to an epithet currently classified as [EpithetStatus.COMPLETED].
+     */
+    private fun isDepCompleted(depName: String, epithets: List<Epithet>, state: SolverState): Boolean {
+        val depEpi = epithets.firstOrNull { it.name == depName } ?: return false
+        return EpithetTracker.classify(depEpi, state) == EpithetStatus.COMPLETED
+    }
+
     private fun matcherReferencesRace(matcher: EpithetMatcher, raceName: String, race: RaceCandidate?): Boolean =
         when (matcher) {
             is EpithetMatcher.WinRace -> matcher.name == raceName
@@ -1339,7 +1380,7 @@ object SmartRaceSolverIntegration {
                         matcher.filter.grade?.let { add(it.name) }
                         matcher.filter.distanceTypes.forEach { add(it.name.lowercase()) }
                     }
-                keywords.firstNotNullOfOrNull { findBulletContaining(it) } ?: "Win ${matcher.count} ${describeFilter(matcher.filter)}"
+                keywords.firstNotNullOfOrNull { findBulletContaining(it) } ?: "Win ${matcher.count} ${describeFilter(matcher.filter)}${if (matcher.count == 1) "" else "s"}"
             }
             is EpithetMatcher.EpithetAnyOf, is EpithetMatcher.EpithetAll -> null
         }
@@ -1356,6 +1397,9 @@ object SmartRaceSolverIntegration {
         filter.grade?.let { parts.add(it.name) }
         if (filter.gradeAtLeastOpen) parts.add("OP+")
         if (filter.gradedOnly) parts.add("graded")
+        if (filter.distanceTypes.isNotEmpty()) {
+            parts.add(filter.distanceTypes.joinToString("/") { it.name.lowercase().replaceFirstChar(Char::uppercase) })
+        }
         filter.terrain?.let { parts.add(it.name.lowercase().replaceFirstChar(Char::uppercase)) }
         if (filter.nameContainsCountry) parts.add("country-named")
         parts.add("race")
