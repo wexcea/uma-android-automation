@@ -42,11 +42,11 @@ export interface PerformanceMetric {
  * Provides detailed timing information for debugging performance issues.
  */
 export class PerformanceLogger {
-    // Currently ON in all builds while we're hunting the navigation/settings perf regression. The
-    // measurement harness (`scripts/perf-nav-test.ts`) parses `[PERF]` lines out of logcat, and
-    // Dev-only by default. The harness needs this on, so set the env var `PERF_LOGGER=1` (or
-    // flip locally to `true`) when running release builds against `yarn perf:nav`.
-    public static ENABLED: boolean = __DEV__
+    // Gated by `EXPO_PUBLIC_PERF_LOGGER`, which Metro inlines at bundle time. The `yarn android`
+    // wrapper (`scripts/run-android.ts`) prompts the user and sets it to `'1'` or `'0'`. Set
+    // `EXPO_PUBLIC_PERF_LOGGER=1` in the shell before `yarn android` (or `yarn perf:nav`) to bypass
+    // the prompt. When the var is unset (release builds, IDE-launched runs), the logger is off.
+    public static ENABLED: boolean = process.env.EXPO_PUBLIC_PERF_LOGGER === "1"
     public static SUPPRESS_LOGGING = false
 
     private metrics: PerformanceMetric[] = []

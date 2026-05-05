@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "start": "expo start",
-        "android": "expo run:android --device",
+        "android": "tsx scripts/run-android.ts",
         "android:bundle": "node android/generate-bundle.js",
         "build": "yarn build:doc-index && cd android && ./gradlew assembleRelease",
         "build:clean": "yarn build:doc-index && cd android && ./gradlew --stop && ./gradlew clean && ./gradlew assembleRelease",
