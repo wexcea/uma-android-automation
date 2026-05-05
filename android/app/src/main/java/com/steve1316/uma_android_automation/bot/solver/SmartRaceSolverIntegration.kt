@@ -1265,16 +1265,6 @@ object SmartRaceSolverIntegration {
                 val aggBefore = epithetFraction(epi, statePrev) ?: (0 to 0)
                 val aggAfter = epithetFraction(epi, stateNow) ?: (0 to 0)
                 if (aggBefore == aggAfter) continue
-
-                // Identify which specific matchers this race advanced and surface their condition text.
-                val conditions = JSONArray()
-                for (m in epi.matchers) {
-                    val mBefore = matcherFraction(m, statePrev) ?: continue
-                    val mAfter = matcherFraction(m, stateNow) ?: continue
-                    if (mBefore == mAfter) continue
-                    matcherConditionLabel(m, race)?.let { conditions.put(it) }
-                }
-
                 arr.put(
                     JSONObject()
                         .put("name", epi.name)
@@ -1282,7 +1272,6 @@ object SmartRaceSolverIntegration {
                         .put("beforeRequired", aggBefore.second)
                         .put("afterCurrent", aggAfter.first)
                         .put("afterRequired", aggAfter.second)
-                        .put("conditions", conditions)
                         .put("reward", epi.bullets.lastOrNull() ?: ""),
                 )
             }
@@ -1290,43 +1279,6 @@ object SmartRaceSolverIntegration {
             statePrev = stateNow
         }
         return contributions
-    }
-
-    /**
-     * Builds a human-readable label for a single matcher that this race advanced. Mirrors
-     * the matcher schema in [Epithet.kt]: name-based matchers reference the specific race
-     * name, filter-based matchers describe their predicate.
-     *
-     * @param matcher The matcher whose count just incremented.
-     * @param race The contributing race.
-     * @return A short condition label like `"Win the Victoria Mile"`, or null when the matcher
-     *   is not a race-progression matcher (e.g. epithet prerequisites).
-     */
-    private fun matcherConditionLabel(matcher: EpithetMatcher, race: RaceCandidate): String? =
-        when (matcher) {
-            is EpithetMatcher.WinRace -> "Win the ${matcher.name}"
-            is EpithetMatcher.WinRaceTimes -> "Win the ${matcher.name} (${matcher.times} times)"
-            is EpithetMatcher.WinAnyOf -> "Win the ${race.name}"
-            is EpithetMatcher.WinAtLeast -> "Win the ${race.name}"
-            is EpithetMatcher.WinCount -> "Win a ${describeFilter(matcher.filter)}"
-            is EpithetMatcher.EpithetAnyOf, is EpithetMatcher.EpithetAll -> null
-        }
-
-    /**
-     * Formats an [EpithetFilter] into a short noun phrase (e.g. `"G1 Turf race"`).
-     *
-     * @param filter Filter to describe.
-     * @return Short label suitable for the tooltip.
-     */
-    private fun describeFilter(filter: EpithetFilter): String {
-        val parts = mutableListOf<String>()
-        filter.grade?.let { parts.add(it.name) }
-        if (filter.gradeAtLeastOpen) parts.add("OP+")
-        if (filter.gradedOnly) parts.add("graded")
-        filter.terrain?.let { parts.add(it.name.lowercase().replaceFirstChar(Char::uppercase)) }
-        if (filter.nameContainsCountry) parts.add("country-named")
-        parts.add("race")
-        return parts.joinToString(" ")
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////
