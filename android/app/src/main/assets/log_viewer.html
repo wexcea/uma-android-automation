@@ -2922,7 +2922,6 @@
                         var line = "— " + prog + c.name
                         var conds = Array.isArray(c.conditions) ? c.conditions.filter(function (s) { return s }) : []
                         if (conds.length > 0) line += " — " + conds.join("; ")
-                        if (c.reward) line += " — Reward: " + c.reward
                         content += '<div class="tooltip-row">' + escapeHtml(line) + '</div>'
                     }
                 } else {

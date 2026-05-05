@@ -1283,6 +1283,18 @@ object SmartRaceSolverIntegration {
                 val aggBefore = epithetFraction(epi, statePrev) ?: (0 to 0)
                 val aggAfter = epithetFraction(epi, stateNow) ?: (0 to 0)
                 if (aggBefore == aggAfter) continue
+
+                // Identify which specific matchers this race advanced and surface their condition text.
+                val conditions = JSONArray()
+                val seen = mutableSetOf<String>()
+                for (m in epi.matchers) {
+                    val mBefore = matcherFraction(m, statePrev) ?: continue
+                    val mAfter = matcherFraction(m, stateNow) ?: continue
+                    if (mBefore == mAfter) continue
+                    val label = matcherConditionLabel(m, race, epi.bullets) ?: continue
+                    if (seen.add(label)) conditions.put(label)
+                }
+
                 arr.put(
                     JSONObject()
                         .put("name", epi.name)
@@ -1290,13 +1302,64 @@ object SmartRaceSolverIntegration {
                         .put("beforeRequired", aggBefore.second)
                         .put("afterCurrent", aggAfter.first)
                         .put("afterRequired", aggAfter.second)
-                        .put("reward", epi.bullets.lastOrNull() ?: ""),
+                        .put("conditions", conditions),
                 )
             }
             if (arr.length() > 0) contributions[turn] = arr
             statePrev = stateNow
         }
         return contributions
+    }
+
+    /**
+     * Builds a short, human-readable label describing which condition of an epithet a race advanced.
+     * Prefers a verbatim bullet from [bullets] so the label matches gametora's authored phrasing in the rest of the UI.
+     * Falls back to a synthesized phrase when no bullet matches the matcher.
+     *
+     * @param matcher The matcher whose count just incremented.
+     * @param race The contributing race.
+     * @param bullets The same epithet's `bullet_points` list.
+     * @return Display label, or null when [matcher] is a prerequisite type with no race-condition meaning.
+     */
+    private fun matcherConditionLabel(matcher: EpithetMatcher, race: RaceCandidate, bullets: List<String>): String? {
+        fun findBulletContaining(needle: String): String? {
+            if (needle.isEmpty()) return null
+            val lower = needle.lowercase()
+            return bullets.firstOrNull { it.lowercase().contains(lower) }
+        }
+        return when (matcher) {
+            is EpithetMatcher.WinRace -> findBulletContaining(matcher.name) ?: "Win the ${matcher.name}"
+            is EpithetMatcher.WinRaceTimes -> findBulletContaining(matcher.name) ?: "Win the ${matcher.name} (${matcher.times} times)"
+            is EpithetMatcher.WinAnyOf -> findBulletContaining(race.name) ?: "Win the ${race.name}"
+            is EpithetMatcher.WinAtLeast -> findBulletContaining(race.name) ?: "Win the ${race.name}"
+            is EpithetMatcher.WinCount -> {
+                val keywords =
+                    buildList {
+                        matcher.filter.terrain?.let { add(it.name.lowercase()) }
+                        matcher.filter.grade?.let { add(it.name) }
+                        matcher.filter.distanceTypes.forEach { add(it.name.lowercase()) }
+                    }
+                keywords.firstNotNullOfOrNull { findBulletContaining(it) } ?: "Win ${matcher.count} ${describeFilter(matcher.filter)}"
+            }
+            is EpithetMatcher.EpithetAnyOf, is EpithetMatcher.EpithetAll -> null
+        }
+    }
+
+    /**
+     * Formats an [EpithetFilter] into a short noun phrase (e.g. `"G1 Turf race"`) used by the synthesized fallback in [matcherConditionLabel].
+     *
+     * @param filter Filter to describe.
+     * @return Short label suitable for the tooltip.
+     */
+    private fun describeFilter(filter: EpithetFilter): String {
+        val parts = mutableListOf<String>()
+        filter.grade?.let { parts.add(it.name) }
+        if (filter.gradeAtLeastOpen) parts.add("OP+")
+        if (filter.gradedOnly) parts.add("graded")
+        filter.terrain?.let { parts.add(it.name.lowercase().replaceFirstChar(Char::uppercase)) }
+        if (filter.nameContainsCountry) parts.add("country-named")
+        parts.add("race")
+        return parts.joinToString(" ")
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////
