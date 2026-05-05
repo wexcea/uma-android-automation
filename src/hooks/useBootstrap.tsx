@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useRef } from "react"
 import { DeviceEventEmitter, AppState, InteractionManager } from "react-native"
 import { BotMetaContext, GeneralMiscContext } from "../context/BotStateContext"
-import { MessageLogContext, MessageLogProviderProps } from "../context/MessageLogContext"
+import { MessageLogDispatchContext, MessageLogDispatchProps } from "../context/MessageLogContext"
 import { useSettings } from "../context/SettingsContext"
 import { logWithTimestamp, logErrorWithTimestamp } from "../lib/logger"
 import { databaseManager, DatabaseRace, DatabaseSkill } from "../lib/database"
@@ -18,7 +18,7 @@ export const useBootstrap = () => {
 
     const { setReadyStatus } = useContext(BotMetaContext)
     const { general } = useContext(GeneralMiscContext)
-    const mlc = useContext(MessageLogContext) as MessageLogProviderProps
+    const mlc = useContext(MessageLogDispatchContext) as MessageLogDispatchProps
 
     // Hook for managing settings persistence.
     const { saveSettingsImmediate, loadSettings } = useSettings()

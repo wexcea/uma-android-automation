@@ -222,6 +222,16 @@ const Settings = () => {
         )
     }
 
+    const renderLLMSettingsLink = () => {
+        return (
+            <NavigationLink
+                title="Go to LLM Settings"
+                description="Configure on-device docs search and chat model downloads for the Ask the Docs feature."
+                onPress={() => navigation.navigate("LLMSettings" as never)}
+            />
+        )
+    }
+
     const renderMiscSettings = () => {
         return (
             <View style={{ marginTop: 16 }}>
@@ -450,6 +460,7 @@ const Settings = () => {
                         {renderDiscordLink()}
                         {renderScenarioOverridesLink()}
                         {renderDebugLink()}
+                        {renderLLMSettingsLink()}
                         {showHeavySections && renderMiscSettings()}
                     </View>
                 </ScrollView>

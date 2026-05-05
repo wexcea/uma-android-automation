@@ -1,5 +1,5 @@
 import { useContext, useState, useMemo, useCallback, memo, useEffect, useRef } from "react"
-import { MessageLogContext } from "../../context/MessageLogContext"
+import { MessageLogDataContext } from "../../context/MessageLogContext"
 import { BotMetaContext, Settings, useSettingsSnapshot } from "../../context/BotStateContext"
 import { useSettings } from "../../context/SettingsContext"
 import { databaseManager } from "../../lib/database"
@@ -191,7 +191,7 @@ const LogItem = memo(({ item, fontSize, onLongPress, enableMessageIdDisplay }: {
  * and a formatted settings summary as the intro message.
  */
 const MessageLog = () => {
-    const mlc = useContext(MessageLogContext)
+    const mlc = useContext(MessageLogDataContext)
     const { appName, appVersion, setSettings } = useContext(BotMetaContext)
     const settings = useSettingsSnapshot()
     const { saveSettingsImmediate } = useSettings()

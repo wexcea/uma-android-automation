@@ -1128,6 +1128,42 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             return false
         }
 
+        /**
+         * Recover from a failed first failure-chance detection by backing out to the Main screen and re-entering the Training screen, then retry once.
+         *
+         * @return The retried failure chance, or -1 if recovery or retry failed.
+         */
+        fun recoverAndRetryFailureChance(): Int {
+            // Back out to the Main screen.
+            ButtonBack.click(game.imageUtils)
+            game.wait(1.0)
+            if (!campaign.checkMainScreen()) {
+                MessageLog.w(TAG, "[WARN] recoverAndRetryFailureChance:: Could not confirm Main screen after backing out. Aborting recovery.")
+                return -1
+            }
+
+            // Re-enter the Training screen.
+            if (!ButtonTraining.click(game.imageUtils)) {
+                MessageLog.w(TAG, "[WARN] recoverAndRetryFailureChance:: Could not click Training button to re-enter Training screen.")
+                return -1
+            }
+            game.wait(0.5)
+
+            // Re-establish SPEED as the active stat.
+            if (!goToStat(StatName.SPEED)) {
+                MessageLog.w(TAG, "[WARN] recoverAndRetryFailureChance:: goToStat(SPEED) failed after re-entering Training screen.")
+                return -1
+            }
+
+            val retried = game.imageUtils.findTrainingFailureChance(tries = 3)
+            if (retried == -1) {
+                MessageLog.w(TAG, "[WARN] recoverAndRetryFailureChance:: Retry of findTrainingFailureChance still returned -1.")
+            } else {
+                MessageLog.i(TAG, "[TRAINING] Recovery succeeded. Failure chance detected on retry: $retried%.")
+            }
+            return retried
+        }
+
         // If not doing single training and speed training isn't active, make it active.
         if (!singleTraining && !goToStat(StatName.SPEED)) {
             MessageLog.w(TAG, "[WARN] analyzeTrainings:: Skipping training due to not being able to confirm whether the bot is at the training screen.")
@@ -1139,7 +1175,11 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
 
         // Check if failure chance is acceptable: either within regular threshold or within risky threshold (if enabled).
         // This acts as an early exit from training analysis to speed up training.
-        val failureChance: Int = game.imageUtils.findTrainingFailureChance(tries = 3)
+        var failureChance: Int = game.imageUtils.findTrainingFailureChance(tries = 3)
+        if (failureChance == -1 && !singleTraining) {
+            MessageLog.w(TAG, "[WARN] analyzeTrainings:: First failure chance detection failed all attempts. Attempting recovery by backing out to the Main screen and re-entering the Training screen.")
+            failureChance = recoverAndRetryFailureChance()
+        }
         if (failureChance == -1) {
             MessageLog.w(TAG, "[WARN] analyzeTrainings:: Skipping training due to not being able to confirm whether or not the bot is at the Training screen.")
             return
@@ -2196,7 +2236,9 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
      */
     private fun appendTrainingDetails(sb: StringBuilder, blacklist: List<StatName?> = emptyList(), selected: TrainingOption? = null) {
         if (trainingMap.isEmpty() && skippedTrainingMap.isEmpty()) {
-            if (trainWitDuringFinale && campaign.date.day > 72) {
+            if (!needsEnergyRecovery) {
+                sb.appendLine("Could not confirm bot is on the Training screen. No analysis performed.")
+            } else if (trainWitDuringFinale && campaign.date.day > 72) {
                 sb.appendLine("Energy recovery needed. No analysis performed. Bot will force Wit training during Finale.")
             } else {
                 sb.appendLine("Energy recovery needed. No analysis performed.")

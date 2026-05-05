@@ -6,7 +6,7 @@ import { useSettings } from "../../context/SettingsContext"
 import { logWithTimestamp, logErrorWithTimestamp } from "../../lib/logger"
 import { Animated, DeviceEventEmitter, StyleSheet, View, NativeModules } from "react-native"
 import { Snackbar } from "react-native-paper"
-import { MessageLogContext } from "../../context/MessageLogContext"
+import { MessageLogDispatchContext } from "../../context/MessageLogContext"
 import { useTheme } from "../../context/ThemeContext"
 import { Text } from "../../components/ui/text"
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../../components/ui/alert-dialog"
@@ -75,7 +75,7 @@ const Home = () => {
 
     const { readyStatus, setReadyStatus, setAppName, setAppVersion } = useContext(BotMetaContext)
     const { general, updateGeneral } = useContext(GeneralMiscContext)
-    const mlc = useContext(MessageLogContext)
+    const mlc = useContext(MessageLogDispatchContext)
     const { saveSettings } = useSettings()
 
     const pulseAnim = useRef(new Animated.Value(1)).current
