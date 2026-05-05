@@ -1443,9 +1443,24 @@
             }
 
             @media (max-width: 1024px) {
+                /* On mobile the panel sits on its own row below the dashboard, so the desktop
+                   absolute-body trick is unnecessary - put the body back in normal flow so it
+                   contributes to the section's height when expanded and disappears when collapsed. */
                 .race-history-section {
                     flex: 1 0 100%;
                     max-height: none;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+                .race-history-body {
+                    position: static;
+                    top: auto;
+                    left: auto;
+                    right: auto;
+                    bottom: auto;
+                    max-height: 360px;
+                    overflow-y: auto;
                 }
                 .race-history-chevron {
                     display: inline-block;
