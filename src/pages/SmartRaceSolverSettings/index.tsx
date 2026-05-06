@@ -219,6 +219,9 @@ const SmartRaceSolverSettings = () => {
         })
     }, [allEpithetsRaw, general?.scenario, smartRaceSolverCharacterPreset])
 
+    /** Names from `allEpithets`, used to gate per-race contribution displays so we don't credit epithets locked to other characters. */
+    const allowedEpithetNames = useMemo<Set<string>>(() => new Set(allEpithets.map((e) => e.name)), [allEpithets])
+
     /** User-facing notice describing which scenario / character filters are active, or null when none are. */
     const restrictionNotice = useMemo<string | null>(() => {
         const activeScenario = general?.scenario || "Trackblazer"
@@ -798,7 +801,7 @@ const SmartRaceSolverSettings = () => {
         const isRace = entry?.type === "Race"
         const race = isRace && entry?.raceKey ? racesByKey[entry.raceKey] : undefined
         // Only list epithets this race actually contributes to: drop ones whose required count is already satisfied earlier in the schedule.
-        const matched = race && preview ? epithetsForRace(race).filter((ep) => turnsContributingToEpithet(ep, preview, racesByKey).has(turn)) : []
+        const matched = race && preview ? epithetsForRace(race).filter((ep) => allowedEpithetNames.has(ep.name) && turnsContributingToEpithet(ep, preview, racesByKey).has(turn)) : []
         const lockedValue: string | undefined = manualLocks[String(turn)]
         const isLocked = lockedValue != null
         const alternatives = (eligibleRacesForTurn.get(turn) ?? []).filter((r) => !race || r.name !== race.name)
