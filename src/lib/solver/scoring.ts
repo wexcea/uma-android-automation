@@ -223,7 +223,9 @@ export const matchingMatcherIndicesForRace = (race: RaceEntry, ep: EpithetEntry)
 /**
  * Picks the best display string for a single fired matcher.
  * Prefers a verbatim bullet from `bullets` so the label matches gametora's authored phrasing in the rest of the UI.
- * Falls back to a synthesized phrase when no bullet matches.
+ * Falls back to the pre-computed `displayLabel` / `displayLabelTemplate` carried on the matcher
+ * (populated by `scripts/precompute-epithet-labels.ts`), so the React popover, the Race History tooltip,
+ * and the Kotlin win log all render identical text for the same race + matcher.
  *
  * @param matcher The matcher that fired.
  * @param race The race that triggered it.
@@ -238,45 +240,38 @@ const matcherConditionLabel = (matcher: Record<string, unknown>, race: RaceEntry
         const lower = needle.toLowerCase()
         return bullets.find((b) => b.toLowerCase().includes(lower)) ?? null
     }
+    const keywords: string[] = []
     switch (type) {
-        case "winRace": {
-            if (!name) return null
-            return findBulletContaining(name) ?? `Win the ${name}`
-        }
-        case "winRaceTimes": {
-            if (!name) return null
-            const times = matcher["times"] as number | undefined
-            return findBulletContaining(name) ?? (times != null ? `Win the ${name} (${times} times)` : `Win the ${name}`)
-        }
+        case "winRace":
+        case "winRaceTimes":
+            if (name) keywords.push(name)
+            break
         case "winAnyOf":
         case "winAtLeast":
-            return findBulletContaining(race.name) ?? `Win the ${race.name}`
+            keywords.push(race.name)
+            break
         case "winCount": {
             const f = (matcher["filter"] as Record<string, unknown> | undefined) ?? {}
             const terrain = f["terrain"] as string | undefined
             const grade = f["grade"] as string | undefined
             const dts = (f["distanceTypes"] as string[] | undefined) ?? []
-            const keywords: string[] = []
             if (terrain) keywords.push(terrain.toLowerCase())
             if (grade) keywords.push(grade)
             for (const dt of dts) keywords.push(dt.toLowerCase())
-            for (const k of keywords) {
-                const hit = findBulletContaining(k)
-                if (hit) return hit
-            }
-            const count = (matcher["count"] as number | undefined) ?? 1
-            const parts: string[] = []
-            if (grade) parts.push(grade)
-            if (f["gradeAtLeastOpen"]) parts.push("OP+")
-            if (f["gradedOnly"]) parts.push("graded")
-            if (terrain) parts.push(terrain.toLowerCase())
-            if (f["nameContainsCountry"]) parts.push("country-named")
-            parts.push(count === 1 ? "race" : "races")
-            return `Win ${count} ${parts.join(" ")}`.replace(/\s+/g, " ").trim()
+            break
         }
-        default:
+        case "epithetAnyOf":
+        case "epithetAll":
             return null
     }
+    for (const k of keywords) {
+        const hit = findBulletContaining(k)
+        if (hit) return hit
+    }
+    const template = matcher["displayLabelTemplate"] as string | undefined
+    if (template) return template.replace("{race}", race.name)
+    const label = matcher["displayLabel"] as string | undefined
+    return label ?? null
 }
 
 /**
@@ -396,6 +391,90 @@ export const epithetProgress = (upToTurn: number, ep: EpithetEntry, preview: Sch
     }
     if (totalRequired === 0) return null
     return { current: totalCurrent, required: totalRequired }
+}
+
+/**
+ * Reports whether `epName` is fully satisfied by the schedule preview as of `upToTurn`. Mirrors `EpithetTracker.classify`'s
+ * COMPLETED branch in Kotlin: every win* matcher must be fully met, and every dependency matcher (`epithetAnyOf`, `epithetAll`)
+ * must hold against other epithets' completion at the same turn. The visited set guards against pathological dependency cycles.
+ *
+ * @param epName Name of the epithet to evaluate.
+ * @param upToTurn Inclusive upper bound on the turn timeline used for matcher progress.
+ * @param epithetsByName Lookup table built once by the caller from the global epithet list.
+ * @param preview Schedule preview that supplies the win history.
+ * @param racesByKey Lookup table from race key to race entry.
+ * @param visited Names already on the recursion stack; callers usually pass the default empty set.
+ * @returns True when every matcher on the epithet is satisfied at `upToTurn`.
+ */
+export const isEpithetCompletedAtTurn = (
+    epName: string,
+    upToTurn: number,
+    epithetsByName: Map<string, EpithetEntry>,
+    preview: SchedulePreview,
+    racesByKey: Record<string, RaceEntry>,
+    visited: Set<string> = new Set(),
+): boolean => {
+    if (visited.has(epName)) return false
+    const ep = epithetsByName.get(epName)
+    if (!ep) return false
+    const nextVisited = new Set(visited).add(epName)
+    for (const m of ep.matchers ?? []) {
+        const type = m["type"] as string
+        if (type === "epithetAnyOf") {
+            const names = (m["names"] as string[] | undefined) ?? []
+            if (!names.some((n) => isEpithetCompletedAtTurn(n, upToTurn, epithetsByName, preview, racesByKey, nextVisited))) return false
+        } else if (type === "epithetAll") {
+            const names = (m["names"] as string[] | undefined) ?? []
+            if (!names.every((n) => isEpithetCompletedAtTurn(n, upToTurn, epithetsByName, preview, racesByKey, nextVisited))) return false
+        } else {
+            const p = matcherProgress(upToTurn, m, preview, racesByKey)
+            if (!p) continue
+            if (p.current < p.required) return false
+        }
+    }
+    return true
+}
+
+/**
+ * Lists the unmet dependency-prerequisite phrases for `ep` evaluated against the schedule projection at `upToTurn`.
+ * Mirrors Kotlin's `pendingPrerequisitesFor` exactly: scan the matcher list for `epithetAnyOf` / `epithetAll`, and for each
+ * unmet name emit the verbatim bullet that references it (case-insensitive substring match) or fall back to `"Get the <name> epithet"`.
+ *
+ * @param ep Epithet whose dependency matchers to inspect.
+ * @param upToTurn Inclusive upper bound on the turn timeline used for completion lookups.
+ * @param epithetsByName Lookup table built once by the caller from the global epithet list.
+ * @param preview Schedule preview that supplies the win history.
+ * @param racesByKey Lookup table from race key to race entry.
+ * @returns Pending-prerequisite phrases in matcher order, deduplicated by referenced name. Empty when no prerequisites are unmet.
+ */
+export const pendingPrerequisitesForEpithet = (
+    ep: EpithetEntry,
+    upToTurn: number,
+    epithetsByName: Map<string, EpithetEntry>,
+    preview: SchedulePreview,
+    racesByKey: Record<string, RaceEntry>,
+): string[] => {
+    const out: string[] = []
+    const seen = new Set<string>()
+    const bullets = ep.bullet_points ?? []
+    for (const m of ep.matchers ?? []) {
+        const type = m["type"] as string
+        const names = (m["names"] as string[] | undefined) ?? []
+        let pending: string[] = []
+        if (type === "epithetAnyOf") {
+            pending = names.some((n) => isEpithetCompletedAtTurn(n, upToTurn, epithetsByName, preview, racesByKey)) ? [] : names
+        } else if (type === "epithetAll") {
+            pending = names.filter((n) => !isEpithetCompletedAtTurn(n, upToTurn, epithetsByName, preview, racesByKey))
+        }
+        for (const name of pending) {
+            if (seen.has(name)) continue
+            seen.add(name)
+            const lower = name.toLowerCase()
+            const bullet = bullets.find((b) => b.toLowerCase().includes(lower))
+            out.push(bullet ?? `Get the ${name} epithet`)
+        }
+    }
+    return out
 }
 
 /**

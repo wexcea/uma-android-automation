@@ -24,6 +24,7 @@ import {
     epithetProgress,
     epithetsForRace,
     isRaceEligible,
+    pendingPrerequisitesForEpithet,
     scenariosForEpithet,
     turnsContributingToEpithet,
 } from "../../lib/solver/scoring"
@@ -201,6 +202,9 @@ const SmartRaceSolverSettings = () => {
     }, [smartRaceSolverWeights])
 
     const allEpithetsRaw = useMemo<EpithetEntry[]>(() => Object.values(epithetsData) as unknown as EpithetEntry[], [])
+
+    /** Name -> entry lookup over every bundled epithet. Reused by `pendingPrerequisitesForEpithet` so dependency lookups stay O(1). */
+    const epithetsByName = useMemo<Map<string, EpithetEntry>>(() => new Map(allEpithetsRaw.map((e) => [e.name, e])), [allEpithetsRaw])
 
     /** Epithets visible in the target / forced pickers after applying the active scenario and character-preset gates. */
     const allEpithets = useMemo<EpithetEntry[]>(() => {
@@ -765,6 +769,7 @@ const SmartRaceSolverSettings = () => {
                 popoverMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 4 },
                 popoverSection: { fontSize: 13, fontWeight: "700", color: colors.foreground, marginTop: 8 },
                 popoverEpithet: { fontSize: 12, color: colors.foreground, marginTop: 2 },
+                popoverEpithetPending: { fontSize: 12, color: colors.mutedForeground, marginTop: 1, fontStyle: "italic" },
                 popoverEmpty: { fontSize: 12, color: colors.mutedForeground, marginTop: 2, fontStyle: "italic" },
                 previewStatus: { fontSize: 12, color: colors.mutedForeground, paddingVertical: 4 },
                 previewError: { fontSize: 12, color: "#dc2626", paddingVertical: 4 },
@@ -820,12 +825,20 @@ const SmartRaceSolverSettings = () => {
                                 const progLabel = before && after ? `(${before.current}/${before.required} -> ${after.current}/${after.required}) ` : ""
                                 const conditions = race ? conditionLabelsForRaceAndEpithet(race, ep) : []
                                 const tail = conditions.join("; ")
+                                const pending = preview ? pendingPrerequisitesForEpithet(ep, turn, epithetsByName, preview, racesByKey) : []
                                 return (
-                                    <Text key={ep.name} style={styles.popoverEpithet}>
-                                        • {progLabel}
-                                        {ep.name}
-                                        {tail ? ` — ${tail}` : ""}
-                                    </Text>
+                                    <View key={ep.name}>
+                                        <Text style={styles.popoverEpithet}>
+                                            • {progLabel}
+                                            {ep.name}
+                                            {tail ? ` — ${tail}` : ""}
+                                        </Text>
+                                        {pending.map((line) => (
+                                            <Text key={line} style={styles.popoverEpithetPending}>
+                                                {"      "}* Still pending: {line}
+                                            </Text>
+                                        ))}
+                                    </View>
                                 )
                             })
                         )}
