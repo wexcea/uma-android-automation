@@ -2918,11 +2918,15 @@
                     content += '<div class="tooltip-section" style="margin-top:6px;font-weight:700">Progresses these epithets</div>'
                     for (var i = 0; i < contribs.length; i++) {
                         var c = contribs[i]
-                        var prog = "(" + c.beforeCurrent + "/" + c.beforeRequired + " → " + c.afterCurrent + "/" + c.afterRequired + ") "
+                        var prog = "(" + c.beforeCurrent + "/" + c.beforeRequired + " -> " + c.afterCurrent + "/" + c.afterRequired + ") "
                         var line = "• " + prog + c.name
                         var conds = Array.isArray(c.conditions) ? c.conditions.filter(function (s) { return s }) : []
                         if (conds.length > 0) line += " — " + conds.join("; ")
                         content += '<div class="tooltip-row">' + escapeHtml(line) + '</div>'
+                        var pending = Array.isArray(c.pending) ? c.pending.filter(function (s) { return s }) : []
+                        for (var j = 0; j < pending.length; j++) {
+                            content += '<div class="tooltip-row" style="margin-left:1em;opacity:0.85;font-style:italic">' + escapeHtml("* Still pending: " + pending[j]) + '</div>'
+                        }
                     }
                 } else {
                     content += '<div class="tooltip-section" style="margin-top:6px;opacity:0.7;font-style:italic">No tracked epithets advance on this race.</div>'
