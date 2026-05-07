@@ -189,8 +189,22 @@ object SmartRaceSolverIntegration {
      * @param scenario Active scenario name from `settings.general.scenario`.
      */
     fun runStartupHooks(game: Game?, currentTurn: TurnNumber, scenario: String) {
-        if (historySeeded) return
         if (!SettingsHelper.getBooleanSetting("racing", "enableSmartRaceSolver")) return
+
+        // Refresh the pivot turn on every call so the Race History snapshot stays in sync with the bot's current turn. The history-seeding
+        // work below is gated by historySeeded and only runs once, but the Remote Log Viewer's calendar badge depends on currentRunTurn
+        // matching whatever turn the bot is observing right now.
+        val turnChanged = currentRunTurn != currentTurn
+        currentRunTurn = currentTurn
+        currentRunScenario = scenario
+
+        if (historySeeded) {
+            // Seeding already happened on an earlier turn. Re-emit the snapshot when the turn ticks forward so the Race History panel
+            // reflects the new pivot without redoing the heavy OCR / preview seeding.
+            if (turnChanged) broadcastCalendarSnapshot()
+            return
+        }
+
         val epithets = loadEpithets() ?: return
         val racesByTurn = loadAllRaces() ?: return
 
@@ -205,8 +219,6 @@ object SmartRaceSolverIntegration {
             seedHistoryFromPreview(currentTurn, scenario, epithets, racesByTurn)
         }
         historySeeded = true
-        currentRunTurn = currentTurn
-        currentRunScenario = scenario
         broadcastCalendarSnapshot()
         logSyntheticDebutOnce(currentTurn)
     }
