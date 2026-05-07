@@ -313,18 +313,6 @@ object SmartRaceSolverIntegration {
     }
 
     /**
-     * True when the matcher progresses on this specific race. Direct-name matchers compare
-     * by name. [EpithetMatcher.WinCount] matchers evaluate their filter against [race] when
-     * available. Dependency matchers ([EpithetMatcher.EpithetAnyOf] / [EpithetMatcher.EpithetAll])
-     * are skipped because they hinge on other epithets, not this race.
-     *
-     * @param matcher Matcher to inspect.
-     * @param raceName Race name (matches [RaceCandidate.name]).
-     * @param race Looked-up [RaceCandidate] for the win, or null when the lookup missed.
-     * @return True when the matcher counts this race as progress.
-     */
-
-    /**
      * Resolves a dependency epithet by name and reports whether it is currently complete in [state].
      *
      * @param depName Epithet name referenced by an [EpithetMatcher.EpithetAnyOf] / [EpithetMatcher.EpithetAll] matcher.
@@ -337,6 +325,17 @@ object SmartRaceSolverIntegration {
         return EpithetTracker.classify(depEpi, state) == EpithetStatus.COMPLETED
     }
 
+    /**
+     * True when the matcher progresses on this specific race. Direct-name matchers compare
+     * by name. [EpithetMatcher.WinCount] matchers evaluate their filter against [race] when
+     * available. Dependency matchers ([EpithetMatcher.EpithetAnyOf] / [EpithetMatcher.EpithetAll])
+     * are skipped because they hinge on other epithets, not this race.
+     *
+     * @param matcher Matcher to inspect.
+     * @param raceName Race name (matches [RaceCandidate.name]).
+     * @param race Looked-up [RaceCandidate] for the win, or null when the lookup missed.
+     * @return True when the matcher counts this race as progress.
+     */
     private fun matcherReferencesRace(matcher: EpithetMatcher, raceName: String, race: RaceCandidate?): Boolean =
         when (matcher) {
             is EpithetMatcher.WinRace -> matcher.name == raceName
