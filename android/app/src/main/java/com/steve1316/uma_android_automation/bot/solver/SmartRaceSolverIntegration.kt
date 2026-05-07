@@ -1284,30 +1284,36 @@ object SmartRaceSolverIntegration {
             results.put(buildResultEntry(loss.turnNumber, loss.raceKey, loss.name, racesByTurn, RaceOutcome.LOSE, null))
         }
 
-        // Append a synthetic entry for the in-game Junior Make Debut race. This row is purely a visual breadcrumb in the Remote Log
+        // Always append a synthetic entry for the in-game Junior Make Debut race. This row is purely a visual breadcrumb in the Remote Log
         // Viewer calendar. It is never part of raceHistory and therefore cannot influence epithet eligibility, the next-race decision, or
-        // schedule preview. The "synthetic" marker swaps the tooltip's epithet section for a "Does not affect solver" notice. Outcome
-        // is derived from the OCR-scraped won/lost flag when the scrape captured the row; defaults to WIN otherwise.
-        if (currentRunTurn > PRE_DEBUT_TURN_THRESHOLD) {
-            val scraped = scrapedDebutEntry
-            val debutOutcome = if (scraped?.won == false) RaceOutcome.LOSE else RaceOutcome.WIN
-            val syntheticEntry =
-                JSONObject()
-                    .put("turn", MAKE_DEBUT_DISPLAY_TURN)
-                    .put("raceKey", "synthetic-make-debut")
-                    .put("name", "Make Debut")
-                    .put("classYear", "Junior")
-                    .put("grade", "DEBUT")
-                    .put("outcome", debutOutcome.name)
-                    .put("fans", 500)
-                    .put("synthetic", true)
-            // The OCR-scraped formatted name (e.g. "Nakayama Turf 1800m (Mile) Right / Inner") is
-            // surfaced via the raceTrack field so the viewer's existing tooltip renders it in the
-            // parts row alongside the grade and fan count. Skipped when the scrape was bypassed or
-            // the row was missing.
-            scraped?.nameFormatted?.takeIf { it.isNotBlank() }?.let { syntheticEntry.put("raceTrack", it) }
-            results.put(syntheticEntry)
-        }
+        // schedule preview. Before the bot exits the pre-debut window the row renders as "pending" (no scrape data yet, no win/lose styling);
+        // once the OCR scrape captures the result the outcome flips to WIN/LOSE. The "synthetic" marker swaps the tooltip's epithet section
+        // for a "Does not affect solver" notice in either case.
+        val scrapedDebut = scrapedDebutEntry
+        val hasRealDebut = currentRunTurn > PRE_DEBUT_TURN_THRESHOLD
+        val debutOutcomeName =
+            when {
+                !hasRealDebut -> "PENDING"
+                scrapedDebut?.won == false -> RaceOutcome.LOSE.name
+                else -> RaceOutcome.WIN.name
+            }
+        val syntheticEntry =
+            JSONObject()
+                .put("turn", MAKE_DEBUT_DISPLAY_TURN)
+                .put("raceKey", "synthetic-make-debut")
+                .put("name", "Make Debut")
+                .put("classYear", "Junior")
+                .put("grade", "DEBUT")
+                .put("outcome", debutOutcomeName)
+                .put("fans", 500)
+                .put("synthetic", true)
+                .put("pending", !hasRealDebut)
+        // The OCR-scraped formatted name (e.g. "Nakayama Turf 1800m (Mile) Right / Inner") is
+        // surfaced via the raceTrack field so the viewer's existing tooltip renders it in the
+        // parts row alongside the grade and fan count. Skipped when the scrape was bypassed or
+        // the row was missing (pre-debut runs).
+        scrapedDebut?.nameFormatted?.takeIf { it.isNotBlank() }?.let { syntheticEntry.put("raceTrack", it) }
+        results.put(syntheticEntry)
 
         return JSONObject()
             .put("currentTurn", currentRunTurn)

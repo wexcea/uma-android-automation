@@ -2915,7 +2915,12 @@
                     ? src.contributions
                     : (decision && decision.contributions ? decision.contributions : [])
                 if (src.synthetic) {
-                    content += '<div class="tooltip-section" style="margin-top:6px;font-weight:700">Does not affect solver</div>'
+                    var headerLabel = src.pending ? "Pending - has not run yet" : "Does not affect solver"
+                    content += '<div class="tooltip-section" style="margin-top:6px;font-weight:700">' + escapeHtml(headerLabel) + '</div>'
+                    if (src.pending) {
+                        content += '<div class="tooltip-row" style="opacity:0.85;font-style:italic">' +
+                            escapeHtml("Does not affect solver.") + '</div>'
+                    }
                 } else if (result && result.outcome === "LOSE") {
                     content += '<div class="tooltip-section" style="margin-top:6px;font-weight:700">No epithet progress (race was lost)</div>'
                 } else if (contribs && contribs.length > 0) {
