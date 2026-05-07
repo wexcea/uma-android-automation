@@ -1014,6 +1014,101 @@ object LogStreamServer {
                             }
                         }
 
+                        // List every completed-session .txt log file in the /logs/ directory, sorted most-recent-first.
+                        get("/logs/files") {
+                            try {
+                                val logsDir = File(context.getExternalFilesDir(null), "logs")
+                                val filesArray = JSONArray()
+                                var totalSize = 0L
+
+                                if (logsDir.exists() && logsDir.isDirectory) {
+                                    val logFiles = logsDir.listFiles { _, name -> name.lowercase().endsWith(".txt") } ?: emptyArray()
+                                    for (file in logFiles.sortedByDescending { it.lastModified() }) {
+                                        val size = file.length()
+                                        totalSize += size
+                                        filesArray.put(
+                                            JSONObject().apply {
+                                                put("name", file.name)
+                                                put("size", size)
+                                                put("modified", file.lastModified())
+                                            },
+                                        )
+                                    }
+                                }
+
+                                val response =
+                                    JSONObject().apply {
+                                        put("files", filesArray)
+                                        put("count", filesArray.length())
+                                        put("totalSize", totalSize)
+                                    }
+                                call.respondText(response.toString(), ContentType.Application.Json)
+                            } catch (e: Exception) {
+                                Log.e(TAG, "[ERROR] /logs/files:: Failed to list log files: ${e.message}")
+                                call.respondText(
+                                    """{"files":[],"count":0,"totalSize":0,"error":"Failed to list log files."}""",
+                                    ContentType.Application.Json,
+                                    HttpStatusCode.InternalServerError,
+                                )
+                            }
+                        }
+
+                        // Serve a single log file by name. Inline by default, or as a download attachment when ?download=1.
+                        get("/logs/files/{filename}") {
+                            try {
+                                val raw = call.parameters["filename"]
+                                if (raw.isNullOrEmpty()) {
+                                    call.respondText("Missing filename.", ContentType.Text.Plain, HttpStatusCode.BadRequest)
+                                    return@get
+                                }
+                                // Reject path-traversal characters and any name not ending in .txt.
+                                if (raw.contains('/') ||
+                                    raw.contains('\\') ||
+                                    raw.contains("..") ||
+                                    raw.contains(' ') ||
+                                    !raw.lowercase().endsWith(".txt")
+                                ) {
+                                    call.respondText("Invalid filename.", ContentType.Text.Plain, HttpStatusCode.BadRequest)
+                                    return@get
+                                }
+
+                                val logsDir = File(context.getExternalFilesDir(null), "logs")
+                                if (!logsDir.exists() || !logsDir.isDirectory) {
+                                    call.respondText("File not found.", ContentType.Text.Plain, HttpStatusCode.NotFound)
+                                    return@get
+                                }
+
+                                // Whitelist against the actual directory listing - the canonical guarantee against any encoded payload.
+                                val available = logsDir.listFiles { _, name -> name.lowercase().endsWith(".txt") }?.map { it.name }?.toSet() ?: emptySet()
+                                if (raw !in available) {
+                                    call.respondText("File not found.", ContentType.Text.Plain, HttpStatusCode.NotFound)
+                                    return@get
+                                }
+
+                                val target = File(logsDir, raw)
+                                // Belt-and-suspenders containment check.
+                                if (!target.canonicalPath.startsWith(logsDir.canonicalPath + File.separator)) {
+                                    call.respondText("Invalid filename.", ContentType.Text.Plain, HttpStatusCode.BadRequest)
+                                    return@get
+                                }
+
+                                val isDownload = call.request.queryParameters["download"] == "1"
+                                if (isDownload) {
+                                    call.response.header(HttpHeaders.ContentDisposition, "attachment; filename=\"$raw\"")
+                                } else {
+                                    call.response.header(HttpHeaders.ContentDisposition, "inline")
+                                }
+                                call.respondText(target.readText(), ContentType.Text.Plain)
+                            } catch (e: Exception) {
+                                Log.e(TAG, "[ERROR] /logs/files/{filename}:: Failed to serve log file: ${e.message}")
+                                call.respondText(
+                                    "Failed to serve log file.",
+                                    ContentType.Text.Plain,
+                                    HttpStatusCode.InternalServerError,
+                                )
+                            }
+                        }
+
                         // Handle WebSocket connections on root path (matches the HTML client).
                         webSocket("/") {
                             handleWebSocketSession(this)
