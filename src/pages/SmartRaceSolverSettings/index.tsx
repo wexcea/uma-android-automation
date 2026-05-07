@@ -1074,7 +1074,14 @@ const SmartRaceSolverSettings = () => {
                         {showHeavySections && (
                             <>
                                 {/* How it works info box. */}
-                                <View style={styles.section}>
+                                <SearchableItem
+                                    id="smart-solver-how-it-works"
+                                    condition={enableSmartRaceSolver}
+                                    parentId="enable-smart-race-solver"
+                                    title="How it works"
+                                    description="Smart Race Solver overview, loss handling, race-history scrape, and notes on epithets without matchers."
+                                    style={styles.section}
+                                >
                                     <InfoContainer>
                                         <View>
                                             <Text style={styles.infoLabel}>How it works</Text>
@@ -1111,7 +1118,7 @@ const SmartRaceSolverSettings = () => {
                                             </View>
                                         </View>
                                     </InfoContainer>
-                                </View>
+                                </SearchableItem>
 
                                 {/* Character preset */}
                                 <SearchableItem

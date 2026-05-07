@@ -438,6 +438,13 @@ const searchConfig: SearchOption[] = [
         page: "SmartRaceSolverSettings",
     },
     {
+        id: "smart-solver-how-it-works",
+        title: "How it works",
+        description: "Smart Race Solver overview, loss handling, race-history scrape, and notes on epithets without matchers.",
+        page: "SmartRaceSolverSettings",
+        parentId: "enable-smart-race-solver",
+    },
+    {
         id: "smart-solver-character-preset",
         title: "Character Preset",
         description: "Pick a character to seed aptitude defaults. You can still override individual aptitudes below.",
