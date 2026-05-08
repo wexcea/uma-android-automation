@@ -88,6 +88,13 @@ object SmartRaceSolverIntegration {
      *  preview for the Remote Log Viewer calendar. */
     @Volatile private var currentRunScenario: String = ""
 
+    /** Schedule produced by the most recent [buildCalendarSnapshotJson] solve. The plan is locked in once and reused by every peek
+     *  and broadcast for the rest of the run. Cleared by [reset] and refreshed only by a loss commit (see [commitPendingRace]). */
+    @Volatile private var cachedSchedule: Schedule? = null
+
+    /** Turn that [cachedSchedule] was solved against. Used to invalidate the cache when the bot has advanced to a new turn. */
+    @Volatile private var cachedScheduleTurn: TurnNumber = -1
+
     /** Clears in-memory race history and pending state. Call at the start of a fresh bot run. */
     fun reset() {
         synchronized(raceHistory) { raceHistory.clear() }
@@ -96,6 +103,8 @@ object SmartRaceSolverIntegration {
         historySeeded = false
         debutDisplayLogged.set(false)
         scrapedDebutEntry = null
+        cachedSchedule = null
+        cachedScheduleTurn = -1
     }
 
     /**
@@ -199,9 +208,10 @@ object SmartRaceSolverIntegration {
         currentRunScenario = scenario
 
         if (historySeeded) {
-            // Seeding already happened on an earlier turn. Re-emit the snapshot when the turn ticks forward so the Race History panel
-            // reflects the new pivot without redoing the heavy OCR / preview seeding.
-            if (turnChanged) broadcastCalendarSnapshot()
+            // Seeding already happened on an earlier turn. Re-emit the snapshot reusing the cached schedule when the turn ticks forward
+            // so the Race History panel updates the badge without re-running the solver - the plan stays locked in until a loss forces
+            // a replan via [commitPendingRace].
+            if (turnChanged) broadcastCalendarSnapshot(reuseSchedule = true)
             return
         }
 
@@ -243,7 +253,7 @@ object SmartRaceSolverIntegration {
         val historyAfter = synchronized(raceHistory) { raceHistory.toList() }
         MessageLog.i(TAG, "Race \"${pending.name}\" on turn ${pending.turnNumber} confirmed 1st; added to history.")
         logEpithetProgressAfterWin(pending.name, pending.turnNumber, historyBefore, historyAfter)
-        broadcastCalendarSnapshot()
+        broadcastCalendarSnapshot(reuseSchedule = true)
         logSyntheticDebutOnce(pending.turnNumber)
     }
 
@@ -491,10 +501,9 @@ object SmartRaceSolverIntegration {
         (peekDecisionForTurn(currentTurn, scenario) as? Decision.RaceDecision)?.raceKey
 
     /**
-     * Peeks at the solver's planned [Decision] for [currentTurn] without requiring on-screen
-     * candidates. Returns the full decision shape (`Train`, `Rest`, or `RaceDecision`)
-     * so callers can route the bot's per-turn action to match the solver's plan instead of
-     * falling through to legacy heuristics on non-Race turns.
+     * Peeks at the solver's planned [Decision] for [currentTurn] without requiring on-screen candidates. Returns the full decision shape
+     * (`Train`, `Rest`, or `RaceDecision`) so the calendar snapshot can render Train/Rest cells. Reuses [cachedSchedule] populated by
+     * the initial seeding broadcast (or refreshed on a loss); only re-solves defensively when no cache exists yet.
      *
      * @param currentTurn The bot's current turn number.
      * @param scenario Active scenario name from `settings.general.scenario`.
@@ -508,9 +517,15 @@ object SmartRaceSolverIntegration {
 
         runStartupHooks(game = null, currentTurn = currentTurn, scenario = scenario)
 
+        cachedSchedule?.let { return it.decisionAt(currentTurn) }
+
         val state = newSolverState(currentTurn, scenario, epithets, racesByTurn)
-        val schedule = SmartRaceSolver.solve(state)
-        return schedule.decisionAt(currentTurn)
+        return SmartRaceSolver.solve(state)
+            .also {
+                cachedSchedule = it
+                cachedScheduleTurn = currentTurn
+            }
+            .decisionAt(currentTurn)
     }
 
     /**
@@ -1239,12 +1254,15 @@ object SmartRaceSolverIntegration {
      * No-op when the Smart Race Solver feature flag is off, when required parsed data is
      * missing, or when [LogStreamServer] is not running. Errors are logged at warn level
      * and swallowed so a viewer hiccup never crashes the bot.
+     *
+     * @param reuseSchedule When true and a [cachedSchedule] exists, skip the MILP solve and reuse the cached [Schedule]. Used by
+     *   turn-change broadcasts and by the win path of [commitPendingRace] - both cases keep the originally locked-in plan.
      */
-    private fun broadcastCalendarSnapshot() {
+    private fun broadcastCalendarSnapshot(reuseSchedule: Boolean = false) {
         if (!SettingsHelper.getBooleanSetting("racing", "enableSmartRaceSolver")) return
         kotlin.concurrent.thread(name = "calendar-snapshot", isDaemon = true) {
             try {
-                val json = buildCalendarSnapshotJson() ?: return@thread
+                val json = buildCalendarSnapshotJson(reuseSchedule) ?: return@thread
                 com.steve1316.uma_android_automation.utils.LogStreamServer.broadcastCalendarSnapshot(json)
             } catch (t: Throwable) {
                 MessageLog.w(TAG, "Calendar snapshot broadcast failed: ${t.message}")
@@ -1253,17 +1271,30 @@ object SmartRaceSolverIntegration {
     }
 
     /**
-     * Re-runs the solver with the cached run inputs and the current win/loss collections,
-     * then serializes the result into the calendar snapshot JSON consumed by `log_viewer.html`.
+     * Builds the calendar snapshot JSON consumed by `log_viewer.html`. Re-runs the solver with the cached run inputs by default,
+     * or reuses [cachedSchedule] when [reuseSchedule] is true and the cache is populated.
      *
+     * @param reuseSchedule When true and a [cachedSchedule] exists, skip the MILP solve and use the cached [Schedule]. Falls back to
+     *   a fresh solve when no cache is available.
      * @return JSON `{ currentTurn, decisions{turn -> entry}, results[ {turn, raceKey, name, grade, outcome} ] }`
      *   or null when required data is unavailable.
      */
-    private fun buildCalendarSnapshotJson(): String? {
+    private fun buildCalendarSnapshotJson(reuseSchedule: Boolean = false): String? {
         val racesByTurn = loadAllRaces() ?: return null
         val epithets = loadEpithets() ?: emptyList()
         val state = newSolverState(currentRunTurn, currentRunScenario, epithets, racesByTurn)
-        val schedule = SmartRaceSolver.solve(state)
+
+        val cached = cachedSchedule
+        val schedule: Schedule =
+            if (reuseSchedule && cached != null) {
+                MessageLog.d(TAG, "Calendar snapshot reusing cached schedule from turn $cachedScheduleTurn.")
+                cached
+            } else {
+                SmartRaceSolver.solve(state).also {
+                    cachedSchedule = it
+                    cachedScheduleTurn = currentRunTurn
+                }
+            }
 
         val winsSnapshot = synchronized(raceHistory) { raceHistory.toList() }
         val lossesSnapshot = synchronized(raceLosses) { raceLosses.toList() }

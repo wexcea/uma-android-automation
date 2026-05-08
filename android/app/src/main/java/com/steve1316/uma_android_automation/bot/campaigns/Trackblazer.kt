@@ -10,7 +10,6 @@ import com.steve1316.uma_android_automation.bot.Game
 import com.steve1316.uma_android_automation.bot.MainScreenAction
 import com.steve1316.uma_android_automation.bot.Racing
 import com.steve1316.uma_android_automation.bot.SelectionSource
-import com.steve1316.uma_android_automation.bot.solver.Decision
 import com.steve1316.uma_android_automation.bot.solver.SmartRaceSolverIntegration
 import com.steve1316.uma_android_automation.components.ButtonBack
 import com.steve1316.uma_android_automation.components.ButtonCancel
@@ -1065,26 +1064,14 @@ class Trackblazer(game: Game) : Campaign(game) {
             }
         }
 
-        // Smart Race Solver pre-check: when enabled, the solver's full decision (Race / Train /
-        // Rest) is authoritative — so a "Train" turn won't be hijacked by the legacy fan-farming
-        // heuristic in the base class, and a "Rest" turn won't trigger training analysis.
+        // Smart Race Solver pre-check: the solver's role is binary - either "race race-X today" or "no race today". When the solver picks
+        // a race we defer to the racing flow. Otherwise we fall through to the legacy main-screen loop, which decides between training,
+        // resting, fan-farming, etc. The solver no longer dictates Train vs Rest on no-race turns.
         if (racing.enableSmartRaceSolver && racing.enableFarmingFans && !racing.enableForceRacing) {
-            when (val decision = SmartRaceSolverIntegration.peekDecisionForTurn(currentTurn = date.day, scenario = game.scenario)) {
-                is Decision.RaceDecision -> {
-                    MessageLog.i(TAG, "[TRACKBLAZER] Smart Race Solver has \"${decision.raceKey}\" planned for turn ${date.day}; deferring to racing flow.")
-                    return MainScreenAction.RACE
-                }
-                Decision.Train -> {
-                    MessageLog.i(TAG, "[TRACKBLAZER] Smart Race Solver plans Train for turn ${date.day}; skipping racing.")
-                    return MainScreenAction.TRAIN
-                }
-                Decision.Rest -> {
-                    MessageLog.i(TAG, "[TRACKBLAZER] Smart Race Solver plans Rest for turn ${date.day}; skipping racing.")
-                    return MainScreenAction.REST
-                }
-                null -> {
-                    // Solver has no opinion (disabled or data missing); fall through to legacy flow.
-                }
+            val solverRaceKey = SmartRaceSolverIntegration.peekRaceKeyForTurn(currentTurn = date.day, scenario = game.scenario)
+            if (solverRaceKey != null) {
+                MessageLog.i(TAG, "[TRACKBLAZER] Smart Race Solver has \"$solverRaceKey\" planned for turn ${date.day}; deferring to racing flow.")
+                return MainScreenAction.RACE
             }
         }
 
