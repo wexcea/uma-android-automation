@@ -486,7 +486,7 @@ const ScenarioOverridesSettings = () => {
                                                             </Text>
                                                         </View>
                                                         <View style={{ flexDirection: "row", gap: 8 }}>
-                                                            <CustomButton icon={<Trash2 size={16} />} onPress={() => updateOverrideSetting("trackblazerExcludedItems", [])}>
+                                                            <CustomButton icon={<Trash2 size={16} color={colors.foreground} />} onPress={() => updateOverrideSetting("trackblazerExcludedItems", [])}>
                                                                 Clear
                                                             </CustomButton>
                                                         </View>

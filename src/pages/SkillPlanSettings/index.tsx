@@ -389,7 +389,7 @@ const SkillPlanSettings: FC<SkillPlanSettingsProps> = ({ planKey, name, title, d
                         </Text>
                     </View>
                     <View style={{ flexDirection: "row", gap: 8 }}>
-                        <CustomButton icon={<Trash2 size={16} />} onPress={() => clearAllSkillsFromPlan()}>
+                        <CustomButton icon={<Trash2 size={16} color={colors.foreground} />} onPress={() => clearActiveList()}>
                             Clear
                         </CustomButton>
                     </View>
