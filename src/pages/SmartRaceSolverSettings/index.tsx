@@ -10,6 +10,9 @@ import {
     DEFAULT_WEIGHTS,
     EpithetEntry,
     GRADE_COLORS,
+    OPTIMIZE_MODE_LABELS,
+    OPTIMIZE_MODE_PRESETS,
+    OptimizeModeKey,
     RaceEntry,
     shortenRaceName,
     TRAIN_LOCK_SENTINEL,
@@ -183,6 +186,7 @@ const SmartRaceSolverSettings = () => {
     const [summerPenaltyInput, setSummerPenaltyInput] = useState(weights.summerPenalty.toString())
     const [raceBonusPctInput, setRaceBonusPctInput] = useState(weights.raceBonusPct.toString())
     const [raceCostPctInput, setRaceCostPctInput] = useState(weights.raceCostPct.toString())
+    const [fanWeightInput, setFanWeightInput] = useState(weights.fanWeight.toString())
 
     useEffect(() => setRaceValueInput(weights.raceValue.toString()), [weights.raceValue])
     useEffect(() => setEpithetValueInput(weights.epithetValue.toString()), [weights.epithetValue])
@@ -191,6 +195,10 @@ const SmartRaceSolverSettings = () => {
     useEffect(() => setSummerPenaltyInput(weights.summerPenalty.toString()), [weights.summerPenalty])
     useEffect(() => setRaceBonusPctInput(weights.raceBonusPct.toString()), [weights.raceBonusPct])
     useEffect(() => setRaceCostPctInput(weights.raceCostPct.toString()), [weights.raceCostPct])
+    useEffect(() => setFanWeightInput(weights.fanWeight.toString()), [weights.fanWeight])
+
+    /** Derived optimization mode. Mode is not persisted - it falls out of the weights so the radio toggle and the slider can never disagree. */
+    const currentOptimizeMode: OptimizeModeKey = weights.fanWeight > 0.0 ? "FANS_EPITAPH" : "STAT_EPITAPH"
 
     const [presetSearch, setPresetSearch] = useState("")
     const [epithetSearch, setEpithetSearch] = useState("")
@@ -384,6 +392,17 @@ const SmartRaceSolverSettings = () => {
      */
     const updateWeight = (key: keyof WeightsMap, value: number | string | boolean) => {
         updateRacingSetting("smartRaceSolverWeights", JSON.stringify({ ...weights, [key]: value }))
+    }
+
+    /**
+     * Snap the editable weight sliders to the named optimization-mode preset. The user can still override individual sliders afterward
+     * (the radio is derived from `weights.fanWeight > 0`, so manually tuning fanWeight back to 0 flips the radio without an extra click).
+     *
+     * @param mode Optimization mode key whose preset bundle should be applied.
+     */
+    const setOptimizeMode = (mode: OptimizeModeKey) => {
+        const preset = OPTIMIZE_MODE_PRESETS[mode]
+        updateRacingSetting("smartRaceSolverWeights", JSON.stringify({ ...weights, ...preset }))
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -737,9 +756,9 @@ const SmartRaceSolverSettings = () => {
                 epithetCardReward: { fontSize: 11, color: colors.foreground, marginBottom: 1 },
                 epithetCardCondition: { fontSize: 11, color: colors.mutedForeground, fontStyle: "italic" },
                 epithetCardConditionItem: { fontSize: 11, color: colors.mutedForeground, fontStyle: "italic", marginLeft: 8 },
-                statsRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "nowrap", marginVertical: 6, paddingHorizontal: 2 },
-                statsCell: { flexDirection: "row", alignItems: "baseline", flexShrink: 1, paddingHorizontal: 2 },
-                statsLabel: { fontSize: 13, color: colors.mutedForeground, marginRight: 4 },
+                statsRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", marginVertical: 6, paddingHorizontal: 2, columnGap: 12, rowGap: 8 },
+                statsCell: { flexDirection: "column", alignItems: "flex-start", minWidth: 70, flexShrink: 1 },
+                statsLabel: { fontSize: 11, color: colors.mutedForeground, marginBottom: 2 },
                 statsValue: { fontSize: 16, color: colors.foreground, fontWeight: "700" },
                 popoverTitle: { fontSize: 15, fontWeight: "700", color: colors.foreground },
                 popoverMeta: { fontSize: 12, color: colors.mutedForeground, marginTop: 4 },
@@ -994,7 +1013,7 @@ const SmartRaceSolverSettings = () => {
             <PageHeader title="Smart Race Solver" />
 
             <SearchPageProvider page="SmartRaceSolverSettings" scrollViewRef={scrollViewRef}>
-                <ScrollView ref={scrollViewRef} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 80 }}>
+                <ScrollView ref={scrollViewRef} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: dirty ? 80 : 24 }}>
                     <View className="m-1">
                         {/* Master toggle */}
                         <SearchableItem
@@ -1225,13 +1244,42 @@ const SmartRaceSolverSettings = () => {
                                     </View>
                                 </SearchableItem>
 
+                                {/* Optimization mode */}
+                                <SearchableItem
+                                    id="smart-solver-optimize-mode"
+                                    condition={enableSmartRaceSolver}
+                                    parentId="enable-smart-race-solver"
+                                    title="Optimization Mode"
+                                    description="Pick whether the solver chases stat epitaphs or also emphasizes fan-heavy races."
+                                    style={styles.section}
+                                >
+                                    <View style={sectionsDisabledStyle}>
+                                        <Text style={styles.sectionTitle}>Optimize for</Text>
+                                        <View style={styles.aptButtons}>
+                                            {(Object.keys(OPTIMIZE_MODE_PRESETS) as OptimizeModeKey[]).map((mode) => {
+                                                const active = currentOptimizeMode === mode
+                                                return (
+                                                    <TouchableOpacity key={mode} style={[styles.aptBtn, active && styles.aptBtnActive]} onPress={() => setOptimizeMode(mode)}>
+                                                        <Text style={active ? styles.aptBtnTextActive : styles.aptBtnText}>{OPTIMIZE_MODE_LABELS[mode]}</Text>
+                                                    </TouchableOpacity>
+                                                )
+                                            })}
+                                        </View>
+                                        <Text style={[styles.inputDescription, { marginBottom: 0, marginTop: 8 }]}>
+                                            Stat Epitaphs (default) optimizes purely for stat-bearing epithets and ignores reward fans. Fans + Epitaphs adds a per-fan score so fan-rich races (G1s, big
+                                            G3s) become more attractive alongside epithets. Switching modes snaps the editable Race Value, Epithet Value, and Fan Weight sliders to a fresh preset; you
+                                            can still tune each slider afterward, and tapping the active mode again resets back to the preset.
+                                        </Text>
+                                    </View>
+                                </SearchableItem>
+
                                 {/* Weights */}
                                 <SearchableItem
                                     id="smart-solver-weights"
                                     condition={enableSmartRaceSolver}
                                     parentId="enable-smart-race-solver"
                                     title="Scoring Weights"
-                                    description="Tune how the solver balances race value, epithet completion, and penalties."
+                                    description="Tune how the solver balances race value, epithet completion, fan rewards, and penalties."
                                     style={styles.section}
                                 >
                                     <View style={sectionsDisabledStyle}>
@@ -1273,6 +1321,20 @@ const SmartRaceSolverSettings = () => {
                                                             <Text style={styles.inputDescription}>
                                                                 Multiplier on epithet stat rewards. Default 1.0 weights an epithet's stats equally with race stats. Raise to 5.0 if you want the solver
                                                                 to chase epithets even at the cost of fewer total races.
+                                                            </Text>
+
+                                                            <Text style={styles.inputLabel}>Fan Weight</Text>
+                                                            <Input
+                                                                style={styles.input}
+                                                                value={fanWeightInput}
+                                                                onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setFanWeightInput(t)}
+                                                                onBlur={() => updateWeight("fanWeight", parseFloat(fanWeightInput) || 0)}
+                                                                keyboardType="decimal-pad"
+                                                                placeholder="0.0"
+                                                            />
+                                                            <Text style={styles.inputDescription}>
+                                                                Score per fan earned from a race. Default 0.0 ignores fans entirely (Stat Epitaphs preset). 0.001 (Fans + Epitaphs preset) makes a
+                                                                25k-fan G1 worth ~25 score points - meaningful but not dominant. Above 0.005 the solver will race almost every eligible turn.
                                                             </Text>
 
                                                             <Text style={styles.inputLabel}>Hint Reward Weight</Text>
@@ -1369,6 +1431,11 @@ const SmartRaceSolverSettings = () => {
                                             Preview of the schedule the solver would start with. Tap a cell to lock it, delete its pick, or switch to an alternative race. Does not reflect mid-run
                                             dynamic re-planning.
                                         </Text>
+                                        {!previewLoading && !previewError && preview && previewStats && (
+                                            <Text style={[styles.inputDescription, { fontStyle: "italic", marginTop: 2 }]}>
+                                                Note: Projected Fan Gain is the raw sum of each scheduled race's base fan reward and does not factor in in-game fan bonuses and other fan sources. Actual fans earned during a run will be higher.
+                                            </Text>
+                                        )}
                                         {dirty && (
                                             <WarningContainer>Settings have changed - the calendar needs to be regenerated. Tap Recalculate to refresh the preview and apply changes.</WarningContainer>
                                         )}
@@ -1404,6 +1471,10 @@ const SmartRaceSolverSettings = () => {
                                                 <View style={styles.statsCell}>
                                                     <Text style={styles.statsLabel}>Hints</Text>
                                                     <Text style={styles.statsValue}>{previewStats.hints}</Text>
+                                                </View>
+                                                <View style={styles.statsCell}>
+                                                    <Text style={styles.statsLabel}>Projected Fan Gain</Text>
+                                                    <Text style={styles.statsValue}>{previewStats.fans.toLocaleString()}</Text>
                                                 </View>
                                                 <View style={styles.statsCell}>
                                                     <Text style={styles.statsLabel}>Score</Text>
@@ -1541,9 +1612,10 @@ const SmartRaceSolverSettings = () => {
                                                       .map(([t, r]) => `T${t}→${r}`)
                                                       .join(" · ")}
                                         </Text>
+                                        <Text style={styles.summary}>Mode: {OPTIMIZE_MODE_LABELS[currentOptimizeMode]}</Text>
                                         <Text style={styles.summary}>
-                                            Weights: race {weights.raceValue}, epithet {weights.epithetValue}, hint {weights.hintWeight}, consec −{weights.consecutiveRacePenalty}, summer −
-                                            {weights.summerPenalty}, raceBonus {weights.raceBonusPct}%, raceCost {weights.raceCostPct}%
+                                            Weights: race {weights.raceValue}, epithet {weights.epithetValue}, fans {weights.fanWeight}, hint {weights.hintWeight}, consec -
+                                            {weights.consecutiveRacePenalty}, summer -{weights.summerPenalty}, raceBonus {weights.raceBonusPct}%, raceCost {weights.raceCostPct}%
                                         </Text>
                                     </View>
                                 </SearchableItem>

@@ -81,6 +81,9 @@ data class Aptitudes(
  * @property summerPenalty Penalty for racing on a turn in [SolverState.summerBlockTurns].
  * @property raceBonusPct Percentage uplift applied to base stat/sp rewards before weighting.
  * @property raceCostPct Per-race cost expressed as a percentage of the weighted G2 baseline.
+ * @property fanWeight Per-fan score contribution applied to a race's reward fans. 0.0 means fans are ignored entirely (Stat Epitaphs preset default).
+ *   1e-3 (Fans + Epitaphs preset) makes a 25k-fan G1 contribute ~25 score points - meaningful but not dominant. Above 5e-3 the solver will
+ *   race almost every eligible turn.
  * @property aptitudeThreshold Minimum aptitude grade required for both distance and surface
  *   for a race to be eligible.
  * @property includeOpAndPreOp When true, OP/Pre-OP races are eligible (subject to the threshold).
@@ -96,6 +99,7 @@ data class Weights(
     val summerPenalty: Double = 5.0,
     val raceBonusPct: Double = 50.0,
     val raceCostPct: Double = 100.0,
+    val fanWeight: Double = 0.0,
     val aptitudeThreshold: Aptitude = Aptitude.C,
     val includeOpAndPreOp: Boolean = false,
     val allowSummerRacing: Boolean = false,
@@ -114,7 +118,7 @@ data class Weights(
  * @property terrain Track surface: Turf or Dirt.
  * @property distanceType Distance category: Sprint, Mile, Medium, or Long.
  * @property distanceMeters Race distance in meters.
- * @property fans Reward fans count. Participates in scoring as a microscopic tiebreaker.
+ * @property fans Reward fans count. Scaled by [Weights.fanWeight] in [ScoringFunctions.raceValue].
  * @property turnNumber Turn the race takes place on (1..72).
  */
 data class RaceCandidate(

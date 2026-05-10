@@ -45,11 +45,13 @@ export function buildSettingsBanner(settings: Settings): string {
     const smartRaceSolverLockCount = safeJsonLength(settings.racing.smartRaceSolverManualLocks)
     const smartRaceSolverWeightsObj = (() => {
         try {
-            return JSON.parse(settings.racing.smartRaceSolverWeights || "{}") as Record<string, number | string>
+            return JSON.parse(settings.racing.smartRaceSolverWeights || "{}") as Record<string, number | string | boolean>
         } catch {
-            return {} as Record<string, number | string>
+            return {} as Record<string, number | string | boolean>
         }
     })()
+    const smartRaceSolverFanWeight = typeof smartRaceSolverWeightsObj.fanWeight === "number" ? smartRaceSolverWeightsObj.fanWeight : 0
+    const smartRaceSolverOptimizeMode = smartRaceSolverFanWeight > 0 ? "Fans + Epitaphs" : "Stat Epitaphs"
     const smartRaceSolverAptitudesObj = (() => {
         try {
             return JSON.parse(settings.racing.smartRaceSolverAptitudes || "{}") as Record<string, string>
@@ -149,7 +151,8 @@ ${longTargetsString}
 🤖 Enable Smart Race Solver: ${settings.racing.enableSmartRaceSolver ? "✅" : "❌"}
 🎭 Solver Character Preset: ${settings.racing.smartRaceSolverCharacterPreset || "(none)"}
 🐎 Solver Aptitudes: Spr ${smartRaceSolverAptitudesObj.Sprint ?? "?"}, Mile ${smartRaceSolverAptitudesObj.Mile ?? "?"}, Med ${smartRaceSolverAptitudesObj.Medium ?? "?"}, Lng ${smartRaceSolverAptitudesObj.Long ?? "?"}, Trf ${smartRaceSolverAptitudesObj.Turf ?? "?"}, Drt ${smartRaceSolverAptitudesObj.Dirt ?? "?"}
-⚖️ Solver Weights: race ${smartRaceSolverWeightsObj.raceValue ?? "?"}, epithet ${smartRaceSolverWeightsObj.epithetValue ?? "?"}, hint ${smartRaceSolverWeightsObj.hintWeight ?? "?"}, consec −${smartRaceSolverWeightsObj.consecutiveRacePenalty ?? "?"}, summer −${smartRaceSolverWeightsObj.summerPenalty ?? "?"}, raceBonus ${smartRaceSolverWeightsObj.raceBonusPct ?? "?"}%, raceCost ${smartRaceSolverWeightsObj.raceCostPct ?? "?"}%, threshold ${smartRaceSolverWeightsObj.aptitudeThreshold ?? "?"}, includeOP ${smartRaceSolverWeightsObj.includeOpAndPreOp ? "✅" : "❌"}, summerRacing ${smartRaceSolverWeightsObj.allowSummerRacing ? "✅" : "❌"}
+🎯 Solver Optimize Mode: ${smartRaceSolverOptimizeMode}
+⚖️ Solver Weights: race ${smartRaceSolverWeightsObj.raceValue ?? "?"}, epithet ${smartRaceSolverWeightsObj.epithetValue ?? "?"}, fans ${smartRaceSolverWeightsObj.fanWeight ?? 0}, hint ${smartRaceSolverWeightsObj.hintWeight ?? "?"}, consec −${smartRaceSolverWeightsObj.consecutiveRacePenalty ?? "?"}, summer −${smartRaceSolverWeightsObj.summerPenalty ?? "?"}, raceBonus ${smartRaceSolverWeightsObj.raceBonusPct ?? "?"}%, raceCost ${smartRaceSolverWeightsObj.raceCostPct ?? "?"}%, threshold ${smartRaceSolverWeightsObj.aptitudeThreshold ?? "?"}, includeOP ${smartRaceSolverWeightsObj.includeOpAndPreOp ? "✅" : "❌"}, summerRacing ${smartRaceSolverWeightsObj.allowSummerRacing ? "✅" : "❌"}
 🎯 Solver Target Epithets: ${smartRaceSolverTargetCount} selected
 🚨 Solver Forced Epithets: ${smartRaceSolverForcedCount} selected
 🔒 Solver Manual Turn Locks: ${smartRaceSolverLockCount} locked turn(s)

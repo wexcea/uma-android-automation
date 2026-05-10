@@ -480,9 +480,16 @@ const searchConfig: SearchOption[] = [
         parentId: "enable-smart-race-solver",
     },
     {
+        id: "smart-solver-optimize-mode",
+        title: "Optimization Mode",
+        description: "Pick whether the Smart Race Solver chases stat epitaphs only or also emphasizes fan-heavy races (G1s, big G3s) alongside epitaphs. Switching modes snaps the editable weight sliders to a fresh preset; you can still tune each slider afterward.",
+        page: "SmartRaceSolverSettings",
+        parentId: "enable-smart-race-solver",
+    },
+    {
         id: "smart-solver-weights",
         title: "Scoring Weights",
-        description: "Advanced multipliers for how the solver balances race rewards, epithet completion, and penalties for racing too often or in summer.",
+        description: "Advanced multipliers for how the solver balances race rewards, epithet completion, fan rewards, and penalties for racing too often or in summer.",
         page: "SmartRaceSolverSettings",
         parentId: "enable-smart-race-solver",
     },

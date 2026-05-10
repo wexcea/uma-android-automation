@@ -76,24 +76,21 @@ object ScoringFunctions {
         return weights.statWeight * stat + weights.spWeight * sp
     }
 
-    /** Sub-unit tiebreaker so equal-value races prefer the larger event without ever matching or
-     *  exceeding the smallest meaningful score increment of 1.0. With max fans ~30k and epsilon = 1e-6
-     *  the contribution caps at ~0.03 - well below the 1.0 anti-race bias on Train. */
-    private const val FANS_EPSILON: Double = 1e-6
-
     /**
      * Returns the value of running a single race, ignoring epithet contributions.
      *
-     * Direct port of the reference Trackblazer solver's `weightedRaceValue`:
+     * Direct port of the reference Trackblazer solver's `weightedRaceValue`, extended with a
+     * tunable per-fan term so users can opt into a fan-weighted optimization mode:
      *   gross = statWeight * floor(baseStat * (1 + raceBonus)) + spWeight * floor(baseSp * (1 + raceBonus))
      *   cost  = (raceCostPct / 100) * costBaseline(grade)
-     *   value = (gross - cost) * raceValue + fans * FANS_EPSILON
+     *   value = (gross - cost) * raceValue + fans * fanWeight
      *
-     * With defaults (raceBonus 50, raceCost 100) G2/G3 net to zero gross-cost - they tie with Train
-     * (which carries a tiny positive anti-race bias in [trainValue]) and are skipped unless an
-     * epithet pushes them positive. Maiden/Debut/Finale/EX have zero gross reward so they always
-     * score well below Train. Fans participate only as a microscopic tiebreaker between two races
-     * of identical grade on the same turn.
+     * With defaults (raceBonus 50, raceCost 100, fanWeight 0) G2/G3 net to zero gross-cost - they
+     * tie with Train (which carries a tiny positive anti-race bias in [trainValue]) and are skipped
+     * unless an epithet pushes them positive. Maiden/Debut/Finale/EX have zero gross reward so they
+     * always score well below Train. With `fanWeight = 0.0` the legacy "Stat Epitaphs" behavior is
+     * preserved; with a non-zero `fanWeight` (the "Fans + Epitaphs" preset uses 1e-3) fan-rich races
+     * such as G1s become more attractive without dominating epithet contributions.
      *
      * @param race Race candidate to score.
      * @param weights Active scoring weights.
@@ -106,14 +103,16 @@ object ScoringFunctions {
         val sp = Math.floor(baseSp(race.grade) * (1.0 + rb))
         val gross = weights.statWeight * stat + weights.spWeight * sp
         val cost = weights.raceCostPct / 100.0 * costBaseline(race.grade, weights)
-        return (gross - cost) * weights.raceValue + race.fans * FANS_EPSILON
+        return (gross - cost) * weights.raceValue + race.fans * weights.fanWeight
     }
 
     /**
-     * Training is the default action. Returns a tiny positive value (`1.0`, larger than the largest
-     * possible [FANS_EPSILON] contribution from the most popular race) so that whenever a race's
-     * gross reward equals its cost, Train wins the tie. The reference solver achieves the same
-     * effect via GLPK's MILP picking `NO_RACE` on ties.
+     * Training is the default action. Returns a constant `1.0` anti-race bias so that whenever a
+     * race's `(gross - cost) * raceValue + fans * fanWeight` equals zero, Train wins the tie. With
+     * the default Stat Epitaphs preset (`fanWeight = 0`) this matches legacy behavior; with a
+     * non-zero `fanWeight` the user has explicitly asked the solver to weigh fans, so Train no
+     * longer auto-wins fan-heavy ties. The reference solver achieves the same effect via GLPK's
+     * MILP picking `NO_RACE` on ties.
      *
      * @param weights Active weights (currently unused, reserved for future tuning).
      * @return Constant `1.0`.

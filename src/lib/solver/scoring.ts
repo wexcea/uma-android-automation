@@ -602,6 +602,7 @@ export const computePreviewStats = (preview: SchedulePreview, weights: Pick<Weig
     let races = 0
     let raceStats = 0
     let raceSp = 0
+    let fans = 0
     for (const [, entry] of Object.entries(preview.decisions)) {
         if (entry.type !== "Race") continue
         races += 1
@@ -609,6 +610,7 @@ export const computePreviewStats = (preview: SchedulePreview, weights: Pick<Weig
         const grade = (race?.grade ?? entry.grade ?? "").replace("-", "_")
         raceStats += Math.floor((BASE_STAT_BY_GRADE[grade] ?? 0) * (1 + rb))
         raceSp += Math.floor((BASE_SP_BY_GRADE[grade] ?? 0) * (1 + rb))
+        fans += race?.fans ?? 0
     }
     let epithetStats = 0
     let hints = 0
@@ -619,5 +621,5 @@ export const computePreviewStats = (preview: SchedulePreview, weights: Pick<Weig
         if (kind === "stat") epithetStats += amount
         else if (kind === "hint") hints += 1
     }
-    return { races, epithets: preview.projectedEpithets.length, raceStats, raceSp, epithetStats, hints }
+    return { races, epithets: preview.projectedEpithets.length, raceStats, raceSp, epithetStats, hints, fans }
 }

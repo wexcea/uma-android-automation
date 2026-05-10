@@ -38,6 +38,8 @@ export interface SolverConfigSnapshot {
         raceBonusPct: number
         /** Cost subtracted from each race's reward, expressed as a percentage of a G2 baseline. */
         raceCostPct: number
+        /** Per-fan score contribution applied to a race's reward fans. 0.0 ignores fans entirely (Stat Epitaphs preset default). */
+        fanWeight: number
         /** Minimum aptitude rank (S..G) a race needs in BOTH its distance type and surface to be eligible. */
         aptitudeThreshold: string
         /** When true, OP and Pre-OP races are also considered alongside G1 / G2 / G3. */

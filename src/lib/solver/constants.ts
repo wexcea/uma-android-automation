@@ -86,6 +86,9 @@ export interface WeightsMap {
     raceBonusPct: number
     /** Cost subtracted from each race's reward, expressed as a percentage of a G2 baseline. */
     raceCostPct: number
+    /** Per-fan score contribution applied to a race's reward fans. 0.0 ignores fans entirely (Stat Epitaphs preset default).
+     *  1e-3 (Fans + Epitaphs preset) makes a 25k-fan G1 contribute ~25 score points - meaningful but not dominant. */
+    fanWeight: number
     /** Minimum aptitude rank (S..G) a race needs in BOTH its distance type and surface to be eligible. */
     aptitudeThreshold: string
     /** When true, OP and Pre-OP races are also considered alongside G1 / G2 / G3. */
@@ -116,6 +119,8 @@ export interface PreviewStats {
     epithetStats: number
     /** Number of skill hints earned via hint-reward epithets. */
     hints: number
+    /** Sum of reward fans across all scheduled races. */
+    fans: number
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -160,9 +165,28 @@ export const DEFAULT_WEIGHTS: WeightsMap = {
     summerPenalty: 5.0,
     raceBonusPct: 50.0,
     raceCostPct: 100.0,
+    fanWeight: 0.0,
     aptitudeThreshold: "C",
     includeOpAndPreOp: false,
     allowSummerRacing: false,
+}
+
+/** Named optimization-mode presets for the Smart Race Solver. Selecting a mode in the UI snaps the
+ *  editable weight sliders to the corresponding bundle; the user can still override individual
+ *  sliders afterward. The mode itself is not persisted as a separate setting - it is derived from
+ *  `weights.fanWeight > 0`, which keeps the stored state and UI in sync. */
+export const OPTIMIZE_MODE_PRESETS: Record<"STAT_EPITAPH" | "FANS_EPITAPH", Partial<WeightsMap>> = {
+    STAT_EPITAPH: { raceValue: 1.0, epithetValue: 1.0, fanWeight: 0.0 },
+    FANS_EPITAPH: { raceValue: 1.0, epithetValue: 1.0, fanWeight: 1.0e-3 },
+}
+
+/** Key identifying which optimization-mode preset is active. */
+export type OptimizeModeKey = keyof typeof OPTIMIZE_MODE_PRESETS
+
+/** Display labels for each optimization mode (used by the radio toggle in SmartRaceSolverSettings and the MessageLog banner). */
+export const OPTIMIZE_MODE_LABELS: Record<OptimizeModeKey, string> = {
+    STAT_EPITAPH: "Stat Epitaphs",
+    FANS_EPITAPH: "Fans + Epitaphs",
 }
 
 /** The sentinel a manual-lock entry takes to lock a turn to Train / no race. The Kotlin parser understands this as `Decision.Train`.

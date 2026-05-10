@@ -83,8 +83,8 @@ class HeuristicTest {
 
     @Test
     fun trainBeatsLowGradeRaceUnderDefaultWeights() {
-        // Pre-OP under default weights: gross 22, cost 49 → ~-27, plus 0.5 fans tiebreaker.
-        // Train is 0, so Train wins.
+        // Pre-OP under default weights (fanWeight = 0.0): gross 22, cost 49 -> ~ -27 net.
+        // Train is +1.0, so Train wins.
         val weak = race("Weak Pre-OP", 30, grade = RaceGrade.PRE_OP, fans = 500)
         val st = state(currentTurn = 30, races = listOf(weak), epithets = emptyList())
         val schedule = Heuristic.search(st)
@@ -93,13 +93,32 @@ class HeuristicTest {
 
     @Test
     fun highGradeRaceBeatsTrainUnderDefaultWeights() {
-        // G1 under default weights: gross 67, cost 49 → 18, plus 50 fans tiebreaker → ~68.
-        // Train is 0, so the race wins.
+        // G1 under default weights (fanWeight = 0.0): gross 67, cost 49 -> 18 net (no fan term).
+        // Train is +1.0, so the race wins.
         val g1 = race("Big G1", 30, grade = RaceGrade.G1, fans = 50000)
         val st = state(currentTurn = 30, races = listOf(g1), epithets = emptyList())
         val schedule = Heuristic.search(st)
         val pick = schedule.decisions[30]
         assertTrue(pick is Decision.RaceDecision && pick.raceKey == g1.key)
+    }
+
+    @Test
+    fun fansEpithPresetFlipsZeroNetG3FromTrainToRace() {
+        // G3 under default weights nets exactly zero gross-cost and loses to Train (+1.0). With the
+        // FANS_EPITAPH preset (fanWeight = 1e-3) a 5k-fan G3 contributes +5 from fans, beating Train.
+        val g3 = race("G3", 30, grade = RaceGrade.G3, fans = 5000)
+        val statMode = state(currentTurn = 30, races = listOf(g3), epithets = emptyList())
+        val fanMode =
+            state(
+                currentTurn = 30,
+                races = listOf(g3),
+                epithets = emptyList(),
+                weights = Weights(fanWeight = 1e-3),
+            )
+
+        assertEquals(Decision.Train, Heuristic.search(statMode).decisions[30])
+        val pick = Heuristic.search(fanMode).decisions[30]
+        assertTrue(pick is Decision.RaceDecision && pick.raceKey == g3.key)
     }
 
     @Test

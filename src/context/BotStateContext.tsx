@@ -272,6 +272,7 @@ export const defaultSettings: Settings = {
             summerPenalty: 5.0,
             raceBonusPct: 50.0,
             raceCostPct: 100.0,
+            fanWeight: 0.0,
             aptitudeThreshold: "C",
             includeOpAndPreOp: false,
             allowSummerRacing: false,

@@ -23,10 +23,42 @@ class ScoringFunctionsTest {
     }
 
     @Test
-    fun raceValueScalesWithFans() {
+    fun raceValueWithFanWeightZeroIgnoresFans() {
+        // Default fanWeight is 0.0 (Stat Epitaphs preset): two races of identical grade with
+        // very different fan counts must produce equal raceValue.
         val small = race("Small", 20, fans = 1000)
         val big = race("Big", 20, fans = 50000)
-        assertTrue(ScoringFunctions.raceValue(big, w) > ScoringFunctions.raceValue(small, w))
+        assertEquals(ScoringFunctions.raceValue(small, w), ScoringFunctions.raceValue(big, w), 1e-9)
+    }
+
+    @Test
+    fun raceValueScalesWithFansWhenFanWeightIsPositive() {
+        // With any positive fanWeight, a fan-rich race outscores a fan-poor race of the same grade.
+        val tunedWeights = Weights(fanWeight = 1e-6)
+        val small = race("Small", 20, fans = 1000)
+        val big = race("Big", 20, fans = 50000)
+        assertTrue(ScoringFunctions.raceValue(big, tunedWeights) > ScoringFunctions.raceValue(small, tunedWeights))
+    }
+
+    @Test
+    fun fansEpithPresetMakesG1MeaningfullyOutscoreG3() {
+        // FANS_EPITAPH preset (fanWeight = 1e-3): a 25k-fan G1 should outscore a 5k-fan G3 by a
+        // margin that survives Train's 1.0 anti-race bias even when their gross-cost happens to tie.
+        val tunedWeights = Weights(fanWeight = 1e-3)
+        val g1 = race("G1", 30, grade = RaceGrade.G1, fans = 25000)
+        val g3 = race("G3", 30, grade = RaceGrade.G3, fans = 5000)
+        val delta = ScoringFunctions.raceValue(g1, tunedWeights) - ScoringFunctions.raceValue(g3, tunedWeights)
+        assertTrue(delta > 1.0, "G1-G3 score delta under fanWeight=1e-3 should exceed Train's 1.0 floor; was $delta")
+    }
+
+    @Test
+    fun fansEpithPresetKeepsZeroRewardGradesBelowTrain() {
+        // Grades outside the BASE_REWARD table (Maiden, Debut, Finale, EX) have zero gross reward
+        // but are charged the G2 cost baseline (~49 score points). Even with the FANS_EPITAPH
+        // preset's fanWeight = 1e-3 and a fan-rich Maiden, raceValue stays well below Train.
+        val tunedWeights = Weights(fanWeight = 1e-3)
+        val maiden = race("Maiden", 30, grade = RaceGrade.MAIDEN, fans = 5000)
+        assertTrue(ScoringFunctions.raceValue(maiden, tunedWeights) < ScoringFunctions.trainValue(tunedWeights))
     }
 
     @Test
@@ -60,12 +92,14 @@ class ScoringFunctionsTest {
     }
 
     @Test
-    fun lowGradeRaceValueIsNegative() {
-        // Pre-OP / OP races should score below zero so Train (value 0) is preferred.
+    fun lowGradeRaceValueLosesToTrain() {
+        // OP/Pre-OP cost baselines equal their own gross reward, so net is exactly zero under
+        // default weights and `fanWeight = 0.0`. Train (+1.0) wins the tie.
         val preOp = race("PreOp", 20, grade = RaceGrade.PRE_OP, fans = 500)
         val op = race("Op", 20, grade = RaceGrade.OP, fans = 1000)
-        assertTrue(ScoringFunctions.raceValue(preOp, w) < 0.0)
-        assertTrue(ScoringFunctions.raceValue(op, w) < 0.0)
+        val trainValue = ScoringFunctions.trainValue(w)
+        assertTrue(ScoringFunctions.raceValue(preOp, w) < trainValue)
+        assertTrue(ScoringFunctions.raceValue(op, w) < trainValue)
     }
 
     @Test
