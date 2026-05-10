@@ -244,7 +244,9 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                     borderRadius: 8,
                 },
                 title: {
-                    fontSize: 24,
+                    flex: 1,
+                    flexShrink: 1,
+                    fontSize: 20,
                     fontWeight: "bold",
                     color: colors.foreground,
                 },
@@ -313,7 +315,7 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
     return (
         <View style={[{ zIndex: isSearching ? 100 : 1 }, style]}>
             <View style={styles.header}>
-                <View style={[styles.headerLeft, { flex: isSearching ? 1 : undefined }]}>
+                <View style={[styles.headerLeft, { flex: 1, minWidth: 0 }]}>
                     {/* Hamburger menu button */}
                     <TouchableOpacity onPress={openDrawer} style={styles.menuButton} activeOpacity={0.7}>
                         <Ionicons name="menu" size={28} color={colors.foreground} />
