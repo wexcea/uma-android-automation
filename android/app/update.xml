@@ -1,42 +1,23 @@
 <AppUpdater>
   <update>
-    <latestVersion>5.6.0</latestVersion>
+    <latestVersion>5.6.1</latestVersion>
     <url>https://github.com/steve1316/uma-android-automation/releases</url>
     <releaseNotes>
-v5.6.0 - Changelog
+v5.6.1 - Changelog
 
 > [!NOTE]
 > Note that `armeabi-v7a` has been dropped in favor of `x86_64`. Installing this variant on x86 devices results in a significant performance boost. You may need to increase `Wait Delay` setting since the bot will now be going super fast in order to avoid issues because of it.
 
-New
----
-- Add `Smart Race Solver` on the `Racing Settings` page, an optimization-based race scheduler that replaces the older `Smart Racing Plan`. The solver takes the trainee's aptitudes and target / forced epithets to produce a 72-turn schedule similar to how https://race.daftuyda.moe does it.
-- Add `Ask the Docs` - an optional, on-device offline documentation chatbot under a new `LLM Settings` page. The RAG chat pipeline uses a bundled `MiniLM ONNX` embedder to find the most relevant excerpts from `README.md`, `HOW_IT_WORKS.md`, the in-app search config, and the Kotlin source code, and a user-downloaded Qwen GGUF model (run via `llama.rn`) or a custom model that the user downloads via Hugging Face paraphrases them.
-- Add `Race History` calendar to the `Remote Log Viewer` showing the bot's wins, losses, and pending races over the 72-turn scenario, with per-cell tooltips that surface epithet progression and per-matcher condition labels. Note this only appears when the `Smart Race Solver` is enabled.
-- Add separate `Event choice stat priority` and `Summer training stat priority` lists in the `Training Settings` page so Summer turns and event choices can lean into a different stat order from the rest of the year.
-- Add `Trackblazer Low Main Stat Gain Item Floor` scenario override so the bot conserves `Charm` and `Reset Whistles` on low-mood turns where the selected training's main stat gain falls below the specified floor.
-- Add `Log Files` tab to the `Remote Log Viewer` for browsing past run logs without needing ADB.
-- Add a unified first-time setup dialog on the Home page that walks the user through the accessibility, overlay, and battery-optimization permissions in one place.
-- Add a `x86_64` build variant for x86_64 Android devices for a significant performance boost and replaces the old `armeabi-v7a` build variant.
-- Add a new `Home` page warning for x86_64 devices running the `arm64-v8a` build variant.
-- Add a per-skill blacklist and `Skip All Green Skills` / `Skip All Red Skills (Debuffs)` / `Skip All Unique Skills` category exclusions to each `Skill Plan` page.
-
 Adjustments
 ---
-- Update game data up to `Ines Fujin` (2026-04-29).
-- Update Automation Library version to `2.5.6` for guidance region touch interception fix.
-- Remove the `Stop on Unexpected Popups` setting to avoid future issues from leaving it on.
-- Remove the `Purchase All Inherited Unique Skills` setting due to conflicting with the new `Skip All Unique Skills` filter.
-- Rename the energy-based selection toggles in the `Training Event Settings` page for race events to `Energy-aware swap` and rework option selection so the bot swaps to the selected option only when the trainee is actually low on energy.
-- Skip opening the `Training Items` dialog when the only items in inventory would be filtered out anyway - low-tier energy items reserved for emergency race recovery, megaphones / charm filtered by their priority rules, or condition heals with no matching active negative status.
-- Enable the Gradle build cache and drop the duplicate JS bundle pipeline for faster local builds.
-- Improve app performance when toggling settings on/off and reduce lag and hitches from DB writes and page navigation.
+- Relax Trackblazer Glow Sticks conservation so the bot is willing to use them on top-tier G1 races instead of hoarding for later turns.
+- Speed/Wit trainings will now no longer be forcibly picked if failure is high with no Good-Luck Charm available and will fall back to resting instead.
 
 Fixes
 ---
-- Fix bug where `CustomSlider`'s track did not match up with the thumb position when dragging.
-- Fix bug where the very first failure-chance OCR read on a `Training` screen entry could come back unparseable. The bot now retries once by re-entering the `Training` screen via `recoverAndRetryFailureChance()` before giving up.
-- Fix `Trackblazer` OCR bug where a lone `L` character was being read for the digit `1` when the Shop Coin count was exactly 1.
+- Fix bug where long page titles in the frontend were overflowing off the right edge on narrow phones.
+- Fix bug where a conflict with healing at the Infirmary caused the date in memory to be stale.
+- Fix bug where the Trackblazer Megaphone duration counter was not decremented after completing a mandatory race, causing the buff timer to drift.
 
     </releaseNotes>
   </update>

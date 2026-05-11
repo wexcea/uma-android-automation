@@ -920,7 +920,7 @@ The first cupcake encountered during the scan is used. Berry Sweet Cupcake raise
 - No training is selected this turn (e.g., the bot is racing or resting).
 - A better megaphone is available in inventory.
 
-**Duration tracking:** After use, the bot sets `megaphoneTurnCounter` to 2/3/4 depending on the megaphone type. This counter is decremented by 1 at the end of each turn where an action was taken.
+**Duration tracking:** After use, the bot sets `megaphoneTurnCounter` to 2/3/4 depending on the megaphone type. This counter is decremented by 1 at the end of each turn where an action was taken — training, voluntary races, **and mandatory races** (the latter is handled explicitly in `Trackblazer.handleRaceEvents()` because the mandatory-race path returns before reaching `executeAction()`, which is where the per-turn decrement normally fires).
 
 </details>
 
@@ -997,6 +997,7 @@ The bot checks for this interaction before evaluating any energy item. It consid
 2. Support cards are reshuffled across the 5 training facilities.
 3. The bot re-runs the full training analysis.
 4. If `whistleForcesTraining` is enabled (default: true) and the re-analysis still finds no suitable training, the bot **forces the best available training** even if it doesn't meet normal thresholds — **unless** the forced stat was already explicitly rejected by analysis (e.g. high failure chance, low gain while a Charm is active) or is blacklisted. In that case, the bot refuses to force-train and falls back to mood or energy recovery instead.
+    - **Charm-safety guard:** When the forced pick comes from the rejected pool, it is by definition either below the Charm minimum-gain floor or has a failure chance high enough that it would only have been viable with a Good-Luck Charm. If a Charm cannot fire on it (none in inventory, already used today, or the analyzer's charm gates would suppress it) **and** the failure chance is **≥ 50%**, the bot abandons the force-pick and falls through to the recovery branch instead of running a near-certain failure with no defensive item.
 5. After the whistle, a second item usage pass runs in case the new training recommendation changes which items should be used (e.g., different Ankle Weights).
 
 **When NOT used:**
@@ -1055,8 +1056,8 @@ The bot checks for this interaction before evaluating any energy item. It consid
 - The upcoming race is **G1 grade**.
 - The race awards **≥ 20,000 fans**.
 - The item is available in inventory.
-- **Finale exception:** During all Finale turns (73–75), the 20,000 fan requirement is **waived** — Glow Sticks are used for any G1 race.
-- **Finale conservation:** During turns 73 and 74, the bot only uses Glow Sticks if it has **2 or more copies**, saving the last one for turn 75 (Finals). On turn 75, all remaining copies are used freely.
+- **Top-tier G1 exception (pre-Finale):** For G1 races awarding **≥ 30,000 fans** before turn 73, the bot will spend the **last** Glow Stick even when only 1 copy remains in inventory. The shop refreshes when the Finales begin, so there is another chance to buy more before turn 75.
+- **Finale conservation:** During turns 73 and 74, the bot only uses Glow Sticks if it has **2 or more copies**, reserving the last one for turn 75 (Finals). On turn 75, all remaining copies are used freely.
 
 **When NONE of these are used:**
 - The race is OP or Pre-OP grade (no items for low-grade races).
