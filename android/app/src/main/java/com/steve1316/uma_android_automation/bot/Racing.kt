@@ -1590,6 +1590,27 @@ class Racing(private val game: Game, private val campaign: Campaign) {
             // Distance is unknown for Finale races; per-distance strategy will fall back to blanket.
         }
 
+        // OCR the mandatory race name via the on-screen double-star prediction icon so per-distance strategy uses the actual race distance. Without this,
+        // lastRaceDistance stays null and per-distance strategy falls back to the user's blanket strategy for every mandatory race. Gated on
+        // enablePerDistanceStrategy so users not using per-distance don't pay the OCR + DB lookup overhead.
+        if (enablePerDistanceStrategy && lastRaceDistance == null) {
+            val predictionLocations = IconRaceListPredictionDoubleStar.findAll(game.imageUtils)
+            if (predictionLocations.isNotEmpty()) {
+                val raceName = game.imageUtils.extractRaceName(predictionLocations[0])
+                val raceDataList = lookupRaceInDatabase(campaign.date.day, raceName)
+                if (raceDataList.isNotEmpty()) {
+                    val raceData = raceDataList[0]
+                    lastRaceDistance = raceData.trackDistance
+                    // Preserve any grade/fans already set above (e.g. by the Finale block).
+                    if (lastRaceGrade == null) lastRaceGrade = raceData.grade
+                    if (lastRaceFans == 0) lastRaceFans = raceData.fans
+                    MessageLog.i(TAG, "[RACE] Detected mandatory race \"${raceData.name}\" (Grade: ${raceData.grade}, Distance: ${raceData.trackDistance}).")
+                }
+            } else {
+                MessageLog.i(TAG, "[RACE] No double-star prediction found on mandatory race screen. Per-distance strategy will fall back to blanket.")
+            }
+        }
+
         // Let the campaign handle any pre-race logic (e.g. using race items in Trackblazer).
         campaign.onScheduledRacePrepScreen()
 
