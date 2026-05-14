@@ -1024,7 +1024,7 @@ const SmartRaceSolverSettings = () => {
                         >
                             <CustomCheckbox
                                 label="Enable Smart Race Solver"
-                                description="Plans every turn of the 72-turn career to maximize score, deciding for each turn whether to race, train, or rest. The bot only runs the races the solver currently plans and never adds extra ones, even when Farming Fans would otherwise pick one up; the plan itself re-solves each turn so wins and losses reshape the remaining schedule. Activates when Farming Fans is on and Force Racing is off."
+                                description="Plans every turn of the 72-turn career to maximize score, deciding for each turn whether to race, train, or rest. The bot only runs the races the solver currently plans and never adds extra ones, even when Farming Fans would otherwise pick one up; the plan itself re-solves each turn so wins and losses reshape the remaining schedule. Activates whenever Force Racing and User In-Game Race Agenda are off."
                                 checked={enableSmartRaceSolver}
                                 onCheckedChange={(checked) => updateRacingSetting("enableSmartRaceSolver", checked)}
                             />
@@ -1046,7 +1046,9 @@ const SmartRaceSolverSettings = () => {
                                             <Text style={styles.infoLabel}>How it works</Text>
                                             <Text style={styles.infoDescription}>
                                                 The solver searches the entire 72-turn career and picks, for every turn, the best decision (Race / Train / Rest) that maximizes your projected score
-                                                against the target epithet rewards. The bot only runs the races the solver currently plans and treats the rest of the schedule as training or rest.
+                                                against the target epithet rewards. The bot only races on the turns the solver has chosen in the calculated schedule - every other turn becomes training
+                                                or rest, even when Farming Fans would otherwise add an extra race. Hard goal requirements (fan / trophy / goal-points) and the Force Racing setting are
+                                                the only things that can override the schedule.
                                             </Text>
 
                                             <View style={styles.infoBlock}>

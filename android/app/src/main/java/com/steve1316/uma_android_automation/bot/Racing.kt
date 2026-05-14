@@ -732,6 +732,19 @@ class Racing(private val game: Game, private val campaign: Campaign) {
             return true
         }
 
+        // When the Smart Race Solver is enabled, its schedule is authoritative for extra races. If the solver did not plan a race for
+        // this turn, suppress every extra-race fallback (including the scenario fan-farm bypass and the racing-interval cadence) so the
+        // bot trains or rests instead of racing as filler. Hard requirements above still short-circuit to true before this guard.
+        if (enableSmartRaceSolver) {
+            val plannedKey = SmartRaceSolverIntegration.peekRaceKeyForTurn(currentTurn = campaign.date.day, scenario = game.scenario)
+            if (plannedKey == null) {
+                MessageLog.i(TAG, "[RACE] Smart Race Solver has no race planned for turn ${campaign.date.day}. Skipping the extra-race fallback.")
+                return false
+            }
+            MessageLog.i(TAG, "[RACE] Smart Race Solver has \"$plannedKey\" planned for turn ${campaign.date.day}. Proceeding to racing screen.")
+            return !raceRepeatWarningCheck
+        }
+
         // For scenarios that race as often as possible, bypass most checks.
         if (campaign.shouldBypassSmartRacing()) {
             MessageLog.i(TAG, "[RACE] Bypassing smart racing and interval checks.")
@@ -1923,8 +1936,8 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                     // Use smart racing for all years except Year 1 (Junior Year).
                     campaign.date.year != DateYear.JUNIOR
                 } else if (enableSmartRaceSolver && campaign.date.year != DateYear.JUNIOR) {
-                    // Year 2 and 3: Use the Smart Race Solver if Farming Fans is on and Force Racing is off.
-                    enableFarmingFans && !enableForceRacing
+                    // Year 2 and 3: Use the Smart Race Solver as long as Force Racing is off. Farming Fans is no longer required.
+                    !enableForceRacing
                 } else {
                     false
                 }
@@ -1938,9 +1951,8 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                         MessageLog.i(TAG, "[RACE] Smart Race Solver conditions not met, using traditional racing logic...")
                         if (campaign.date.year == DateYear.JUNIOR) {
                             MessageLog.i(TAG, "[RACE]   - It is currently the Junior Year.")
-                        } else {
-                            if (!enableFarmingFans) MessageLog.i(TAG, "[RACE]   - enableFarmingFans is false")
-                            if (enableForceRacing) MessageLog.i(TAG, "[RACE]   - enableForceRacing is true")
+                        } else if (enableForceRacing) {
+                            MessageLog.i(TAG, "[RACE]   - enableForceRacing is true")
                         }
                     }
 

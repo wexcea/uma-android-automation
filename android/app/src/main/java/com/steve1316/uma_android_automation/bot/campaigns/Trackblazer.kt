@@ -504,7 +504,7 @@ class Trackblazer(game: Game) : Campaign(game) {
 
         // Peek the Solver's planned race so the scrollList scan can short-circuit as soon as it surfaces.
         val solverPlannedKey =
-            if (racing.enableSmartRaceSolver && racing.enableFarmingFans && !racing.enableForceRacing) {
+            if (racing.enableSmartRaceSolver && !racing.enableForceRacing) {
                 SmartRaceSolverIntegration.peekRaceKeyForTurn(currentTurn = date.day, scenario = game.scenario)
             } else {
                 null
@@ -1071,9 +1071,9 @@ class Trackblazer(game: Game) : Campaign(game) {
         }
 
         // Smart Race Solver pre-check: the solver's role is binary - either "race race-X today" or "no race today". When the solver picks
-        // a race we defer to the racing flow. Otherwise we fall through to the legacy main-screen loop, which decides between training,
-        // resting, fan-farming, etc. The solver no longer dictates Train vs Rest on no-race turns.
-        if (racing.enableSmartRaceSolver && racing.enableFarmingFans && !racing.enableForceRacing) {
+        // a race we defer to the racing flow. Otherwise we fall through to the legacy main-screen loop for training / rest decisions only;
+        // the extra-race fallback is suppressed downstream in checkEligibilityToStartExtraRacingProcess() so unscheduled turns never race.
+        if (racing.enableSmartRaceSolver && !racing.enableForceRacing) {
             val solverRaceKey = SmartRaceSolverIntegration.peekRaceKeyForTurn(currentTurn = date.day, scenario = game.scenario)
             if (solverRaceKey != null) {
                 MessageLog.i(TAG, "[TRACKBLAZER] Smart Race Solver has \"$solverRaceKey\" planned for turn ${date.day}; deferring to racing flow.")
