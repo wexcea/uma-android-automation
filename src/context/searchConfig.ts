@@ -185,6 +185,13 @@ const searchConfig: SearchOption[] = [
         page: "TrainingSettings",
     },
     {
+        id: "disable-stat-targets",
+        title: "Disable Stat Targets",
+        description:
+            "When enabled, all per-distance stat targets are ignored. Every stat is treated as having a target equal to the in-game stat cap (1200), so the bot keeps pushing your top priority stats even after they would normally be considered done. Useful when you want strict adherence to your Stat Prioritization list.",
+        page: "TrainingSettings",
+    },
+    {
         id: "stat-targets-by-distance",
         title: "Stat Targets by Distance",
         description:
