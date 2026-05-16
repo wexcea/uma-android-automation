@@ -131,6 +131,9 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
     /** Whether to weight training scores by the OCR-detected training level (1-5) of the priority-list stats. */
     internal val enableTrainingLevelWeighting: Boolean = SettingsHelper.getBooleanSetting("training", "enableTrainingLevelWeighting", false)
 
+    /** Whether to ignore per-distance stat targets and treat every stat's target as the scenario stat cap. When ON, the bot keeps the ratio multiplier in the "encourage training" band for every stat. */
+    internal val disableStatTargets: Boolean = SettingsHelper.getBooleanSetting("training", "disableStatTargets", false)
+
     /** Cached screen location of the Energy label, used as the anchor for training level OCR. Resolved lazily on first use, reused for the rest of the bot session. */
     private var cachedEnergyLocation: Point? = null
 
@@ -286,6 +289,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
      * @property skillHintsPerLocation Map of detected skill hints for each training.
      * @property enablePrioritizeSkillHints Whether to prioritize skill hints.
      * @property enableTrainingLevelWeighting Whether to amplify priority-list stat scores by their OCR-detected training level (1-5).
+     * @property disableStatTargets Whether per-distance stat targets are overridden by the scenario stat cap for all stats.
      * @property statsTrainedOverBuffer Set of stats that have already exceeded their cap buffer.
      */
     data class TrainingConfig(
@@ -305,6 +309,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
         val skillHintsPerLocation: Map<StatName, Int> = StatName.entries.associateWith { 0 },
         val enablePrioritizeSkillHints: Boolean = false,
         val enableTrainingLevelWeighting: Boolean = false,
+        val disableStatTargets: Boolean = false,
         val statsTrainedOverBuffer: Set<StatName> = emptySet(),
     ) {
         override fun equals(other: Any?): Boolean {
@@ -328,6 +333,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             if (skillHintsPerLocation != other.skillHintsPerLocation) return false
             if (enablePrioritizeSkillHints != other.enablePrioritizeSkillHints) return false
             if (enableTrainingLevelWeighting != other.enableTrainingLevelWeighting) return false
+            if (disableStatTargets != other.disableStatTargets) return false
             if (statsTrainedOverBuffer != other.statsTrainedOverBuffer) return false
 
             return true
@@ -349,6 +355,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             result = 31 * result + skillHintsPerLocation.hashCode()
             result = 31 * result + enablePrioritizeSkillHints.hashCode()
             result = 31 * result + enableTrainingLevelWeighting.hashCode()
+            result = 31 * result + disableStatTargets.hashCode()
             result = 31 * result + statsTrainedOverBuffer.hashCode()
             return result
         }
@@ -2036,7 +2043,12 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                 statPrioritization = statPrioritization,
                 eventChoiceStatPriority = eventChoiceStatPriority,
                 summerTrainingStatPriority = summerTrainingStatPriority,
-                statTargets = campaign.trainee.getPhaseStatTargets(campaign.date.year),
+                statTargets =
+                    if (disableStatTargets) {
+                        StatName.entries.associateWith { getScenarioStatCap(game.scenario, it) }
+                    } else {
+                        campaign.trainee.getPhaseStatTargets(campaign.date.year)
+                    },
                 currentDate = campaign.date,
                 scenario = game.scenario,
                 enableRainbowTrainingBonus = enableRainbowTrainingBonus,
@@ -2047,6 +2059,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                 skillHintsPerLocation = skillHintsPerLocation,
                 enablePrioritizeSkillHints = enablePrioritizeSkillHints,
                 enableTrainingLevelWeighting = enableTrainingLevelWeighting,
+                disableStatTargets = disableStatTargets,
                 statsTrainedOverBuffer = statsTrainedOverBuffer,
             )
 
@@ -2153,7 +2166,12 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             statNames.joinToString(", ") {
                 "${it.name.lowercase().replaceFirstChar { char -> char.titlecase() }}=${targets[it]}"
             }
-        sb.appendLine("Stat Targets ($preferredDistance) [$phaseLabel]: $targetsFormatted")
+        if (config.disableStatTargets) {
+            val cap = getScenarioStatCap(config.scenario, StatName.SPEED)
+            sb.appendLine("Stat Targets: Disabled (treating cap=$cap as the target for all stats)")
+        } else {
+            sb.appendLine("Stat Targets ($preferredDistance) [$phaseLabel]: $targetsFormatted")
+        }
 
         // Compute completion percentages for each stat.
         val completionPercentages =
