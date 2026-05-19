@@ -123,6 +123,9 @@ abstract class Campaign(game: Game) : Task(game) {
     /** Required instance of the GameDate class. */
     var date: GameDate = GameDate(day = 1)
 
+    /** Per-turn structured decision logger. Subclasses populate snapshots and reasoning via the various record... methods; the consolidated block is emitted at the end of `executeAction`. */
+    val decisionTracer: DecisionTracer = DecisionTracer()
+
     /** Flag to track whether the bot should force Wit training during the pre-summer turn. */
     var bForcedWitTraining: Boolean = false
 
@@ -814,6 +817,25 @@ abstract class Campaign(game: Game) : Task(game) {
     open fun onMainScreenEntry() {
         return
     }
+
+    /**
+     * Decision-relevant inventory snapshot for the current turn. Subclasses with inventory tracking (e.g. Trackblazer) should override to
+     * return the items that drive their decisions (charms, whistles, megaphones, energy/mood items). Empty map by default for campaigns
+     * without inventory.
+     */
+    open fun gatherDecisionInventory(): Map<String, Int> = emptyMap()
+
+    /**
+     * Decision-relevant settings snapshot for the current turn. Subclasses should populate the snapshot with the user-configurable knobs
+     * that most often drive "why" questions (failure-chance limits, energy thresholds, charm minimums, agenda gating, etc.).
+     */
+    open fun gatherDecisionSettings(): DecisionTracer.SettingsSnapshot = DecisionTracer.SettingsSnapshot()
+
+    /**
+     * Campaign-specific extra state that does not live on `Trainee` itself (for example Trackblazer's `consecutiveRaceCount`). Returned as
+     * a display-friendly key/value map appended to the State section of the Decision Report.
+     */
+    open fun gatherDecisionExtraState(): Map<String, String> = emptyMap()
 
     /**
      * Determines whether item-based mood recovery should override the default mood recovery logic.
@@ -1685,6 +1707,15 @@ abstract class Campaign(game: Game) : Task(game) {
         // Scenario-specific main screen entry hook (e.g. for item usage).
         onMainScreenEntry()
 
+        // Open the per-turn structured decision log. Snapshots state after onMainScreenEntry so item-consumption effects are visible.
+        decisionTracer.startTurn(
+            date = date,
+            trainee = trainee,
+            inventorySnapshot = gatherDecisionInventory(),
+            settings = gatherDecisionSettings(),
+            extraState = gatherDecisionExtraState(),
+        )
+
         // Decision-making process.
         val action = decideNextAction()
         val bIsScheduledRaceDay = LabelScheduledRace.check(game.imageUtils)
@@ -1846,34 +1877,42 @@ abstract class Campaign(game: Game) : Task(game) {
         val bIsMandatoryRaceDay = IconRaceDayRibbon.check(game.imageUtils, sourceBitmap = sourceBitmap)
 
         if (bIsMandatoryRaceDay || bIsScheduledRaceDay) {
+            val reason = if (bIsMandatoryRaceDay) "Mandatory race day" else "Scheduled race day"
+            decisionTracer.recordActionChoice(MainScreenAction.RACE, reason)
             return MainScreenAction.RACE
         }
 
         if (racing.encounteredRacingPopup) {
+            decisionTracer.recordActionChoice(MainScreenAction.RACE, "Racing popup already on screen from prior turn")
             return MainScreenAction.RACE
         }
 
         if (racing.enableForceRacing) {
             MessageLog.i(TAG, "[INFO] Force racing enabled - skipping all other activities and going straight to racing.")
+            decisionTracer.recordActionChoice(MainScreenAction.RACE, "Force racing setting enabled")
             return MainScreenAction.RACE
         }
 
         if (!bHasCheckedForMaidenRaceToday && !date.bIsPreDebut && !trainee.bHasCompletedMaidenRace) {
             MessageLog.i(TAG, "[INFO] Bot has not yet completed maiden race. Checking for valid maiden race...")
+            decisionTracer.recordActionChoice(MainScreenAction.RACE, "Maiden race not yet completed")
             return MainScreenAction.RACE
         }
 
         if (mustRestBeforeSummer && (date.year == DateYear.CLASSIC || date.year == DateYear.SENIOR) && date.month == DateMonth.JUNE && date.phase == DatePhase.LATE) {
             if (trainee.energy < 70) {
                 MessageLog.i(TAG, "[INFO] Energy is low (${trainee.energy}% < 70%). Forcing rest during $date in preparation for Summer Training.")
+                decisionTracer.recordActionChoice(MainScreenAction.REST, "Pre-summer prep (energy ${trainee.energy}% < 70%)")
                 return MainScreenAction.REST
             } else if (trainee.mood < Mood.GREAT && !training.firstTrainingCheck) {
                 MessageLog.i(TAG, "[INFO] Energy is sufficient (>= 70%) but Mood is not Great (${trainee.mood}). Forcing mood recovery during $date in preparation for Summer Training.")
                 forcedTargetMood = Mood.GREAT
+                decisionTracer.recordActionChoice(MainScreenAction.RECOVER_MOOD, "Pre-summer prep (energy >= 70%, mood ${trainee.mood} < GREAT)")
                 return MainScreenAction.RECOVER_MOOD
             } else {
                 MessageLog.i(TAG, "[INFO] Energy is sufficient (>= 70%) and mood is Great. Performing Wit training during $date in preparation for Summer Training.")
                 bForcedWitTraining = true
+                decisionTracer.recordActionChoice(MainScreenAction.TRAIN, "Pre-summer prep (energy and mood sufficient; forced Wit training)")
                 return MainScreenAction.TRAIN
             }
         }
@@ -1881,6 +1920,7 @@ abstract class Campaign(game: Game) : Task(game) {
         val isRacingRequirementActive = racing.hasFanRequirement || racing.hasTrophyRequirement
         if (isRacingRequirementActive) {
             MessageLog.i(TAG, "[INFO] Racing requirement is active. Bypassing health and mood checks.")
+            decisionTracer.recordActionChoice(MainScreenAction.RACE, "Racing requirement (fans or trophy) active")
             return MainScreenAction.RACE
         }
 
@@ -1895,18 +1935,22 @@ abstract class Campaign(game: Game) : Task(game) {
 
         if (hasInjury) {
             // Injury handled internally in checkInjury, but returning NONE as turn is likely over or needs re-evaluation.
+            decisionTracer.recordActionChoice(MainScreenAction.NONE, "Injury detected and handled internally; turn aborted for re-evaluation")
             return MainScreenAction.NONE
         }
 
         if (shouldRecoverMood(sourceBitmap)) {
+            decisionTracer.recordActionChoice(MainScreenAction.RECOVER_MOOD, "shouldRecoverMood returned true (mood ${trainee.mood})")
             return MainScreenAction.RECOVER_MOOD
         }
 
         if (racing.checkEligibilityToStartExtraRacingProcess()) {
             MessageLog.i(TAG, "[INFO] Bot has no injuries, mood is sufficient and extra races can be run today. Setting the action to RACE.")
+            decisionTracer.recordActionChoice(MainScreenAction.RACE, "Extra-race eligible (no injury, sufficient mood, eligible day)")
             return MainScreenAction.RACE
         }
 
+        decisionTracer.recordActionChoice(MainScreenAction.TRAIN, "Default fallback after racing/mood/injury checks did not trigger")
         return MainScreenAction.TRAIN
     }
 
@@ -1924,6 +1968,7 @@ abstract class Campaign(game: Game) : Task(game) {
             training.handleTraining(StatName.WIT)
             bForcedWitTraining = false
             bHasCheckedDateThisTurn = false
+            decisionTracer.emit()
             return true
         }
 
@@ -1961,6 +2006,7 @@ abstract class Campaign(game: Game) : Task(game) {
                 return false
             }
         }
+        decisionTracer.emit()
         return true
     }
 
