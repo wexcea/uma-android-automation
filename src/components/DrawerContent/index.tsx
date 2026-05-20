@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useContext, useRef } from "react"
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from "react-native"
+import { View, Text, StyleSheet, Pressable, Linking } from "react-native"
 import { DrawerContentScrollView, DrawerContentComponentProps, useDrawerStatus } from "@react-navigation/drawer"
 import { CommonActions } from "@react-navigation/native"
 import { Ionicons } from "@expo/vector-icons"
@@ -8,6 +8,7 @@ import { markNavigationStart, markNavigationPhase } from "../../lib/performanceL
 import { useTheme } from "../../context/ThemeContext"
 import { ChatContext, BotMetaContext } from "../../context/BotStateContext"
 import { skillPlanSettingsPages } from "../../pages/SkillPlanSettings/config"
+import { circularPress } from "../../lib/pressSurface"
 
 interface MenuItem {
     /** The route name used for navigation. */
@@ -110,11 +111,7 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
                     color: colors.primary,
                     fontWeight: "600",
                 },
-                chevronButton: {
-                    padding: 4,
-                    marginLeft: 8,
-                    borderRadius: 4,
-                },
+                chevronButton: { ...circularPress(40), marginLeft: 8 },
                 nestedContainer: {
                     overflow: "hidden",
                 },
@@ -499,23 +496,21 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
 
         return (
             <View key={item.name}>
-                <View style={[itemStyle, isActive && activeStyle]}>
-                    <TouchableOpacity
-                        style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
-                        onPress={() => (level === 0 ? handleParentNavigation(item) : handleNavigation(item.name))}
-                        activeOpacity={0.7}
-                    >
-                        <View style={iconStyle}>
-                            <Ionicons name={item.icon(isActive) as any} size={iconSize} color={isActive ? colors.primary : colors.foreground} />
-                        </View>
-                        <Text style={[textStyle, isActive && textActiveStyle]}>{item.label}</Text>
-                    </TouchableOpacity>
+                <Pressable
+                    style={[itemStyle, isActive && activeStyle]}
+                    android_ripple={{ color: colors.ripple, foreground: true }}
+                    onPress={() => (level === 0 ? handleParentNavigation(item) : handleNavigation(item.name))}
+                >
+                    <View style={iconStyle}>
+                        <Ionicons name={item.icon(isActive) as any} size={iconSize} color={isActive ? colors.primary : colors.foreground} />
+                    </View>
+                    <Text style={[textStyle, isActive && textActiveStyle]}>{item.label}</Text>
                     {item.nested && (
-                        <TouchableOpacity onPress={(e) => handleChevronPress(e, item)} style={styles.chevronButton} activeOpacity={0.7}>
+                        <Pressable onPress={(e) => handleChevronPress(e, item)} style={styles.chevronButton} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={chevronSize} color={colors.mutedForeground} />
-                        </TouchableOpacity>
+                        </Pressable>
                     )}
-                </View>
+                </Pressable>
                 {item.nested && isExpanded && <View style={styles.nestedContainer}>{item.nested.map((nestedItem) => renderMenuItem(nestedItem, level + 1))}</View>}
             </View>
         )
@@ -536,12 +531,12 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
                 <View style={styles.menuContainer}>{menuItems.map((item) => renderMenuItem(item, 0))}</View>
             </DrawerContentScrollView>
             <View style={styles.footer}>
-                <TouchableOpacity onPress={() => Linking.openURL("https://github.com/steve1316/uma-android-automation")} activeOpacity={0.7}>
+                <Pressable onPress={() => Linking.openURL("https://github.com/steve1316/uma-android-automation")} android_ripple={{ color: colors.ripple, foreground: true }}>
                     <View style={styles.footerButton}>
                         <Ionicons name="logo-github" size={32} color={colors.primary} style={{ marginRight: 8 }} />
                         <Text style={styles.footerText}>Go to GitHub</Text>
                     </View>
-                </TouchableOpacity>
+                </Pressable>
             </View>
         </>
     )

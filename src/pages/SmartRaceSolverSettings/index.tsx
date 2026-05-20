@@ -1,5 +1,5 @@
 import { useMemo, useContext, useState, useEffect, useRef, useCallback } from "react"
-import { InteractionManager, View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native"
+import { InteractionManager, View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator } from "react-native"
 import { Divider } from "react-native-paper"
 import { previewSchedule, SchedulePreview, ScheduleEntry, SolverConfigSnapshot } from "../../lib/solver/preview"
 import {
@@ -852,7 +852,12 @@ const SmartRaceSolverSettings = () => {
                         {alternatives.map((alt) => {
                             const altColor = GRADE_COLORS[alt.grade] ?? colors.primary
                             return (
-                                <TouchableOpacity key={`${alt.name}-${alt.date}`} style={styles.popoverAltRow} onPress={() => switchTurnRace(turn, alt.name)}>
+                                <Pressable
+                                    key={`${alt.name}-${alt.date}`}
+                                    style={styles.popoverAltRow}
+                                    onPress={() => switchTurnRace(turn, alt.name)}
+                                    android_ripple={{ color: colors.ripple, foreground: true }}
+                                >
                                     <View style={[styles.popoverAltBadge, { backgroundColor: altColor }]}>
                                         <Text style={styles.calendarBadgeText}>{alt.grade.replace("PRE_OP", "Pre").replace("PRE-OP", "Pre")}</Text>
                                     </View>
@@ -862,7 +867,7 @@ const SmartRaceSolverSettings = () => {
                                             {alt.raceTrack} · {alt.terrain} · {alt.distanceType} ({alt.distanceMeters}m) · {alt.fans.toLocaleString()} fans
                                         </Text>
                                     </View>
-                                </TouchableOpacity>
+                                </Pressable>
                             )
                         })}
                     </ScrollView>
@@ -929,9 +934,12 @@ const SmartRaceSolverSettings = () => {
             <View key={turn} style={styles.calendarCellWrapper}>
                 <Popover>
                     <PopoverTrigger asChild>
-                        <TouchableOpacity style={[styles.calendarCell, isRace && styles.calendarCellRace, isLocked && styles.calendarCellLocked, highlightHit && styles.calendarCellHighlighted]}>
+                        <Pressable
+                            style={[styles.calendarCell, isRace && styles.calendarCellRace, isLocked && styles.calendarCellLocked, highlightHit && styles.calendarCellHighlighted]}
+                            android_ripple={{ color: colors.ripple, foreground: true }}
+                        >
                             {cellInner}
-                        </TouchableOpacity>
+                        </Pressable>
                     </PopoverTrigger>
                     <PopoverContent side="top" align="center" className="w-80 p-3">
                         {renderPopoverBody(turn, entry)}
@@ -1098,9 +1106,10 @@ const SmartRaceSolverSettings = () => {
                                             {filteredPresets.map((p) => {
                                                 const active = smartRaceSolverCharacterPreset === p.name
                                                 return (
-                                                    <TouchableOpacity
+                                                    <Pressable
                                                         key={p.name}
                                                         style={[styles.presetItem, active && styles.presetItemActive]}
+                                                        android_ripple={{ color: colors.ripple, foreground: true }}
                                                         onPress={() => applyPreset(p)}
                                                         onLayout={(e) => {
                                                             presetLayoutsRef.current.set(p.name, e.nativeEvent.layout.y)
@@ -1112,7 +1121,7 @@ const SmartRaceSolverSettings = () => {
                                                             Sprint {p.distanceAptitudes.Sprint} · Mile {p.distanceAptitudes.Mile} · Med {p.distanceAptitudes.Medium} · Long {p.distanceAptitudes.Long} ·
                                                             Turf {p.surfaceAptitudes.Turf} · Dirt {p.surfaceAptitudes.Dirt}
                                                         </Text>
-                                                    </TouchableOpacity>
+                                                    </Pressable>
                                                 )
                                             })}
                                             {presetSearch && filteredPresets.length === 0 && <Text style={styles.inputDescription}>No matches.</Text>}
@@ -1165,9 +1174,14 @@ const SmartRaceSolverSettings = () => {
                                             {APTITUDE_RANKS.map((rank) => {
                                                 const active = weights.aptitudeThreshold === rank
                                                 return (
-                                                    <TouchableOpacity key={rank} style={[styles.aptBtn, active && styles.aptBtnActive]} onPress={() => updateWeight("aptitudeThreshold", rank)}>
+                                                    <Pressable
+                                                        key={rank}
+                                                        style={[styles.aptBtn, active && styles.aptBtnActive]}
+                                                        onPress={() => updateWeight("aptitudeThreshold", rank)}
+                                                        android_ripple={{ color: active ? colors.rippleInverse : colors.ripple, foreground: true }}
+                                                    >
                                                         <Text style={active ? styles.aptBtnTextActive : styles.aptBtnText}>{rank}</Text>
-                                                    </TouchableOpacity>
+                                                    </Pressable>
                                                 )
                                             })}
                                         </View>
@@ -1261,9 +1275,14 @@ const SmartRaceSolverSettings = () => {
                                             {(Object.keys(OPTIMIZE_MODE_PRESETS) as OptimizeModeKey[]).map((mode) => {
                                                 const active = currentOptimizeMode === mode
                                                 return (
-                                                    <TouchableOpacity key={mode} style={[styles.aptBtn, active && styles.aptBtnActive]} onPress={() => setOptimizeMode(mode)}>
+                                                    <Pressable
+                                                        key={mode}
+                                                        style={[styles.aptBtn, active && styles.aptBtnActive]}
+                                                        onPress={() => setOptimizeMode(mode)}
+                                                        android_ripple={{ color: active ? colors.rippleInverse : colors.ripple, foreground: true }}
+                                                    >
                                                         <Text style={active ? styles.aptBtnTextActive : styles.aptBtnText}>{OPTIMIZE_MODE_LABELS[mode]}</Text>
-                                                    </TouchableOpacity>
+                                                    </Pressable>
                                                 )
                                             })}
                                         </View>
@@ -1297,117 +1316,133 @@ const SmartRaceSolverSettings = () => {
                                                     title: "Show advanced weights",
                                                     children: (
                                                         <View>
-                                                            <Text style={styles.inputLabel}>Race Value Weight</Text>
-                                                            <Input
-                                                                style={styles.input}
-                                                                value={raceValueInput}
-                                                                onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setRaceValueInput(t)}
-                                                                onBlur={() => updateWeight("raceValue", parseFloat(raceValueInput) || 0)}
-                                                                keyboardType="decimal-pad"
-                                                                placeholder="1.0"
-                                                            />
-                                                            <Text style={styles.inputDescription}>
-                                                                Multiplier on every race's stat + SP reward. Default 1.0. Raise to 2.0 to make the schedule more race-heavy; lower to 0.5 to favor
-                                                                training.
-                                                            </Text>
+                                                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                                                <Text style={styles.inputLabel}>Race Value Weight</Text>
+                                                                <Input
+                                                                    style={styles.input}
+                                                                    value={raceValueInput}
+                                                                    onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setRaceValueInput(t)}
+                                                                    onBlur={() => updateWeight("raceValue", parseFloat(raceValueInput) || 0)}
+                                                                    keyboardType="decimal-pad"
+                                                                    placeholder="1.0"
+                                                                />
+                                                                <Text style={styles.inputDescription}>
+                                                                    Multiplier on every race's stat + SP reward. Default 1.0. Raise to 2.0 to make the schedule more race-heavy; lower to 0.5 to favor
+                                                                    training.
+                                                                </Text>
+                                                            </Pressable>
 
-                                                            <Text style={styles.inputLabel}>Epithet Value Weight</Text>
-                                                            <Input
-                                                                style={styles.input}
-                                                                value={epithetValueInput}
-                                                                onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setEpithetValueInput(t)}
-                                                                onBlur={() => updateWeight("epithetValue", parseFloat(epithetValueInput) || 0)}
-                                                                keyboardType="decimal-pad"
-                                                                placeholder="1.0"
-                                                            />
-                                                            <Text style={styles.inputDescription}>
-                                                                Multiplier on epithet stat rewards. Default 1.0 weights an epithet's stats equally with race stats. Raise to 5.0 if you want the solver
-                                                                to chase epithets even at the cost of fewer total races.
-                                                            </Text>
+                                                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                                                <Text style={styles.inputLabel}>Epithet Value Weight</Text>
+                                                                <Input
+                                                                    style={styles.input}
+                                                                    value={epithetValueInput}
+                                                                    onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setEpithetValueInput(t)}
+                                                                    onBlur={() => updateWeight("epithetValue", parseFloat(epithetValueInput) || 0)}
+                                                                    keyboardType="decimal-pad"
+                                                                    placeholder="1.0"
+                                                                />
+                                                                <Text style={styles.inputDescription}>
+                                                                    Multiplier on epithet stat rewards. Default 1.0 weights an epithet's stats equally with race stats. Raise to 5.0 if you want the
+                                                                    solver to chase epithets even at the cost of fewer total races.
+                                                                </Text>
+                                                            </Pressable>
 
-                                                            <Text style={styles.inputLabel}>Fan Weight</Text>
-                                                            <Input
-                                                                style={styles.input}
-                                                                value={fanWeightInput}
-                                                                onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setFanWeightInput(t)}
-                                                                onBlur={() => updateWeight("fanWeight", parseFloat(fanWeightInput) || 0)}
-                                                                keyboardType="decimal-pad"
-                                                                placeholder="0.0"
-                                                            />
-                                                            <Text style={styles.inputDescription}>
-                                                                Score per fan earned from a race. Default 0.0 ignores fans entirely (Stat Epitaphs preset). 0.001 (Fans + Epitaphs preset) makes a
-                                                                25k-fan G1 worth ~25 score points - meaningful but not dominant. Above 0.005 the solver will race almost every eligible turn.
-                                                            </Text>
+                                                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                                                <Text style={styles.inputLabel}>Fan Weight</Text>
+                                                                <Input
+                                                                    style={styles.input}
+                                                                    value={fanWeightInput}
+                                                                    onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setFanWeightInput(t)}
+                                                                    onBlur={() => updateWeight("fanWeight", parseFloat(fanWeightInput) || 0)}
+                                                                    keyboardType="decimal-pad"
+                                                                    placeholder="0.0"
+                                                                />
+                                                                <Text style={styles.inputDescription}>
+                                                                    Score per fan earned from a race. Default 0.0 ignores fans entirely (Stat Epitaphs preset). 0.001 (Fans + Epitaphs preset) makes a
+                                                                    25k-fan G1 worth ~25 score points - meaningful but not dominant. Above 0.005 the solver will race almost every eligible turn.
+                                                                </Text>
+                                                            </Pressable>
 
-                                                            <Text style={styles.inputLabel}>Hint Reward Weight</Text>
-                                                            <Input
-                                                                style={styles.input}
-                                                                value={hintWeightInput}
-                                                                onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setHintWeightInput(t)}
-                                                                onBlur={() => updateWeight("hintWeight", parseFloat(hintWeightInput) || 0)}
-                                                                keyboardType="decimal-pad"
-                                                                placeholder="8.0"
-                                                            />
-                                                            <Text style={styles.inputDescription}>
-                                                                Score given for completing a skill-hint epithet (one that grants a skill instead of stats). Default 8.0 ≈ value of one G1 race. Drop to
-                                                                0 to skip hint-only epithets entirely.
-                                                            </Text>
+                                                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                                                <Text style={styles.inputLabel}>Hint Reward Weight</Text>
+                                                                <Input
+                                                                    style={styles.input}
+                                                                    value={hintWeightInput}
+                                                                    onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setHintWeightInput(t)}
+                                                                    onBlur={() => updateWeight("hintWeight", parseFloat(hintWeightInput) || 0)}
+                                                                    keyboardType="decimal-pad"
+                                                                    placeholder="8.0"
+                                                                />
+                                                                <Text style={styles.inputDescription}>
+                                                                    Score given for completing a skill-hint epithet (one that grants a skill instead of stats). Default 8.0 ≈ value of one G1 race. Drop
+                                                                    to 0 to skip hint-only epithets entirely.
+                                                                </Text>
+                                                            </Pressable>
 
-                                                            <Text style={styles.inputLabel}>Consecutive Race Penalty</Text>
-                                                            <Input
-                                                                style={styles.input}
-                                                                value={consecPenaltyInput}
-                                                                onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setConsecPenaltyInput(t)}
-                                                                onBlur={() => updateWeight("consecutiveRacePenalty", parseFloat(consecPenaltyInput) || 0)}
-                                                                keyboardType="decimal-pad"
-                                                                placeholder="3.0"
-                                                            />
-                                                            <Text style={styles.inputDescription}>
-                                                                Penalty per race when racing 3+ turns in a row. Models in-game motivation/condition loss. Late-Dec turns (23, 47, 71) are exempt because
-                                                                the year ends there. Set to 0 to disable.
-                                                            </Text>
+                                                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                                                <Text style={styles.inputLabel}>Consecutive Race Penalty</Text>
+                                                                <Input
+                                                                    style={styles.input}
+                                                                    value={consecPenaltyInput}
+                                                                    onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setConsecPenaltyInput(t)}
+                                                                    onBlur={() => updateWeight("consecutiveRacePenalty", parseFloat(consecPenaltyInput) || 0)}
+                                                                    keyboardType="decimal-pad"
+                                                                    placeholder="3.0"
+                                                                />
+                                                                <Text style={styles.inputDescription}>
+                                                                    Penalty per race when racing 3+ turns in a row. Models in-game motivation/condition loss. Late-Dec turns (23, 47, 71) are exempt
+                                                                    because the year ends there. Set to 0 to disable.
+                                                                </Text>
+                                                            </Pressable>
 
-                                                            <Text style={styles.inputLabel}>Summer Block Penalty</Text>
-                                                            <Input
-                                                                style={styles.input}
-                                                                value={summerPenaltyInput}
-                                                                onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setSummerPenaltyInput(t)}
-                                                                onBlur={() => updateWeight("summerPenalty", parseFloat(summerPenaltyInput) || 0)}
-                                                                keyboardType="decimal-pad"
-                                                                placeholder="5.0"
-                                                            />
-                                                            <Text style={styles.inputDescription}>
-                                                                Penalty for racing during summer training camps (turns 12-14, 36-39, 60-63). High enough to discourage racing through summer, low enough
-                                                                that an epithet-completing race can still be picked.
-                                                            </Text>
+                                                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                                                <Text style={styles.inputLabel}>Summer Block Penalty</Text>
+                                                                <Input
+                                                                    style={styles.input}
+                                                                    value={summerPenaltyInput}
+                                                                    onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setSummerPenaltyInput(t)}
+                                                                    onBlur={() => updateWeight("summerPenalty", parseFloat(summerPenaltyInput) || 0)}
+                                                                    keyboardType="decimal-pad"
+                                                                    placeholder="5.0"
+                                                                />
+                                                                <Text style={styles.inputDescription}>
+                                                                    Penalty for racing during summer training camps (turns 12-14, 36-39, 60-63). High enough to discourage racing through summer, low
+                                                                    enough that an epithet-completing race can still be picked.
+                                                                </Text>
+                                                            </Pressable>
 
-                                                            <Text style={styles.inputLabel}>Race Bonus %</Text>
-                                                            <Input
-                                                                style={styles.input}
-                                                                value={raceBonusPctInput}
-                                                                onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setRaceBonusPctInput(t)}
-                                                                onBlur={() => updateWeight("raceBonusPct", parseFloat(raceBonusPctInput) || 0)}
-                                                                keyboardType="decimal-pad"
-                                                                placeholder="50.0"
-                                                            />
-                                                            <Text style={styles.inputDescription}>
-                                                                Percentage uplift applied to base stat/SP reward of every race before scoring. Default 50%. Higher = the solver picks more races
-                                                                overall.
-                                                            </Text>
+                                                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                                                <Text style={styles.inputLabel}>Race Bonus %</Text>
+                                                                <Input
+                                                                    style={styles.input}
+                                                                    value={raceBonusPctInput}
+                                                                    onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setRaceBonusPctInput(t)}
+                                                                    onBlur={() => updateWeight("raceBonusPct", parseFloat(raceBonusPctInput) || 0)}
+                                                                    keyboardType="decimal-pad"
+                                                                    placeholder="50.0"
+                                                                />
+                                                                <Text style={styles.inputDescription}>
+                                                                    Percentage uplift applied to base stat/SP reward of every race before scoring. Default 50%. Higher = the solver picks more races
+                                                                    overall.
+                                                                </Text>
+                                                            </Pressable>
 
-                                                            <Text style={styles.inputLabel}>Race Cost %</Text>
-                                                            <Input
-                                                                style={styles.input}
-                                                                value={raceCostPctInput}
-                                                                onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setRaceCostPctInput(t)}
-                                                                onBlur={() => updateWeight("raceCostPct", parseFloat(raceCostPctInput) || 0)}
-                                                                keyboardType="decimal-pad"
-                                                                placeholder="100.0"
-                                                            />
-                                                            <Text style={styles.inputDescription}>
-                                                                Cost subtracted from each race's reward, expressed as a percentage of a G2 race's baseline value. At 100 (default), G2 and G3 races
-                                                                score zero net and only get raced when they progress an epithet. Lower this to schedule more races.
-                                                            </Text>
+                                                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                                                <Text style={styles.inputLabel}>Race Cost %</Text>
+                                                                <Input
+                                                                    style={styles.input}
+                                                                    value={raceCostPctInput}
+                                                                    onChangeText={(t) => /^-?\d*\.?\d*$/.test(t) && setRaceCostPctInput(t)}
+                                                                    onBlur={() => updateWeight("raceCostPct", parseFloat(raceCostPctInput) || 0)}
+                                                                    keyboardType="decimal-pad"
+                                                                    placeholder="100.0"
+                                                                />
+                                                                <Text style={styles.inputDescription}>
+                                                                    Cost subtracted from each race's reward, expressed as a percentage of a G2 race's baseline value. At 100 (default), G2 and G3 races
+                                                                    score zero net and only get raced when they progress an epithet. Lower this to schedule more races.
+                                                                </Text>
+                                                            </Pressable>
                                                         </View>
                                                     ),
                                                 },
@@ -1514,10 +1549,11 @@ const SmartRaceSolverSettings = () => {
                                                 const conditionLines = epBullets.length > 1 ? epBullets.slice(0, -1) : []
                                                 const isHighlighted = highlightedEpithet === name
                                                 return (
-                                                    <TouchableOpacity
+                                                    <Pressable
                                                         key={`sel-${name}`}
                                                         style={[styles.epithetCard, isHighlighted && styles.epithetCardHighlighted]}
                                                         onPress={() => setHighlightedEpithet(isHighlighted ? null : name)}
+                                                        android_ripple={{ color: colors.ripple, foreground: true }}
                                                     >
                                                         <Text style={styles.epithetCardName}>
                                                             {name}
@@ -1536,7 +1572,7 @@ const SmartRaceSolverSettings = () => {
                                                         ) : (
                                                             <Text style={styles.epithetCardCondition}>Condition: (condition unknown)</Text>
                                                         )}
-                                                    </TouchableOpacity>
+                                                    </Pressable>
                                                 )
                                             })
                                         })()}
@@ -1557,10 +1593,11 @@ const SmartRaceSolverSettings = () => {
                                             const isSelected = targetEpithets.includes(name) || forcedEpithets.includes(name)
                                             const isHighlighted = highlightedEpithet === name
                                             return (
-                                                <TouchableOpacity
+                                                <Pressable
                                                     key={`proj-${name}`}
                                                     style={[styles.epithetCard, isHighlighted && styles.epithetCardHighlighted]}
                                                     onPress={() => setHighlightedEpithet(isHighlighted ? null : name)}
+                                                    android_ripple={{ color: colors.ripple, foreground: true }}
                                                 >
                                                     <Text style={[styles.epithetCardName, { color: isSelected ? colors.primary : colors.foreground }]}>
                                                         {name}
@@ -1579,7 +1616,7 @@ const SmartRaceSolverSettings = () => {
                                                     ) : (
                                                         <Text style={styles.epithetCardCondition}>Condition: (condition unknown)</Text>
                                                     )}
-                                                </TouchableOpacity>
+                                                </Pressable>
                                             )
                                         })}
                                     </View>

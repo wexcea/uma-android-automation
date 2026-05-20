@@ -1,5 +1,5 @@
 import { useMemo, useContext, useRef, useState, useCallback } from "react"
-import { View, ScrollView, StyleSheet, TextInput, Text } from "react-native"
+import { View, ScrollView, StyleSheet, TextInput, Text, Pressable } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
 import { DiscordContext, defaultSettings, Settings } from "../../context/BotStateContext"
 import { SearchPageProvider } from "../../context/SearchPageContext"
@@ -153,18 +153,20 @@ const DiscordSettings = () => {
                             description="The token generated from the Discord Developer Portal. Your Discord bot must share a server with you."
                             style={styles.section}
                         >
-                            <Text style={styles.inputLabel}>Discord Bot Token</Text>
-                            <Text style={styles.inputDescription}>The token generated from the Discord Developer Portal. Your Discord bot must share a server with you.</Text>
-                            <TextInput
-                                style={[styles.textInput, !enableDiscordNotifications && styles.textInputDisabled]}
-                                value={discordToken}
-                                onChangeText={(text) => updateDiscordSetting("discordToken", text)}
-                                placeholder="Enter your Discord bot token..."
-                                placeholderTextColor={colors.foreground + "55"}
-                                editable={enableDiscordNotifications}
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                            />
+                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                <Text style={styles.inputLabel}>Discord Bot Token</Text>
+                                <Text style={styles.inputDescription}>The token generated from the Discord Developer Portal. Your Discord bot must share a server with you.</Text>
+                                <TextInput
+                                    style={[styles.textInput, !enableDiscordNotifications && styles.textInputDisabled]}
+                                    value={discordToken}
+                                    onChangeText={(text) => updateDiscordSetting("discordToken", text)}
+                                    placeholder="Enter your Discord bot token..."
+                                    placeholderTextColor={colors.foreground + "55"}
+                                    editable={enableDiscordNotifications}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                />
+                            </Pressable>
                         </SearchableItem>
 
                         {/* Discord User ID */}
@@ -174,19 +176,21 @@ const DiscordSettings = () => {
                             description="Your Discord user ID. Enable Developer Mode in Discord settings, then click your name and select 'Copy User ID'."
                             style={styles.section}
                         >
-                            <Text style={styles.inputLabel}>Discord User ID</Text>
-                            <Text style={styles.inputDescription}>Your Discord user ID. Enable Developer Mode in Discord settings, then click your name and select 'Copy User ID'.</Text>
-                            <TextInput
-                                style={[styles.textInput, !enableDiscordNotifications && styles.textInputDisabled]}
-                                value={discordUserID}
-                                onChangeText={(text) => updateDiscordSetting("discordUserID", text)}
-                                placeholder="Enter your Discord user ID..."
-                                placeholderTextColor={colors.foreground + "55"}
-                                editable={enableDiscordNotifications}
-                                keyboardType="numeric"
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                            />
+                            <Pressable android_ripple={{ color: colors.ripple, foreground: true }}>
+                                <Text style={styles.inputLabel}>Discord User ID</Text>
+                                <Text style={styles.inputDescription}>Your Discord user ID. Enable Developer Mode in Discord settings, then click your name and select 'Copy User ID'.</Text>
+                                <TextInput
+                                    style={[styles.textInput, !enableDiscordNotifications && styles.textInputDisabled]}
+                                    value={discordUserID}
+                                    onChangeText={(text) => updateDiscordSetting("discordUserID", text)}
+                                    placeholder="Enter your Discord user ID..."
+                                    placeholderTextColor={colors.foreground + "55"}
+                                    editable={enableDiscordNotifications}
+                                    keyboardType="numeric"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                />
+                            </Pressable>
                         </SearchableItem>
 
                         {/* Test Connection */}

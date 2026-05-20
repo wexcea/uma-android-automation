@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal as RNModal } from "react-native"
+import { View, Text, StyleSheet, ScrollView, Pressable, Modal as RNModal } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
 import CustomButton from "../CustomButton"
 import { Input } from "../ui/input"
@@ -389,13 +389,13 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
     return (
         <>
             <RNModal visible={visible && !showDeleteDialog} transparent={true} animationType="fade" onRequestClose={onClose}>
-                <TouchableOpacity style={styles.modal} activeOpacity={1} onPress={onClose}>
-                    <TouchableOpacity style={styles.modalContent} activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+                <Pressable style={styles.modal} onPress={onClose}>
+                    <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
                         <View style={styles.header}>
                             <Text style={styles.title}>Manage Profiles</Text>
-                            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                            <Pressable style={styles.closeButton} onPress={onClose} android_ripple={{ color: colors.ripple, foreground: true }}>
                                 <X size={24} color={colors.foreground} />
-                            </TouchableOpacity>
+                            </Pressable>
                         </View>
 
                         {/*
@@ -445,31 +445,43 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                                                         {isEditing ? (
                                                             <>
                                                                 {/* Save button */}
-                                                                <TouchableOpacity style={styles.actionButton} onPress={handleUpdateProfile}>
+                                                                <Pressable style={styles.actionButton} onPress={handleUpdateProfile} android_ripple={{ color: colors.ripple, foreground: true }}>
                                                                     <Check size={18} color={colors.primary} />
-                                                                </TouchableOpacity>
+                                                                </Pressable>
                                                                 {/* Cancel button */}
-                                                                <TouchableOpacity style={styles.actionButton} onPress={handleCancelEdit}>
+                                                                <Pressable style={styles.actionButton} onPress={handleCancelEdit} android_ripple={{ color: colors.ripple, foreground: true }}>
                                                                     <X size={18} color={colors.foreground} />
-                                                                </TouchableOpacity>
+                                                                </Pressable>
                                                             </>
                                                         ) : (
                                                             <>
                                                                 {/* Edit button */}
-                                                                <TouchableOpacity style={styles.actionButton} onPress={() => handleEditProfile(profile.id)}>
+                                                                <Pressable
+                                                                    style={styles.actionButton}
+                                                                    onPress={() => handleEditProfile(profile.id)}
+                                                                    android_ripple={{ color: colors.ripple, foreground: true }}
+                                                                >
                                                                     <Edit2 size={18} color={colors.primary} />
-                                                                </TouchableOpacity>
+                                                                </Pressable>
                                                                 {/* Delete button */}
-                                                                <TouchableOpacity style={styles.actionButton} onPress={() => handleDeleteClick(profile.id)}>
+                                                                <Pressable
+                                                                    style={styles.actionButton}
+                                                                    onPress={() => handleDeleteClick(profile.id)}
+                                                                    android_ripple={{ color: colors.ripple, foreground: true }}
+                                                                >
                                                                     <Trash2 size={18} color={colors.destructive} />
-                                                                </TouchableOpacity>
+                                                                </Pressable>
                                                             </>
                                                         )}
                                                         {/* Save button */}
                                                         {!isEditing && onOverwriteSettings && (
-                                                            <TouchableOpacity style={styles.actionButton} onPress={() => handleSaveClick(profile.id)}>
+                                                            <Pressable
+                                                                style={styles.actionButton}
+                                                                onPress={() => handleSaveClick(profile.id)}
+                                                                android_ripple={{ color: colors.ripple, foreground: true }}
+                                                            >
                                                                 <Save size={18} color={colors.primary} />
-                                                            </TouchableOpacity>
+                                                            </Pressable>
                                                         )}
                                                     </View>
                                                 </View>
@@ -490,8 +502,8 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                                 />
                             )}
                         </ScrollView>
-                    </TouchableOpacity>
-                </TouchableOpacity>
+                    </Pressable>
+                </Pressable>
             </RNModal>
 
             {/* Delete dialog */}
@@ -501,9 +513,9 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                         <View style={styles.header}>
                             <Text style={styles.title}>Delete Profile</Text>
                             {/* Close button */}
-                            <TouchableOpacity style={styles.closeButton} onPress={handleDeleteCancel}>
+                            <Pressable style={styles.closeButton} onPress={handleDeleteCancel} android_ripple={{ color: colors.ripple, foreground: true }}>
                                 <X size={24} color={colors.foreground} />
-                            </TouchableOpacity>
+                            </Pressable>
                         </View>
                         <Text style={{ color: colors.foreground, marginBottom: 20 }}>Are you sure you want to delete this profile? This action cannot be undone.</Text>
                         <View style={styles.buttonRow}>

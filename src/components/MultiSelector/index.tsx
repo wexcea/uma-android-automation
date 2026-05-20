@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react"
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, ViewStyle } from "react-native"
+import { View, Text, StyleSheet, Pressable, Modal, TextInput, ScrollView, ViewStyle } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
 import CustomCheckbox from "../CustomCheckbox"
 import CustomButton from "../CustomButton"
@@ -318,10 +318,15 @@ const MultiSelector: React.FC<MultiSelectorProps> = ({
 
             {/* Multi-Selector Button */}
             <View style={styles.multiSelectorContainer}>
-                <TouchableOpacity style={selectAll ? styles.multiSelectorButtonDisabled : styles.multiSelectorButton} onPress={() => setModalVisible(true)} disabled={selectAll}>
+                <Pressable
+                    style={selectAll ? styles.multiSelectorButtonDisabled : styles.multiSelectorButton}
+                    onPress={() => setModalVisible(true)}
+                    disabled={selectAll}
+                    android_ripple={{ color: colors.ripple, foreground: true }}
+                >
                     <Search size={20} color={selectAll ? colors.foreground : colors.background} />
                     <Text style={selectAll ? styles.multiSelectorButtonTextDisabled : styles.multiSelectorButtonText}>{selectAll ? "All Selected" : selectIndividualLabel}</Text>
-                </TouchableOpacity>
+                </Pressable>
             </View>
 
             {/* Selected Count and Disabled Note */}
@@ -335,14 +340,14 @@ const MultiSelector: React.FC<MultiSelectorProps> = ({
 
             {/* Modal for individual selection */}
             <Modal animationType="slide" transparent={true} visible={modalVisible && !selectAll} onRequestClose={() => setModalVisible(false)}>
-                <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
-                    <TouchableOpacity style={styles.modalContent} activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+                <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
+                    <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
                         {/* Modal Header */}
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>{title}</Text>
-                            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                            <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                 <X size={24} color={colors.foreground} />
-                            </TouchableOpacity>
+                            </Pressable>
                         </View>
 
                         {/* Search Container */}
@@ -350,9 +355,9 @@ const MultiSelector: React.FC<MultiSelectorProps> = ({
                             <Search size={20} color={colors.foreground} />
                             <TextInput style={styles.searchInput} placeholder="Search..." placeholderTextColor={colors.foreground + "80"} value={searchQuery} onChangeText={setSearchQuery} />
                             {searchQuery.length > 0 && (
-                                <TouchableOpacity style={styles.clearSearchButton} onPress={() => setSearchQuery("")}>
+                                <Pressable style={styles.clearSearchButton} onPress={() => setSearchQuery("")} android_ripple={{ color: colors.ripple, foreground: true }}>
                                     <X size={16} color={colors.foreground} />
-                                </TouchableOpacity>
+                                </Pressable>
                             )}
                         </View>
 
@@ -390,8 +395,8 @@ const MultiSelector: React.FC<MultiSelectorProps> = ({
                                 Select All
                             </CustomButton>
                         </View>
-                    </TouchableOpacity>
-                </TouchableOpacity>
+                    </Pressable>
+                </Pressable>
             </Modal>
         </View>
     )

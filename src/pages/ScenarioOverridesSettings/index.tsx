@@ -1,5 +1,5 @@
 import { useMemo, useContext, useRef, useState, useCallback, useEffect } from "react"
-import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, InteractionManager } from "react-native"
+import { View, Text, ScrollView, StyleSheet, Image, Pressable, InteractionManager } from "react-native"
 import { Divider } from "react-native-paper"
 import { useRoute } from "@react-navigation/native"
 import { useTheme } from "../../context/ThemeContext"
@@ -313,39 +313,36 @@ const ScenarioOverridesSettings = () => {
                                                         Select which race grades should trigger a shop check after the race in the Trackblazer scenario.
                                                     </Text>
                                                     <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                                                        {["G1", "G2", "G3"].map((grade) => (
-                                                            <View
-                                                                key={grade}
-                                                                style={{
-                                                                    padding: 10,
-                                                                    borderRadius: 8,
-                                                                    marginRight: 8,
-                                                                    marginBottom: 8,
-                                                                    backgroundColor: scenarioOverrides.trackblazerShopCheckGrades.includes(grade) ? colors.primary : colors.card,
-                                                                }}
-                                                                onTouchEnd={() => {
-                                                                    const currentGrades = scenarioOverrides.trackblazerShopCheckGrades
-                                                                    if (currentGrades.includes(grade)) {
-                                                                        updateOverrideSetting(
-                                                                            "trackblazerShopCheckGrades",
-                                                                            currentGrades.filter((g) => g !== grade)
-                                                                        )
-                                                                    } else {
-                                                                        updateOverrideSetting("trackblazerShopCheckGrades", [...currentGrades, grade])
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Text
+                                                        {["G1", "G2", "G3"].map((grade) => {
+                                                            const selected = scenarioOverrides.trackblazerShopCheckGrades.includes(grade)
+                                                            return (
+                                                                <Pressable
+                                                                    key={grade}
                                                                     style={{
-                                                                        fontSize: 14,
-                                                                        fontWeight: "600",
-                                                                        color: scenarioOverrides.trackblazerShopCheckGrades.includes(grade) ? colors.background : colors.foreground,
+                                                                        padding: 10,
+                                                                        borderRadius: 8,
+                                                                        marginRight: 8,
+                                                                        marginBottom: 8,
+                                                                        overflow: "hidden",
+                                                                        backgroundColor: selected ? colors.primary : colors.card,
                                                                     }}
+                                                                    onPress={() => {
+                                                                        const currentGrades = scenarioOverrides.trackblazerShopCheckGrades
+                                                                        if (currentGrades.includes(grade)) {
+                                                                            updateOverrideSetting(
+                                                                                "trackblazerShopCheckGrades",
+                                                                                currentGrades.filter((g) => g !== grade)
+                                                                            )
+                                                                        } else {
+                                                                            updateOverrideSetting("trackblazerShopCheckGrades", [...currentGrades, grade])
+                                                                        }
+                                                                    }}
+                                                                    android_ripple={{ color: selected ? colors.rippleInverse : colors.ripple, foreground: true }}
                                                                 >
-                                                                    {grade}
-                                                                </Text>
-                                                            </View>
-                                                        ))}
+                                                                    <Text style={{ fontSize: 14, fontWeight: "600", color: selected ? colors.background : colors.foreground }}>{grade}</Text>
+                                                                </Pressable>
+                                                            )
+                                                        })}
                                                     </View>
                                                 </View>
 
@@ -355,39 +352,36 @@ const ScenarioOverridesSettings = () => {
                                                         Select which race grades should allow using a Race Retry in the Trackblazer scenario.
                                                     </Text>
                                                     <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                                                        {["G1", "G2", "G3"].map((grade) => (
-                                                            <View
-                                                                key={grade}
-                                                                style={{
-                                                                    padding: 10,
-                                                                    borderRadius: 8,
-                                                                    marginRight: 8,
-                                                                    marginBottom: 8,
-                                                                    backgroundColor: scenarioOverrides.trackblazerRetryRacesBeforeFinalGrades.includes(grade) ? colors.primary : colors.card,
-                                                                }}
-                                                                onTouchEnd={() => {
-                                                                    const currentGrades = scenarioOverrides.trackblazerRetryRacesBeforeFinalGrades
-                                                                    if (currentGrades.includes(grade)) {
-                                                                        updateOverrideSetting(
-                                                                            "trackblazerRetryRacesBeforeFinalGrades",
-                                                                            currentGrades.filter((g) => g !== grade)
-                                                                        )
-                                                                    } else {
-                                                                        updateOverrideSetting("trackblazerRetryRacesBeforeFinalGrades", [...currentGrades, grade])
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Text
+                                                        {["G1", "G2", "G3"].map((grade) => {
+                                                            const selected = scenarioOverrides.trackblazerRetryRacesBeforeFinalGrades.includes(grade)
+                                                            return (
+                                                                <Pressable
+                                                                    key={grade}
                                                                     style={{
-                                                                        fontSize: 14,
-                                                                        fontWeight: "600",
-                                                                        color: scenarioOverrides.trackblazerRetryRacesBeforeFinalGrades.includes(grade) ? colors.background : colors.foreground,
+                                                                        padding: 10,
+                                                                        borderRadius: 8,
+                                                                        marginRight: 8,
+                                                                        marginBottom: 8,
+                                                                        overflow: "hidden",
+                                                                        backgroundColor: selected ? colors.primary : colors.card,
                                                                     }}
+                                                                    onPress={() => {
+                                                                        const currentGrades = scenarioOverrides.trackblazerRetryRacesBeforeFinalGrades
+                                                                        if (currentGrades.includes(grade)) {
+                                                                            updateOverrideSetting(
+                                                                                "trackblazerRetryRacesBeforeFinalGrades",
+                                                                                currentGrades.filter((g) => g !== grade)
+                                                                            )
+                                                                        } else {
+                                                                            updateOverrideSetting("trackblazerRetryRacesBeforeFinalGrades", [...currentGrades, grade])
+                                                                        }
+                                                                    }}
+                                                                    android_ripple={{ color: selected ? colors.rippleInverse : colors.ripple, foreground: true }}
                                                                 >
-                                                                    {grade}
-                                                                </Text>
-                                                            </View>
-                                                        ))}
+                                                                    <Text style={{ fontSize: 14, fontWeight: "600", color: selected ? colors.background : colors.foreground }}>{grade}</Text>
+                                                                </Pressable>
+                                                            )
+                                                        })}
                                                     </View>
                                                 </View>
 
@@ -397,39 +391,36 @@ const ScenarioOverridesSettings = () => {
                                                         Select preferred track distances for extra race selection. Matching races will be prioritized. Leave empty for no preference.
                                                     </Text>
                                                     <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                                                        {["Sprint", "Mile", "Medium", "Long"].map((distance) => (
-                                                            <View
-                                                                key={distance}
-                                                                style={{
-                                                                    padding: 10,
-                                                                    borderRadius: 8,
-                                                                    marginRight: 8,
-                                                                    marginBottom: 8,
-                                                                    backgroundColor: scenarioOverrides.trackblazerPreferredDistances.includes(distance) ? colors.primary : colors.card,
-                                                                }}
-                                                                onTouchEnd={() => {
-                                                                    const current = scenarioOverrides.trackblazerPreferredDistances
-                                                                    if (current.includes(distance)) {
-                                                                        updateOverrideSetting(
-                                                                            "trackblazerPreferredDistances",
-                                                                            current.filter((d) => d !== distance)
-                                                                        )
-                                                                    } else {
-                                                                        updateOverrideSetting("trackblazerPreferredDistances", [...current, distance])
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Text
+                                                        {["Sprint", "Mile", "Medium", "Long"].map((distance) => {
+                                                            const selected = scenarioOverrides.trackblazerPreferredDistances.includes(distance)
+                                                            return (
+                                                                <Pressable
+                                                                    key={distance}
                                                                     style={{
-                                                                        fontSize: 14,
-                                                                        fontWeight: "600",
-                                                                        color: scenarioOverrides.trackblazerPreferredDistances.includes(distance) ? colors.background : colors.foreground,
+                                                                        padding: 10,
+                                                                        borderRadius: 8,
+                                                                        marginRight: 8,
+                                                                        marginBottom: 8,
+                                                                        overflow: "hidden",
+                                                                        backgroundColor: selected ? colors.primary : colors.card,
                                                                     }}
+                                                                    onPress={() => {
+                                                                        const current = scenarioOverrides.trackblazerPreferredDistances
+                                                                        if (current.includes(distance)) {
+                                                                            updateOverrideSetting(
+                                                                                "trackblazerPreferredDistances",
+                                                                                current.filter((d) => d !== distance)
+                                                                            )
+                                                                        } else {
+                                                                            updateOverrideSetting("trackblazerPreferredDistances", [...current, distance])
+                                                                        }
+                                                                    }}
+                                                                    android_ripple={{ color: selected ? colors.rippleInverse : colors.ripple, foreground: true }}
                                                                 >
-                                                                    {distance}
-                                                                </Text>
-                                                            </View>
-                                                        ))}
+                                                                    <Text style={{ fontSize: 14, fontWeight: "600", color: selected ? colors.background : colors.foreground }}>{distance}</Text>
+                                                                </Pressable>
+                                                            )
+                                                        })}
                                                     </View>
                                                 </View>
 
@@ -439,39 +430,36 @@ const ScenarioOverridesSettings = () => {
                                                         Select preferred track surfaces for extra race selection. Matching races will be prioritized. Leave empty for no preference.
                                                     </Text>
                                                     <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                                                        {["Turf", "Dirt"].map((surface) => (
-                                                            <View
-                                                                key={surface}
-                                                                style={{
-                                                                    padding: 10,
-                                                                    borderRadius: 8,
-                                                                    marginRight: 8,
-                                                                    marginBottom: 8,
-                                                                    backgroundColor: scenarioOverrides.trackblazerPreferredSurfaces.includes(surface) ? colors.primary : colors.card,
-                                                                }}
-                                                                onTouchEnd={() => {
-                                                                    const current = scenarioOverrides.trackblazerPreferredSurfaces
-                                                                    if (current.includes(surface)) {
-                                                                        updateOverrideSetting(
-                                                                            "trackblazerPreferredSurfaces",
-                                                                            current.filter((s) => s !== surface)
-                                                                        )
-                                                                    } else {
-                                                                        updateOverrideSetting("trackblazerPreferredSurfaces", [...current, surface])
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Text
+                                                        {["Turf", "Dirt"].map((surface) => {
+                                                            const selected = scenarioOverrides.trackblazerPreferredSurfaces.includes(surface)
+                                                            return (
+                                                                <Pressable
+                                                                    key={surface}
                                                                     style={{
-                                                                        fontSize: 14,
-                                                                        fontWeight: "600",
-                                                                        color: scenarioOverrides.trackblazerPreferredSurfaces.includes(surface) ? colors.background : colors.foreground,
+                                                                        padding: 10,
+                                                                        borderRadius: 8,
+                                                                        marginRight: 8,
+                                                                        marginBottom: 8,
+                                                                        overflow: "hidden",
+                                                                        backgroundColor: selected ? colors.primary : colors.card,
                                                                     }}
+                                                                    onPress={() => {
+                                                                        const current = scenarioOverrides.trackblazerPreferredSurfaces
+                                                                        if (current.includes(surface)) {
+                                                                            updateOverrideSetting(
+                                                                                "trackblazerPreferredSurfaces",
+                                                                                current.filter((s) => s !== surface)
+                                                                            )
+                                                                        } else {
+                                                                            updateOverrideSetting("trackblazerPreferredSurfaces", [...current, surface])
+                                                                        }
+                                                                    }}
+                                                                    android_ripple={{ color: selected ? colors.rippleInverse : colors.ripple, foreground: true }}
                                                                 >
-                                                                    {surface}
-                                                                </Text>
-                                                            </View>
-                                                        ))}
+                                                                    <Text style={{ fontSize: 14, fontWeight: "600", color: selected ? colors.background : colors.foreground }}>{surface}</Text>
+                                                                </Pressable>
+                                                            )
+                                                        })}
                                                     </View>
                                                 </View>
 
@@ -515,7 +503,12 @@ const ScenarioOverridesSettings = () => {
                                                         <View style={{ height: 400 }}>
                                                             <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={true}>
                                                                 {filteredItems.map((itemName) => (
-                                                                    <TouchableOpacity key={itemName} onPress={() => handleItemPress(itemName)} style={styles.itemContainer}>
+                                                                    <Pressable
+                                                                        key={itemName}
+                                                                        onPress={() => handleItemPress(itemName)}
+                                                                        style={styles.itemContainer}
+                                                                        android_ripple={{ color: colors.ripple, foreground: true }}
+                                                                    >
                                                                         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flex: 1 }}>
                                                                             <Image source={trackblazerIcons[itemName].icon} style={{ width: 48, height: 48, marginRight: 8 }} />
                                                                             <View style={{ flex: 1 }}>
@@ -526,7 +519,7 @@ const ScenarioOverridesSettings = () => {
                                                                             </View>
                                                                             {scenarioOverrides.trackblazerExcludedItems.includes(itemName) && <CircleCheckBig size={18} color={"green"} />}
                                                                         </View>
-                                                                    </TouchableOpacity>
+                                                                    </Pressable>
                                                                 ))}
                                                             </ScrollView>
                                                         </View>

@@ -1,5 +1,6 @@
 import React from "react"
-import { View, Text, TouchableOpacity, ViewStyle } from "react-native"
+import { Pressable, Text, View, ViewStyle } from "react-native"
+import { useTheme } from "../../context/ThemeContext"
 import { useThemeClasses } from "../../hooks/useThemeClasses"
 import { copyToClipboard } from "../../lib/utils"
 
@@ -33,14 +34,21 @@ interface NavigationLinkProps {
  */
 const NavigationLink: React.FC<NavigationLinkProps> = ({ title, description, onPress, disabled = false, disabledDescription, className = "", style }) => {
     const themeClasses = useThemeClasses()
+    const { colors } = useTheme()
 
     return (
-        <View className={`mt-5 p-4 rounded-lg border ${themeClasses.bgCard} ${themeClasses.border} ${disabled ? "opacity-50" : ""} ${className}`} style={style}>
-            <TouchableOpacity onPress={disabled ? undefined : onPress} onLongPress={() => copyToClipboard(title)} disabled={disabled}>
+        <View className={`mt-5 rounded-lg border overflow-hidden ${themeClasses.bgCard} ${themeClasses.border} ${disabled ? "opacity-50" : ""} ${className}`} style={style}>
+            <Pressable
+                className="p-4"
+                onPress={disabled ? undefined : onPress}
+                onLongPress={() => copyToClipboard(title)}
+                disabled={disabled}
+                android_ripple={{ color: colors.ripple, foreground: true }}
+            >
                 <Text className={`text-lg font-semibold ${disabled ? themeClasses.textSecondary : themeClasses.text}`}>{title}</Text>
                 <Text className={`mt-2 ${themeClasses.textSecondary}`}>{description}</Text>
                 {disabled && disabledDescription && <Text className={`mt-2 text-sm text-orange-500`}>⚠️ {disabledDescription}</Text>}
-            </TouchableOpacity>
+            </Pressable>
         </View>
     )
 }

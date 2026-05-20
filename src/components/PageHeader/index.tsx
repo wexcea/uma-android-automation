@@ -1,10 +1,11 @@
 import React, { useMemo, useState, useRef, useEffect } from "react"
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextInput, Animated, Keyboard, ScrollView } from "react-native"
+import { View, Text, StyleSheet, Pressable, ViewStyle, TextInput, Animated, Keyboard, ScrollView } from "react-native"
 import { useNavigation, DrawerActions } from "@react-navigation/native"
 import { Ionicons } from "@expo/vector-icons"
 import { useTheme } from "../../context/ThemeContext"
 import { useSearchRegistry } from "../../context/SearchRegistryContext"
 import { Portal } from "@rn-primitives/portal"
+import { circularPress } from "../../lib/pressSurface"
 
 interface PageHeaderProps {
     /** The title to display in the header. */
@@ -235,14 +236,8 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                     alignItems: "center",
                     justifyContent: "flex-end",
                 },
-                menuButton: {
-                    padding: 8,
-                    borderRadius: 8,
-                },
-                homeButton: {
-                    padding: 8,
-                    borderRadius: 8,
-                },
+                menuButton: circularPress(44),
+                homeButton: circularPress(40),
                 title: {
                     flex: 1,
                     flexShrink: 1,
@@ -317,22 +312,22 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
             <View style={styles.header}>
                 <View style={[styles.headerLeft, { flex: 1, minWidth: 0 }]}>
                     {/* Hamburger menu button */}
-                    <TouchableOpacity onPress={openDrawer} style={styles.menuButton} activeOpacity={0.7}>
+                    <Pressable onPress={openDrawer} style={styles.menuButton} android_ripple={{ color: colors.ripple, foreground: true }}>
                         <Ionicons name="menu" size={28} color={colors.foreground} />
-                    </TouchableOpacity>
+                    </Pressable>
 
                     {/* Home button */}
                     {!isSearching && showHomeButton && (
-                        <TouchableOpacity onPress={goHome} style={styles.homeButton} activeOpacity={0.7}>
+                        <Pressable onPress={goHome} style={styles.homeButton} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <Ionicons name="home" size={24} color={colors.foreground} />
-                        </TouchableOpacity>
+                        </Pressable>
                     )}
 
                     {/* Search button */}
                     {!isSearching && (
-                        <TouchableOpacity onPress={handleSearchToggle} style={styles.homeButton} activeOpacity={0.7}>
+                        <Pressable onPress={handleSearchToggle} style={styles.homeButton} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <Ionicons name="search" size={24} color={colors.foreground} />
-                        </TouchableOpacity>
+                        </Pressable>
                     )}
 
                     {/* Left component */}
@@ -354,9 +349,9 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
                             />
-                            <TouchableOpacity onPress={handleSearchToggle} activeOpacity={0.7} style={{ padding: 4 }}>
+                            <Pressable onPress={handleSearchToggle} style={{ padding: 4 }} android_ripple={{ color: colors.ripple, foreground: true }}>
                                 <Ionicons name="close" size={20} color={colors.foreground} />
-                            </TouchableOpacity>
+                            </Pressable>
                         </View>
                     )}
                 </View>
@@ -384,10 +379,10 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                                             </View>
                                             {/* Search results items */}
                                             {section.data.map((item) => (
-                                                <TouchableOpacity key={item.id} style={styles.resultItem} onPress={() => handleResultPress(item)}>
+                                                <Pressable key={item.id} style={styles.resultItem} onPress={() => handleResultPress(item)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                                     <HighlightedText text={item.title} query={searchQuery} style={styles.resultTitle} highlightColor={colors.primary} />
                                                     <HighlightedText text={item.description} query={searchQuery} style={styles.resultDescription} highlightColor={colors.primary} />
-                                                </TouchableOpacity>
+                                                </Pressable>
                                             ))}
                                         </View>
                                     ))

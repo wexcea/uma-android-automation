@@ -1,5 +1,5 @@
 import React, { useMemo, useContext, useEffect, useState, useRef, useCallback } from "react"
-import { View, Text, ScrollView, StyleSheet, Modal, TouchableOpacity, Dimensions, InteractionManager } from "react-native"
+import { View, Text, ScrollView, StyleSheet, Modal, Pressable, Dimensions, InteractionManager } from "react-native"
 import { Snackbar } from "react-native-paper"
 import { useTheme } from "../../context/ThemeContext"
 import { TrainingContext, GeneralMiscContext, BotMetaContext, defaultSettings, Settings } from "../../context/BotStateContext"
@@ -403,22 +403,22 @@ const TrainingSettings = () => {
     ) => {
         const content = (
             <View style={styles.section}>
-                <View style={styles.row}>
-                    <Text style={styles.label}>{title}</Text>
-                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                <Pressable onPress={() => setModalVisible(true)} android_ripple={{ color: colors.ripple, foreground: true }}>
+                    <View style={styles.row}>
+                        <Text style={styles.label}>{title}</Text>
                         <Text style={styles.pressableText}>{selectedStats.length === 0 ? "None" : selectedStats.join(", ")}</Text>
-                    </TouchableOpacity>
-                </View>
-                {description && <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>{description}</Text>}
+                    </View>
+                    {description && <Text style={[styles.label, { fontSize: 14, color: colors.foreground, opacity: 0.7, marginTop: 4 }]}>{description}</Text>}
+                </Pressable>
 
                 <Modal visible={modalVisible} transparent={true} animationType="fade" onRequestClose={() => setModalVisible(false)}>
-                    <TouchableOpacity style={styles.modal} activeOpacity={1} onPress={() => setModalVisible(false)}>
-                        <TouchableOpacity style={styles.modalContent} activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+                    <Pressable style={styles.modal} onPress={() => setModalVisible(false)}>
+                        <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
                             <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>{title}</Text>
-                                <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                                <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                     <Text style={styles.closeText}>✕</Text>
-                                </TouchableOpacity>
+                                </Pressable>
                             </View>
 
                             {mode === "priority" ? (
@@ -466,8 +466,8 @@ const TrainingSettings = () => {
                                     Select All
                                 </CustomButton>
                             </View>
-                        </TouchableOpacity>
-                    </TouchableOpacity>
+                        </Pressable>
+                    </Pressable>
                 </Modal>
             </View>
         )

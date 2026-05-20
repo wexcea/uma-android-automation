@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react"
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native"
+import { View, StyleSheet, Pressable, Text } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
 import CustomSelect from "../CustomSelect"
 import { useProfileManager } from "../../hooks/useProfileManager"
@@ -190,13 +190,13 @@ const ProfileSelector: React.FC<ProfileSelectorProps> = ({ currentTrainingSettin
                     <CustomSelect placeholder="Select a profile" options={profileOptions} value={selectedProfileName} onValueChange={handleProfileChange} width="100%" />
                 </View>
                 {/* Create profile button */}
-                <TouchableOpacity style={styles.iconButton} onPress={() => setShowCreateModal(true)}>
+                <Pressable style={styles.iconButton} onPress={() => setShowCreateModal(true)} android_ripple={{ color: colors.ripple, foreground: true }}>
                     <Plus size={20} color={colors.foreground} />
-                </TouchableOpacity>
+                </Pressable>
                 {/* Manage profiles button */}
-                <TouchableOpacity style={styles.iconButton} onPress={() => setShowManageModal(true)}>
+                <Pressable style={styles.iconButton} onPress={() => setShowManageModal(true)} android_ripple={{ color: colors.ripple, foreground: true }}>
                     <SettingsIcon size={20} color={colors.foreground} />
-                </TouchableOpacity>
+                </Pressable>
             </View>
 
             <View style={[styles.row, { marginTop: 12 }]}>

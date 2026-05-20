@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react"
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native"
+import { StyleSheet, Text, View, Pressable } from "react-native"
 import { FlashList } from "@shopify/flash-list"
 import * as DocumentPicker from "expo-document-picker"
 import * as FileSystem from "expo-file-system"
@@ -18,6 +18,7 @@ import CustomCheckbox from "../../components/CustomCheckbox"
 import PageHeader from "../../components/PageHeader"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import WarningContainer from "../../components/WarningContainer"
+import { circularPress } from "../../lib/pressSurface"
 
 type MixedRecord = DayRecord | GapRecord | FileDividerRecord
 
@@ -187,9 +188,9 @@ const EventLogVisualizer: React.FC = () => {
                     </CustomButton>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <TouchableOpacity style={{ padding: 8 }}>
+                            <Pressable style={circularPress(40)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                 <Info size={20} color={colors.primary} />
-                            </TouchableOpacity>
+                            </Pressable>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" style={{ backgroundColor: isDark ? colors.muted : "black", maxWidth: 300 }}>
                             <WarningContainer>
@@ -221,18 +222,26 @@ const EventLogVisualizer: React.FC = () => {
 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                     <View style={[styles.toggleContainer, { flex: 1 }]}>
-                        <TouchableOpacity style={[styles.toggleButton, viewMode === "timeline" ? styles.toggleButtonActive : styles.toggleButtonInactive]} onPress={() => setViewMode("timeline")}>
+                        <Pressable
+                            style={[styles.toggleButton, viewMode === "timeline" ? styles.toggleButtonActive : styles.toggleButtonInactive]}
+                            onPress={() => setViewMode("timeline")}
+                            android_ripple={{ color: viewMode === "timeline" ? colors.rippleInverse : colors.ripple, foreground: true }}
+                        >
                             <Text style={[styles.toggleButtonText, viewMode === "timeline" ? styles.toggleButtonTextActive : styles.toggleButtonTextInactive]}>Timeline</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.toggleButton, viewMode === "years" ? styles.toggleButtonActive : styles.toggleButtonInactive]} onPress={() => setViewMode("years")}>
+                        </Pressable>
+                        <Pressable
+                            style={[styles.toggleButton, viewMode === "years" ? styles.toggleButtonActive : styles.toggleButtonInactive]}
+                            onPress={() => setViewMode("years")}
+                            android_ripple={{ color: viewMode === "years" ? colors.rippleInverse : colors.ripple, foreground: true }}
+                        >
                             <Text style={[styles.toggleButtonText, viewMode === "years" ? styles.toggleButtonTextActive : styles.toggleButtonTextInactive]}>Year Summaries</Text>
-                        </TouchableOpacity>
+                        </Pressable>
                     </View>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <TouchableOpacity style={{ padding: 8 }}>
+                            <Pressable style={circularPress(40)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                 <Info size={20} color={colors.primary} />
-                            </TouchableOpacity>
+                            </Pressable>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" style={{ backgroundColor: isDark ? colors.muted : "black", maxWidth: 300 }}>
                             <Text style={styles.empty}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import { View, Text, TouchableOpacity, LayoutChangeEvent, ViewStyle, ScrollView } from "react-native"
+import { View, Text, Pressable, LayoutChangeEvent, ViewStyle, ScrollView } from "react-native"
 import DragList, { DragListRenderItemInfo } from "react-native-draglist"
 import { Checkbox } from "../ui/checkbox"
 import { Label } from "../ui/label"
@@ -148,9 +148,9 @@ const DraggablePriorityList: React.FC<DraggablePriorityListProps> = ({ items, se
 
         return (
             <View key={item.id} style={{ marginVertical: 1 }} className={`mb-2 ${className}`}>
-                <TouchableOpacity
+                <Pressable
                     style={{ justifyContent: "space-between", backgroundColor: colors.input }}
-                    activeOpacity={0.7}
+                    android_ripple={{ color: colors.ripple, foreground: true }}
                     className="flex flex-row items-center gap-2 border border-border rounded-lg p-2"
                 >
                     <View style={{ flex: 1, flexDirection: "row", gap: 10 }}>
@@ -178,7 +178,7 @@ const DraggablePriorityList: React.FC<DraggablePriorityListProps> = ({ items, se
                             <Grip size={18} color={colors.primary} onPressIn={isSelected ? onDragStart : undefined} onPressOut={isSelected ? onDragEnd : undefined} />
                         </View>
                     )}
-                </TouchableOpacity>
+                </Pressable>
             </View>
         )
     }
@@ -205,16 +205,16 @@ const DraggablePriorityList: React.FC<DraggablePriorityListProps> = ({ items, se
                 {/* Scroll helper buttons for very long lists */}
                 {contentHeight > containerHeight && (
                     <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
-                        <TouchableOpacity style={{ borderColor: colors.primary }} className="px-3 py-1 border rounded" onPress={scrollToTop}>
+                        <Pressable style={{ borderColor: colors.primary }} className="px-3 py-1 border rounded" onPress={scrollToTop} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <Text style={{ color: colors.foreground }} className="text-xs">
                                 ↑ Scroll Up
                             </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{ borderColor: colors.primary }} className="px-3 py-1 border rounded" onPress={scrollToBottom}>
+                        </Pressable>
+                        <Pressable style={{ borderColor: colors.primary }} className="px-3 py-1 border rounded" onPress={scrollToBottom} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <Text style={{ color: colors.foreground }} className="text-xs">
                                 ↓ Scroll Down
                             </Text>
-                        </TouchableOpacity>
+                        </Pressable>
                     </View>
                 )}
             </ScrollView>

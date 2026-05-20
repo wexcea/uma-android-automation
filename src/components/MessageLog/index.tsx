@@ -4,7 +4,8 @@ import { BotMetaContext, useSettingsSnapshot } from "../../context/BotStateConte
 import { useSettings } from "../../context/SettingsContext"
 import { databaseManager } from "../../lib/database"
 import { buildSettingsBanner } from "../../lib/messageLog/buildSettingsBanner"
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Animated } from "react-native"
+import { StyleSheet, Text, View, TextInput, Pressable, Animated } from "react-native"
+import { useTheme } from "../../context/ThemeContext"
 import * as Clipboard from "expo-clipboard"
 import { Copy, Plus, Minus, Type, X, ArrowUp, ArrowDown, ArrowUpAZ, ArrowDownZA } from "lucide-react-native"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
@@ -143,6 +144,7 @@ interface LogMessage {
  * @param enableMessageIdDisplay Whether to display the message ID.
  */
 const LogItem = memo(({ item, fontSize, onLongPress, enableMessageIdDisplay }: { item: LogMessage; fontSize: number; onLongPress: (message: string) => void; enableMessageIdDisplay: boolean }) => {
+    const { colors } = useTheme()
     /**
      * Returns the style for the log message based on its type.
      * @returns The style for the log message.
@@ -176,12 +178,12 @@ const LogItem = memo(({ item, fontSize, onLongPress, enableMessageIdDisplay }: {
     }, [item.text, item.messageId, enableMessageIdDisplay])
 
     return (
-        <TouchableOpacity style={styles.logItem} onLongPress={() => onLongPress(item.text)} delayLongPress={500}>
+        <Pressable style={styles.logItem} onLongPress={() => onLongPress(item.text)} delayLongPress={500} android_ripple={{ color: colors.ripple, foreground: true }}>
             <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
                 {enableMessageIdDisplay && item.messageId !== undefined && <Text style={[getTextStyle(), { color: "gray", minWidth: 40 }]}>[{item.messageId}]</Text>}
                 <Text style={[getTextStyle(), { flex: 1, flexShrink: 1 }]}>{displayText}</Text>
             </View>
-        </TouchableOpacity>
+        </Pressable>
     )
 })
 
@@ -192,6 +194,7 @@ const LogItem = memo(({ item, fontSize, onLongPress, enableMessageIdDisplay }: {
  * and a formatted settings summary as the intro message.
  */
 const MessageLog = () => {
+    const { colors } = useTheme()
     const mlc = useContext(MessageLogDataContext)
     const { appName, appVersion, setSettings } = useContext(BotMetaContext)
     const settings = useSettingsSnapshot()
@@ -629,33 +632,33 @@ const MessageLog = () => {
                         autoCapitalize="none"
                     />
                     {searchQuery.length > 0 && (
-                        <TouchableOpacity style={styles.clearButton} onPress={clearSearch}>
+                        <Pressable style={styles.clearButton} onPress={clearSearch} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <X size={16} color="#888" />
-                        </TouchableOpacity>
+                        </Pressable>
                     )}
                 </View>
-                <TouchableOpacity style={styles.actionButton} onPress={copyToClipboard}>
+                <Pressable style={styles.actionButton} onPress={copyToClipboard} android_ripple={{ color: colors.ripple, foreground: true }}>
                     <Copy size={16} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton} onPress={toggleSortOrder}>
+                </Pressable>
+                <Pressable style={styles.actionButton} onPress={toggleSortOrder} android_ripple={{ color: colors.ripple, foreground: true }}>
                     {sortOrder === "asc" ? <ArrowUpAZ size={16} color="white" /> : <ArrowDownZA size={16} color="white" />}
-                </TouchableOpacity>
+                </Pressable>
                 <Popover>
                     <PopoverTrigger asChild>
-                        <TouchableOpacity style={styles.actionButton}>
+                        <Pressable style={styles.actionButton} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <Type size={16} color="white" />
-                        </TouchableOpacity>
+                        </Pressable>
                     </PopoverTrigger>
                     <PopoverContent className="bg-black w-auto p-2" align="end" side="bottom">
                         <View style={styles.popoverContentContainer}>
                             <Text style={styles.fontSizeDisplay}>Font Size: {fontSize}pt</Text>
                             <View style={styles.popoverButtonContainer}>
-                                <TouchableOpacity style={styles.popoverButton} onPress={decreaseFontSize}>
+                                <Pressable style={styles.popoverButton} onPress={decreaseFontSize} android_ripple={{ color: colors.ripple, foreground: true }}>
                                     <Minus size={16} color="white" />
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.popoverButton} onPress={increaseFontSize}>
+                                </Pressable>
+                                <Pressable style={styles.popoverButton} onPress={increaseFontSize} android_ripple={{ color: colors.ripple, foreground: true }}>
                                     <Plus size={16} color="white" />
-                                </TouchableOpacity>
+                                </Pressable>
                             </View>
                         </View>
                     </PopoverContent>
@@ -692,9 +695,9 @@ const MessageLog = () => {
                             pointerEvents: showScrollToTop ? "auto" : "none",
                         }}
                     >
-                        <TouchableOpacity style={styles.floatingButton} onPress={scrollToTop}>
+                        <Pressable style={styles.floatingButton} onPress={scrollToTop} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <ArrowUp size={16} color="white" />
-                        </TouchableOpacity>
+                        </Pressable>
                     </Animated.View>
                     <Animated.View
                         style={{
@@ -702,9 +705,9 @@ const MessageLog = () => {
                             pointerEvents: showScrollToBottom ? "auto" : "none",
                         }}
                     >
-                        <TouchableOpacity style={styles.floatingButton} onPress={scrollToBottom}>
+                        <Pressable style={styles.floatingButton} onPress={scrollToBottom} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <ArrowDown size={16} color="white" />
-                        </TouchableOpacity>
+                        </Pressable>
                     </Animated.View>
                 </View>
             )}

@@ -571,7 +571,12 @@ const LLMSettings = () => {
                                               }
                                             : () => persistModelUrl(p.url)
                                     return (
-                                        <Pressable key={p.url} style={[styles.presetCard, selected && styles.presetCardSelected]} onPress={onPress}>
+                                        <Pressable
+                                            key={p.url}
+                                            style={[styles.presetCard, selected && styles.presetCardSelected]}
+                                            onPress={onPress}
+                                            android_ripple={{ color: colors.ripple, foreground: true }}
+                                        >
                                             <Text style={styles.presetLabel}>{p.label}</Text>
                                             <Text style={styles.presetDetail}>{p.detail}</Text>
                                         </Pressable>
@@ -581,11 +586,19 @@ const LLMSettings = () => {
                                     <>
                                         <View style={styles.linkRowContainer}>
                                             {modelUrl !== CUSTOM_URL_SENTINEL && modelUrl.trim().length > 0 && (
-                                                <Pressable style={styles.linkRow} onPress={() => Linking.openURL(modelUrl.replace(/\/resolve\/main\/.*$/, ""))}>
+                                                <Pressable
+                                                    style={styles.linkRow}
+                                                    onPress={() => Linking.openURL(modelUrl.replace(/\/resolve\/main\/.*$/, ""))}
+                                                    android_ripple={{ color: colors.ripple, foreground: true }}
+                                                >
                                                     <Text style={styles.link}>Open selected model page</Text>
                                                 </Pressable>
                                             )}
-                                            <Pressable style={styles.linkRow} onPress={() => Linking.openURL("https://huggingface.co/settings/tokens")}>
+                                            <Pressable
+                                                style={styles.linkRow}
+                                                onPress={() => Linking.openURL("https://huggingface.co/settings/tokens")}
+                                                android_ripple={{ color: colors.ripple, foreground: true }}
+                                            >
                                                 <Text style={styles.link}>Create token</Text>
                                             </Pressable>
                                         </View>
@@ -646,7 +659,11 @@ const LLMSettings = () => {
                                                         <Text style={styles.modelActionActiveText}>Active</Text>
                                                     </View>
                                                 ) : (
-                                                    <Pressable style={styles.modelActionButton} onPress={() => handleSelectActiveModel(m.filename)}>
+                                                    <Pressable
+                                                        style={styles.modelActionButton}
+                                                        onPress={() => handleSelectActiveModel(m.filename)}
+                                                        android_ripple={{ color: colors.ripple, foreground: true }}
+                                                    >
                                                         <Text style={styles.modelActionText}>Use</Text>
                                                     </Pressable>
                                                 )}
@@ -655,6 +672,7 @@ const LLMSettings = () => {
                                                     onPress={() => handleDeleteModelFile(m.filename)}
                                                     accessibilityLabel={`Delete ${m.filename}`}
                                                     accessibilityRole="button"
+                                                    android_ripple={{ color: colors.ripple, foreground: true }}
                                                 >
                                                     <Trash2 size={14} color={colors.foreground} />
                                                 </Pressable>
@@ -668,7 +686,7 @@ const LLMSettings = () => {
                         <View style={styles.section}>
                             <View style={styles.tuningHeader}>
                                 <Text style={styles.sectionLabel}>Generation Tuning</Text>
-                                <Pressable onPress={handleResetTuning} style={styles.linkRow}>
+                                <Pressable onPress={handleResetTuning} style={styles.linkRow} android_ripple={{ color: colors.ripple, foreground: true }}>
                                     <Text style={styles.link}>Reset to defaults</Text>
                                 </Pressable>
                             </View>

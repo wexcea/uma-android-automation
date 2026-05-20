@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react"
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from "react-native"
+import { View, Text, StyleSheet, Modal, Pressable, ScrollView } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
 import CustomButton from "../CustomButton"
 import { Input } from "../ui/input"
@@ -242,9 +242,9 @@ const ProfileCreationModal: React.FC<ProfileCreationModalProps> = ({ visible, on
                     {/* Header */}
                     <View style={styles.header}>
                         <Text style={styles.title}>Create New Profile</Text>
-                        <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+                        <Pressable style={styles.closeButton} onPress={handleClose} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <X size={24} color={colors.foreground} />
-                        </TouchableOpacity>
+                        </Pressable>
                     </View>
 
                     {/* Profile name input */}

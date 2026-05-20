@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef } from "react"
-import { View, Text, TouchableOpacity, ActivityIndicator, Animated, ViewStyle } from "react-native"
+import { View, Text, Pressable, ActivityIndicator, Animated, ViewStyle } from "react-native"
+import { useTheme } from "../../../context/ThemeContext"
 import { RefreshCw } from "lucide-react-native"
 import { APTITUDE_RANKS, AptitudeMap } from "../../../lib/solver/constants"
 
@@ -22,21 +23,24 @@ interface AptitudeRowProps {
  * @param props The {@link AptitudeRowProps} for this row.
  * @returns The rendered aptitude row.
  */
-export const AptitudeRow = memo(({ slot, label, currentRank, onChange, styles }: AptitudeRowProps) => (
-    <View style={styles.aptRow}>
-        <Text style={styles.aptLabel}>{label}</Text>
-        <View style={styles.aptButtons}>
-            {APTITUDE_RANKS.map((rank) => {
-                const active = currentRank === rank
-                return (
-                    <TouchableOpacity key={rank} style={[styles.aptBtn, active && styles.aptBtnActive]} onPress={() => onChange(slot, rank)}>
-                        <Text style={active ? styles.aptBtnTextActive : styles.aptBtnText}>{rank}</Text>
-                    </TouchableOpacity>
-                )
-            })}
+export const AptitudeRow = memo(({ slot, label, currentRank, onChange, styles }: AptitudeRowProps) => {
+    const { colors } = useTheme()
+    return (
+        <View style={styles.aptRow}>
+            <Text style={styles.aptLabel}>{label}</Text>
+            <View style={styles.aptButtons}>
+                {APTITUDE_RANKS.map((rank) => {
+                    const active = currentRank === rank
+                    return (
+                        <Pressable key={rank} style={[styles.aptBtn, active && styles.aptBtnActive]} onPress={() => onChange(slot, rank)} android_ripple={{ color: colors.ripple, foreground: true }}>
+                            <Text style={active ? styles.aptBtnTextActive : styles.aptBtnText}>{rank}</Text>
+                        </Pressable>
+                    )
+                })}
+            </View>
         </View>
-    </View>
-))
+    )
+})
 AptitudeRow.displayName = "AptitudeRow"
 
 interface EpithetChipProps {
@@ -57,6 +61,7 @@ interface EpithetChipProps {
  * @returns The rendered epithet chip.
  */
 export const EpithetChip = memo(({ epithet, selected, onToggle, styles }: EpithetChipProps) => {
+    const { colors } = useTheme()
     const bullets = epithet.bullet_points ?? []
     // Last bullet is the reward; earlier bullets are conditions.
     const conditionBullets = bullets.length > 1 ? bullets.slice(0, -1) : []
@@ -64,7 +69,7 @@ export const EpithetChip = memo(({ epithet, selected, onToggle, styles }: Epithe
     // Red dot in the corner flags epithets the solver can't track or advance (see "Epithets without matchers" info block).
     const hasMatchers = (epithet.matchers ?? []).length > 0
     return (
-        <TouchableOpacity style={[styles.chip, selected && styles.chipActive]} onPress={() => onToggle(epithet.name)}>
+        <Pressable style={[styles.chip, selected && styles.chipActive]} onPress={() => onToggle(epithet.name)} android_ripple={{ color: colors.ripple, foreground: true }}>
             {hasMatchers ? null : <View style={styles.chipNoMatcherDot} />}
             <Text style={selected ? styles.chipTextActive : styles.chipText}>{epithet.name}</Text>
             {conditionBullets.map((b, idx) => (
@@ -77,7 +82,7 @@ export const EpithetChip = memo(({ epithet, selected, onToggle, styles }: Epithe
                     {rewardBullet}
                 </Text>
             ) : null}
-        </TouchableOpacity>
+        </Pressable>
     )
 })
 EpithetChip.displayName = "EpithetChip"
@@ -102,6 +107,7 @@ interface RecalcFabProps {
  * @returns Animated FAB containing the recalculate icon (or a spinner while loading).
  */
 export const RecalcFab = memo(({ onPress, loading, styles, colors }: RecalcFabProps) => {
+    const { colors: themeColors } = useTheme()
     const scale = useRef(new Animated.Value(0)).current
     useEffect(() => {
         Animated.spring(scale, { toValue: 1, friction: 5, tension: 90, useNativeDriver: true }).start()
@@ -111,9 +117,9 @@ export const RecalcFab = memo(({ onPress, loading, styles, colors }: RecalcFabPr
             <View style={styles.recalcFabLabel}>
                 <Text style={styles.recalcFabLabelText}>Apply Changes?</Text>
             </View>
-            <TouchableOpacity style={styles.recalcFabButton} onPress={onPress} disabled={loading} activeOpacity={0.85}>
+            <Pressable style={styles.recalcFabButton} onPress={onPress} disabled={loading} android_ripple={{ color: themeColors.ripple, foreground: true }}>
                 {loading ? <ActivityIndicator size="small" color={colors.background} /> : <RefreshCw size={22} color={colors.background} />}
-            </TouchableOpacity>
+            </Pressable>
         </Animated.View>
     )
 })

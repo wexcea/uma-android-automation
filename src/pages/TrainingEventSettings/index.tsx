@@ -1,5 +1,5 @@
 import { useContext, useState, useMemo, useCallback, useRef } from "react"
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TextInput, Dimensions } from "react-native"
+import { View, Text, ScrollView, StyleSheet, Pressable, Modal, TextInput, Dimensions } from "react-native"
 import { FlashList } from "@shopify/flash-list"
 import { useTheme } from "../../context/ThemeContext"
 import { TrainingEventContext, defaultSettings } from "../../context/BotStateContext"
@@ -366,8 +366,9 @@ const TrainingEventSettings = () => {
      */
     const renderEventItem = useCallback(({ item: event }: { item: { key: string; characterOrSupport: string; eventName: string; options: string[]; type: "character" | "support" | "scenario" } }) => {
         return (
-            <TouchableOpacity
+            <Pressable
                 style={styles.eventItem}
+                android_ripple={{ color: colors.ripple, foreground: true }}
                 onPress={() => {
                     // Store the event and close search modal, then open option selection modal.
                     setSelectedEventForOption(event)
@@ -381,7 +382,7 @@ const TrainingEventSettings = () => {
                         <Text style={styles.eventItemEventName}>{event.eventName}</Text>
                     </View>
                 </View>
-            </TouchableOpacity>
+            </Pressable>
         )
     }, [])
 
@@ -644,9 +645,10 @@ const TrainingEventSettings = () => {
                                 {currentOverrides.map((override) => {
                                     const event = allEvents.find((e) => e.key === override.key)
                                     return (
-                                        <TouchableOpacity
+                                        <Pressable
                                             key={override.key}
                                             style={styles.overrideCard}
+                                            android_ripple={{ color: colors.ripple, foreground: true }}
                                             onPress={() => {
                                                 if (event) {
                                                     setSelectedEventForOption(event)
@@ -659,7 +661,8 @@ const TrainingEventSettings = () => {
                                                     <Text style={styles.overrideCharacterName}>{override.characterOrSupport}</Text>
                                                     <Text style={styles.overrideEventName}>{override.eventName}</Text>
                                                 </View>
-                                                <TouchableOpacity
+                                                <Pressable
+                                                    android_ripple={{ color: colors.ripple, foreground: true }}
                                                     onPress={(e) => {
                                                         e.stopPropagation()
                                                         removeEventOverride(override.key)
@@ -667,13 +670,13 @@ const TrainingEventSettings = () => {
                                                     style={styles.removeButton}
                                                 >
                                                     <X size={20} color={colors.destructive} />
-                                                </TouchableOpacity>
+                                                </Pressable>
                                             </View>
                                             <View style={styles.overrideOptionContainer}>
                                                 <Text style={styles.overrideOptionLabel}>Selected Option: {override.optionIndex + 1}</Text>
                                                 <Text style={styles.overrideOptionText}>{override.options[override.optionIndex]}</Text>
                                             </View>
-                                        </TouchableOpacity>
+                                        </Pressable>
                                     )
                                 })}
                             </View>
@@ -876,13 +879,13 @@ const TrainingEventSettings = () => {
 
             {/* Event Override Selection Modal */}
             <Modal animationType="slide" transparent={true} visible={eventOverrideModalVisible} onRequestClose={() => setEventOverrideModalVisible(false)}>
-                <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setEventOverrideModalVisible(false)}>
-                    <TouchableOpacity style={styles.modalContent} activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+                <Pressable style={styles.modalOverlay} onPress={() => setEventOverrideModalVisible(false)}>
+                    <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Select Event Override</Text>
-                            <TouchableOpacity style={styles.closeButton} onPress={() => setEventOverrideModalVisible(false)}>
+                            <Pressable style={styles.closeButton} onPress={() => setEventOverrideModalVisible(false)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                 <X size={24} color={colors.foreground} />
-                            </TouchableOpacity>
+                            </Pressable>
                         </View>
 
                         <View style={styles.searchContainer}>
@@ -895,9 +898,9 @@ const TrainingEventSettings = () => {
                                 onChangeText={setEventOverrideSearchQuery}
                             />
                             {eventOverrideSearchQuery.length > 0 && (
-                                <TouchableOpacity style={styles.clearSearchButton} onPress={() => setEventOverrideSearchQuery("")}>
+                                <Pressable style={styles.clearSearchButton} onPress={() => setEventOverrideSearchQuery("")} android_ripple={{ color: colors.ripple, foreground: true }}>
                                     <X size={16} color={colors.foreground} />
-                                </TouchableOpacity>
+                                </Pressable>
                             )}
                         </View>
 
@@ -919,8 +922,8 @@ const TrainingEventSettings = () => {
                                 }
                             />
                         </View>
-                    </TouchableOpacity>
-                </TouchableOpacity>
+                    </Pressable>
+                </Pressable>
             </Modal>
 
             {/* Option Selection Modal */}
@@ -933,26 +936,26 @@ const TrainingEventSettings = () => {
                     setEventOverrideModalVisible(true)
                 }}
             >
-                <TouchableOpacity
+                <Pressable
                     style={styles.modalOverlay}
-                    activeOpacity={1}
                     onPress={() => {
                         setOptionSelectionModalVisible(false)
                         setEventOverrideModalVisible(true)
                     }}
                 >
-                    <TouchableOpacity style={styles.modalContent} activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+                    <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Select Option</Text>
-                            <TouchableOpacity
+                            <Pressable
                                 style={styles.closeButton}
+                                android_ripple={{ color: colors.ripple, foreground: true }}
                                 onPress={() => {
                                     setOptionSelectionModalVisible(false)
                                     setEventOverrideModalVisible(true)
                                 }}
                             >
                                 <X size={24} color={colors.foreground} />
-                            </TouchableOpacity>
+                            </Pressable>
                         </View>
 
                         {selectedEventForOption && (
@@ -971,15 +974,16 @@ const TrainingEventSettings = () => {
                                             selectedEventForOption.type === "character" ? characterOverrides[selectedEventForOption.key] : supportOverrides[selectedEventForOption.key]
                                         const isOptionSelected = currentOverride === index
                                         return (
-                                            <TouchableOpacity
+                                            <Pressable
                                                 key={index}
                                                 style={[styles.optionButton, isOptionSelected && styles.optionButtonSelected]}
+                                                android_ripple={{ color: colors.ripple, foreground: true }}
                                                 onPress={() => updateEventOverride(selectedEventForOption.key, index)}
                                             >
                                                 <Text style={[styles.optionButtonText, isOptionSelected && styles.optionButtonTextSelected]}>
                                                     Option {index + 1}: {option}
                                                 </Text>
-                                            </TouchableOpacity>
+                                            </Pressable>
                                         )
                                     })}
                                 </View>
@@ -997,8 +1001,8 @@ const TrainingEventSettings = () => {
                                 </View>
                             </>
                         )}
-                    </TouchableOpacity>
-                </TouchableOpacity>
+                    </Pressable>
+                </Pressable>
             </Modal>
         </View>
     )

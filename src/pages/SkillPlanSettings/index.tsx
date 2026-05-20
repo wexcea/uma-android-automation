@@ -1,5 +1,5 @@
 import React, { useMemo, useContext, useState, useRef, FC, useCallback } from "react"
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native"
+import { View, Text, ScrollView, StyleSheet, Pressable, Image } from "react-native"
 import { Divider } from "react-native-paper"
 import { useTheme } from "../../context/ThemeContext"
 import { SkillsContext, defaultSettings } from "../../context/BotStateContext"
@@ -396,12 +396,12 @@ const SkillPlanSettings: FC<SkillPlanSettingsProps> = ({ planKey, name, title, d
                 </View>
 
                 <View style={{ flexDirection: "row", marginBottom: 12, gap: 8 }}>
-                    <TouchableOpacity onPress={() => setSelectionMode("plan")} style={[styles.modeTab, isPlanMode && styles.modeTabActive]}>
+                    <Pressable onPress={() => setSelectionMode("plan")} style={[styles.modeTab, isPlanMode && styles.modeTabActive]} android_ripple={{ color: colors.ripple, foreground: true }}>
                         <Text style={[styles.modeTabLabel, isPlanMode && styles.modeTabLabelActive]}>Plan ({planIds.length})</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setSelectionMode("blacklist")} style={[styles.modeTab, !isPlanMode && styles.modeTabActive]}>
+                    </Pressable>
+                    <Pressable onPress={() => setSelectionMode("blacklist")} style={[styles.modeTab, !isPlanMode && styles.modeTabActive]} android_ripple={{ color: colors.ripple, foreground: true }}>
                         <Text style={[styles.modeTabLabel, !isPlanMode && styles.modeTabLabelActive]}>Blacklist ({blacklistIds.length})</Text>
-                    </TouchableOpacity>
+                    </Pressable>
                 </View>
 
                 <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
@@ -427,7 +427,7 @@ const SkillPlanSettings: FC<SkillPlanSettingsProps> = ({ planKey, name, title, d
                             targetProps={{
                                 data: filteredSkills,
                                 renderItem: ({ item: skill }) => (
-                                    <TouchableOpacity onPress={() => handleSkillPress(skill)} style={styles.skillItem}>
+                                    <Pressable onPress={() => handleSkillPress(skill)} style={styles.skillItem} android_ripple={{ color: colors.ripple, foreground: true }}>
                                         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                                             <Image source={icons[skill.icon_id]} style={{ width: 64, height: 64, marginRight: 8 }} />
                                             <View style={{ flex: 1 }}>
@@ -437,7 +437,7 @@ const SkillPlanSettings: FC<SkillPlanSettingsProps> = ({ planKey, name, title, d
                                             </View>
                                             {activeIds.includes(skill.id) && <CircleCheckBig size={18} color={selectionMode === "plan" ? "green" : "red"} />}
                                         </View>
-                                    </TouchableOpacity>
+                                    </Pressable>
                                 ),
                                 nestedScrollEnabled: true,
                             }}

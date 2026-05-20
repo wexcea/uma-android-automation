@@ -1,11 +1,12 @@
 import React from "react"
-import { TouchableOpacity, TouchableOpacityProps } from "react-native"
+import { Pressable, StyleProp, ViewStyle } from "react-native"
 import { Moon, Sun } from "lucide-react-native"
 import { useTheme } from "../../context/ThemeContext"
+import { circularPress } from "../../lib/pressSurface"
 
 interface ThemeToggleProps {
     /** Optional custom style for the toggle button. */
-    style?: TouchableOpacityProps["style"]
+    style?: StyleProp<ViewStyle>
 }
 
 /**
@@ -17,9 +18,9 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ style }) => {
     const { theme, toggleTheme, colors } = useTheme()
 
     return (
-        <TouchableOpacity onPress={toggleTheme} style={style}>
+        <Pressable onPress={toggleTheme} style={[circularPress(40), style]} android_ripple={{ color: colors.ripple, foreground: true }}>
             {theme === "light" ? <Moon size={24} color={colors.secondaryForeground} /> : <Sun size={24} color={colors.secondaryForeground} />}
-        </TouchableOpacity>
+        </Pressable>
     )
 }
 

@@ -320,6 +320,7 @@ const Chat = () => {
                     marginRight: 6,
                     marginBottom: 6,
                     backgroundColor: colors.card,
+                    overflow: "hidden",
                 },
                 historyChipText: { color: colors.foreground, fontSize: 12 },
                 historyChipRow: { flexDirection: "row", flexWrap: "wrap" },
@@ -448,13 +449,13 @@ const Chat = () => {
                     <>
                         <View style={styles.historyHeaderRow}>
                             <Text style={styles.historyTitle}>Recent questions</Text>
-                            <Pressable onPress={handleClearHistory}>
+                            <Pressable onPress={handleClearHistory} android_ripple={{ color: colors.ripple, foreground: true }}>
                                 <Text style={styles.historyClear}>Clear</Text>
                             </Pressable>
                         </View>
                         <View style={styles.historyChipRow}>
                             {history.map((q) => (
-                                <Pressable key={q} style={styles.historyChip} onPress={() => handleHistoryTap(q)}>
+                                <Pressable key={q} style={styles.historyChip} onPress={() => handleHistoryTap(q)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                     <Text style={styles.historyChipText} numberOfLines={1}>
                                         {q}
                                     </Text>
