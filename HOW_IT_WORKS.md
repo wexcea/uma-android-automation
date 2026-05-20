@@ -675,7 +675,7 @@ If **none** of these conditions are met and the inventory has already been synce
 - **Conserved energy item only:** If the only energy items in inventory are the lowest-tier copies reserved for emergency race recovery, the dialog is skipped — opening it would just use them and defeat the conservation rule.
 - **Conserved megaphone or Charm only:** If the only training-effect items in inventory would be filtered out by the megaphone-priority logic or by the Charm low-failure / low-gain rules, the dialog is skipped.
 - **No matching condition heal:** If no negative status is active, condition heals don't trigger the dialog even when they're in inventory.
-- **Low main stat gain floor (Trackblazer):** Trackblazer also tracks a `trackblazerLowMainStatGainItemFloor` (default 20) — when mood is low, the bot refuses to spend a Charm or run a Reset Whistle reshuffle if the selected training's main stat gain falls below this floor. The mood penalty would cap the gain enough that the item is conserved for a higher-gain turn instead.
+- **Low main stat gain floor (Trackblazer):** Trackblazer also tracks a `trackblazerSkipBadMoodItemsBelowGain` (default 15) — when mood is low, the bot refuses to spend a Charm or run a Reset Whistle reshuffle if the selected training's main stat gain falls below this floor. The mood penalty would cap the gain enough that the item is conserved for a higher-gain turn instead.
 
 Once the dialog is open, the bot scrolls through the full item list, performing **inventory sync** and **inline item usage** in a single pass. Each item encountered is evaluated against the rules below. If the cached inventory already accounts for every item of interest, the scan exits early.
 

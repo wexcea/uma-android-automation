@@ -707,16 +707,17 @@ const searchConfig: SearchOption[] = [
         page: "ScenarioOverridesSettings",
     },
     {
-        id: "trackblazer-min-stat-gain-for-charm",
-        title: "Trackblazer Min Main Stat Gain for Good-Luck Charm",
-        description: "Sets the minimum main stat gain required to justify using a Good-Luck Charm during training in the Trackblazer scenario.",
+        id: "trackblazer-skip-risky-charm-training-below-gain",
+        title: "Trackblazer Skip Risky Charm Training Below Stat Gain",
+        description:
+            "When a Good-Luck Charm is available to override a risky training's failure chance, skip that training anyway if its main stat gain is below this value. Prevents committing the Charm to low-value risky picks in the Trackblazer scenario.",
         page: "ScenarioOverridesSettings",
     },
     {
-        id: "trackblazer-low-main-stat-gain-item-floor",
-        title: "Trackblazer Low Main Stat Gain Item Floor",
+        id: "trackblazer-skip-bad-mood-items-below-gain",
+        title: "Trackblazer Skip Items During Bad Mood Below Stat Gain",
         description:
-            "When mood is BAD or AWFUL, refuse to use Reset Whistle, Good-Luck Charm, or Megaphone if main-stat gain is below this floor. Prevents wasting items on structurally low-return turns where the mood multiplier caps the stat gains.",
+            "When mood is BAD or AWFUL, refuse to use Reset Whistle, Good-Luck Charm, or Megaphone if the selected training's main stat gain is below this floor. Prevents wasting items on structurally low-return turns where the mood multiplier caps the stat gains.",
         page: "ScenarioOverridesSettings",
     },
     {

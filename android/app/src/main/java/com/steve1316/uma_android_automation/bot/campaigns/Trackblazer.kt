@@ -216,7 +216,7 @@ class Trackblazer(game: Game) : Campaign(game) {
     private val enableIrregularTraining: Boolean = SettingsHelper.getBooleanSetting("scenarioOverrides", "trackblazerEnableIrregularTraining", false)
 
     /** The minimum stat gain required for using a Good-Luck Charm to bypass failure chance. */
-    private val minCharmGain: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerMinStatGainForCharm", 30)
+    private val minCharmGain: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerSkipRiskyCharmTrainingBelowGain", 30)
 
     /** The minimum stat gain threshold for irregular training evaluation. */
     private val minIrregularGain: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerIrregularTrainingMinStatGain", 30)
@@ -231,7 +231,7 @@ class Trackblazer(game: Game) : Campaign(game) {
      * When mood is below NORMAL (BAD or AWFUL), training resources (Reset Whistle reshuffle, Good-Luck Charm, and Megaphones) refuse to fire if main-stat gain is below this floor.
      * Prevents wasting items on structurally low-return turns where the mood multiplier caps the gain.
      */
-    private val lowMainStatGainItemFloor: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerLowMainStatGainItemFloor", 20)
+    private val lowMainStatGainItemFloor: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerSkipBadMoodItemsBelowGain", 15)
 
     /** The frequency to check the shop after a race. */
     private val shopCheckFrequency: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerShopCheckFrequency", 3)
@@ -1043,9 +1043,9 @@ class Trackblazer(game: Game) : Campaign(game) {
         DecisionTracer
             .SettingsSnapshot()
             .add("Trackblazer Energy Threshold", energyThresholdToUseEnergyItems)
-            .add("Min Stat Gain for Charm", minCharmGain)
+            .add("Skip Risky Charm Training Below Gain", minCharmGain)
             .add("Consecutive Races Limit", consecutiveRacesLimit)
-            .add("Low Main Stat Gain Floor", lowMainStatGainItemFloor)
+            .add("Skip Bad-Mood Items Below Gain", lowMainStatGainItemFloor)
             .add("Whistle Forces Training", whistleForcesTraining)
             .add("Irregular Training", if (enableIrregularTraining) "on (min main $minIrregularGain)" else "off")
             .add("Enable In-Game Race Agenda", racing.enableUserInGameRaceAgenda)

@@ -176,5 +176,25 @@ export const applyMigrations = (settings: any, rawSettings?: any): { settings: a
         logWithTimestamp("[SettingsManager] Dropped removed setting enablePopupCheck.")
     }
 
+    // Migration: Rename Trackblazer Charm and Item Floor settings to behavior-first names.
+    // The old keys (trackblazerMinStatGainForCharm, trackblazerLowMainStatGainItemFloor) are replaced by
+    // trackblazerSkipRiskyCharmTrainingBelowGain and trackblazerSkipBadMoodItemsBelowGain respectively.
+    const scenarioOverrides = migratedSettings.scenarioOverrides as any
+    const rawScenarioOverrides = rawSettings?.scenarioOverrides as any
+    if (scenarioOverrides && rawScenarioOverrides) {
+        if (rawScenarioOverrides.trackblazerMinStatGainForCharm !== undefined) {
+            scenarioOverrides.trackblazerSkipRiskyCharmTrainingBelowGain = rawScenarioOverrides.trackblazerMinStatGainForCharm
+            delete scenarioOverrides.trackblazerMinStatGainForCharm
+            anyMigrated = true
+            logWithTimestamp("[SettingsManager] Migrated trackblazerMinStatGainForCharm to trackblazerSkipRiskyCharmTrainingBelowGain.")
+        }
+        if (rawScenarioOverrides.trackblazerLowMainStatGainItemFloor !== undefined) {
+            scenarioOverrides.trackblazerSkipBadMoodItemsBelowGain = rawScenarioOverrides.trackblazerLowMainStatGainItemFloor
+            delete scenarioOverrides.trackblazerLowMainStatGainItemFloor
+            anyMigrated = true
+            logWithTimestamp("[SettingsManager] Migrated trackblazerLowMainStatGainItemFloor to trackblazerSkipBadMoodItemsBelowGain.")
+        }
+    }
+
     return { settings: migratedSettings, anyMigrated }
 }

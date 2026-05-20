@@ -215,37 +215,37 @@ const ScenarioOverridesSettings = () => {
 
                                                 <View style={styles.section}>
                                                     <CustomSlider
-                                                        searchId="trackblazer-min-stat-gain-for-charm"
-                                                        value={scenarioOverrides.trackblazerMinStatGainForCharm}
-                                                        placeholder={defaultSettings.scenarioOverrides.trackblazerMinStatGainForCharm}
-                                                        onValueChange={(value) => updateOverrideSetting("trackblazerMinStatGainForCharm", value)}
-                                                        onSlidingComplete={(value) => updateOverrideSetting("trackblazerMinStatGainForCharm", value)}
+                                                        searchId="trackblazer-skip-risky-charm-training-below-gain"
+                                                        value={scenarioOverrides.trackblazerSkipRiskyCharmTrainingBelowGain}
+                                                        placeholder={defaultSettings.scenarioOverrides.trackblazerSkipRiskyCharmTrainingBelowGain}
+                                                        onValueChange={(value) => updateOverrideSetting("trackblazerSkipRiskyCharmTrainingBelowGain", value)}
+                                                        onSlidingComplete={(value) => updateOverrideSetting("trackblazerSkipRiskyCharmTrainingBelowGain", value)}
                                                         min={20}
                                                         max={100}
                                                         step={5}
-                                                        label="Minimum Main Stat Gain for Good-Luck Charm"
+                                                        label="Skip Risky Charm Training Below Stat Gain"
                                                         labelUnit=""
                                                         showValue={true}
                                                         showLabels={true}
-                                                        description="The minimum expected gain for the main training stat required to use a Good-Luck Charm instead of skipping training."
+                                                        description="When a Good-Luck Charm is available to override a risky training's failure chance, skip that training anyway if its main stat gain is below this value. Prevents committing the Charm to low-value risky picks."
                                                     />
                                                 </View>
 
                                                 <View style={styles.section}>
                                                     <CustomSlider
-                                                        searchId="trackblazer-low-main-stat-gain-item-floor"
-                                                        value={scenarioOverrides.trackblazerLowMainStatGainItemFloor}
-                                                        placeholder={defaultSettings.scenarioOverrides.trackblazerLowMainStatGainItemFloor}
-                                                        onValueChange={(value) => updateOverrideSetting("trackblazerLowMainStatGainItemFloor", value)}
-                                                        onSlidingComplete={(value) => updateOverrideSetting("trackblazerLowMainStatGainItemFloor", value)}
+                                                        searchId="trackblazer-skip-bad-mood-items-below-gain"
+                                                        value={scenarioOverrides.trackblazerSkipBadMoodItemsBelowGain}
+                                                        placeholder={defaultSettings.scenarioOverrides.trackblazerSkipBadMoodItemsBelowGain}
+                                                        onValueChange={(value) => updateOverrideSetting("trackblazerSkipBadMoodItemsBelowGain", value)}
+                                                        onSlidingComplete={(value) => updateOverrideSetting("trackblazerSkipBadMoodItemsBelowGain", value)}
                                                         min={0}
                                                         max={50}
                                                         step={1}
-                                                        label="Low Main Stat Gain Item Floor"
+                                                        label="Skip Items During Bad Mood Below Stat Gain"
                                                         labelUnit=""
                                                         showValue={true}
                                                         showLabels={true}
-                                                        description="When mood is BAD or AWFUL, refuse to use Reset Whistle / Good-Luck Charm / Megaphone if main-stat gain is below this floor. Prevents wasting items on structurally low-return turns where the mood multiplier caps the stat gains."
+                                                        description="When mood is BAD or AWFUL, refuse to use Reset Whistle / Good-Luck Charm / Megaphone if the selected training's main stat gain is below this floor. Prevents wasting items on structurally low-return turns where the mood multiplier caps the stat gains."
                                                     />
                                                 </View>
 
