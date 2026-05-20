@@ -172,6 +172,13 @@ const searchConfig: SearchOption[] = [
         page: "TrainingSettings",
     },
     {
+        id: "enable-prioritize-near-max-friendship",
+        title: "Prioritize Near-Max Friendship Bars",
+        description:
+            "When enabled (Year 2+), trainings with multiple green/blue friendship bars close to maxing receive an anticipatory rainbow multiplier (up to 1.6x), helping the bot favor them so the bars cross into orange and unlock real rainbow training on later turns. Does not stack with the actual rainbow bonus.",
+        page: "TrainingSettings",
+    },
+    {
         id: "enable-training-analysis-validation",
         title: "Enable Training Analysis Validation",
         description:

@@ -119,6 +119,7 @@ export interface Settings {
         disableTrainingOnMaxedStat: boolean
         focusOnSparkStatTarget: string[]
         enableRainbowTrainingBonus: boolean
+        enablePrioritizeNearMaxFriendship: boolean
         preferredDistanceOverride: string
         mustRestBeforeSummer: boolean
         enableRiskyTraining: boolean
@@ -378,6 +379,7 @@ export const defaultSettings: Settings = {
         disableTrainingOnMaxedStat: true,
         focusOnSparkStatTarget: ["Speed", "Stamina", "Power"],
         enableRainbowTrainingBonus: false,
+        enablePrioritizeNearMaxFriendship: true,
         preferredDistanceOverride: "Auto",
         mustRestBeforeSummer: false,
         enableRiskyTraining: false,

@@ -157,6 +157,7 @@ const ProfileCreationModal: React.FC<ProfileCreationModalProps> = ({ visible, on
         settings.push(`Disable on Maxed: ${currentTrainingSettings.disableTrainingOnMaxedStat ? "Yes" : "No"}`)
         settings.push(`Focus on Sparks: ${currentTrainingSettings.focusOnSparkStatTarget ? "Yes" : "No"}`)
         settings.push(`Rainbow Bonus: ${currentTrainingSettings.enableRainbowTrainingBonus ? "Yes" : "No"}`)
+        settings.push(`Prioritize Near-Max Friendship: ${currentTrainingSettings.enablePrioritizeNearMaxFriendship ? "Yes" : "No"}`)
         settings.push(`Preferred Distance: ${currentTrainingSettings.preferredDistanceOverride}`)
         settings.push(`Must Rest Before Summer: ${currentTrainingSettings.mustRestBeforeSummer ? "Yes" : "No"}`)
         settings.push(`Train Wit During Finale: ${currentTrainingSettings.trainWitDuringFinale ? "Yes" : "No"}`)
