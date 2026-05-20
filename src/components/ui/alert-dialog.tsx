@@ -1,6 +1,7 @@
 import { buttonTextVariants, buttonVariants } from "@/src/components/ui/button"
 import { NativeOnlyAnimatedView } from "@/src/components/ui/native-only-animated-view"
 import { TextClassContext } from "@/src/components/ui/text"
+import { useTheme } from "@/src/context/ThemeContext"
 import { cn } from "@/src/lib/utils"
 import * as AlertDialogPrimitive from "@rn-primitives/alert-dialog"
 import * as React from "react"
@@ -112,17 +113,19 @@ function AlertDialogDescription({ className, ...props }: AlertDialogPrimitive.De
 }
 
 function AlertDialogAction({ className, ...props }: AlertDialogPrimitive.ActionProps & React.RefAttributes<AlertDialogPrimitive.ActionRef>) {
+    const { colors } = useTheme()
     return (
         <TextClassContext.Provider value={buttonTextVariants({ className })}>
-            <AlertDialogPrimitive.Action className={cn(buttonVariants(), className)} {...props} />
+            <AlertDialogPrimitive.Action className={cn(buttonVariants(), "overflow-hidden", className)} android_ripple={{ color: colors.ripple, foreground: true }} {...props} />
         </TextClassContext.Provider>
     )
 }
 
 function AlertDialogCancel({ className, ...props }: AlertDialogPrimitive.CancelProps & React.RefAttributes<AlertDialogPrimitive.CancelRef>) {
+    const { colors } = useTheme()
     return (
         <TextClassContext.Provider value={buttonTextVariants({ className, variant: "outline" })}>
-            <AlertDialogPrimitive.Cancel className={cn(buttonVariants({ variant: "outline" }), className)} {...props} />
+            <AlertDialogPrimitive.Cancel className={cn(buttonVariants({ variant: "outline" }), "overflow-hidden", className)} android_ripple={{ color: colors.ripple, foreground: true }} {...props} />
         </TextClassContext.Provider>
     )
 }

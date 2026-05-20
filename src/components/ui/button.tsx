@@ -1,3 +1,4 @@
+import { useTheme } from "@/src/context/ThemeContext"
 import { NativeOnlyAnimatedView } from "@/src/components/ui/native-only-animated-view"
 import { TextClassContext } from "@/src/components/ui/text"
 import { cn } from "@/src/lib/utils"
@@ -100,6 +101,7 @@ const buttonTextVariants = cva(cn("text-foreground text-sm font-medium", Platfor
 type ButtonProps = React.ComponentProps<typeof Pressable> & React.RefAttributes<typeof Pressable> & VariantProps<typeof buttonVariants>
 
 function Button({ className, variant, size, disabled, onPressIn, onPressOut, ...props }: ButtonProps) {
+    const { colors } = useTheme()
     const opacity = useSharedValue(1)
 
     const animatedStyle = useAnimatedStyle(() => {
@@ -122,6 +124,10 @@ function Button({ className, variant, size, disabled, onPressIn, onPressOut, ...
         onPressOut?.(event)
     }
 
+    // `overflow-hidden` plus the variant's `rounded-md` lets the Android foreground ripple clip to the
+    // button's rounded outline via clipToOutline on API 29+. On API <= 28 corners may render sharp, which
+    // is an acceptable trade-off versus introducing a wrapper that breaks flex/width inheritance for
+    // callers that pass `flex: 1` etc. via `style` (e.g. `SelectButton`).
     return (
         <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
             <NativeOnlyAnimatedView style={animatedStyle}>
@@ -138,6 +144,7 @@ function Button({ className, variant, size, disabled, onPressIn, onPressOut, ...
                     disabled={disabled}
                     onPressIn={handlePressIn}
                     onPressOut={handlePressOut}
+                    android_ripple={{ color: colors.ripple, foreground: true }}
                     {...props}
                 />
             </NativeOnlyAnimatedView>
