@@ -273,8 +273,8 @@ object SmartRaceSolverIntegration {
         val race = racesByTurn[turnNumber]?.firstOrNull { it.name == raceName }
         val candidates = epithets.filter { epi -> epi.matchers.any { matcherReferencesRace(it, raceName, race) } }
         if (candidates.isEmpty()) return
-        val stateBefore = newSolverState(currentTurn = 1, scenario = "", epithets = epithets, racesByTurn = racesByTurn, raceHistorySnapshot = historyBefore)
-        val stateAfter = newSolverState(currentTurn = 1, scenario = "", epithets = epithets, racesByTurn = racesByTurn, raceHistorySnapshot = historyAfter)
+        val stateBefore = newSolverState(currentTurn = 1, scenario = "", epithets = epithets, racesByTurn = racesByTurn, raceHistorySnapshot = historyBefore, lockedDecisions = emptyMap())
+        val stateAfter = newSolverState(currentTurn = 1, scenario = "", epithets = epithets, racesByTurn = racesByTurn, raceHistorySnapshot = historyAfter, lockedDecisions = emptyMap())
         val affected = candidates.filter { epi -> epithetFraction(epi, stateBefore) != epithetFraction(epi, stateAfter) }
         if (affected.isEmpty()) return
         val sb = StringBuilder()
@@ -595,7 +595,8 @@ object SmartRaceSolverIntegration {
      * @param epithets Parsed epithet list.
      * @param racesByTurn Race calendar the solver may pick from.
      * @param raceHistorySnapshot History to feed the solver. Defaults to a snapshot of the current run's accumulated wins.
-     * @param lockedDecisions Manual turn -> decision overrides. Defaults to empty (no locks).
+     * @param lockedDecisions Manual turn -> decision overrides. Null (default) loads locks from the
+     *   `smartRaceSolverManualLocks` setting. Pass `emptyMap()` explicitly to skip lock loading.
      * @return Populated [SolverState].
      */
     private fun newSolverState(
@@ -604,7 +605,7 @@ object SmartRaceSolverIntegration {
         epithets: List<Epithet>,
         racesByTurn: Map<TurnNumber, List<RaceCandidate>>,
         raceHistorySnapshot: List<RaceWin> = synchronized(raceHistory) { raceHistory.toList() },
-        lockedDecisions: Map<TurnNumber, Decision> = emptyMap(),
+        lockedDecisions: Map<TurnNumber, Decision>? = null,
     ): SolverState =
         SolverState(
             currentTurn = currentTurn,
@@ -616,7 +617,7 @@ object SmartRaceSolverIntegration {
             raceHistory = raceHistorySnapshot,
             forcedEpithets = readStringSet("smartRaceSolverForcedEpithets"),
             targetEpithets = readStringSet("smartRaceSolverTargetEpithets"),
-            lockedDecisions = lockedDecisions,
+            lockedDecisions = lockedDecisions ?: loadManualLocksFromSettings(racesByTurn),
             weights = readWeights(),
         )
 
@@ -664,8 +665,6 @@ object SmartRaceSolverIntegration {
      * @param racesByTurn Full race calendar from settings.
      */
     private fun seedHistoryFromPreview(currentTurn: TurnNumber, scenario: String, epithets: List<Epithet>, racesByTurn: Map<TurnNumber, List<RaceCandidate>>) {
-        val manualLocksJson = SettingsHelper.getStringSetting("racing", "smartRaceSolverManualLocks")
-        val manualLocksObj = runCatching { if (manualLocksJson.isEmpty()) null else JSONObject(manualLocksJson) }.getOrNull()
         val state =
             newSolverState(
                 currentTurn = 1,
@@ -673,7 +672,6 @@ object SmartRaceSolverIntegration {
                 epithets = epithets,
                 racesByTurn = racesByTurn,
                 raceHistorySnapshot = emptyList(),
-                lockedDecisions = parseManualLocks(manualLocksObj, racesByTurn),
             )
         val schedule = SmartRaceSolver.solve(state)
         logPreviewSchedule(schedule, racesByTurn)
@@ -1212,6 +1210,18 @@ object SmartRaceSolverIntegration {
     private const val TRAIN_LOCK_SENTINEL: String = "__TRAIN__"
 
     /**
+     * Reads `smartRaceSolverManualLocks` from settings and parses it into a turn -> decision map.
+     *
+     * @param racesByTurn Candidate pool used by [parseManualLocks] to resolve race names to keys.
+     * @return Parsed manual locks, or an empty map when the setting is absent or unparseable.
+     */
+    private fun loadManualLocksFromSettings(racesByTurn: Map<TurnNumber, List<RaceCandidate>>): Map<TurnNumber, Decision> {
+        val json = SettingsHelper.getStringSetting("racing", "smartRaceSolverManualLocks")
+        val obj = runCatching { if (json.isEmpty()) null else JSONObject(json) }.getOrNull()
+        return parseManualLocks(obj, racesByTurn)
+    }
+
+    /**
      * Serialises a [Schedule] into the JSON shape the React Native preview UI expects.
      *
      * @param schedule Schedule to serialise.
@@ -1471,6 +1481,7 @@ object SmartRaceSolverIntegration {
                 epithets = epithets,
                 racesByTurn = racesByTurn,
                 raceHistorySnapshot = emptyList(),
+                lockedDecisions = emptyMap(),
             )
         for (turn in 1..72) {
             val race = winsByTurn[turn] ?: continue
@@ -1482,6 +1493,7 @@ object SmartRaceSolverIntegration {
                     epithets = epithets,
                     racesByTurn = racesByTurn,
                     raceHistorySnapshot = cumulativeWins.toList(),
+                    lockedDecisions = emptyMap(),
                 )
 
             val arr = JSONArray()

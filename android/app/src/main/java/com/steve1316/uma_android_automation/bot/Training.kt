@@ -2467,21 +2467,40 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                 // Check if we should force Wit training during the Finale instead of recovering energy.
                 // Always force Wit on turn 75 since recovering energy on the very last turn is completely useless.
                 if ((trainWitDuringFinale && campaign.date.day > 72) || campaign.date.day == 75) {
-                    if (campaign.date.day == 75) {
-                        MessageLog.v(TAG, "[TRAINING] It is the final turn. Forcing Wit training instead of recovering energy since resting provides zero benefit now.")
-                    } else {
-                        MessageLog.v(TAG, "[TRAINING] There is not enough energy for training to be done but the setting to train Wit during the Finale is enabled. Forcing Wit training...")
-                    }
+                    val finaleReason =
+                        if (campaign.date.day == 75) {
+                            MessageLog.v(TAG, "[TRAINING] It is the final turn. Forcing Wit training instead of recovering energy since resting provides zero benefit now.")
+                            "Finale Turn 75: forcing WIT via direct button click (resting on final turn is wasteful)"
+                        } else {
+                            MessageLog.v(TAG, "[TRAINING] There is not enough energy for training to be done but the setting to train Wit during the Finale is enabled. Forcing Wit training...")
+                            "Finale forced WIT (trainWitDuringFinale enabled and day>72, no other training viable)"
+                        }
                     // Directly attempt to tap Wit training.
                     if (ButtonTrainingWit.click(game.imageUtils, taps = 3)) {
                         game.waitForLoading()
                         MessageLog.v(TAG, "[TRAINING] Successfully forced Wit training during the Finale instead of recovering energy.")
+                        campaign.decisionTracer.recordTrainingSelection(
+                            selected = StatName.WIT,
+                            source = SelectionSource.FORCED_DEFAULT,
+                            reason = finaleReason,
+                            runnerUps = buildRunnerUps(StatName.WIT),
+                        )
                         firstTrainingCheck = false
                     } else {
                         MessageLog.w(TAG, "[WARN] handleTraining:: Could not find Wit training button. Falling back to recovering energy...")
+                        campaign.decisionTracer.recordTrainingSelection(
+                            selected = null,
+                            source = lastSelectionSource,
+                            reason = "$finaleReason - but WIT button click failed; falling back to energy recovery",
+                            runnerUps = buildRunnerUps(null),
+                        )
                         ButtonBack.click(game.imageUtils)
                         game.wait(1.0)
                         if (campaign.checkMainScreen()) {
+                            campaign.decisionTracer.recordRecoveryExecuted(
+                                action = "RECOVER_ENERGY",
+                                reason = "Finale forced WIT button click failed; calling recoverEnergy() as fallback",
+                            )
                             campaign.recoverEnergy()
                         } else {
                             MessageLog.w(TAG, "[WARN] handleTraining:: Could not head back to the Main screen in order to recover energy.")
@@ -2493,11 +2512,26 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                     game.wait(1.0)
 
                     if (campaign.checkMainScreen()) {
-                        if (restrictedTrainingNames.size == StatName.entries.size || (restrictedTrainingNames.size + blacklist.size) >= StatName.entries.size) {
-                            MessageLog.v(TAG, "[TRAINING] Will recover energy due to all available trainings being restricted or blacklisted.")
-                        } else {
-                            MessageLog.v(TAG, "[TRAINING] Will recover energy due to either failure chance was high enough to do so or no failure chances were detected via OCR.")
-                        }
+                        val recoverReason =
+                            if (restrictedTrainingNames.size == StatName.entries.size ||
+                                (restrictedTrainingNames.size + blacklist.size) >= StatName.entries.size
+                            ) {
+                                MessageLog.v(TAG, "[TRAINING] Will recover energy due to all available trainings being restricted or blacklisted.")
+                                "All trainings restricted or blacklisted"
+                            } else {
+                                MessageLog.v(TAG, "[TRAINING] Will recover energy due to either failure chance was high enough to do so or no failure chances were detected via OCR.")
+                                "Failure chance too high, or OCR detected no failure chances"
+                            }
+                        campaign.decisionTracer.recordTrainingSelection(
+                            selected = null,
+                            source = lastSelectionSource,
+                            reason = "Empty training map ($recoverReason); recovering energy instead",
+                            runnerUps = buildRunnerUps(null),
+                        )
+                        campaign.decisionTracer.recordRecoveryExecuted(
+                            action = "RECOVER_ENERGY",
+                            reason = recoverReason,
+                        )
                         campaign.recoverEnergy()
                     } else {
                         MessageLog.w(TAG, "[WARN] handleTraining:: Could not head back to the Main screen in order to recover energy.")
@@ -2505,6 +2539,17 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                 }
             } else {
                 // Now select the training option with the highest weight.
+                campaign.decisionTracer.recordTrainingSelection(
+                    selected = trainingSelected,
+                    source = if (forceStat != null) SelectionSource.FORCED_DEFAULT else lastSelectionSource,
+                    reason =
+                        if (forceStat != null) {
+                            "Caller-supplied forceStat override - executing $forceStat without analyzer re-evaluation"
+                        } else {
+                            "Selected by Training.handleTraining base flow (analyzer pick)"
+                        },
+                    runnerUps = buildRunnerUps(trainingSelected),
+                )
                 executeTraining(trainingSelected)
                 firstTrainingCheck = false
             }
@@ -2515,6 +2560,49 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
         }
         MessageLog.v(TAG, "********************")
         return trainingSelected
+    }
+
+    /**
+     * Builds the runner-up training list for the Decision Report from live analyzer state.
+     * Mirrors the Trackblazer-private snapshot-based version, but reads `cachedAnalysisResults` / `skippedTrainingMap` directly
+     * since the base flow (URA Finale, Unity Cup) does not re-analyze mid-turn the way Trackblazer does (no Reset Whistle path).
+     *
+     * @param picked The stat selected this turn (excluded from the runner-up list). Null when no training was picked.
+     * @return One entry per non-picked, non-blacklisted training that the analyzer evaluated this turn.
+     */
+    fun buildRunnerUps(picked: StatName?): List<DecisionTracer.TrainingRunnerUp> {
+        val analyzed = cachedAnalysisResults.orEmpty()
+        val runnerUps = mutableListOf<DecisionTracer.TrainingRunnerUp>()
+        StatName.entries.forEach { stat ->
+            if (stat == picked) return@forEach
+            // Blacklisted trainings are intentional user config, not a per-turn decision - omit so the report stays focused.
+            if (stat in blacklist) return@forEach
+            val skipEntry = skippedTrainingMap[stat]
+            val analyzedEntry = analyzed.firstOrNull { it.name == stat }
+            when {
+                skipEntry != null ->
+                    runnerUps.add(
+                        DecisionTracer.TrainingRunnerUp(
+                            stat = stat,
+                            rejected = true,
+                            reason = skipEntry.skipReason ?: "skipped (no reason recorded)",
+                            failureChance = skipEntry.failureChance,
+                            statGains = skipEntry.statGains,
+                        ),
+                    )
+                analyzedEntry != null ->
+                    runnerUps.add(
+                        DecisionTracer.TrainingRunnerUp(
+                            stat = stat,
+                            rejected = false,
+                            reason = "considered by analyzer but lost to selection",
+                            failureChance = analyzedEntry.failureChance.takeIf { it >= 0 },
+                            statGains = analyzedEntry.statGains,
+                        ),
+                    )
+            }
+        }
+        return runnerUps
     }
 
     /**

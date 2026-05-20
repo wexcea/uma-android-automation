@@ -717,18 +717,28 @@ class Racing(private val game: Game, private val campaign: Campaign) {
         // Don't bother looking for races on Junior Year Early July (Turn 13) since they only start showing up on Turn 14.
         if (campaign.date.day == 13) {
             MessageLog.i(TAG, "[RACE] Junior Year Early July (Turn 13) detected. No races available until Turn 14. Skipping extra race check.")
+            campaign.decisionTracer.recordRaceEligibility(eligible = false, reason = "Junior Year Early July (Turn 13) - no races available until Turn 14")
             return false
         }
 
         // If the user wants to limit extra races to ONLY those scheduled in their in-game racing agenda.
         if (enableUserInGameRaceAgenda && limitRacesToInGameAgenda) {
             MessageLog.i(TAG, "[RACE] Skipping extra race check due to 'Limit Extra Races to Agenda' setting in favor of those scheduled by the user's in-game racing agenda.")
+            campaign.decisionTracer.recordRaceEligibility(eligible = false, reason = "Limit Extra Races to Agenda setting is on; no agenda race scheduled for this turn")
             return false
         }
 
         // If the setting to force racing extra races is enabled or we have a specific requirement, always return true.
         if (enableForceRacing || hasFanRequirement || hasTrophyRequirement || hasInsufficientGoalRacePtsRequirement) {
             Log.d(TAG, "[DEBUG] checkEligibilityToStartExtraRacingProcess:: Force racing or requirement is active so eligibility will be true.")
+            val activeReason =
+                listOf(
+                    if (enableForceRacing) "force-racing" else null,
+                    if (hasFanRequirement) "fan-requirement" else null,
+                    if (hasTrophyRequirement) "trophy-requirement" else null,
+                    if (hasInsufficientGoalRacePtsRequirement) "insufficient-goal-pts" else null,
+                ).filterNotNull().joinToString(", ")
+            campaign.decisionTracer.recordRaceEligibility(eligible = true, reason = "Hard requirement active: $activeReason")
             return true
         }
 
@@ -739,10 +749,13 @@ class Racing(private val game: Game, private val campaign: Campaign) {
             val plannedKey = SmartRaceSolverIntegration.peekRaceKeyForTurn(currentTurn = campaign.date.day, scenario = game.scenario)
             if (plannedKey == null) {
                 MessageLog.i(TAG, "[RACE] Smart Race Solver has no race planned for turn ${campaign.date.day}. Skipping the extra-race fallback.")
+                campaign.decisionTracer.recordRaceEligibility(eligible = false, reason = "Smart Race Solver has no race planned for this turn")
                 return false
             }
             MessageLog.i(TAG, "[RACE] Smart Race Solver has \"$plannedKey\" planned for turn ${campaign.date.day}. Proceeding to racing screen.")
-            return !raceRepeatWarningCheck
+            val result = !raceRepeatWarningCheck
+            campaign.decisionTracer.recordRaceEligibility(eligible = result, reason = "Smart Race Solver planned race \"$plannedKey\" (raceRepeatWarning=$raceRepeatWarningCheck)")
+            return result
         }
 
         // For scenarios that race as often as possible, bypass most checks.
@@ -752,23 +765,30 @@ class Racing(private val game: Game, private val campaign: Campaign) {
             // Still check for finals and summer as they are hard restrictions.
             if (campaign.checkFinals()) {
                 MessageLog.i(TAG, "[RACE] It is UMA Finals right now so there will be no extra races. Stopping extra race check.")
+                campaign.decisionTracer.recordRaceEligibility(eligible = false, reason = "UMA Finals - no extra races")
                 return false
             } else if (campaign.date.isSummer() && !(skipSummerTrainingForAgenda && enableUserInGameRaceAgenda)) {
                 MessageLog.i(TAG, "[RACE] It is currently Summer right now. Stopping extra race check.")
+                campaign.decisionTracer.recordRaceEligibility(eligible = false, reason = "Summer - no extra races (skipSummerTrainingForAgenda not active)")
                 return false
             } else if (ButtonRaces.checkDisabled(game.imageUtils) == true) {
                 MessageLog.i(TAG, "[RACE] Extra Races button is currently locked. Stopping extra race check.")
+                campaign.decisionTracer.recordRaceEligibility(eligible = false, reason = "Extra Races button is currently locked / disabled")
                 return false
             }
 
-            return !raceRepeatWarningCheck
+            val result = !raceRepeatWarningCheck
+            campaign.decisionTracer.recordRaceEligibility(eligible = result, reason = "Scenario bypasses smart racing (raceRepeatWarning=$raceRepeatWarningCheck)")
+            return result
         }
 
         // If fan or trophy requirement is detected, bypass smart racing logic to force racing.
         // Both requirements are independent of racing plan and farming fans settings.
         if (hasFanRequirement) {
             MessageLog.i(TAG, "[RACE] Fan requirement detected. Bypassing smart racing logic to fulfill requirement.")
-            return !raceRepeatWarningCheck
+            val result = !raceRepeatWarningCheck
+            campaign.decisionTracer.recordRaceEligibility(eligible = result, reason = "Fan requirement active (raceRepeatWarning=$raceRepeatWarningCheck)")
+            return result
         } else if (hasTrophyRequirement) {
             if (hasPreOpOrAboveRequirement || hasG3OrAboveRequirement) {
                 if (hasPreOpOrAboveRequirement) {
@@ -776,7 +796,9 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                 } else {
                     MessageLog.i(TAG, "[RACE] Trophy requirement with G3 or above criteria detected. Proceeding to racing screen.")
                 }
-                return !raceRepeatWarningCheck
+                val result = !raceRepeatWarningCheck
+                campaign.decisionTracer.recordRaceEligibility(eligible = result, reason = "Trophy requirement with Pre-OP/G3+ criteria (raceRepeatWarning=$raceRepeatWarningCheck)")
+                return result
             }
 
             // Check if G1 races exist at current turn before proceeding.
@@ -788,17 +810,32 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                     MessageLog.i(TAG, "[RACE] Trophy requirement detected but no G1 races at turn ${campaign.date.day}. Allowing regular racing on eligible day.")
                 } else {
                     MessageLog.i(TAG, "[RACE] Trophy requirement detected but no G1 races available at turn ${campaign.date.day} and not a regular racing day. Skipping racing.")
+                    campaign.decisionTracer.recordRaceEligibility(eligible = false, reason = "Trophy requirement: no G1 races at this turn and not a regular racing day")
                     return false
                 }
             } else {
                 MessageLog.i(TAG, "[RACE] Trophy requirement detected. G1 races available at turn ${campaign.date.day}. Proceeding to racing screen.")
             }
 
-            return !raceRepeatWarningCheck
+            val result = !raceRepeatWarningCheck
+            campaign.decisionTracer.recordRaceEligibility(
+                eligible = result,
+                reason = "Trophy requirement: G1 races available or eligible regular racing day (raceRepeatWarning=$raceRepeatWarningCheck)",
+            )
+            return result
         }
 
         // Standard racing fallback: race on every Nth day of the racing interval.
-        return enableFarmingFans && (turnsRemaining % daysToRunExtraRaces == 0) && !raceRepeatWarningCheck
+        val result = enableFarmingFans && (turnsRemaining % daysToRunExtraRaces == 0) && !raceRepeatWarningCheck
+        val fallbackReason =
+            when {
+                !enableFarmingFans -> "Farming Fans setting is off"
+                (turnsRemaining % daysToRunExtraRaces) != 0 -> "Not a racing-interval day ($turnsRemaining turns remaining, every $daysToRunExtraRaces days)"
+                raceRepeatWarningCheck -> "Race repeat warning is active"
+                else -> "Standard fallback: every-$daysToRunExtraRaces-day racing window matched"
+            }
+        campaign.decisionTracer.recordRaceEligibility(eligible = result, reason = fallbackReason)
+        return result
     }
 
     /**
@@ -1505,8 +1542,13 @@ class Racing(private val game: Game, private val campaign: Campaign) {
             campaign.handleDialogs(args = mapOf("overrideIgnoreConsecutiveRaceWarning" to true))
             return handleMaidenRace()
         } else if ((!campaign.date.bIsPreDebut && ButtonRaces.click(game.imageUtils)) || isScheduledRace) {
+            // SRS-planned races bypass the consecutive-race limit. SRS owns the schedule, so its picks must not be gated by the local limit.
+            val isSrsScheduledRace =
+                enableSmartRaceSolver &&
+                    !enableForceRacing &&
+                    SmartRaceSolverIntegration.peekRaceKeyForTurn(currentTurn = campaign.date.day, scenario = game.scenario) != null
             var overrideIgnore = false
-            if (isScheduledRace || hasFanRequirement || hasTrophyRequirement || hasInsufficientGoalRacePtsRequirement) {
+            if (isScheduledRace || hasFanRequirement || hasTrophyRequirement || hasInsufficientGoalRacePtsRequirement || isSrsScheduledRace) {
                 MessageLog.v(TAG, "[RACE] Racing requirement is active. Ignoring consecutive race warning.")
                 overrideIgnore = true
             }
@@ -1872,7 +1914,12 @@ class Racing(private val game: Game, private val campaign: Campaign) {
         // If there is a scheduled race pending, proceed to run it immediately.
         if (!isScheduledRace) {
             // Check for the consecutive race dialog before proceeding.
-            val overrideIgnore: Boolean = isScheduledRace || enableForceRacing || hasInsufficientGoalRacePtsRequirement
+            // SRS-planned races bypass the consecutive-race limit because the solver owns the racing schedule.
+            val isSrsScheduledRace =
+                enableSmartRaceSolver &&
+                    !enableForceRacing &&
+                    SmartRaceSolverIntegration.peekRaceKeyForTurn(currentTurn = campaign.date.day, scenario = game.scenario) != null
+            val overrideIgnore: Boolean = isScheduledRace || enableForceRacing || hasInsufficientGoalRacePtsRequirement || isSrsScheduledRace
             val result: DialogHandlerResult = campaign.handleDialogs(args = mapOf("overrideIgnoreConsecutiveRaceWarning" to overrideIgnore))
             if (result is DialogHandlerResult.Handled &&
                 result.dialog.name == "consecutive_race_warning" &&
