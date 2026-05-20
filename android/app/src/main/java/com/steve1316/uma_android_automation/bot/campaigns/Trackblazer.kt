@@ -5,11 +5,13 @@ import android.util.Log
 import com.steve1316.automation_library.utils.MessageLog
 import com.steve1316.automation_library.utils.SettingsHelper
 import com.steve1316.uma_android_automation.bot.Campaign
+import com.steve1316.uma_android_automation.bot.DecisionTracer
 import com.steve1316.uma_android_automation.bot.DialogHandlerResult
 import com.steve1316.uma_android_automation.bot.Game
 import com.steve1316.uma_android_automation.bot.MainScreenAction
 import com.steve1316.uma_android_automation.bot.Racing
 import com.steve1316.uma_android_automation.bot.SelectionSource
+import com.steve1316.uma_android_automation.bot.Training
 import com.steve1316.uma_android_automation.bot.solver.SmartRaceSolverIntegration
 import com.steve1316.uma_android_automation.components.ButtonBack
 import com.steve1316.uma_android_automation.components.ButtonCancel
@@ -184,6 +186,15 @@ class Trackblazer(game: Game) : Campaign(game) {
 
     /** Flag indicating if the bot has checked for Irregular Training during the current turn. */
     private var bHasCheckedIrregularTrainingThisTurn: Boolean = false
+
+    /**
+     * Snapshot of the most recent analyzer pass results, captured eagerly because `confirmAndCloseItemDialog` clears `Training.cachedAnalysisResults`
+     * before `recordTrainingSelection` runs. Used by `buildTrainingRunnerUps` so the Decision Report always carries the analyzer's runner-up data.
+     */
+    private var analysisSnapshotForReport: List<Training.TrainingAnalysisResult> = emptyList()
+
+    /** Companion snapshot of `Training.skippedTrainingMap` taken alongside `analysisSnapshotForReport`. */
+    private var skippedSnapshotForReport: Map<StatName, Training.TrainingOption> = emptyMap()
 
     /** Mapping of energy-restoring items to their gain values. */
     private val energyGains =
@@ -768,6 +779,9 @@ class Trackblazer(game: Game) : Campaign(game) {
                     TAG,
                     "[WARN] shouldAllowConsecutiveRace:: Energy critically low (${trainee.energy}%) with $consecutiveRaceCount consecutive races, but ignoreLowEnergyRacingBlock is enabled. Allowing race.",
                 )
+                decisionTracer.recordNote(
+                    "shouldAllowConsecutiveRace: critical energy ${trainee.energy}% with $consecutiveRaceCount consec races; ignoreLowEnergyRacingBlock setting allowed it through (-30 stat risk)",
+                )
             } else {
                 val conserveItem = energyItemConservationOrder.firstOrNull { (currentInventory[it] ?: 0) > 0 }
                 if (conserveItem != null) {
@@ -775,10 +789,18 @@ class Trackblazer(game: Game) : Campaign(game) {
                         TAG,
                         "[WARN] shouldAllowConsecutiveRace:: Energy critically low but $conserveItem exists in inventory. This should have been used in decideNextAction(). Blocking race as safety net.",
                     )
+                    decisionTracer.recordRaceEligibility(
+                        eligible = false,
+                        reason = "Consecutive-race safety net: critical energy with $conserveItem still in inventory (should have been used); blocked",
+                    )
                 } else {
                     MessageLog.w(
                         TAG,
                         "[WARN] shouldAllowConsecutiveRace:: Energy is critically low (${trainee.energy}%) with $consecutiveRaceCount consecutive races. Blocking to avoid possible -30 stat penalty.",
+                    )
+                    decisionTracer.recordRaceEligibility(
+                        eligible = false,
+                        reason = "Consecutive-race safety net: energy ${trainee.energy}% with $consecutiveRaceCount races, no energy item available; blocked to avoid -30 stat penalty",
                     )
                 }
                 racing.encounteredRacingPopup = false
@@ -800,22 +822,31 @@ class Trackblazer(game: Game) : Campaign(game) {
         val isLateDecember = date.month == DateMonth.DECEMBER && date.phase == DatePhase.LATE
 
         if (consecutiveRaceCount < (consecutiveRacesLimit + 1) || onlyOneTurnLeft || isLateDecember) {
+            val allowReason: String
             if (isLateDecember && consecutiveRaceCount >= (consecutiveRacesLimit + 1)) {
                 MessageLog.i(
                     TAG,
                     "[TRACKBLAZER] Consecutive race count $consecutiveRaceCount >= ${consecutiveRacesLimit + 1}, but it is Late December. Ignoring limit to maximize races before mandatory goal race.",
                 )
+                allowReason = "Late December override: ignoring limit to max races before goal ($consecutiveRaceCount >= ${consecutiveRacesLimit + 1})"
             } else if (onlyOneTurnLeft && consecutiveRaceCount >= (consecutiveRacesLimit + 1)) {
                 MessageLog.i(
                     TAG,
                     "[TRACKBLAZER] Consecutive race count $consecutiveRaceCount >= ${consecutiveRacesLimit + 1}, but only 1 turn remains before mandatory race. Racing is safe. Continuing.",
                 )
+                allowReason = "Only 1 turn left before mandatory race - racing past limit is safe ($consecutiveRaceCount >= ${consecutiveRacesLimit + 1})"
             } else {
                 MessageLog.i(TAG, "[TRACKBLAZER] Consecutive race count $consecutiveRaceCount < ${consecutiveRacesLimit + 1}. Continuing.")
+                allowReason = "Under consecutive-race limit ($consecutiveRaceCount < ${consecutiveRacesLimit + 1})"
             }
+            decisionTracer.recordRaceEligibility(eligible = true, reason = "Consecutive-race check: $allowReason")
             return true
         } else {
             MessageLog.w(TAG, "[WARN] shouldAllowConsecutiveRace:: Consecutive race count $consecutiveRaceCount >= ${consecutiveRacesLimit + 1}. Aborting racing.")
+            decisionTracer.recordRaceEligibility(
+                eligible = false,
+                reason = "Consecutive-race limit hit: $consecutiveRaceCount >= ${consecutiveRacesLimit + 1}, not Late December, more than 1 turn before mandatory",
+            )
             racing.encounteredRacingPopup = false
             return false
         }
@@ -987,6 +1018,113 @@ class Trackblazer(game: Game) : Campaign(game) {
         }
     }
 
+    override fun gatherDecisionInventory(): Map<String, Int> {
+        // Only the items that drive Trackblazer's decision tree this turn. Energy items are aggregated under their displayable name.
+        val keys = listOf("Good-Luck Charm", "Empowering Megaphone", "Motivating Megaphone", "Coaching Megaphone", "Reset Whistle", "Royal Kale Juice", "Berry Sweet Cupcake", "Plain Cupcake")
+        val snapshot = mutableMapOf<String, Int>()
+        keys.forEach { name -> snapshot[name] = currentInventory[name] ?: 0 }
+        return snapshot
+    }
+
+    override fun gatherDecisionSettings(): DecisionTracer.SettingsSnapshot =
+        DecisionTracer
+            .SettingsSnapshot()
+            .add("Trackblazer Energy Threshold", energyThresholdToUseEnergyItems)
+            .add("Min Stat Gain for Charm", minCharmGain)
+            .add("Consecutive Races Limit", consecutiveRacesLimit)
+            .add("Low Main Stat Gain Floor", lowMainStatGainItemFloor)
+            .add("Whistle Forces Training", whistleForcesTraining)
+            .add("Irregular Training", if (enableIrregularTraining) "on (min main $minIrregularGain)" else "off")
+            .add("Enable In-Game Race Agenda", racing.enableUserInGameRaceAgenda)
+            .add("Max Failure Chance", "${SettingsHelper.getIntSetting("training", "maximumFailureChance")}%")
+            .add(
+                "Riskier Training",
+                if (SettingsHelper.getBooleanSetting("training", "enableRiskyTraining")) {
+                    "on (max fail ${SettingsHelper.getIntSetting("training", "riskyTrainingMaxFailureChance")}%, min main ${SettingsHelper.getIntSetting("training", "riskyTrainingMinStatGain")})"
+                } else {
+                    "off"
+                },
+            )
+
+    override fun gatherDecisionExtraState(): Map<String, String> =
+        mapOf(
+            "Megaphone Turns" to trainee.megaphoneTurnCounter.toString(),
+            "Consecutive Races" to consecutiveRaceCount.toString(),
+            "Used Charm Today" to bUsedCharmToday.toString(),
+            "Used Whistle Today" to bUsedWhistleToday.toString(),
+        )
+
+    /**
+     * Build the runner-up list for the Decision Report from the analyzer's cached scoring data. Trainings that the analyzer scored but did
+     * not select are surfaced with their failure chance and main-stat gain. Trainings that were filtered out (`skippedTrainingMap`) come
+     * through with their skip reason. The caller passes in the picked stat so the runner-up list excludes it.
+     *
+     * @param picked The stat that was selected this turn (omitted from the runner-up list); null when no training was selected.
+     * @return Up to 5 runner-up entries representing the non-picked options analyzed this turn.
+     */
+
+    /**
+     * Snapshot the analyzer's current results into `analysisSnapshotForReport` / `skippedSnapshotForReport` so the Decision Report's runner-ups
+     * survive the cache clear performed by `confirmAndCloseItemDialog` later in the turn. Call this right after every `recommendTraining()` pass.
+     */
+    private fun captureRunnerUpsSnapshot() {
+        analysisSnapshotForReport = training.cachedAnalysisResults?.toList() ?: emptyList()
+        skippedSnapshotForReport = training.skippedTrainingMap.toMap()
+    }
+
+    /**
+     * Pulls the picked stat's failure-chance and stat-gain map out of the snapshot so the Decision Report's `Pick:` line can show them. Returns
+     * (null, null) when the pick is null or absent from both snapshots. `failureChance < 0` is treated as "OCR did not measure" and surfaced as null.
+     */
+    private fun pickedStatDetails(picked: StatName?): Pair<Int?, Map<StatName, Int>?> {
+        if (picked == null) return null to null
+        analysisSnapshotForReport.firstOrNull { it.name == picked }?.let { return it.failureChance.takeIf { fc -> fc >= 0 } to it.statGains }
+        skippedSnapshotForReport[picked]?.let { return it.failureChance.takeIf { fc -> fc >= 0 } to it.statGains }
+        return null to null
+    }
+
+    private fun buildTrainingRunnerUps(picked: StatName?): List<DecisionTracer.TrainingRunnerUp> {
+        val analyzed = analysisSnapshotForReport
+        val skipped = skippedSnapshotForReport
+        val runnerUps = mutableListOf<DecisionTracer.TrainingRunnerUp>()
+
+        StatName.entries.forEach { stat ->
+            if (stat == picked) return@forEach
+            // Blacklisted trainings are intentional user configuration, not a decision the bot made this turn - skip them entirely
+            // so the Runner-ups list focuses on trainings that were actually evaluated.
+            if (stat in training.blacklist) return@forEach
+            val skipEntry = skipped[stat]
+            val analyzedEntry = analyzed.firstOrNull { it.name == stat }
+            when {
+                skipEntry != null -> {
+                    runnerUps.add(
+                        DecisionTracer.TrainingRunnerUp(
+                            stat = stat,
+                            rejected = true,
+                            reason = skipEntry.skipReason ?: "skipped (no reason recorded)",
+                            failureChance = skipEntry.failureChance,
+                            statGains = skipEntry.statGains,
+                        ),
+                    )
+                }
+                analyzedEntry != null -> {
+                    // failureChance = -1 means OCR did not measure it; surface as null in the runner-up so the report doesn't show "fail=-1%".
+                    val failureChance = analyzedEntry.failureChance.takeIf { it >= 0 }
+                    runnerUps.add(
+                        DecisionTracer.TrainingRunnerUp(
+                            stat = stat,
+                            rejected = false,
+                            reason = "considered by analyzer but lost to selection",
+                            failureChance = failureChance,
+                            statGains = analyzedEntry.statGains,
+                        ),
+                    )
+                }
+            }
+        }
+        return runnerUps
+    }
+
     override fun onMainScreenEntry() {
         // Before taking any action, check for items to use.
         // This handles Stats, Energy, Mood, and Bad Conditions.
@@ -1013,12 +1151,14 @@ class Trackblazer(game: Game) : Campaign(game) {
         // Summer Training: Train during July and August in Classic/Senior.
         if (date.isSummer() && !(racing.skipSummerTrainingForAgenda && racing.enableUserInGameRaceAgenda)) {
             MessageLog.i(TAG, "[TRACKBLAZER] It is Summer. Prioritizing training.")
+            decisionTracer.recordActionChoice(MainScreenAction.TRAIN, "Trackblazer: Summer prioritizes training")
             return MainScreenAction.TRAIN
         }
 
         // Finale: Train during the final 3 turns (Qualifier, Semifinal, Finals).
         if (date.bIsFinaleSeason && date.day >= 73) {
             MessageLog.i(TAG, "[TRACKBLAZER] It is the Finale. Prioritizing training.")
+            decisionTracer.recordActionChoice(MainScreenAction.TRAIN, "Trackblazer: Finale (day >= 73) prioritizes training")
             return MainScreenAction.TRAIN
         }
 
@@ -1059,12 +1199,20 @@ class Trackblazer(game: Game) : Campaign(game) {
                     // Fall through to normal racing/training logic below.
                 } else {
                     MessageLog.w(TAG, "[WARN] decideNextAction:: Energy still low (${trainee.energy}%) after emergency recovery. Resting.")
+                    decisionTracer.recordActionChoice(
+                        MainScreenAction.REST,
+                        "Trackblazer low-energy guard: energy ${trainee.energy}% still <= 10 after emergency conserved-item use ($consecutiveRaceCount consecutive races)",
+                    )
                     return MainScreenAction.REST
                 }
             } else {
                 MessageLog.w(
                     TAG,
                     "[WARN] decideNextAction:: Energy is low (${trainee.energy}%) with $consecutiveRaceCount consecutive races and no energy items available. Resting to avoid -30 stat penalty.",
+                )
+                decisionTracer.recordActionChoice(
+                    MainScreenAction.REST,
+                    "Trackblazer low-energy guard: energy ${trainee.energy}% <= 10 with $consecutiveRaceCount consecutive races and no energy items in inventory",
                 )
                 return MainScreenAction.REST
             }
@@ -1077,6 +1225,7 @@ class Trackblazer(game: Game) : Campaign(game) {
             val solverRaceKey = SmartRaceSolverIntegration.peekRaceKeyForTurn(currentTurn = date.day, scenario = game.scenario)
             if (solverRaceKey != null) {
                 MessageLog.i(TAG, "[TRACKBLAZER] Smart Race Solver has \"$solverRaceKey\" planned for turn ${date.day}; deferring to racing flow.")
+                decisionTracer.recordActionChoice(MainScreenAction.RACE, "Smart Race Solver planned race \"$solverRaceKey\" for this turn")
                 return MainScreenAction.RACE
             }
         }
@@ -1114,6 +1263,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                         MessageLog.i(TAG, "[TRACKBLAZER] Valid Irregular Training found ($bestTraining). Hijacking turn.")
 
                         bIsIrregularTraining = true
+                        decisionTracer.recordActionChoice(MainScreenAction.TRAIN, "Irregular Training pre-screen found viable pick: $bestTraining")
                         return MainScreenAction.TRAIN
                     } else {
                         MessageLog.i(TAG, "[TRACKBLAZER] No valid Irregular Training found. Backing out to resume racing logic.")
@@ -1168,6 +1318,12 @@ class Trackblazer(game: Game) : Campaign(game) {
                     MessageLog.i(TAG, "[TRACKBLAZER] Shop check counter: $shopCheckCounter / $shopCheckFrequency. Next check in ${shopCheckFrequency - shopCheckCounter} day(s).")
                 }
             }
+        }
+
+        // Emit the Decision Report after the override's TRAIN path completes. The non-TRAIN paths delegate to super.executeAction which
+        // emits there - the hasEmitted guard on DecisionTracer makes the second call here a no-op for those branches.
+        if (result && action != MainScreenAction.NONE) {
+            decisionTracer.emit()
         }
 
         return result
@@ -1538,6 +1694,7 @@ class Trackblazer(game: Game) : Campaign(game) {
         if (bIsIrregularTraining) {
             MessageLog.i(TAG, "[TRACKBLAZER] Using existing irregular training analysis (already on Training screen).")
             val trainingSelected: StatName? = training.recommendTraining(args = mapOf("isIrregularEvaluation" to true, "irregularTrainingMinStatGain" to minIrregularGain))
+            captureRunnerUpsSnapshot()
             if (trainingSelected != null && training.lastSelectionSource != SelectionSource.ANALYSIS) {
                 MessageLog.i(TAG, "[TRACKBLAZER] On-screen evaluation used fallback (${training.lastSelectionSource}): $trainingSelected.")
             }
@@ -1548,9 +1705,24 @@ class Trackblazer(game: Game) : Campaign(game) {
             }
 
             if (trainingSelected != null) {
+                val (pickFail, pickGains) = pickedStatDetails(trainingSelected)
+                decisionTracer.recordTrainingSelection(
+                    selected = trainingSelected,
+                    source = training.lastSelectionSource,
+                    reason = "Irregular Training fast-path (already on Training screen from pre-screen evaluation)",
+                    runnerUps = buildTrainingRunnerUps(trainingSelected),
+                    pickedFailureChance = pickFail,
+                    pickedStatGains = pickGains,
+                )
                 training.executeTraining(trainingSelected)
             } else {
                 MessageLog.w(TAG, "[WARN] handleTrackblazerTraining:: Irregular training unexpectedly became null. Backing out.")
+                decisionTracer.recordTrainingSelection(
+                    selected = null,
+                    source = training.lastSelectionSource,
+                    reason = "Irregular Training fast-path lost its selection (recommendTraining returned null after pre-screen pick); backing out",
+                    runnerUps = buildTrainingRunnerUps(null),
+                )
                 ButtonBack.click(game.imageUtils)
                 game.wait(game.dialogWaitDelay)
             }
@@ -1571,6 +1743,7 @@ class Trackblazer(game: Game) : Campaign(game) {
         val hasCharm = date.day >= 13 && !bUsedCharmToday && (currentInventory["Good-Luck Charm"] ?: 0) > 0
         training.analyzeTrainings(mapOf("ignoreFailureChance" to hasCharm, "minStatGainForCharm" to minCharmGain))
         var trainingSelected: StatName? = training.recommendTraining()
+        captureRunnerUpsSnapshot()
         if (trainingSelected != null && training.lastSelectionSource != SelectionSource.ANALYSIS) {
             MessageLog.i(TAG, "[TRACKBLAZER] Initial training selection used fallback (${training.lastSelectionSource}): $trainingSelected.")
         }
@@ -1613,6 +1786,10 @@ class Trackblazer(game: Game) : Campaign(game) {
 
             if (whistleGateBlocks) {
                 // Whistle usage was skipped such that trainingSelected stays null and the existing recovery branch below fires.
+                decisionTracer.recordWhistleOutcome(
+                    DecisionTracer.WhistleVerdict.BLOCKED,
+                    "Mood ${trainee.mood} would cap gains after reshuffle; refusing to spend Whistle on a near-no-op turn",
+                )
             } else if (hasWhistle) {
                 MessageLog.i(TAG, "[TRACKBLAZER] No suitable training found. Using Reset Whistle.")
                 if (shopList.openTrainingItemsDialog()) {
@@ -1626,10 +1803,17 @@ class Trackblazer(game: Game) : Campaign(game) {
                         MessageLog.i(TAG, "[TRACKBLAZER] Re-analyzing trainings after Reset Whistle.")
                         training.analyzeTrainings(mapOf("ignoreFailureChance" to hasCharm, "minStatGainForCharm" to minCharmGain))
                         trainingSelected = training.recommendTraining(forceSelection = whistleForcesTraining)
+                        captureRunnerUpsSnapshot()
 
                         when {
-                            trainingSelected == null ->
+                            trainingSelected == null -> {
                                 MessageLog.i(TAG, "[TRACKBLAZER] Reset Whistle re-analysis returned no training; nothing to execute.")
+                                decisionTracer.recordWhistleOutcome(
+                                    DecisionTracer.WhistleVerdict.USED,
+                                    "Re-analysis after Whistle still produced no acceptable training",
+                                    postRollSelection = null,
+                                )
+                            }
                             training.lastSelectionSource == SelectionSource.FORCED_FROM_SKIPPED -> {
                                 // The forced pick comes from the rejected pool, so by definition either its main gain is below minCharmGain or its failure is too high to clear without a charm.
                                 // If the analyzer's charm gates would suppress the charm anyway, executing this pick is a near-certain failure with no defensive item.
@@ -1645,6 +1829,11 @@ class Trackblazer(game: Game) : Campaign(game) {
                                         TAG,
                                         "[TRACKBLAZER] Skipping Whistle force-pick: $trainingSelected at $forcedFail% fail with no Good-Luck Charm. Falling back to recovery.",
                                     )
+                                    decisionTracer.recordWhistleOutcome(
+                                        DecisionTracer.WhistleVerdict.USED,
+                                        "Re-analysis force-picked $trainingSelected at $forcedFail% fail but charm cannot fire; abandoned to recovery",
+                                        postRollSelection = null,
+                                    )
                                     trainingSelected = null
                                 } else {
                                     MessageLog.i(
@@ -1652,31 +1841,80 @@ class Trackblazer(game: Game) : Campaign(game) {
                                         "[TRACKBLAZER] Reset Whistle re-analysis still rejected all trainings; Whistle Forces Training is enabled, " +
                                             "so executing forced pick: $trainingSelected. Megaphone (if available) will be applied to this forced selection.",
                                     )
+                                    decisionTracer.recordWhistleOutcome(
+                                        DecisionTracer.WhistleVerdict.USED,
+                                        "Re-analysis rejected all trainings; Whistle Forces Training enabled, force-pick $trainingSelected (fail=$forcedFail%, gain=$forcedMainGain)",
+                                        postRollSelection = trainingSelected,
+                                    )
                                 }
                             }
-                            training.lastSelectionSource != SelectionSource.ANALYSIS ->
+                            training.lastSelectionSource != SelectionSource.ANALYSIS -> {
                                 MessageLog.i(TAG, "[TRACKBLAZER] Reset Whistle re-analysis used fallback (${training.lastSelectionSource}): $trainingSelected.")
-                            else ->
+                                decisionTracer.recordWhistleOutcome(
+                                    DecisionTracer.WhistleVerdict.USED,
+                                    "Re-analysis used ${training.lastSelectionSource} fallback to pick $trainingSelected",
+                                    postRollSelection = trainingSelected,
+                                )
+                            }
+                            else -> {
                                 MessageLog.i(TAG, "[TRACKBLAZER] Reset Whistle re-analysis selected: $trainingSelected.")
+                                decisionTracer.recordWhistleOutcome(
+                                    DecisionTracer.WhistleVerdict.USED,
+                                    "Re-analysis selected $trainingSelected from new shuffle",
+                                    postRollSelection = trainingSelected,
+                                )
+                            }
                         }
 
                         // Perform another consolidated item usage pass if needed after shuffle.
                         useItems(trainee, trainingSelected)
                     } else {
                         MessageLog.i(TAG, "[TRACKBLAZER] No Reset Whistles found in inventory.")
+                        decisionTracer.recordWhistleOutcome(
+                            DecisionTracer.WhistleVerdict.NOT_IN_INVENTORY,
+                            "Cached inventory had Whistle but in-dialog scan returned no usable Whistles",
+                        )
                         ButtonClose.click(game.imageUtils)
                         game.wait(game.dialogWaitDelay, skipWaitingForLoading = true)
                     }
                 }
             } else {
                 MessageLog.i(TAG, "[TRACKBLAZER] No suitable training found and no Reset Whistles in cached inventory or all are disabled.")
+                decisionTracer.recordWhistleOutcome(
+                    DecisionTracer.WhistleVerdict.NOT_IN_INVENTORY,
+                    "No Reset Whistles in cached inventory (or all disabled in dialog)",
+                )
             }
         } else if (training.needsEnergyRecovery && trainingSelected == null) {
             MessageLog.i(TAG, "[TRACKBLAZER] Skipping Reset Whistle as energy recovery is needed, not a training re-roll.")
+            decisionTracer.recordWhistleOutcome(
+                DecisionTracer.WhistleVerdict.NOT_ELIGIBLE,
+                "Recovery is needed (training.needsEnergyRecovery=true) - reshuffling won't help",
+            )
+        } else if (trainingSelected == null && (date.day !in 37..40 && date.day <= 60)) {
+            // Selection failed but the Whistle window is closed - explain in the report why no reshuffle was attempted.
+            decisionTracer.recordWhistleOutcome(
+                DecisionTracer.WhistleVerdict.NOT_ELIGIBLE,
+                "Outside Whistle window (day=${date.day}, allowed: 37..40 or > 60)",
+            )
         }
 
         // Final Training Execution.
         if (trainingSelected != null) {
+            val (pickFail, pickGains) = pickedStatDetails(trainingSelected)
+            decisionTracer.recordTrainingSelection(
+                selected = trainingSelected,
+                source = training.lastSelectionSource,
+                reason =
+                    if (bUsedWhistleToday) {
+                        "Final pick selected by analyzer after Reset Whistle re-roll"
+                    } else {
+                        "Final pick selected by initial analyzer pass (no Reset Whistle used)"
+                    },
+                runnerUps = buildTrainingRunnerUps(trainingSelected),
+                pickedFailureChance = pickFail,
+                pickedStatGains = pickGains,
+            )
             training.executeTraining(trainingSelected)
             training.firstTrainingCheck = false
         } else {
@@ -1684,6 +1922,12 @@ class Trackblazer(game: Game) : Campaign(game) {
             // Resting has 62.5% chance of being +50 energy, Shrine (remove status conditions) has 30% chance in recreation.
             if (trainee.mood <= Mood.NORMAL || trainee.energy <= 50) {
                 MessageLog.i(TAG, "[TRACKBLAZER] Still no suitable training found. Backing out for recovery.")
+                decisionTracer.recordTrainingSelection(
+                    selected = null,
+                    source = training.lastSelectionSource,
+                    reason = "No training selected; mood ${trainee.mood} <= NORMAL or energy ${trainee.energy}% <= 50 - backing out for recovery",
+                    runnerUps = buildTrainingRunnerUps(null),
+                )
 
                 // firstTrainingCheck is false since there is no suitable training (breaks looping on recovery/energy)
                 training.firstTrainingCheck = false
@@ -1693,9 +1937,17 @@ class Trackblazer(game: Game) : Campaign(game) {
                 if (checkMainScreen()) {
                     if (trainee.mood == Mood.AWFUL || (trainee.mood <= Mood.NORMAL && trainee.energy >= 20)) {
                         MessageLog.i(TAG, "[TRACKBLAZER] Mood is ${trainee.mood}. Attempting to recover mood.")
+                        decisionTracer.recordRecoveryExecuted(
+                            action = "RECOVER_MOOD",
+                            reason = "Mood ${trainee.mood} is AWFUL, or <= NORMAL with energy ${trainee.energy}% >= 20%",
+                        )
                         recoverMood()
                     } else {
                         MessageLog.i(TAG, "[TRACKBLAZER] Energy is ${trainee.energy}%. Attempting to recover energy.")
+                        decisionTracer.recordRecoveryExecuted(
+                            action = "RECOVER_ENERGY",
+                            reason = "Mood ${trainee.mood} > NORMAL or energy ${trainee.energy}% < 20%",
+                        )
                         recoverEnergy()
                     }
                 }
@@ -1710,6 +1962,12 @@ class Trackblazer(game: Game) : Campaign(game) {
                 if (skippedForced != null || forcedIsBlacklisted) {
                     val reason = skippedForced?.skipReason ?: "blacklisted"
                     MessageLog.w(TAG, "[WARN] handleTrackblazerTraining:: Cannot force $forcedStat training ($reason). Backing out for recovery instead.")
+                    decisionTracer.recordTrainingSelection(
+                        selected = null,
+                        source = training.lastSelectionSource,
+                        reason = "Wanted to force $forcedStat but it was rejected ($reason); backing out for recovery",
+                        runnerUps = buildTrainingRunnerUps(null),
+                    )
 
                     training.firstTrainingCheck = false
                     ButtonBack.click(game.imageUtils)
@@ -1718,14 +1976,31 @@ class Trackblazer(game: Game) : Campaign(game) {
                     if (checkMainScreen()) {
                         if (trainee.mood == Mood.AWFUL || (trainee.mood <= Mood.NORMAL && trainee.energy >= 20)) {
                             MessageLog.i(TAG, "[TRACKBLAZER] Mood is ${trainee.mood}. Attempting to recover mood.")
+                            decisionTracer.recordRecoveryExecuted(
+                                action = "RECOVER_MOOD",
+                                reason = "Mood ${trainee.mood} is AWFUL, or <= NORMAL with energy ${trainee.energy}% >= 20% (forced-stat backout)",
+                            )
                             recoverMood()
                         } else {
                             MessageLog.i(TAG, "[TRACKBLAZER] Energy is ${trainee.energy}%. Attempting to recover energy.")
+                            decisionTracer.recordRecoveryExecuted(
+                                action = "RECOVER_ENERGY",
+                                reason = "Mood ${trainee.mood} > NORMAL or energy ${trainee.energy}% < 20% (forced-stat backout)",
+                            )
                             recoverEnergy()
                         }
                     }
                 } else {
                     MessageLog.i(TAG, "[TRACKBLAZER] Still no suitable training found. Energy (${trainee.energy}%) and Mood (${trainee.mood}) are sufficient. Forcing $forcedStat training.")
+                    val (forcedPickFail, forcedPickGains) = pickedStatDetails(forcedStat)
+                    decisionTracer.recordTrainingSelection(
+                        selected = forcedStat,
+                        source = SelectionSource.FORCED_DEFAULT,
+                        reason = "No analyzer pick but energy ${trainee.energy}% > 50 and mood ${trainee.mood} > NORMAL - forcing $forcedStat",
+                        runnerUps = buildTrainingRunnerUps(forcedStat),
+                        pickedFailureChance = forcedPickFail,
+                        pickedStatGains = forcedPickGains,
+                    )
                     training.executeTraining(forcedStat)
                     training.firstTrainingCheck = false
                 }
@@ -2157,21 +2432,36 @@ class Trackblazer(game: Game) : Campaign(game) {
 
         // Good-Luck Charm Check.
         val failureChance = training.trainingMap[trainingSelected]?.failureChance ?: 0
-        if (date.day >= 13 && !bUsedCharmToday && failureChance >= 20 && itemName == "Good-Luck Charm") {
-            // When mood is below NORMAL, the mood multiplier structurally caps stat gain. Burning Charm on a
-            // low-gain training squanders its 0%-failure benefit — conserve for a higher-gain turn instead.
-            if (shouldConserveTrainingEffectItems(trainingSelected, trainee)) {
-                val selectedMainGain = training.cachedAnalysisResults?.firstOrNull { it.name == trainingSelected }?.statGains?.get(trainingSelected) ?: 0
-                MessageLog.i(
-                    TAG,
-                    "[TRACKBLAZER] Skipping Good-Luck Charm: mood=${trainee.mood}, selected $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor). Conserving Charm for a higher-gain turn.",
-                )
-                return null
-            }
-            val reason = "Setting training failure chance to 0%."
-            if (clickItemPlusButton(itemName, entry, "[TRACKBLAZER] Queuing Good-Luck Charm via inline pass.", nextInventory, reason = reason)) {
-                bUsedCharmToday = true
-                return reason
+        if (itemName == "Good-Luck Charm") {
+            when {
+                date.day < 13 ->
+                    decisionTracer.recordCharmGate(queued = false, blockingGate = "Day ${date.day} < 13 (training items not yet available)")
+                bUsedCharmToday ->
+                    decisionTracer.recordCharmGate(queued = false, blockingGate = "Already used a Good-Luck Charm this turn")
+                trainingSelected == null ->
+                    decisionTracer.recordCharmGate(queued = false, blockingGate = "No training selected by analyzeTrainings (failureChance unknown)")
+                failureChance < 20 ->
+                    decisionTracer.recordCharmGate(queued = false, blockingGate = "Selected $trainingSelected has failureChance=$failureChance%, below 20% threshold")
+                shouldConserveTrainingEffectItems(trainingSelected, trainee) -> {
+                    val selectedMainGain = training.cachedAnalysisResults?.firstOrNull { it.name == trainingSelected }?.statGains?.get(trainingSelected) ?: 0
+                    decisionTracer.recordCharmGate(
+                        queued = false,
+                        blockingGate = "Conservation: mood=${trainee.mood}, $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor)",
+                    )
+                    MessageLog.i(
+                        TAG,
+                        "[TRACKBLAZER] Skipping Good-Luck Charm: mood=${trainee.mood}, selected $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor). Conserving Charm for a higher-gain turn.",
+                    )
+                    return null
+                }
+                else -> {
+                    val reason = "Setting training failure chance to 0%."
+                    if (clickItemPlusButton(itemName, entry, "[TRACKBLAZER] Queuing Good-Luck Charm via inline pass.", nextInventory, reason = reason)) {
+                        bUsedCharmToday = true
+                        decisionTracer.recordCharmGate(queued = true)
+                        return reason
+                    }
+                }
             }
         }
 
@@ -2189,6 +2479,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                 val conserveItem = energyItemConservationOrder.firstOrNull { (nextInventory[it] ?: 0) > 0 }
                 if (conserveItem == itemName && (nextInventory[itemName] ?: 0) <= 1) {
                     MessageLog.i(TAG, "[TRACKBLAZER] Conserving last $itemName for emergency race recovery.")
+                    decisionTracer.recordItemDecision(itemName, DecisionTracer.ItemVerdict.CONSERVED, "Last unit reserved for emergency race recovery")
                     return null
                 }
             }
@@ -2200,6 +2491,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                     val oldEnergy = trainee.energy
                     trainee.energy = (trainee.energy + gain).coerceAtMost(100)
                     MessageLog.i(TAG, "[TRACKBLAZER] Trainee energy updated: $oldEnergy% -> ${trainee.energy}%.")
+                    decisionTracer.recordItemDecision(itemName, DecisionTracer.ItemVerdict.USED, "Energy $oldEnergy% -> ${trainee.energy}% (gain +$gain)")
                     return reason
                 }
             }
@@ -2241,6 +2533,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                     (itemName == "Berry Sweet Cupcake" && berryCount <= 1 && plainCount == 0)
             if (shouldConserve) {
                 MessageLog.i(TAG, "[TRACKBLAZER] Conserving last $itemName for potential Royal Kale Juice usage.")
+                decisionTracer.recordItemDecision(itemName, DecisionTracer.ItemVerdict.CONSERVED, "Last unit reserved for potential Royal Kale Juice synergy")
                 return null
             }
 
@@ -2250,6 +2543,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                 val oldMood = trainee.mood
                 trainee.mood = if (itemName == "Berry Sweet Cupcake") Mood.GOOD else Mood.NORMAL
                 MessageLog.i(TAG, "[TRACKBLAZER] Trainee mood updated: $oldMood -> ${trainee.mood}.")
+                decisionTracer.recordItemDecision(itemName, DecisionTracer.ItemVerdict.USED, "Mood $oldMood -> ${trainee.mood} (energy ${trainee.energy}% < 70%)")
                 return reason
             }
         }
@@ -2264,6 +2558,11 @@ class Trackblazer(game: Game) : Campaign(game) {
                 MessageLog.i(
                     TAG,
                     "[TRACKBLAZER] Skipping $itemName: mood=${trainee.mood}, selected $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor). Conserving Megaphone for a higher-gain turn.",
+                )
+                decisionTracer.recordItemDecision(
+                    itemName,
+                    DecisionTracer.ItemVerdict.CONSERVED,
+                    "Conservation: mood=${trainee.mood}, $trainingSelected main gain ($selectedMainGain) below floor ($lowMainStatGainItemFloor)",
                 )
                 return null
             }
@@ -2291,6 +2590,11 @@ class Trackblazer(game: Game) : Campaign(game) {
                             "Coaching Megaphone" -> 4
                             else -> 0
                         }
+                    decisionTracer.recordItemDecision(
+                        itemName,
+                        DecisionTracer.ItemVerdict.USED,
+                        "Best megaphone in inventory; setting megaphone turn duration to ${trainee.megaphoneTurnCounter}",
+                    )
                     return reason
                 }
             }
@@ -2415,6 +2719,20 @@ class Trackblazer(game: Game) : Campaign(game) {
             }
         } else {
             MessageLog.i(TAG, "[TRACKBLAZER] Skipping Training Items dialog as no relevant items are in the cached inventory.")
+            // When the dialog is skipped with a training already locked in, `shouldDecideToUseItem` never runs - surface the per-item
+            // Charm reason so the Decision Report can answer "why didn't it use my Charm?" without cross-referencing the gating logic.
+            // When trainingSelected is null we deliberately skip this: the Whistle re-roll path in handleTrackblazerTraining will run
+            // next and record the real Charm/Whistle outcomes, so pre-recording here would just produce stale entries that contradict
+            // the actual decision (e.g. Whistle: NOT_ELIGIBLE followed by Whistle: USED in the same report).
+            if (trainingSelected != null && (currentInventory["Good-Luck Charm"] ?: 0) > 0) {
+                val gate =
+                    when {
+                        date.day < 13 -> "Day ${date.day} < 13 (training items not yet available)"
+                        bUsedCharmToday -> "Already used a Good-Luck Charm this turn"
+                        else -> "Selected $trainingSelected has failureChance below 20% threshold (charm reserved for risky trainings)"
+                    }
+                decisionTracer.recordCharmGate(queued = false, blockingGate = "Item dialog skipped: $gate")
+            }
         }
     }
 
