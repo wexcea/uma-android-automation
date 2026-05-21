@@ -1538,6 +1538,16 @@
     "@eslint/core" "^0.17.0"
     levn "^0.4.1"
 
+"@expo-google-fonts/geist-mono@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/geist-mono/-/geist-mono-0.4.2.tgz#082b402dd3e336255319128fd957701a56205d9a"
+  integrity sha512-Ei2dBHXBgCL0pNi1RSuWIroOsvaNBeyT+2oE/q9vQBzZyqWuKYZ5yrybTeIeDl7MEWTgxBVUjyrws3JVbVac8Q==
+
+"@expo-google-fonts/geist@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/geist/-/geist-0.4.2.tgz#67ceaef82a42f32e8294105dd4cc5c1ff992281c"
+  integrity sha512-cTsqJRQrvK5EniTVwH7UDK18RFf9Bc6yxciAuM936aViQ+eR6j3mLEI2rQkJXz5JP9kwtn8tHJviDyZ0ulH6oA==
+
 "@expo/cli@^56.1.10":
   version "56.1.10"
   resolved "https://registry.yarnpkg.com/@expo/cli/-/cli-56.1.10.tgz#c8961425401e9325acdace0518e41bc1c35a27bc"
@@ -5820,6 +5830,11 @@ expo-asset@~56.0.13:
   dependencies:
     "@expo/image-utils" "^0.10.0"
     expo-constants "~56.0.14"
+
+expo-blur@~56.0.3:
+  version "56.0.3"
+  resolved "https://registry.yarnpkg.com/expo-blur/-/expo-blur-56.0.3.tgz#4420700813be7ed47298b9280d83fdfb32d04cdb"
+  integrity sha512-KDDtrpWc2tYlm1WCPaOgBtv+YEGqe5ELheFPIgSNgHt28NQUDcfBcFsA9Us2StDh6osmSD6NbKxOt5bU6PcDbQ==
 
 expo-build-properties@~56.0.13:
   version "56.0.13"
