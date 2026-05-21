@@ -212,6 +212,9 @@ class Trackblazer(game: Game) : Campaign(game) {
     /** Number of energy items (lowest-tier first across `energyItemConservationOrder`) held back as the emergency-race-recovery reserve. 0 = no reserve. */
     private val energyItemReserveCount: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerEnergyItemReserve", 1)
 
+    /** Number of cupcakes (Plain preferred over Berry Sweet) held back so Royal Kale Juice's mood penalty can be offset. 0 = no reserve. */
+    private val cupcakeReserveCount: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerCupcakeReserve", 1)
+
     /** Whether the Reset Whistle forces training. */
     private val whistleForcesTraining: Boolean = SettingsHelper.getBooleanSetting("scenarioOverrides", "trackblazerWhistleForcesTraining", true)
 
@@ -2540,17 +2543,20 @@ class Trackblazer(game: Game) : Campaign(game) {
         // Mood Items Check.
         val shouldUseMoodItem = trainee.mood <= Mood.NORMAL && trainee.energy < 70
         if (shouldUseMoodItem && (itemName == "Berry Sweet Cupcake" || itemName == "Plain Cupcake")) {
-            // Conservation: always keep at least 1 cupcake in case Royal Kale Juice is purchased later.
-            // Prefer conserving Plain Cupcake (+1 mood) since Kale Juice is -1 mood and we can avoid waste from Berry Sweet (+2).
-            val plainCount = nextInventory["Plain Cupcake"] ?: 0
-            val berryCount = nextInventory["Berry Sweet Cupcake"] ?: 0
-            val shouldConserve =
-                (itemName == "Plain Cupcake" && plainCount <= 1) ||
-                    (itemName == "Berry Sweet Cupcake" && berryCount <= 1 && plainCount == 0)
-            if (shouldConserve) {
-                MessageLog.i(TAG, "[TRACKBLAZER] Conserving last $itemName for potential Royal Kale Juice usage.")
-                decisionTracer.recordItemDecision(itemName, DecisionTracer.ItemVerdict.CONSERVED, "Last unit reserved for potential Royal Kale Juice synergy")
-                return null
+            // Conservation: hold back `cupcakeReserveCount` cupcakes (Plain preferred) so Royal Kale Juice's -1 mood penalty can be offset.
+            // Plain (+1 mood) is preferred for the reserve because Berry Sweet (+2 mood) would overshoot when paired with Kale Juice.
+            if (cupcakeReserveCount > 0) {
+                val plainCount = nextInventory["Plain Cupcake"] ?: 0
+                val berryCount = nextInventory["Berry Sweet Cupcake"] ?: 0
+                val totalCupcakes = plainCount + berryCount
+                val shouldConserve =
+                    (itemName == "Plain Cupcake" && plainCount <= cupcakeReserveCount) ||
+                        (itemName == "Berry Sweet Cupcake" && totalCupcakes <= cupcakeReserveCount && plainCount == 0)
+                if (shouldConserve) {
+                    MessageLog.i(TAG, "[TRACKBLAZER] Conserving $itemName for potential Royal Kale Juice usage (reserve floor: $cupcakeReserveCount).")
+                    decisionTracer.recordItemDecision(itemName, DecisionTracer.ItemVerdict.CONSERVED, "Within Kale Juice synergy reserve of $cupcakeReserveCount")
+                    return null
+                }
             }
 
             // Very simple inline mood: use the first one seen if energy is low.
