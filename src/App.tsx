@@ -6,6 +6,8 @@ import { LogBox } from "react-native"
 import { PortalHost } from "@rn-primitives/portal"
 import { StatusBar } from "expo-status-bar"
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context"
+import { useFonts, Geist_400Regular, Geist_500Medium, Geist_600SemiBold, Geist_700Bold } from "@expo-google-fonts/geist"
+import { GeistMono_400Regular, GeistMono_500Medium } from "@expo-google-fonts/geist-mono"
 import { BotStateProvider } from "./context/BotStateContext"
 import { MessageLogProvider } from "./context/MessageLogContext"
 import { SettingsProvider } from "./context/SettingsContext"
@@ -132,6 +134,18 @@ function AppContent() {
 }
 
 function App() {
+    // Wait for Geist + Geist Mono to load before rendering navigation so the first paint uses the brand fonts. The OS splash covers this window.
+    const [fontsLoaded] = useFonts({
+        Geist_400Regular,
+        Geist_500Medium,
+        Geist_600SemiBold,
+        Geist_700Bold,
+        GeistMono_400Regular,
+        GeistMono_500Medium,
+    })
+
+    if (!fontsLoaded) return null
+
     return (
         <SafeAreaProvider>
             <ThemeProvider>
