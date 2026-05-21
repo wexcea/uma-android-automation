@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useMemo, useRef, useCallback } from "react"
-import * as FileSystem from "expo-file-system"
+import { File, Paths } from "expo-file-system"
 import * as Sharing from "expo-sharing"
 import { startActivityAsync } from "expo-intent-launcher"
 import { defaultSettings, Settings, BotMetaContext, useSettingsSnapshot } from "../context/BotStateContext"
@@ -231,7 +231,7 @@ export const useSettingsManager = () => {
      */
     const loadFromJSONFile = async (fileUri: string): Promise<{ settings: Settings; profiles?: Array<{ id: number; name: string; settings: any; created_at: string; updated_at: string }> }> => {
         try {
-            const data = await FileSystem.readAsStringAsync(fileUri)
+            const data = await new File(fileUri).text()
             const parsed: any = JSON.parse(data)
 
             // Extract profiles if they exist.
@@ -391,15 +391,15 @@ export const useSettingsManager = () => {
             // Create a temporary file name with timestamp.
             const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
             const fileName = `UAA-settings-${timestamp}.json`
-            const fileUri = FileSystem.documentDirectory + fileName
+            const file = new File(Paths.document, fileName)
 
-            // Write the settings to file.
-            await FileSystem.writeAsStringAsync(fileUri, jsonString)
+            // Write the settings to file. In SDK 56's expo-file-system, `write` is synchronous.
+            file.write(jsonString)
 
-            logWithTimestamp(`Settings exported successfully to: ${fileUri}`)
+            logWithTimestamp(`Settings exported successfully to: ${file.uri}`)
 
             endTiming({ status: "success", fileName, fileSize: jsonString.length, profilesCount: profiles.length })
-            return fileUri
+            return file.uri
         } catch (error) {
             logErrorWithTimestamp("Error exporting settings:", error)
             endTiming({ status: "error", error: error instanceof Error ? error.message : String(error) })
@@ -444,13 +444,12 @@ export const useSettingsManager = () => {
             }
 
             // Final fallback: Share the settings file directly.
-            const settingsPath = FileSystem.documentDirectory + "settings.json"
-            const fileInfo = await FileSystem.getInfoAsync(settingsPath)
+            const settingsFile = new File(Paths.document, "settings.json")
 
-            if (fileInfo.exists) {
+            if (settingsFile.exists) {
                 const isAvailable = await Sharing.isAvailableAsync()
                 if (isAvailable) {
-                    await Sharing.shareAsync(settingsPath, {
+                    await Sharing.shareAsync(settingsFile.uri, {
                         mimeType: "application/json",
                         dialogTitle: "Share Settings File",
                     })

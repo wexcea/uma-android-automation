@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback } from "react"
 import { StyleSheet, Text, View, Pressable } from "react-native"
 import { FlashList } from "@shopify/flash-list"
 import * as DocumentPicker from "expo-document-picker"
-import * as FileSystem from "expo-file-system"
+import { File } from "expo-file-system"
 import DayRow from "../../components/EventLog/DayRow"
 import GapsNotice from "../../components/EventLog/GapsNotice"
 import FileDivider from "../../components/EventLog/FileDivider"
@@ -113,7 +113,7 @@ const EventLogVisualizer: React.FC = () => {
             for (const a of assets) {
                 const uri = a.uri
                 const name = a.name || "log.txt"
-                const content = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.UTF8 })
+                const content = await new File(uri).text()
                 fileInputs.push({ name, content })
             }
 

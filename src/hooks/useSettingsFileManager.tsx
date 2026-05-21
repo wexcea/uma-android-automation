@@ -1,7 +1,7 @@
 import { useState } from "react"
 import * as DocumentPicker from "expo-document-picker"
 import * as Sharing from "expo-sharing"
-import * as FileSystem from "expo-file-system"
+import { File } from "expo-file-system"
 import { useNavigation } from "@react-navigation/native"
 import { useSettings } from "../context/SettingsContext"
 import { Settings, defaultSettings, getLatestSettingsSnapshot } from "../context/BotStateContext"
@@ -96,7 +96,7 @@ const compareSettings = (current: Settings, imported: Settings) => {
  */
 const loadFromJSONFile = async (fileUri: string): Promise<Settings> => {
     try {
-        const data = await FileSystem.readAsStringAsync(fileUri)
+        const data = await new File(fileUri).text()
         const parsed = JSON.parse(data) as Settings
         // Merge the parsed settings with the default settings.
         return deepMerge(defaultSettings, parsed as Partial<Settings>)
