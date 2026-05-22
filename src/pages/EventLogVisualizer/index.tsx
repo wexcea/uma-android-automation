@@ -19,6 +19,7 @@ import PageHeader from "../../components/PageHeader"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import WarningContainer from "../../components/WarningContainer"
 import { circularPress } from "../../lib/pressSurface"
+import { TYPE } from "../../lib/type"
 
 type MixedRecord = DayRecord | GapRecord | FileDividerRecord
 
@@ -55,14 +56,16 @@ const EventLogVisualizer: React.FC = () => {
                     opacity: 0.8,
                 },
                 totalTimeTitle: {
-                    fontSize: 18,
+                    ...TYPE.h1,
                     fontWeight: "bold",
                 },
                 totalTimeValue: {
+                    ...TYPE.monoValue,
                     fontSize: 18,
                     fontWeight: "600",
                 },
                 totalTimeHuman: {
+                    ...TYPE.caption,
                     fontSize: 14,
                 },
                 toggleContainer: {
@@ -87,7 +90,7 @@ const EventLogVisualizer: React.FC = () => {
                     backgroundColor: "transparent",
                 },
                 toggleButtonText: {
-                    fontSize: 14,
+                    ...TYPE.body,
                     fontWeight: "600",
                 },
                 toggleButtonTextActive: {
@@ -246,12 +249,12 @@ const EventLogVisualizer: React.FC = () => {
                         </TooltipTrigger>
                         <TooltipContent side="bottom" style={{ backgroundColor: isDark ? colors.surfaceRaised : "black", maxWidth: 300 }}>
                             <Text style={styles.empty}>
-                                <Text style={{ fontWeight: "bold", color: isDark ? colors.text : colors.textMuted }}>Timeline View:</Text>
+                                <Text style={[TYPE.monoLabel, { color: isDark ? colors.text : colors.textMuted }]}>Timeline View:</Text>
                                 {"\n"}
                                 Displays all days in chronological order with their actions (Recover Energy, Recover Mood, Recover Injury, Training, Race). Shows gaps for missing days and file
                                 dividers when the source file changes.
                                 {"\n\n"}
-                                <Text style={{ fontWeight: "bold", color: isDark ? colors.text : colors.textMuted }}>Year Summaries View:</Text>
+                                <Text style={[TYPE.monoLabel, { color: isDark ? colors.text : colors.textMuted }]}>Year Summaries View:</Text>
                                 {"\n"}
                                 Provides aggregated statistics for each year (Junior, Classic, Senior). Shows total action counts, stat gains from training (approximated), and elapsed time per year.
                             </Text>
