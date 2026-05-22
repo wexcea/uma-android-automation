@@ -48,7 +48,9 @@ import PageHeader from "../../components/PageHeader"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import SearchableItem from "../../components/SearchableItem"
 import { useNavigation, useFocusEffect } from "@react-navigation/native"
-import { AptitudeRow, EpithetChip, RecalcFab } from "./components/Helpers"
+import { AptitudeRow, EpithetChip } from "./components/Helpers"
+import { GlassFab } from "../../components/ui/glass-fab"
+import { RefreshCw } from "lucide-react-native"
 
 // Stringify the bundled JSON once at module load so we don't pay the serialisation cost on every debounced preview call.
 const RACES_DATA_JSON = JSON.stringify(racesData)
@@ -728,7 +730,6 @@ const SmartRaceSolverSettings = () => {
                 recalcFab: { position: "absolute", bottom: 16, right: 16, zIndex: 10, alignItems: "flex-end" },
                 recalcFabLabel: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderHair, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6, marginBottom: 6, elevation: 4 },
                 recalcFabLabelText: { color: colors.text, fontSize: 12, fontWeight: "600" },
-                recalcFabButton: { width: 56, height: 56, borderRadius: 28, backgroundColor: colors.brand, alignItems: "center", justifyContent: "center", elevation: 6 },
                 epithetCard: {
                     paddingVertical: 6,
                     paddingHorizontal: 8,
@@ -1670,15 +1671,20 @@ const SmartRaceSolverSettings = () => {
                 </ScrollView>
             </SearchPageProvider>
             {dirty && (
-                <RecalcFab
-                    onPress={() => {
-                        triggerCalendarHighlight()
-                        runPreview()
-                    }}
-                    loading={previewLoading}
-                    styles={styles}
-                    colors={colors}
-                />
+                <View style={styles.recalcFab}>
+                    <View style={styles.recalcFabLabel}>
+                        <Text style={styles.recalcFabLabelText}>Apply Changes?</Text>
+                    </View>
+                    <GlassFab
+                        onPress={() => {
+                            triggerCalendarHighlight()
+                            runPreview()
+                        }}
+                        disabled={previewLoading}
+                        accessibilityLabel="Apply changes and recompute schedule"
+                        icon={<RefreshCw size={22} color={colors.brand} />}
+                    />
+                </View>
             )}
         </View>
     )

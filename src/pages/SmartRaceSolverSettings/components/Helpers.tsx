@@ -1,7 +1,6 @@
-import { memo, useEffect, useRef } from "react"
-import { View, Text, Pressable, ActivityIndicator, Animated, ViewStyle } from "react-native"
+import { memo } from "react"
+import { View, Text, Pressable } from "react-native"
 import { useTheme } from "../../../context/ThemeContext"
-import { RefreshCw } from "lucide-react-native"
 import { APTITUDE_RANKS, AptitudeMap } from "../../../lib/solver/constants"
 
 interface AptitudeRowProps {
@@ -86,41 +85,3 @@ export const EpithetChip = memo(({ epithet, selected, onToggle, styles }: Epithe
     )
 })
 EpithetChip.displayName = "EpithetChip"
-
-/** Props for `RecalcFab`. */
-interface RecalcFabProps {
-    /** Triggered when the user taps the FAB - typically `runPreview`. */
-    onPress: () => void
-    /** When true the icon is swapped for a spinner and the button is disabled. */
-    loading: boolean
-    /** Style sheet from the parent so the FAB inherits the page's themed colors / sizes. */
-    styles: { recalcFab: ViewStyle; recalcFabButton: ViewStyle; recalcFabLabel: ViewStyle; recalcFabLabelText: object }
-    /** Theme palette - the icon and spinner pull their tint from `colors.onBrand` to contrast the brand fill. */
-    colors: { onBrand: string }
-}
-
-/**
- * Floating action button shown in the bottom-right corner when the schedule preview is stale. Plays a one-shot
- * spring scale-in on mount to draw the user's eye, then sits still until tapped or unmounted.
- *
- * @param props See `RecalcFabProps`.
- * @returns Animated FAB containing the recalculate icon (or a spinner while loading).
- */
-export const RecalcFab = memo(({ onPress, loading, styles, colors }: RecalcFabProps) => {
-    const { colors: themeColors } = useTheme()
-    const scale = useRef(new Animated.Value(0)).current
-    useEffect(() => {
-        Animated.spring(scale, { toValue: 1, friction: 5, tension: 90, useNativeDriver: true }).start()
-    }, [scale])
-    return (
-        <Animated.View style={[styles.recalcFab, { transform: [{ scale }] }]} pointerEvents="box-none">
-            <View style={styles.recalcFabLabel}>
-                <Text style={styles.recalcFabLabelText}>Apply Changes?</Text>
-            </View>
-            <Pressable style={styles.recalcFabButton} onPress={onPress} disabled={loading} android_ripple={{ color: themeColors.ripple, foreground: true }}>
-                {loading ? <ActivityIndicator size="small" color={colors.onBrand} /> : <RefreshCw size={22} color={colors.onBrand} />}
-            </Pressable>
-        </Animated.View>
-    )
-})
-RecalcFab.displayName = "RecalcFab"
