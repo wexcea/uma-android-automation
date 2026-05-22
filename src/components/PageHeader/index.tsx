@@ -243,13 +243,13 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                     flexShrink: 1,
                     fontSize: 20,
                     fontWeight: "bold",
-                    color: colors.foreground,
+                    color: colors.text,
                 },
                 searchContainer: {
                     flex: 1,
                     flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: colors.card,
+                    backgroundColor: colors.surface,
                     borderRadius: 8,
                     paddingHorizontal: 10,
                     marginLeft: 10,
@@ -257,7 +257,7 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                 },
                 searchInput: {
                     flex: 1,
-                    color: colors.foreground,
+                    color: colors.text,
                     marginLeft: 8,
                     fontSize: 16,
                 },
@@ -267,7 +267,7 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: colors.background,
+                    backgroundColor: colors.bg,
                     zIndex: 100,
                     padding: 10,
                 },
@@ -277,20 +277,20 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                 resultItem: {
                     padding: 16,
                     borderBottomWidth: 1,
-                    borderBottomColor: colors.border,
+                    borderBottomColor: colors.borderHair,
                 },
                 resultTitle: {
                     fontSize: 16,
                     fontWeight: "bold",
-                    color: colors.foreground,
+                    color: colors.text,
                 },
                 resultDescription: {
                     fontSize: 14,
-                    color: colors.mutedForeground,
+                    color: colors.textMuted,
                     marginTop: 4,
                 },
                 resultHeader: {
-                    backgroundColor: colors.muted,
+                    backgroundColor: colors.surfaceRaised,
                     paddingHorizontal: 16,
                     paddingVertical: 8,
                     marginTop: 8,
@@ -299,7 +299,7 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                 resultHeaderText: {
                     fontSize: 12,
                     fontWeight: "bold",
-                    color: colors.mutedForeground,
+                    color: colors.textMuted,
                     textTransform: "uppercase",
                     letterSpacing: 1,
                 },
@@ -313,20 +313,20 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                 <View style={[styles.headerLeft, { flex: 1, minWidth: 0 }]}>
                     {/* Hamburger menu button */}
                     <Pressable onPress={openDrawer} style={styles.menuButton} android_ripple={{ color: colors.ripple, foreground: true }}>
-                        <Ionicons name="menu" size={28} color={colors.foreground} />
+                        <Ionicons name="menu" size={28} color={colors.text} />
                     </Pressable>
 
                     {/* Home button */}
                     {!isSearching && showHomeButton && (
                         <Pressable onPress={goHome} style={styles.homeButton} android_ripple={{ color: colors.ripple, foreground: true }}>
-                            <Ionicons name="home" size={24} color={colors.foreground} />
+                            <Ionicons name="home" size={24} color={colors.text} />
                         </Pressable>
                     )}
 
                     {/* Search button */}
                     {!isSearching && (
                         <Pressable onPress={handleSearchToggle} style={styles.homeButton} android_ripple={{ color: colors.ripple, foreground: true }}>
-                            <Ionicons name="search" size={24} color={colors.foreground} />
+                            <Ionicons name="search" size={24} color={colors.text} />
                         </Pressable>
                     )}
 
@@ -340,17 +340,17 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                     {/* Search bar */}
                     {isSearching && (
                         <View style={styles.searchContainer}>
-                            <Ionicons name="search" size={20} color={colors.mutedForeground} />
+                            <Ionicons name="search" size={20} color={colors.textMuted} />
                             <TextInput
                                 ref={searchInputRef}
                                 style={styles.searchInput}
                                 placeholder="Search settings..."
-                                placeholderTextColor={colors.mutedForeground}
+                                placeholderTextColor={colors.textMuted}
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
                             />
                             <Pressable onPress={handleSearchToggle} style={{ padding: 4 }} android_ripple={{ color: colors.ripple, foreground: true }}>
-                                <Ionicons name="close" size={20} color={colors.foreground} />
+                                <Ionicons name="close" size={20} color={colors.text} />
                             </Pressable>
                         </View>
                     )}
@@ -380,8 +380,8 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
                                             {/* Search results items */}
                                             {section.data.map((item) => (
                                                 <Pressable key={item.id} style={styles.resultItem} onPress={() => handleResultPress(item)} android_ripple={{ color: colors.ripple, foreground: true }}>
-                                                    <HighlightedText text={item.title} query={searchQuery} style={styles.resultTitle} highlightColor={colors.primary} />
-                                                    <HighlightedText text={item.description} query={searchQuery} style={styles.resultDescription} highlightColor={colors.primary} />
+                                                    <HighlightedText text={item.title} query={searchQuery} style={styles.resultTitle} highlightColor={colors.brand} />
+                                                    <HighlightedText text={item.description} query={searchQuery} style={styles.resultDescription} highlightColor={colors.brand} />
                                                 </Pressable>
                                             ))}
                                         </View>
