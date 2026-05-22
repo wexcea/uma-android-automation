@@ -1,5 +1,6 @@
 import { useContext, useState, useMemo, useCallback, useRef } from "react"
-import { View, Text, ScrollView, StyleSheet, Pressable, Modal, TextInput, Dimensions } from "react-native"
+import { View, Text, ScrollView, StyleSheet, Pressable, TextInput, Dimensions } from "react-native"
+import { GlassModal } from "../../components/ui/glass-modal"
 import { FlashList } from "@shopify/flash-list"
 import { useTheme } from "../../context/ThemeContext"
 import { TrainingEventContext, defaultSettings } from "../../context/BotStateContext"
@@ -449,12 +450,6 @@ const TrainingEventSettings = () => {
                     fontSize: 14,
                     color: colors.text,
                 },
-                modalOverlay: {
-                    flex: 1,
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    justifyContent: "center",
-                    alignItems: "center",
-                },
                 modalContent: {
                     backgroundColor: colors.surface,
                     borderRadius: 16,
@@ -884,10 +879,8 @@ const TrainingEventSettings = () => {
             </SearchPageProvider>
 
             {/* Event Override Selection Modal */}
-            <Modal animationType="slide" transparent={true} visible={eventOverrideModalVisible} onRequestClose={() => setEventOverrideModalVisible(false)}>
-                <Pressable style={styles.modalOverlay} onPress={() => setEventOverrideModalVisible(false)}>
-                    <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-                        <View style={styles.modalHeader}>
+            <GlassModal visible={eventOverrideModalVisible} onRequestClose={() => setEventOverrideModalVisible(false)} contentStyle={styles.modalContent}>
+                <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Select Event Override</Text>
                             <Pressable style={styles.closeButton} onPress={() => setEventOverrideModalVisible(false)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                 <X size={24} color={colors.text} />
@@ -928,29 +921,18 @@ const TrainingEventSettings = () => {
                                 }
                             />
                         </View>
-                    </Pressable>
-                </Pressable>
-            </Modal>
+            </GlassModal>
 
             {/* Option Selection Modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
+            <GlassModal
                 visible={optionSelectionModalVisible}
                 onRequestClose={() => {
                     setOptionSelectionModalVisible(false)
                     setEventOverrideModalVisible(true)
                 }}
+                contentStyle={styles.modalContent}
             >
-                <Pressable
-                    style={styles.modalOverlay}
-                    onPress={() => {
-                        setOptionSelectionModalVisible(false)
-                        setEventOverrideModalVisible(true)
-                    }}
-                >
-                    <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-                        <View style={styles.modalHeader}>
+                <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Select Option</Text>
                             <Pressable
                                 style={styles.closeButton}
@@ -1007,9 +989,7 @@ const TrainingEventSettings = () => {
                                 </View>
                             </>
                         )}
-                    </Pressable>
-                </Pressable>
-            </Modal>
+            </GlassModal>
         </View>
     )
 }

@@ -1,5 +1,6 @@
 import React, { useMemo, useContext, useEffect, useState, useRef, useCallback } from "react"
-import { View, Text, ScrollView, StyleSheet, Modal, Pressable, Dimensions, InteractionManager } from "react-native"
+import { View, Text, ScrollView, StyleSheet, Pressable, Dimensions, InteractionManager } from "react-native"
+import { GlassModal } from "../../components/ui/glass-modal"
 import { Snackbar } from "react-native-paper"
 import { useTheme } from "../../context/ThemeContext"
 import { TrainingContext, GeneralMiscContext, BotMetaContext, defaultSettings, Settings } from "../../context/BotStateContext"
@@ -305,12 +306,6 @@ const TrainingSettings = () => {
                     color: colors.brand,
                     textDecorationLine: "underline",
                 },
-                modal: {
-                    flex: 1,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: "rgba(70, 70, 70, 0.5)",
-                },
                 modalContent: {
                     backgroundColor: colors.surface,
                     borderRadius: 12,
@@ -412,10 +407,8 @@ const TrainingSettings = () => {
                     {description && <Text style={[styles.label, { fontSize: 14, color: colors.text, opacity: 0.7, marginTop: 4 }]}>{description}</Text>}
                 </Pressable>
 
-                <Modal visible={modalVisible} transparent={true} animationType="fade" onRequestClose={() => setModalVisible(false)}>
-                    <Pressable style={styles.modal} onPress={() => setModalVisible(false)}>
-                        <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-                            <View style={styles.modalHeader}>
+                <GlassModal visible={modalVisible} onRequestClose={() => setModalVisible(false)} contentStyle={styles.modalContent}>
+                    <View style={styles.modalHeader}>
                                 <Text style={styles.modalTitle}>{title}</Text>
                                 <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                     <Text style={styles.closeText}>✕</Text>
@@ -467,9 +460,7 @@ const TrainingSettings = () => {
                                     Select All
                                 </CustomButton>
                             </View>
-                        </Pressable>
-                    </Pressable>
-                </Modal>
+                </GlassModal>
             </View>
         )
 
