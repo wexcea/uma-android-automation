@@ -10,6 +10,9 @@ import PageHeader from "../../components/PageHeader"
 import WarningContainer from "../../components/WarningContainer"
 import InfoContainer from "../../components/InfoContainer"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
+import { Section } from "../../components/ui/section"
+import { TYPE } from "../../lib/type"
+import { SPACING } from "../../lib/spacing"
 import { databaseManager } from "../../lib/database"
 import { DEFAULTS as TUNING_DEFAULTS, saveTuning } from "../../lib/chat/chatSettings"
 import { ACTIVE_MODEL_SETTING } from "../../lib/chat/activeModel"
@@ -427,7 +430,6 @@ const LLMSettings = () => {
             StyleSheet.create({
                 root: { flex: 1, margin: 10, backgroundColor: colors.bg },
                 section: { marginTop: 14 },
-                sectionLabel: { fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 },
                 statusRow: { color: colors.text, marginBottom: 4 },
                 hint: { fontSize: 11, color: colors.textMuted, marginTop: 4 },
                 linkRowContainer: { flexDirection: "row" as const, gap: 16, marginTop: 4 },
@@ -507,55 +509,66 @@ const LLMSettings = () => {
 
                 {enableAskTheDocs && (
                     <>
-                        <View style={styles.section}>
-                            <Text style={styles.sectionLabel}>Device Fitness</Text>
-                            {deviceCaps ? (
-                                <>
-                                    <Text style={styles.statusRow}>
-                                        RAM: {formatBytes(deviceCaps.totalRamBytes)} ({formatBytes(deviceCaps.availRamBytes)} free) · Acceleration: {accelerationTierLabel(tier)}
-                                    </Text>
-                                    <Text style={styles.hint}>
-                                        {recommended
-                                            ? `Recommended preset based on free RAM: ${recommended.label}.`
-                                            : "Free RAM is below the threshold for any preset. Generation may crash; consider closing background apps before downloading."}
-                                    </Text>
-                                </>
-                            ) : (
-                                <Text style={styles.hint}>Reading device capabilities...</Text>
-                            )}
-                        </View>
-
-                        <View style={styles.section}>
-                            <Text style={styles.sectionLabel}>Ask the Docs Engine</Text>
-                            <Text style={styles.hint}>
-                                The MiniLM embedder (~{Math.round(EMBEDDER_SIZE_BYTES / 1024 / 1024)} MB) powers documentation retrieval. It is downloaded on demand to keep the APK small; both
-                                retrieve-only search and the chat model require it. Hosted on Hugging Face; no token required.
-                            </Text>
-                            <Text style={styles.statusRow}>{embedderReady ? `✅ Installed (~${Math.round(EMBEDDER_SIZE_BYTES / 1024 / 1024)} MB)` : "❌ Not installed"}</Text>
-                            {embedderProgressText && <Text style={styles.hint}>{embedderProgressText}</Text>}
-                            <View style={styles.buttonRow}>
-                                {!embedderReady && !isEmbedderDownloading && (
-                                    <CustomButton variant="primary" onPress={handleDownloadEmbedder}>
-                                        Download engine
-                                    </CustomButton>
-                                )}
-                                {isEmbedderDownloading && (
-                                    <CustomButton variant="destructive" onPress={handleCancel}>
-                                        Cancel
-                                    </CustomButton>
-                                )}
-                                {embedderReady && !isEmbedderDownloading && (
-                                    <CustomButton variant="destructive" onPress={handleDeleteEmbedder}>
-                                        Delete engine
-                                    </CustomButton>
+                        <Section label="Device Fitness">
+                            <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
+                                {deviceCaps ? (
+                                    <>
+                                        <Text style={styles.statusRow}>
+                                            RAM: <Text style={[TYPE.monoValue, { color: colors.text }]}>{formatBytes(deviceCaps.totalRamBytes)}</Text> (
+                                            <Text style={[TYPE.monoValue, { color: colors.text }]}>{formatBytes(deviceCaps.availRamBytes)}</Text> free) · Acceleration:{" "}
+                                            {accelerationTierLabel(tier)}
+                                        </Text>
+                                        <Text style={styles.hint}>
+                                            {recommended
+                                                ? `Recommended preset based on free RAM: ${recommended.label}.`
+                                                : "Free RAM is below the threshold for any preset. Generation may crash; consider closing background apps before downloading."}
+                                        </Text>
+                                    </>
+                                ) : (
+                                    <Text style={styles.hint}>Reading device capabilities...</Text>
                                 )}
                             </View>
-                        </View>
+                        </Section>
 
-                        <View style={styles.section}>
-                            <Text style={styles.sectionLabel}>Chat Model (llama.cpp / GGUF)</Text>
-                            {downloadedModels.length === 0 && <Text style={styles.statusRow}>Not downloaded</Text>}
-                            <>
+                        <Section label="Ask the Docs Engine">
+                            <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
+                                <Text style={styles.hint}>
+                                    The MiniLM embedder (~<Text style={[TYPE.monoValue, { color: colors.text }]}>{Math.round(EMBEDDER_SIZE_BYTES / 1024 / 1024)}</Text> MB) powers documentation
+                                    retrieval. It is downloaded on demand to keep the APK small; both retrieve-only search and the chat model require it. Hosted on Hugging Face; no token required.
+                                </Text>
+                                <Text style={styles.statusRow}>
+                                    {embedderReady ? (
+                                        <>
+                                            ✅ Installed (~<Text style={[TYPE.monoValue, { color: colors.text }]}>{Math.round(EMBEDDER_SIZE_BYTES / 1024 / 1024)}</Text> MB)
+                                        </>
+                                    ) : (
+                                        "❌ Not installed"
+                                    )}
+                                </Text>
+                                {embedderProgressText && <Text style={styles.hint}>{embedderProgressText}</Text>}
+                                <View style={styles.buttonRow}>
+                                    {!embedderReady && !isEmbedderDownloading && (
+                                        <CustomButton variant="primary" onPress={handleDownloadEmbedder}>
+                                            Download engine
+                                        </CustomButton>
+                                    )}
+                                    {isEmbedderDownloading && (
+                                        <CustomButton variant="destructive" onPress={handleCancel}>
+                                            Cancel
+                                        </CustomButton>
+                                    )}
+                                    {embedderReady && !isEmbedderDownloading && (
+                                        <CustomButton variant="destructive" onPress={handleDeleteEmbedder}>
+                                            Delete engine
+                                        </CustomButton>
+                                    )}
+                                </View>
+                            </View>
+                        </Section>
+
+                        <Section label="Chat Model (llama.cpp / GGUF)">
+                            <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
+                                {downloadedModels.length === 0 && <Text style={styles.statusRow}>Not downloaded</Text>}
                                 <Text style={styles.hint}>
                                     The Qwen presets are public, no token required. Bigger models summarize better but need more RAM and download time. Pick Custom to paste a different .gguf URL; the
                                     token field will appear if the source is gated.
@@ -622,107 +635,112 @@ const LLMSettings = () => {
                                         />
                                     </>
                                 )}
-                            </>
-                            {progressText && <Text style={styles.hint}>{progressText}</Text>}
-                            <View style={styles.buttonRow}>
-                                {!isDownloading && (
-                                    <CustomButton variant="primary" onPress={handleDownload} disabled={selectedAlreadyDownloaded}>
-                                        {selectedAlreadyDownloaded ? "Already downloaded" : downloadedModels.length > 0 ? "Download another model" : "Download"}
-                                    </CustomButton>
-                                )}
-                                {isDownloading && (
-                                    <CustomButton variant="destructive" onPress={handleCancel}>
-                                        Cancel
-                                    </CustomButton>
-                                )}
+                                {progressText && <Text style={styles.hint}>{progressText}</Text>}
+                                <View style={styles.buttonRow}>
+                                    {!isDownloading && (
+                                        <CustomButton variant="primary" onPress={handleDownload} disabled={selectedAlreadyDownloaded}>
+                                            {selectedAlreadyDownloaded ? "Already downloaded" : downloadedModels.length > 0 ? "Download another model" : "Download"}
+                                        </CustomButton>
+                                    )}
+                                    {isDownloading && (
+                                        <CustomButton variant="destructive" onPress={handleCancel}>
+                                            Cancel
+                                        </CustomButton>
+                                    )}
+                                </View>
                             </View>
-                        </View>
+                        </Section>
 
                         {downloadedModels.length > 0 && (
-                            <View style={styles.section}>
-                                <Text style={styles.sectionLabel}>Downloaded Models</Text>
-                                <Text style={styles.hint}>Tap Use to switch the active chat model. Keep multiple variants so you can A/B without re-downloading.</Text>
-                                {downloadedModels.map((m) => {
-                                    const isActive = (activeModelFilename ?? downloadedModels[0]?.filename) === m.filename
-                                    return (
-                                        <View key={m.filename} style={[styles.modelRow, isActive && styles.modelRowActive]}>
-                                            <View style={styles.modelInfo}>
-                                                <Text style={styles.modelFilename} numberOfLines={1}>
-                                                    {m.filename}
-                                                </Text>
-                                                <Text style={styles.modelMeta}>{(m.sizeBytes / 1024 / 1024).toFixed(0)} MB</Text>
-                                            </View>
-                                            <View style={styles.modelActions}>
-                                                {isActive ? (
-                                                    <View style={styles.activeBadge}>
-                                                        <Check size={14} color={colors.brand} />
-                                                        <Text style={styles.modelActionActiveText}>Active</Text>
-                                                    </View>
-                                                ) : (
+                            <Section label="Downloaded Models">
+                                <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
+                                    <Text style={styles.hint}>Tap Use to switch the active chat model. Keep multiple variants so you can A/B without re-downloading.</Text>
+                                    {downloadedModels.map((m) => {
+                                        const isActive = (activeModelFilename ?? downloadedModels[0]?.filename) === m.filename
+                                        return (
+                                            <View key={m.filename} style={[styles.modelRow, isActive && styles.modelRowActive]}>
+                                                <View style={styles.modelInfo}>
+                                                    <Text style={[styles.modelFilename, TYPE.monoValue]} numberOfLines={1}>
+                                                        {m.filename}
+                                                    </Text>
+                                                    <Text style={styles.modelMeta}>
+                                                        <Text style={[TYPE.monoValue, { color: colors.textMuted, fontSize: 11 }]}>{(m.sizeBytes / 1024 / 1024).toFixed(0)}</Text> MB
+                                                    </Text>
+                                                </View>
+                                                <View style={styles.modelActions}>
+                                                    {isActive ? (
+                                                        <View style={styles.activeBadge}>
+                                                            <Check size={14} color={colors.brand} />
+                                                            <Text style={styles.modelActionActiveText}>Active</Text>
+                                                        </View>
+                                                    ) : (
+                                                        <Pressable
+                                                            style={styles.modelActionButton}
+                                                            onPress={() => handleSelectActiveModel(m.filename)}
+                                                            android_ripple={{ color: colors.ripple, foreground: true }}
+                                                        >
+                                                            <Text style={styles.modelActionText}>Use</Text>
+                                                        </Pressable>
+                                                    )}
                                                     <Pressable
                                                         style={styles.modelActionButton}
-                                                        onPress={() => handleSelectActiveModel(m.filename)}
+                                                        onPress={() => handleDeleteModelFile(m.filename)}
+                                                        accessibilityLabel={`Delete ${m.filename}`}
+                                                        accessibilityRole="button"
                                                         android_ripple={{ color: colors.ripple, foreground: true }}
                                                     >
-                                                        <Text style={styles.modelActionText}>Use</Text>
+                                                        <Trash2 size={14} color={colors.text} />
                                                     </Pressable>
-                                                )}
-                                                <Pressable
-                                                    style={styles.modelActionButton}
-                                                    onPress={() => handleDeleteModelFile(m.filename)}
-                                                    accessibilityLabel={`Delete ${m.filename}`}
-                                                    accessibilityRole="button"
-                                                    android_ripple={{ color: colors.ripple, foreground: true }}
-                                                >
-                                                    <Trash2 size={14} color={colors.text} />
-                                                </Pressable>
+                                                </View>
                                             </View>
-                                        </View>
-                                    )
-                                })}
-                            </View>
+                                        )
+                                    })}
+                                </View>
+                            </Section>
                         )}
 
-                        <View style={styles.section}>
-                            <View style={styles.tuningHeader}>
-                                <Text style={styles.sectionLabel}>Generation Tuning</Text>
-                                <Pressable onPress={handleResetTuning} style={styles.linkRow} android_ripple={{ color: colors.ripple, foreground: true }}>
-                                    <Text style={styles.link}>Reset to defaults</Text>
-                                </Pressable>
+                        <Section label="Generation Tuning">
+                            <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
+                                <View style={styles.tuningHeader}>
+                                    <Text style={[TYPE.body, { color: colors.text }]}>Tune defaults</Text>
+                                    <Pressable onPress={handleResetTuning} style={styles.linkRow} android_ripple={{ color: colors.ripple, foreground: true }}>
+                                        <Text style={styles.link}>Reset to defaults</Text>
+                                    </Pressable>
+                                </View>
+                                <Text style={styles.hint}>Bigger numbers = longer, slower answers. Changes apply to the next chat call. Engine context window changes reload the loaded model.</Text>
+                                <CustomSlider
+                                    label="Max output tokens"
+                                    description="Upper bound on answer length. 768 default is enough for 4-10 sentences; 1024+ slows generation noticeably on phones."
+                                    value={maxOutputTokens}
+                                    onValueChange={setMaxOutputTokens}
+                                    onSlidingComplete={commitMaxOutputTokens}
+                                    min={128}
+                                    max={2048}
+                                    step={64}
+                                />
+                                <CustomSlider
+                                    label="Context per citation (chars)"
+                                    description="How much of each retrieved doc section is fed to the LLM. Larger gives the model more to summarize from but eats KV cache budget."
+                                    value={llmCitationCharCap}
+                                    onValueChange={setLlmCitationCharCap}
+                                    onSlidingComplete={commitLlmCitationCharCap}
+                                    min={500}
+                                    max={4000}
+                                    step={100}
+                                />
+                                <CustomSlider
+                                    label="Model context window (tokens)"
+                                    description="Engine KV cache size. 4096 default fits 4 expanded citations + scaffold + 768 output. Raising this requires the model to support it."
+                                    value={modelContextWindow}
+                                    onValueChange={setModelContextWindow}
+                                    onSlidingComplete={commitModelContextWindow}
+                                    min={2048}
+                                    max={16384}
+                                    step={1024}
+                                />
+                                {ekvCapWarning && <Text style={styles.warningHint}>{ekvCapWarning}</Text>}
                             </View>
-                            <Text style={styles.hint}>Bigger numbers = longer, slower answers. Changes apply to the next chat call. Engine context window changes reload the loaded model.</Text>
-                            <CustomSlider
-                                label="Max output tokens"
-                                description="Upper bound on answer length. 768 default is enough for 4-10 sentences; 1024+ slows generation noticeably on phones."
-                                value={maxOutputTokens}
-                                onValueChange={setMaxOutputTokens}
-                                onSlidingComplete={commitMaxOutputTokens}
-                                min={128}
-                                max={2048}
-                                step={64}
-                            />
-                            <CustomSlider
-                                label="Context per citation (chars)"
-                                description="How much of each retrieved doc section is fed to the LLM. Larger gives the model more to summarize from but eats KV cache budget."
-                                value={llmCitationCharCap}
-                                onValueChange={setLlmCitationCharCap}
-                                onSlidingComplete={commitLlmCitationCharCap}
-                                min={500}
-                                max={4000}
-                                step={100}
-                            />
-                            <CustomSlider
-                                label="Model context window (tokens)"
-                                description="Engine KV cache size. 4096 default fits 4 expanded citations + scaffold + 768 output. Raising this requires the model to support it."
-                                value={modelContextWindow}
-                                onValueChange={setModelContextWindow}
-                                onSlidingComplete={commitModelContextWindow}
-                                min={2048}
-                                max={16384}
-                                step={1024}
-                            />
-                            {ekvCapWarning && <Text style={styles.warningHint}>{ekvCapWarning}</Text>}
-                        </View>
+                        </Section>
 
                         <WarningContainer>
                             Generated answers may occasionally be wrong or phrased imprecisely. A verifier guards against clear hallucinations by falling back to showing the source text verbatim, but

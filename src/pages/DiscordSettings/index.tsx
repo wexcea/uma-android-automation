@@ -10,6 +10,9 @@ import WarningContainer from "../../components/WarningContainer"
 import SearchableItem from "../../components/SearchableItem"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import { NativeModules } from "react-native"
+import { TYPE } from "../../lib/type"
+import { SPACING } from "../../lib/spacing"
+import { RADII } from "../../lib/radii"
 
 /**
  * Discord Settings page for configuring Discord bot notifications.
@@ -80,23 +83,22 @@ const DiscordSettings = () => {
                     backgroundColor: colors.bg,
                 },
                 section: {
-                    marginBottom: 24,
+                    marginBottom: SPACING.xl,
                 },
                 inputLabel: {
-                    fontSize: 14,
-                    fontWeight: "600",
+                    ...TYPE.body,
                     color: colors.text,
                     marginBottom: 6,
                 },
                 inputDescription: {
-                    fontSize: 12,
+                    ...TYPE.caption,
                     color: colors.textMuted,
                     marginBottom: 8,
                 },
                 textInput: {
                     borderWidth: 1,
                     borderColor: isDark ? "#444" : "#ccc",
-                    borderRadius: 8,
+                    borderRadius: RADII.md,
                     padding: 12,
                     fontSize: 14,
                     color: colors.text,
@@ -108,7 +110,7 @@ const DiscordSettings = () => {
                 resultContainer: {
                     marginTop: 12,
                     padding: 12,
-                    borderRadius: 8,
+                    borderRadius: RADII.md,
                     borderWidth: 1,
                 },
                 resultSuccess: {
