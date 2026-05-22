@@ -43,7 +43,7 @@ const EventLogVisualizer: React.FC = () => {
             StyleSheet.create({
                 root: {
                     flex: 1,
-                    backgroundColor: colors.background,
+                    backgroundColor: colors.bg,
                 },
                 content: {
                     padding: 12,
@@ -67,7 +67,7 @@ const EventLogVisualizer: React.FC = () => {
                 },
                 toggleContainer: {
                     flexDirection: "row",
-                    backgroundColor: colors.card,
+                    backgroundColor: colors.surface,
                     borderRadius: 8,
                     padding: 4,
                     gap: 4,
@@ -81,7 +81,7 @@ const EventLogVisualizer: React.FC = () => {
                     justifyContent: "center",
                 },
                 toggleButtonActive: {
-                    backgroundColor: colors.primary,
+                    backgroundColor: colors.brand,
                 },
                 toggleButtonInactive: {
                     backgroundColor: "transparent",
@@ -91,10 +91,10 @@ const EventLogVisualizer: React.FC = () => {
                     fontWeight: "600",
                 },
                 toggleButtonTextActive: {
-                    color: colors.primaryForeground,
+                    color: colors.onBrand,
                 },
                 toggleButtonTextInactive: {
-                    color: colors.foreground,
+                    color: colors.text,
                 },
             }),
         [colors]
@@ -189,10 +189,10 @@ const EventLogVisualizer: React.FC = () => {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Pressable style={circularPress(40)} android_ripple={{ color: colors.ripple, foreground: true }}>
-                                <Info size={20} color={colors.primary} />
+                                <Info size={20} color={colors.brand} />
                             </Pressable>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom" style={{ backgroundColor: isDark ? colors.muted : "black", maxWidth: 300 }}>
+                        <TooltipContent side="bottom" style={{ backgroundColor: isDark ? colors.surfaceRaised : "black", maxWidth: 300 }}>
                             <WarningContainer>
                                 <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
                                     <Text style={{ fontWeight: "bold", color: colors.warningText }}>⚠️ File Explorer Note:</Text>
@@ -240,17 +240,17 @@ const EventLogVisualizer: React.FC = () => {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Pressable style={circularPress(40)} android_ripple={{ color: colors.ripple, foreground: true }}>
-                                <Info size={20} color={colors.primary} />
+                                <Info size={20} color={colors.brand} />
                             </Pressable>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom" style={{ backgroundColor: isDark ? colors.muted : "black", maxWidth: 300 }}>
+                        <TooltipContent side="bottom" style={{ backgroundColor: isDark ? colors.surfaceRaised : "black", maxWidth: 300 }}>
                             <Text style={styles.empty}>
-                                <Text style={{ fontWeight: "bold", color: isDark ? colors.foreground : colors.mutedForeground }}>Timeline View:</Text>
+                                <Text style={{ fontWeight: "bold", color: isDark ? colors.text : colors.textMuted }}>Timeline View:</Text>
                                 {"\n"}
                                 Displays all days in chronological order with their actions (Recover Energy, Recover Mood, Recover Injury, Training, Race). Shows gaps for missing days and file
                                 dividers when the source file changes.
                                 {"\n\n"}
-                                <Text style={{ fontWeight: "bold", color: isDark ? colors.foreground : colors.mutedForeground }}>Year Summaries View:</Text>
+                                <Text style={{ fontWeight: "bold", color: isDark ? colors.text : colors.textMuted }}>Year Summaries View:</Text>
                                 {"\n"}
                                 Provides aggregated statistics for each year (Junior, Classic, Senior). Shows total action counts, stat gains from training (approximated), and elapsed time per year.
                             </Text>
@@ -272,9 +272,9 @@ const EventLogVisualizer: React.FC = () => {
                     <>
                         {yearSummariesResult.totalElapsedTimeFormatted && (
                             <View style={[styles.content, { paddingBottom: 8, flexDirection: "row", alignItems: "center", gap: 8 }]}>
-                                <Text style={[styles.totalTimeTitle, { color: colors.foreground }]}>Total Elapsed Time:</Text>
-                                <Text style={[styles.totalTimeValue, { color: colors.foreground }]}>{yearSummariesResult.totalElapsedTimeFormatted}</Text>
-                                <Text style={[styles.totalTimeHuman, { color: colors.mutedForeground }]}>({yearSummariesResult.totalElapsedTimeHuman})</Text>
+                                <Text style={[styles.totalTimeTitle, { color: colors.text }]}>Total Elapsed Time:</Text>
+                                <Text style={[styles.totalTimeValue, { color: colors.text }]}>{yearSummariesResult.totalElapsedTimeFormatted}</Text>
+                                <Text style={[styles.totalTimeHuman, { color: colors.textMuted }]}>({yearSummariesResult.totalElapsedTimeHuman})</Text>
                             </View>
                         )}
                         <FlashList
@@ -291,7 +291,7 @@ const EventLogVisualizer: React.FC = () => {
                 visible={snackbarOpen}
                 onDismiss={() => setSnackbarOpen(false)}
                 action={{ label: "Close", onPress: () => setSnackbarOpen(false) }}
-                style={{ backgroundColor: errors.length ? colors.destructive : colors.card, borderRadius: 10 }}
+                style={{ backgroundColor: errors.length ? colors.destructive : colors.surface, borderRadius: 10 }}
             >
                 {errors.join("\n")}
             </Snackbar>

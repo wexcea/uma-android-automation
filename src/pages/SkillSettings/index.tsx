@@ -55,11 +55,11 @@ const SkillSettings = () => {
                     flexDirection: "column",
                     justifyContent: "center",
                     margin: 10,
-                    backgroundColor: colors.background,
+                    backgroundColor: colors.bg,
                 },
                 description: {
                     fontSize: 14,
-                    color: colors.foreground,
+                    color: colors.text,
                     opacity: 0.7,
                     marginBottom: 16,
                     lineHeight: 20,
@@ -72,7 +72,7 @@ const SkillSettings = () => {
                 },
                 inputLabel: {
                     fontSize: 16,
-                    color: colors.foreground,
+                    color: colors.text,
                     marginBottom: 8,
                 },
                 infoBlock: {
@@ -80,14 +80,14 @@ const SkillSettings = () => {
                 },
                 infoLabel: {
                     fontWeight: "bold",
-                    color: colors.foreground,
+                    color: colors.text,
                     fontSize: 14,
                     lineHeight: 22,
                     includeFontPadding: false,
                 },
                 infoDescription: {
                     fontSize: 14,
-                    color: colors.foreground,
+                    color: colors.text,
                     opacity: 0.7,
                     lineHeight: 22,
                     includeFontPadding: false,
