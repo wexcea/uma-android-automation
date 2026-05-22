@@ -1,0 +1,16 @@
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Radius scale (Linear-balanced)
+//
+// Cards default to `lg` (10). Buttons / inputs default to `md` (8). Toggles and badges use `pill`.
+
+export const RADII = {
+    xs: 4,
+    sm: 6,
+    md: 8,
+    lg: 10,
+    xl: 14,
+    pill: 999,
+} as const
+
+export type RadiusKey = keyof typeof RADII
