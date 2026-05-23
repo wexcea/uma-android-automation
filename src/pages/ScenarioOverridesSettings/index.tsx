@@ -181,7 +181,7 @@ const ScenarioOverridesSettings = () => {
                     opacity: 0.7,
                     marginBottom: 12,
                 },
-                resetLink: { ...TYPE.caption, color: colors.brand, fontWeight: "600" } as any,
+                resetLink: { ...TYPE.caption, color: colors.brand, fontWeight: "600" as const },
             }),
         [colors]
     )
