@@ -220,7 +220,7 @@ const EventLogVisualizer: React.FC = () => {
                 <Row
                     title="Show trigger lines"
                     description="Display the log lines behind each action"
-                    right={<Switch checked={showTriggers} onCheckedChange={(checked) => setShowTriggers(!!checked)} />}
+                    right={<Switch checked={showTriggers} onCheckedChange={setShowTriggers} />}
                 />
 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
