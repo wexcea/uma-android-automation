@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import { View, Text, Image, StyleSheet, ImageSourcePropType } from "react-native"
+import { View, Text, StyleSheet } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
 import { TYPE } from "../../lib/type"
 import { SPACING } from "../../lib/spacing"
@@ -13,14 +13,8 @@ export type HeroStatus = "ready" | "running" | "stopped" | "error"
 export interface HeroStatusCardProps {
     /** Current bot status pill. */
     status: HeroStatus
-    /** Active campaign name (e.g. "Trackblazer"). */
-    campaign: string
     /** Active profile name (e.g. "Default"). */
     profile: string
-    /** Optional secondary line (e.g. "Last run - 2h ago - 5 races"). */
-    metaLine?: string
-    /** Mascot image source. */
-    mascot: ImageSourcePropType
     /** Press handler for the default Start CTA. Ignored when `cta` is provided. */
     onStart?: () => void
     /** Whether the default Start button is disabled. Defaults to false. Ignored when `cta` is provided. */
@@ -37,23 +31,19 @@ const STATUS_LABEL: Record<HeroStatus, string> = {
 }
 
 const BULLET = "●" // BLACK CIRCLE
-const SEPARATOR = "·" // MIDDLE DOT
 
 /**
- * Home dashboard hero card: mascot, status pill, campaign + profile, primary action.
- * Uses a cyan-tinted brand surface with a cyan border to draw the eye and signal
- * the page's primary anchor.
+ * Home dashboard hero card: status pill + active profile + primary action.
+ * Brand-tinted surface anchors the page; campaign name and avatar live in the
+ * scenario picker and the drawer respectively, so neither is repeated here.
  * @param status Current bot status.
- * @param campaign Active campaign name.
  * @param profile Active profile name.
- * @param metaLine Optional caption rendered beneath the campaign line.
- * @param mascot Mascot image source.
  * @param onStart Press handler for the default Start CTA. Ignored when `cta` is provided.
  * @param startDisabled Whether the default Start button is disabled. Ignored when `cta` is provided.
  * @param cta Optional custom right-side action that replaces the default Start button.
- * @returns A brand-tinted card containing the mascot, status block, and primary action.
+ * @returns A brand-tinted card containing the status pill, profile name, and primary action.
  */
-const HeroStatusCard: React.FC<HeroStatusCardProps> = ({ status, campaign, profile, metaLine, mascot, onStart, startDisabled = false, cta }) => {
+const HeroStatusCard: React.FC<HeroStatusCardProps> = ({ status, profile, onStart, startDisabled = false, cta }) => {
     const { colors } = useTheme()
     // Status pill color: ready/running -> success token, stopped/error -> warning.
     const isHealthy = status === "ready" || status === "running"
@@ -67,8 +57,7 @@ const HeroStatusCard: React.FC<HeroStatusCardProps> = ({ status, campaign, profi
                     borderRadius: RADII.xl,
                 },
                 row: { flexDirection: "row", alignItems: "center", gap: SPACING.md, padding: SPACING.md },
-                mascot: { width: 56, height: 56, borderRadius: 999 },
-                body: { flex: 1, gap: 2 },
+                body: { flex: 1, gap: 4 },
                 statusPill: {
                     ...TYPE.monoLabel,
                     color: isHealthy ? colors.success : colors.warning,
@@ -78,21 +67,16 @@ const HeroStatusCard: React.FC<HeroStatusCardProps> = ({ status, campaign, profi
                     backgroundColor: isHealthy ? colors.successSubtle : colors.warningSubtle,
                     borderRadius: RADII.pill,
                 },
-                campaign: { ...TYPE.h2, color: colors.text },
-                meta: { ...TYPE.caption, color: colors.textMuted },
+                profile: { ...TYPE.h2, color: colors.text },
             }),
         [colors, isHealthy]
     )
     return (
         <View style={styles.card}>
             <View style={styles.row}>
-                <Image source={mascot} style={styles.mascot} />
                 <View style={styles.body}>
                     <Text style={styles.statusPill}>{`${BULLET} ${STATUS_LABEL[status]}`}</Text>
-                    <Text style={styles.campaign}>
-                        {campaign} {SEPARATOR} {profile}
-                    </Text>
-                    {metaLine ? <Text style={styles.meta}>{metaLine}</Text> : null}
+                    <Text style={styles.profile}>{profile}</Text>
                 </View>
                 {cta ?? (
                     <CustomButton variant="primary" size="sm" onPress={onStart} disabled={startDisabled}>
