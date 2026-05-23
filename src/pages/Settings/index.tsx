@@ -2,7 +2,6 @@ import { useMemo, useContext, useEffect, useState, useRef, useCallback } from "r
 import { SearchPageProvider } from "../../context/SearchPageContext"
 import { BotMetaContext, GeneralMiscContext } from "../../context/BotStateContext"
 import { InteractionManager, ScrollView, StyleSheet, Text, View } from "react-native"
-import { Snackbar } from "react-native-paper"
 import { useNavigation } from "@react-navigation/native"
 import { Ionicons } from "@react-native-vector-icons/ionicons"
 import ThemeToggle from "../../components/ThemeToggle"
@@ -31,10 +30,9 @@ import { SPACING } from "../../lib/spacing"
  */
 const Settings = () => {
     usePerformanceLogging("Settings")
-    const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false)
     const scrollViewRef = useRef<ScrollView>(null)
 
-    const { readyStatus, defaultSettings } = useContext(BotMetaContext)
+    const { defaultSettings } = useContext(BotMetaContext)
     const { general, misc, updateGeneral, updateMisc } = useContext(GeneralMiscContext)
     const { colors } = useTheme()
     const navigation = useNavigation()
@@ -60,12 +58,6 @@ const Settings = () => {
     //////////////////////////////////////////////////
     // Callbacks
 
-    useEffect(() => {
-        // Manually set this flag to false as the snackbar autohiding does not set this to false automatically.
-        setSnackbarOpen(true)
-        setTimeout(() => setSnackbarOpen(false), 2500)
-    }, [readyStatus])
-
     // Two-phase mount. First paint renders the cheap navigation-link list (~40 ms baseline) so the
     // user sees the page immediately; the heavy Misc section (sliders, checkboxes, dialogs,
     // file-manager hook plumbing — ~1 s of additional work) commits one tick later, after the
@@ -84,11 +76,7 @@ const Settings = () => {
      * Reset the settings to their default values.
      */
     const handleResetSettings = async () => {
-        const success = await resetSettings()
-        if (success) {
-            setSnackbarOpen(true)
-            setTimeout(() => setSnackbarOpen(false), 2500)
-        }
+        await resetSettings()
     }
 
     //////////////////////////////////////////////////
@@ -430,20 +418,6 @@ const Settings = () => {
                     </View>
                 </ScrollView>
             </SearchPageProvider>
-
-            <Snackbar
-                visible={snackbarOpen}
-                onDismiss={() => setSnackbarOpen(false)}
-                action={{
-                    label: "Close",
-                    onPress: () => {
-                        setSnackbarOpen(false)
-                    },
-                }}
-                style={{ backgroundColor: readyStatus ? "green" : "red", borderRadius: 10 }}
-            >
-                {readyStatus ? "Bot is ready!" : "Bot is not ready!"}
-            </Snackbar>
 
             {/* Restart Dialog */}
             <AlertDialog open={showImportDialog} onOpenChange={setShowImportDialog}>
