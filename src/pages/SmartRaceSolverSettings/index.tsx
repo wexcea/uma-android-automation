@@ -79,7 +79,8 @@ interface SubTopicProps {
 
 /**
  * A titled paragraph used inside an InfoCallout body.
- * @param props See `SubTopicProps`.
+ * @param title Section heading shown in `TYPE.h2`.
+ * @param children Body content shown in `TYPE.body` with `textMuted` color.
  * @returns A View with a heading and body text.
  */
 const SubTopic = ({ title, children }: SubTopicProps) => {
@@ -632,9 +633,9 @@ const SmartRaceSolverSettings = () => {
                 chipConditionActive: { color: colors.onBrand, fontSize: 10, fontStyle: "italic", marginTop: 2, opacity: 0.8 },
                 chipNoMatcherDot: { position: "absolute", top: 8, right: 8, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.destructive },
                 distanceChip: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
-                distanceChipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
+                distanceChipActive: { backgroundColor: colors.brand, borderColor: colors.brand },
                 distanceChipText: { color: colors.text, fontSize: 12, fontWeight: "600" },
-                distanceChipTextActive: { color: colors.text, fontSize: 12, fontWeight: "700" },
+                distanceChipTextActive: { color: colors.onBrand, fontSize: 12, fontWeight: "700" },
                 aptRow: { flexDirection: "row", alignItems: "center", marginVertical: 4 },
                 aptLabel: { width: 70, color: colors.text, fontSize: 13 },
                 aptButtons: { flexDirection: "row", gap: 4, flex: 1 },
