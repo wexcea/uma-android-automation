@@ -238,7 +238,5 @@ ${longTargetsString}
 ---------- Discord Options ----------
 🔔 Discord Notifications: ${settings.discord?.enableDiscordNotifications ? "✅" : "❌"}
 👤 Discord User ID: ${settings.discord?.discordUserID ? "Configured" : "Not Set"}
-🔑 Discord Bot Token: ${settings.discord?.discordToken ? "Configured" : "Not Set"}
-
-****************************************`
+🔑 Discord Bot Token: ${settings.discord?.discordToken ? "Configured" : "Not Set"}`
 }

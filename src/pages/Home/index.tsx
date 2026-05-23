@@ -1,10 +1,10 @@
 import * as Application from "expo-application"
 import MessageLog from "../../components/MessageLog"
-import { useContext, useEffect, useRef, useState, useMemo } from "react"
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { BotMetaContext, GeneralMiscContext } from "../../context/BotStateContext"
 import { useSettings } from "../../context/SettingsContext"
 import { logWithTimestamp, logErrorWithTimestamp } from "../../lib/logger"
-import { Animated, DeviceEventEmitter, StyleSheet, View, NativeModules } from "react-native"
+import { Animated, DeviceEventEmitter, LayoutAnimation, Pressable, StyleSheet, View, NativeModules } from "react-native"
 import { Snackbar } from "react-native-paper"
 import { MessageLogDispatchContext } from "../../context/MessageLogContext"
 import { useTheme } from "../../context/ThemeContext"
@@ -17,6 +17,14 @@ import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import SelectButton from "../../components/SelectButton"
 import PermissionSetupDialog from "../../components/PermissionSetupDialog"
 import { loadDeviceCapabilities, shouldSuggestX8664Variant } from "../../lib/chat/deviceCapabilities"
+import HeroStatusCard, { HeroStatus } from "../../components/HeroStatusCard"
+import { GlassFab } from "../../components/ui/glass-fab"
+import { useProfileContext, DEFAULT_PROFILE_NAME } from "../../context/ProfileContext"
+import { MOTION } from "../../lib/motion"
+import { SPACING } from "../../lib/spacing"
+import { TYPE } from "../../lib/type"
+
+const MASCOT_SOURCE = require("../../assets/app_icon.png")
 
 const styles = StyleSheet.create({
     root: {
@@ -30,6 +38,25 @@ const styles = StyleSheet.create({
         flex: 1,
         width: "100%",
         flexDirection: "column",
+    },
+    hero: {
+        width: "100%",
+        marginBottom: SPACING.md,
+    },
+    logHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: SPACING.sm,
+        paddingHorizontal: SPACING.xs,
+    },
+    logBody: {
+        flex: 1,
+    },
+    fab: {
+        position: "absolute",
+        right: SPACING.lg,
+        bottom: SPACING.lg,
     },
     button: {
         width: 100,
@@ -79,6 +106,13 @@ const Home = () => {
     const { general, updateGeneral } = useContext(GeneralMiscContext)
     const mlc = useContext(MessageLogDispatchContext)
     const { saveSettings } = useSettings()
+    const { currentProfileName } = useProfileContext()
+
+    const [logExpanded, setLogExpanded] = useState<boolean>(false)
+    const toggleLog = useCallback(() => {
+        LayoutAnimation.configureNext(LayoutAnimation.create(MOTION.duration.base, "easeInEaseOut", "opacity"))
+        setLogExpanded((prev) => !prev)
+    }, [])
 
     const pulseAnim = useRef(new Animated.Value(1)).current
 
@@ -330,6 +364,20 @@ Note: Reinstall using the x86_64 release APK for much better performance.`)
         return null
     }
 
+    // Map the existing bot state to the hero card's status pill. Running takes priority. Warnings (unsupported display
+    // or ABI mismatch) surface as "error". An unselected scenario lands on "stopped". Otherwise the bot is "ready".
+    const heroStatus: HeroStatus = isRunning
+        ? "running"
+        : unsupportedReason !== null || abiMismatch
+        ? "error"
+        : readyStatus && deviceMetrics !== null
+        ? "ready"
+        : "stopped"
+    const heroCampaign = general.scenario && general.scenario !== "" ? general.scenario : "No campaign selected"
+    const heroProfile = currentProfileName ?? DEFAULT_PROFILE_NAME
+    const fabIconName = isRunning ? "stop" : "play"
+    const fabAccessibilityLabel = isRunning ? "Stop bot" : "Start bot"
+
     return (
         <View style={styles.root}>
             {/* MessageLog uses FlashList, which doesn't support sticky headers the same way as ScrollView, so PageHeader stays a sibling above (non-sticky). */}
@@ -355,9 +403,42 @@ Note: Reinstall using the x86_64 release APK for much better performance.`)
                 rightComponent={renderStatus()}
             />
 
-            <View style={styles.contentContainer}>
-                <MessageLog />
+            <View style={styles.hero}>
+                <HeroStatusCard
+                    status={heroStatus}
+                    campaign={heroCampaign}
+                    profile={heroProfile}
+                    mascot={MASCOT_SOURCE}
+                    onStart={handleButtonPress}
+                    startDisabled={!isRunning && (!readyStatus || !isScenarioValid)}
+                />
             </View>
+
+            <View style={styles.contentContainer}>
+                <Pressable
+                    onPress={toggleLog}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: logExpanded }}
+                    android_ripple={{ color: colors.ripple, foreground: true }}
+                    style={styles.logHeader}
+                >
+                    <Text style={{ ...TYPE.h2, color: colors.text }}>Activity Log</Text>
+                    <Ionicons name={logExpanded ? "chevron-up" : "chevron-down"} size={20} color={colors.textMuted} />
+                </Pressable>
+                {logExpanded && (
+                    <View style={styles.logBody}>
+                        <MessageLog />
+                    </View>
+                )}
+            </View>
+
+            <GlassFab
+                icon={<Ionicons name={fabIconName} size={22} color={colors.brand} />}
+                onPress={handleButtonPress}
+                accessibilityLabel={fabAccessibilityLabel}
+                style={styles.fab}
+            />
+
 
             <AlertDialog open={showNotReadyDialog} onOpenChange={setShowNotReadyDialog}>
                 <AlertDialogContent onDismiss={() => setShowNotReadyDialog(false)}>

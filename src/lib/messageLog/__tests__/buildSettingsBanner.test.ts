@@ -32,8 +32,8 @@ describe("buildSettingsBanner", () => {
         expect(banner).toMatch(/Complete Career on Failure:/)
     })
 
-    it("ends with the closing separator line", () => {
-        expect(buildSettingsBanner(makeStubSettings())).toMatch(/\*{40}$/)
+    it("does not include the legacy asterisk divider line", () => {
+        expect(buildSettingsBanner(makeStubSettings())).not.toMatch(/\*{10,}/)
     })
 
     it("includes the major section headers", () => {
