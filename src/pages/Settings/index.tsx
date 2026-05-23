@@ -157,7 +157,7 @@ const Settings = () => {
                     <Row title="Training" description="Stat priorities, training behavior, and customization." right={chevron} onPress={() => navigation.navigate("TrainingSettings" as never)} />
                     <Row title="Training Events" description="Training event preferences and event selection." right={chevron} onPress={() => navigation.navigate("TrainingEventSettings" as never)} />
                     <Row title="Racing" description="Racing behavior, retries, and mandatory race handling." right={chevron} onPress={() => navigation.navigate("RacingSettings" as never)} />
-                    <Row title="Skills" description="Skill purchasing behavior." right={chevron} onPress={() => navigation.navigate("SkillSettings" as never)} />
+                    <Row title="Skills" description="Skill purchasing behavior." right={chevron} onPress={() => navigation.navigate("Skills" as never)} />
                 </Section>
 
                 <Section label="SCENARIO">

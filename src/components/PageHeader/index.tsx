@@ -205,7 +205,7 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
             "TrainingEventSettings",
             "RacingSettings",
             "SmartRaceSolverSettings",
-            "SkillSettings",
+            "Skills",
             "EventLogVisualizer",
             "ImportSettingsPreview",
             "DebugSettings",
