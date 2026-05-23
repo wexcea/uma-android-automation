@@ -46,7 +46,7 @@ const InfoCallout: React.FC<InfoCalloutProps> = ({ title, children, defaultExpan
     )
     return (
         <View style={[styles.container, style]}>
-            <Pressable onPress={onPress} style={styles.header} accessibilityRole="button" accessibilityState={{ expanded }}>
+            <Pressable onPress={onPress} style={styles.header} accessibilityRole="button" accessibilityState={{ expanded }} android_ripple={{ color: colors.ripple, foreground: true }}>
                 <Ionicons name="information-circle-outline" size={16} color={colors.brand} />
                 <Text style={styles.title}>{title}</Text>
                 <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={16} color={colors.textMuted} />
