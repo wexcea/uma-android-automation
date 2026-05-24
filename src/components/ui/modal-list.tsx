@@ -204,6 +204,7 @@ const ModalFooterChipImpl = ({ label, onPress, tone = "neutral", disabled = fals
             style={[styles.chip, tone === "primary" && styles.chipPrimary, tone === "danger" && styles.chipDanger, disabled && styles.chipDisabled]}
             android_ripple={{ color: colors.ripple, foreground: true }}
             accessibilityRole="button"
+            accessibilityState={{ disabled }}
         >
             <Text style={[styles.text, tone === "primary" && styles.textPrimary, tone === "danger" && styles.textDanger]}>{label}</Text>
         </Pressable>
