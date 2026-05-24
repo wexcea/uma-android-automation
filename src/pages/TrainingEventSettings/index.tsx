@@ -1011,7 +1011,13 @@ const TrainingEventSettings = () => {
                             {selectedEventForOption.options.map((option: string, index: number) => {
                                 const characterOverrides = characterEventOverrides || {}
                                 const supportOverrides = supportEventOverrides || {}
-                                const currentOverride = selectedEventForOption.type === "character" ? characterOverrides[selectedEventForOption.key] : supportOverrides[selectedEventForOption.key]
+                                const scenarioOverrides = scenarioEventOverrides || {}
+                                const currentOverride =
+                                    selectedEventForOption.type === "character"
+                                        ? characterOverrides[selectedEventForOption.key]
+                                        : selectedEventForOption.type === "support"
+                                          ? supportOverrides[selectedEventForOption.key]
+                                          : scenarioOverrides[selectedEventForOption.key]
                                 const isOptionSelected = currentOverride === index
                                 return (
                                     <ModalRadioRow
