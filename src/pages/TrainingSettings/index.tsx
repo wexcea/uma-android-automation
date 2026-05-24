@@ -1,5 +1,5 @@
 import React, { useMemo, useContext, useEffect, useState, useRef, useCallback } from "react"
-import { View, Text, ScrollView, StyleSheet, Pressable, Dimensions, InteractionManager } from "react-native"
+import { View, Text, ScrollView, StyleSheet, Pressable, InteractionManager } from "react-native"
 import { SheetModal } from "../../components/ui/sheet-modal"
 import { ModalCheckRow, ModalFooterChip } from "../../components/ui/modal-list"
 import Ionicons from "@react-native-vector-icons/ionicons"
