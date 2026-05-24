@@ -20,6 +20,7 @@ import { Switch } from "../../components/ui/switch"
 import { GlassSurface } from "../../components/ui/glass-surface"
 import { SheetModal } from "../../components/ui/sheet-modal"
 import { ModalRadioRow } from "../../components/ui/modal-list"
+import { useModalShellStyles } from "../../components/ui/modal-shell-styles"
 import { TYPE } from "../../lib/type"
 import { SPACING } from "../../lib/spacing"
 import { RADII } from "../../lib/radii"
@@ -36,6 +37,7 @@ type RaceStrategy = (typeof RACE_STRATEGY_OPTIONS)[number]
 const RacingSettings = () => {
     usePerformanceLogging("RacingSettings")
     const { colors } = useTheme()
+    const modalShellStyles = useModalShellStyles()
     const navigation = useNavigation()
     const { racing, updateRacing } = useContext(RacingContext)
     const scrollViewRef = useRef<ScrollView>(null)
@@ -126,20 +128,6 @@ const RacingSettings = () => {
                     opacity: 0.7,
                     marginTop: 4,
                 },
-                modalHeaderRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-                modalTitleMono: { ...TYPE.monoLabel, color: colors.text, fontSize: 13, letterSpacing: 1.5 },
-                modalCloseChip: {
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
-                    overflow: "hidden",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: colors.surfaceRaised,
-                    borderWidth: 1,
-                    borderColor: colors.borderHair,
-                },
-                modalBodyList: { gap: SPACING.xs + 2 },
             }),
         [colors]
     )
@@ -171,8 +159,9 @@ const RacingSettings = () => {
      * @param onSelect Called when the user picks a new value (the modal close is handled by the caller).
      * @returns A list of pressable option rows.
      */
+    // `current` is typed `string` to match the context shape; if the stored value is outside RACE_STRATEGY_OPTIONS, no row renders as selected.
     const renderStrategyOptions = (current: string, onSelect: (value: RaceStrategy) => void) => (
-        <View style={styles.modalBodyList}>
+        <View style={modalShellStyles.modalBodyList}>
             {RACE_STRATEGY_OPTIONS.map((option) => (
                 <ModalRadioRow
                     key={option}
@@ -521,10 +510,10 @@ const RacingSettings = () => {
                     visible={juniorPickerOpen}
                     onRequestClose={() => setJuniorPickerOpen(false)}
                     header={
-                        <View style={styles.modalHeaderRow}>
-                            <Text style={styles.modalTitleMono}>JUNIOR YEAR STRATEGY</Text>
+                        <View style={modalShellStyles.modalHeaderRow}>
+                            <Text style={modalShellStyles.modalTitleMono}>JUNIOR YEAR STRATEGY</Text>
                             <Pressable
-                                style={styles.modalCloseChip}
+                                style={modalShellStyles.modalCloseChip}
                                 onPress={() => setJuniorPickerOpen(false)}
                                 android_ripple={{ color: colors.ripple, foreground: true }}
                                 accessibilityLabel="Close"
@@ -545,10 +534,10 @@ const RacingSettings = () => {
                     visible={originalPickerOpen}
                     onRequestClose={() => setOriginalPickerOpen(false)}
                     header={
-                        <View style={styles.modalHeaderRow}>
-                            <Text style={styles.modalTitleMono}>ORIGINAL STRATEGY</Text>
+                        <View style={modalShellStyles.modalHeaderRow}>
+                            <Text style={modalShellStyles.modalTitleMono}>ORIGINAL STRATEGY</Text>
                             <Pressable
-                                style={styles.modalCloseChip}
+                                style={modalShellStyles.modalCloseChip}
                                 onPress={() => setOriginalPickerOpen(false)}
                                 android_ripple={{ color: colors.ripple, foreground: true }}
                                 accessibilityLabel="Close"

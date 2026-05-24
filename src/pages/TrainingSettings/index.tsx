@@ -24,6 +24,7 @@ import WarningContainer from "../../components/WarningContainer"
 import { Row } from "../../components/ui/row"
 import { Section } from "../../components/ui/section"
 import { Switch } from "../../components/ui/switch"
+import { useModalShellStyles } from "../../components/ui/modal-shell-styles"
 import { TYPE } from "../../lib/type"
 import { SPACING } from "../../lib/spacing"
 
@@ -35,6 +36,7 @@ import { SPACING } from "../../lib/spacing"
 const TrainingSettings = () => {
     usePerformanceLogging("TrainingSettings")
     const { colors } = useTheme()
+    const modalShellStyles = useModalShellStyles()
     const { training, trainingStatTarget, updateTraining, updateTrainingStatTarget: updateStatTargetSlice } = useContext(TrainingContext)
     const { misc, updateMisc } = useContext(GeneralMiscContext)
     const { setSettings } = useContext(BotMetaContext)
@@ -310,20 +312,6 @@ const TrainingSettings = () => {
                     color: colors.brand,
                     textDecorationLine: "underline",
                 },
-                modalHeaderRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-                modalTitleMono: { ...TYPE.monoLabel, color: colors.text, fontSize: 13, letterSpacing: 1.5 },
-                modalCloseChip: {
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
-                    overflow: "hidden",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: colors.surfaceRaised,
-                    borderWidth: 1,
-                    borderColor: colors.borderHair,
-                },
-                modalBodyList: { gap: SPACING.xs + 2 },
                 modalFooterRow: { flexDirection: "row", gap: SPACING.sm },
             }),
         [colors]
@@ -400,10 +388,10 @@ const TrainingSettings = () => {
                     visible={modalVisible}
                     onRequestClose={() => setModalVisible(false)}
                     header={
-                        <View style={styles.modalHeaderRow}>
-                            <Text style={styles.modalTitleMono}>{title.toUpperCase()}</Text>
+                        <View style={modalShellStyles.modalHeaderRow}>
+                            <Text style={modalShellStyles.modalTitleMono}>{title.toUpperCase()}</Text>
                             <Pressable
-                                style={styles.modalCloseChip}
+                                style={modalShellStyles.modalCloseChip}
                                 onPress={() => setModalVisible(false)}
                                 android_ripple={{ color: colors.ripple, foreground: true }}
                                 accessibilityLabel="Close"
@@ -447,7 +435,7 @@ const TrainingSettings = () => {
                             onOrderChange={(orderedItems) => setSelectedStats(orderedItems)}
                         />
                     ) : (
-                        <View style={styles.modalBodyList}>
+                        <View style={modalShellStyles.modalBodyList}>
                             {defaultSettings.training.statPrioritization.map((stat) => (
                                 <ModalCheckRow
                                     key={stat}
