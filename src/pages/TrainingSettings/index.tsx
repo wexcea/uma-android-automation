@@ -27,6 +27,7 @@ import { Switch } from "../../components/ui/switch"
 import { useModalShellStyles } from "../../components/ui/modal-shell-styles"
 import { TYPE } from "../../lib/type"
 import { SPACING } from "../../lib/spacing"
+import { RADII } from "../../lib/radii"
 
 /**
  * The Training Settings page.
@@ -313,6 +314,21 @@ const TrainingSettings = () => {
                     textDecorationLine: "underline",
                 },
                 modalFooterRow: { flexDirection: "row", gap: SPACING.sm },
+                selectorRow: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md, gap: SPACING.sm },
+                selectorHeader: { flexDirection: "row", alignItems: "flex-start", gap: SPACING.sm },
+                selectorTitle: { ...TYPE.body, color: colors.text, fontWeight: "600" as const },
+                selectorDescription: { ...TYPE.caption, color: colors.textMuted, marginTop: 2 },
+                selectorEmpty: { ...TYPE.caption, color: colors.textMuted, fontStyle: "italic" as const },
+                selectorChips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+                selectorChip: {
+                    backgroundColor: colors.brandSubtle,
+                    borderWidth: 1,
+                    borderColor: colors.brandBorder,
+                    borderRadius: RADII.pill,
+                    paddingHorizontal: SPACING.sm,
+                    paddingVertical: 2,
+                },
+                selectorChipText: { ...TYPE.caption, color: colors.brand, fontWeight: "600" as const },
             }),
         [colors]
     )
@@ -376,12 +392,25 @@ const TrainingSettings = () => {
     ) => {
         const content = (
             <View style={styles.section}>
-                <Pressable onPress={() => setModalVisible(true)} android_ripple={{ color: colors.ripple, foreground: true }}>
-                    <View style={styles.row}>
-                        <Text style={styles.label}>{title}</Text>
-                        <Text style={styles.pressableText}>{selectedStats.length === 0 ? "None" : selectedStats.join(", ")}</Text>
+                <Pressable style={styles.selectorRow} onPress={() => setModalVisible(true)} android_ripple={{ color: colors.ripple, foreground: true }}>
+                    <View style={styles.selectorHeader}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.selectorTitle}>{title}</Text>
+                            {description ? <Text style={styles.selectorDescription}>{description}</Text> : null}
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
                     </View>
-                    {description && <Text style={[styles.label, { fontSize: 14, color: colors.text, opacity: 0.7, marginTop: 4 }]}>{description}</Text>}
+                    {selectedStats.length === 0 ? (
+                        <Text style={styles.selectorEmpty}>None</Text>
+                    ) : (
+                        <View style={styles.selectorChips}>
+                            {selectedStats.map((stat) => (
+                                <View key={stat} style={styles.selectorChip}>
+                                    <Text style={styles.selectorChipText}>{stat}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
                 </Pressable>
 
                 <SheetModal
