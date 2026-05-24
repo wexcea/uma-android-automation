@@ -162,6 +162,8 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
             setShowComparison(false)
             setOverwriteProfileId(null)
             setComparisonData(null)
+            setDeleteProfileId(null)
+            setShowDeleteDialog(false)
         }
     }, [visible, loadProfiles])
 
@@ -196,7 +198,7 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
             const errorMessage = `Failed to update profile: ${error instanceof Error ? error.message : String(error)}`
             onError?.(errorMessage)
         }
-    }, [profileName, editingProfileId, profiles, updateProfile, onProfileUpdated, onError])
+    }, [profileName, editingProfileId, updateProfile, onProfileUpdated, onError])
 
     /**
      * Opens the delete confirmation dialog for the given profile.
