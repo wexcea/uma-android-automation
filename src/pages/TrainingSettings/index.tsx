@@ -419,6 +419,7 @@ const TrainingSettings = () => {
                                 onPress={() => {
                                     if (mode === "priority") {
                                         setSelectedStats(defaultSettings.training.statPrioritization)
+                                        setModalVisible(false)
                                     } else {
                                         selectAll(setSelectedStats, selectedStats)
                                     }
