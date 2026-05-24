@@ -314,8 +314,14 @@ const TrainingSettings = () => {
                     textDecorationLine: "underline",
                 },
                 modalFooterRow: { flexDirection: "row", gap: SPACING.sm },
-                selectorRow: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md, gap: SPACING.sm },
-                selectorHeader: { flexDirection: "row", alignItems: "flex-start", gap: SPACING.sm },
+                selectorRow: {
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: SPACING.sm,
+                    paddingHorizontal: SPACING.md,
+                    paddingVertical: SPACING.md,
+                },
+                selectorMain: { flex: 1, gap: SPACING.sm },
                 selectorTitle: { ...TYPE.body, color: colors.text, fontWeight: "600" as const },
                 selectorDescription: { ...TYPE.caption, color: colors.textMuted, marginTop: 2 },
                 selectorEmpty: { ...TYPE.caption, color: colors.textMuted, fontStyle: "italic" as const },
@@ -391,26 +397,24 @@ const TrainingSettings = () => {
         id?: string
     ) => {
         const content = (
-            <View style={styles.section}>
+            <View>
                 <Pressable style={styles.selectorRow} onPress={() => setModalVisible(true)} android_ripple={{ color: colors.ripple, foreground: true }}>
-                    <View style={styles.selectorHeader}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.selectorTitle}>{title}</Text>
-                            {description ? <Text style={styles.selectorDescription}>{description}</Text> : null}
-                        </View>
-                        <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+                    <View style={styles.selectorMain}>
+                        <Text style={styles.selectorTitle}>{title}</Text>
+                        {description ? <Text style={styles.selectorDescription}>{description}</Text> : null}
+                        {selectedStats.length === 0 ? (
+                            <Text style={styles.selectorEmpty}>None</Text>
+                        ) : (
+                            <View style={styles.selectorChips}>
+                                {selectedStats.map((stat) => (
+                                    <View key={stat} style={styles.selectorChip}>
+                                        <Text style={styles.selectorChipText}>{stat}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
                     </View>
-                    {selectedStats.length === 0 ? (
-                        <Text style={styles.selectorEmpty}>None</Text>
-                    ) : (
-                        <View style={styles.selectorChips}>
-                            {selectedStats.map((stat) => (
-                                <View key={stat} style={styles.selectorChip}>
-                                    <Text style={styles.selectorChipText}>{stat}</Text>
-                                </View>
-                            ))}
-                        </View>
-                    )}
+                    <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
                 </Pressable>
 
                 <SheetModal
