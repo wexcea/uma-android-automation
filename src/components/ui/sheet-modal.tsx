@@ -47,7 +47,7 @@ const SheetModalImpl = ({ visible, onRequestClose, header, children, footer, hei
                 card: {
                     width: "92%",
                     maxWidth: 560,
-                    height: cardHeight,
+                    maxHeight: cardHeight,
                     borderRadius: RADII.xl,
                     borderWidth: 1,
                     borderColor: colors.brandBorder,
@@ -55,7 +55,7 @@ const SheetModalImpl = ({ visible, onRequestClose, header, children, footer, hei
                     overflow: "hidden",
                 },
                 header: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md },
-                body: { flex: 1 },
+                body: { flexShrink: 1 },
                 bodyContent: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md },
                 footer: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md },
             }),
