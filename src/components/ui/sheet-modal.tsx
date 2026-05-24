@@ -47,7 +47,7 @@ const SheetModalImpl = ({ visible, onRequestClose, header, children, footer, hei
                 card: {
                     width: "92%",
                     maxWidth: 560,
-                    maxHeight: cardHeight,
+                    height: cardHeight,
                     borderRadius: RADII.xl,
                     borderWidth: 1,
                     borderColor: colors.brandBorder,
