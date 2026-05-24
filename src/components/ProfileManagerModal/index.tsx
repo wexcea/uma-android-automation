@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react"
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
-import CustomButton from "../CustomButton"
 import { GlassModal } from "../ui/glass-modal"
 import { SheetModal } from "../ui/sheet-modal"
 import { useProfileManager } from "../../hooks/useProfileManager"
@@ -58,7 +57,7 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
     onError,
 }) => {
     const { colors } = useTheme()
-    const { profiles, updateProfile, deleteProfile, loadProfiles, compareWithProfile } = useProfileManager(onError)
+    const { profiles, currentProfileName, updateProfile, deleteProfile, loadProfiles, compareWithProfile } = useProfileManager(onError)
     const [profileName, setProfileName] = useState("")
     const [editingProfileId, setEditingProfileId] = useState<number | null>(null)
     const [deleteProfileId, setDeleteProfileId] = useState<number | null>(null)
@@ -94,8 +93,19 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                     backgroundColor: colors.surfaceRaised,
                     gap: SPACING.sm,
                 },
-                cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+                cardActive: {
+                    borderColor: colors.brandBorder,
+                    backgroundColor: colors.brandSubtle,
+                },
+                cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: SPACING.sm },
                 cardName: { ...TYPE.body, color: colors.text, fontWeight: "600" as const, flex: 1 },
+                activePill: {
+                    paddingHorizontal: SPACING.xs + 2,
+                    paddingVertical: 2,
+                    borderRadius: RADII.sm,
+                    backgroundColor: colors.brand,
+                },
+                activePillText: { ...TYPE.monoLabel, color: colors.onBrand, fontSize: 9, letterSpacing: 1.5, fontWeight: "700" as const },
                 actionsRow: { flexDirection: "row", gap: SPACING.xs },
                 action: {
                     flex: 1,
@@ -133,7 +143,27 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                 renameSave: { borderColor: colors.brand, backgroundColor: colors.brand },
                 renameCancel: { borderColor: colors.borderHair },
                 renameChipText: { ...TYPE.caption, fontWeight: "600" as const },
-                footerBtn: { width: "100%" },
+                footerBtn: {
+                    paddingVertical: SPACING.sm,
+                    borderRadius: RADII.md,
+                    borderWidth: 1,
+                    borderColor: colors.borderHair,
+                    alignItems: "center",
+                    overflow: "hidden",
+                },
+                footerBtnText: { ...TYPE.body, color: colors.text, fontWeight: "600" as const },
+                deleteBtn: {
+                    flex: 1,
+                    paddingVertical: SPACING.sm,
+                    borderRadius: RADII.md,
+                    borderWidth: 1,
+                    alignItems: "center",
+                    overflow: "hidden",
+                },
+                deleteBtnCancel: { borderColor: colors.borderHair },
+                deleteBtnConfirm: { borderColor: colors.destructive, backgroundColor: colors.destructive },
+                deleteBtnText: { ...TYPE.body, color: colors.text, fontWeight: "600" as const },
+                deleteBtnTextConfirm: { color: colors.onBrand },
                 emptyState: { padding: SPACING.lg, alignItems: "center" },
                 emptyText: { ...TYPE.body, color: colors.textMuted },
                 deleteModalContent: {
@@ -318,9 +348,9 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
     )
 
     const footer = (
-        <CustomButton onPress={onClose} variant="outline" style={styles.footerBtn}>
-            Close
-        </CustomButton>
+        <Pressable onPress={onClose} style={styles.footerBtn} android_ripple={{ color: colors.ripple, foreground: true }} accessibilityRole="button">
+            <Text style={styles.footerBtnText}>Close</Text>
+        </Pressable>
     )
 
     return (
@@ -334,8 +364,9 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                     <View style={styles.cardList}>
                         {profiles.map((profile) => {
                             const isEditing = editingProfileId === profile.id
+                            const isActive = !!currentProfileName && profile.name === currentProfileName
                             return (
-                                <View key={profile.id} style={styles.card}>
+                                <View key={profile.id} style={[styles.card, isActive && styles.cardActive]}>
                                     {isEditing ? (
                                         <View style={styles.renameRow}>
                                             <TextInput
@@ -366,6 +397,11 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                                         <>
                                             <View style={styles.cardTop}>
                                                 <Text style={styles.cardName}>{profile.name}</Text>
+                                                {isActive ? (
+                                                    <View style={styles.activePill}>
+                                                        <Text style={styles.activePillText}>ACTIVE</Text>
+                                                    </View>
+                                                ) : null}
                                             </View>
                                             <View style={styles.actionsRow}>
                                                 <Pressable
@@ -420,12 +456,22 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                 </View>
                 <Text style={styles.deleteBody}>Are you sure you want to delete this profile? This action cannot be undone.</Text>
                 <View style={styles.deleteButtons}>
-                    <CustomButton onPress={handleDeleteCancel} variant="outline">
-                        Cancel
-                    </CustomButton>
-                    <CustomButton onPress={handleDeleteConfirm} variant="destructive">
-                        Delete
-                    </CustomButton>
+                    <Pressable
+                        onPress={handleDeleteCancel}
+                        style={[styles.deleteBtn, styles.deleteBtnCancel]}
+                        android_ripple={{ color: colors.ripple, foreground: true }}
+                        accessibilityRole="button"
+                    >
+                        <Text style={styles.deleteBtnText}>Cancel</Text>
+                    </Pressable>
+                    <Pressable
+                        onPress={handleDeleteConfirm}
+                        style={[styles.deleteBtn, styles.deleteBtnConfirm]}
+                        android_ripple={{ color: colors.ripple, foreground: true }}
+                        accessibilityRole="button"
+                    >
+                        <Text style={[styles.deleteBtnText, styles.deleteBtnTextConfirm]}>Delete</Text>
+                    </Pressable>
                 </View>
             </GlassModal>
         </>
