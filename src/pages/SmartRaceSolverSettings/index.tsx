@@ -1289,7 +1289,22 @@ const SmartRaceSolverSettings = () => {
                                             when those races wouldn't otherwise be worth racing. The schedule is still allowed to skip a target if it would hurt overall score — for guaranteed
                                             completion use Forced Epithets instead.
                                         </Text>
-                                        {restrictionNotice && <Text style={styles.restrictionNotice}>{restrictionNotice}</Text>}
+                                        {restrictionNotice && (
+                                            <InfoCallout title={restrictionNotice} style={{ backgroundColor: colors.surfaceRaised, marginTop: SPACING.sm, marginBottom: SPACING.sm }}>
+                                                <Text style={[TYPE.body, { color: colors.text }]}>
+                                                    The epithet list below is filtered to only those compatible with the current scenario and character preset. Change either to widen the list.
+                                                </Text>
+                                            </InfoCallout>
+                                        )}
+                                        <InfoCallout
+                                            title="Epithets with no structured matcher in the code"
+                                            icon={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.destructive }} />}
+                                            style={{ backgroundColor: colors.surfaceRaised, marginTop: SPACING.sm, marginBottom: SPACING.sm }}
+                                        >
+                                            <Text style={[TYPE.body, { color: colors.text }]}>
+                                                Their in-game conditions is too difficult or impossible to model as a per-race rule. The solver won't pick races to advance them. Adding one to Forced makes the schedule infeasible, so leave it out of Forced even if you plan to earn it manually in-game.
+                                            </Text>
+                                        </InfoCallout>
                                         <Input style={styles.input} value={epithetSearch} onChangeText={setEpithetSearch} placeholder={`Search ${allEpithets.length} epithets…`} />
                                         <ScrollView style={styles.epithetList} nestedScrollEnabled keyboardShouldPersistTaps="handled">
                                             <View style={styles.row}>
@@ -1318,7 +1333,22 @@ const SmartRaceSolverSettings = () => {
                                             Epithets the solver MUST complete. If a forced epithet becomes impossible (e.g. a required race is already lost), the solver fails and falls back. Use
                                             sparingly — every forced epithet shrinks the search space and may push the solver to skip otherwise-valuable races just to satisfy the constraint.
                                         </Text>
-                                        {restrictionNotice && <Text style={styles.restrictionNotice}>{restrictionNotice}</Text>}
+                                        {restrictionNotice && (
+                                            <InfoCallout title={restrictionNotice} style={{ backgroundColor: colors.surfaceRaised, marginTop: SPACING.sm, marginBottom: SPACING.sm }}>
+                                                <Text style={[TYPE.body, { color: colors.text }]}>
+                                                    The epithet list below is filtered to only those compatible with the current scenario and character preset. Change either to widen the list.
+                                                </Text>
+                                            </InfoCallout>
+                                        )}
+                                        <InfoCallout
+                                            title="Epithets with no structured matcher in the code"
+                                            icon={<View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.destructive }} />}
+                                            style={{ backgroundColor: colors.surfaceRaised, marginTop: SPACING.sm, marginBottom: SPACING.sm }}
+                                        >
+                                            <Text style={[TYPE.body, { color: colors.text }]}>
+                                                The in-game condition (like "Win your first G1 in Senior class") can't be modeled as a per-race rule yet. The solver won't pick races to advance them. Adding one to Forced makes the schedule infeasible, so leave it out of Forced even if you plan to earn it manually in-game.
+                                            </Text>
+                                        </InfoCallout>
                                         <Input style={styles.input} value={forcedEpithetSearch} onChangeText={setForcedEpithetSearch} placeholder={`Search ${allEpithets.length} epithets…`} />
                                         <ScrollView style={styles.epithetList} nestedScrollEnabled keyboardShouldPersistTaps="handled">
                                             <View style={styles.row}>
