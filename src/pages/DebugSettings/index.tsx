@@ -218,15 +218,14 @@ const DebugSettings = () => {
     return (
         <View style={styles.root}>
             <SearchPageProvider page="DebugSettings" scrollViewRef={scrollViewRef}>
+                <PageHeader title="Debug Settings" />
                 <ScrollView
                     ref={scrollViewRef}
-                    stickyHeaderIndices={[0]}
                     nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ flexGrow: 1 }}
                 >
-                    <PageHeader title="Debug Settings" />
                     <View className="m-1">
                         <View style={{ marginTop: 16 }}>
                             {/* Enable Debug Mode */}

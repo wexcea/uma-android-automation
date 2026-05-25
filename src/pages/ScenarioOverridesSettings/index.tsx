@@ -196,15 +196,14 @@ const ScenarioOverridesSettings = () => {
     return (
         <View style={styles.root}>
             <SearchPageProvider page="ScenarioOverridesSettings" scrollViewRef={scrollViewRef}>
+                <PageHeader title="Scenario Overrides Settings" />
                 <ScrollView
                     ref={scrollViewRef}
-                    stickyHeaderIndices={[0]}
                     nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ flexGrow: 1 }}
                 >
-                    <PageHeader title="Scenario Overrides Settings" />
                     <View className="m-1">
                         <View style={{ marginBottom: SPACING.lg }}>
                             <CampaignCard campaign={activeCampaign} onSwitch={handleSwitch} />

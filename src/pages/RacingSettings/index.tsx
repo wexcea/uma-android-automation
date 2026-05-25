@@ -176,15 +176,14 @@ const RacingSettings = () => {
     return (
         <View style={styles.root}>
             <SearchPageProvider page="RacingSettings" scrollViewRef={scrollViewRef}>
+                <PageHeader title="Racing Settings" />
                 <ScrollView
                     ref={scrollViewRef}
-                    stickyHeaderIndices={[0]}
                     nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ flexGrow: 1 }}
                 >
-                    <PageHeader title="Racing Settings" />
                     <View className="m-1">
                         {/* //////////////////////////////////////////////////////////////////////////////////////////////////
                             //////////////////////////////////////////////////////////////////////////////////////////////////

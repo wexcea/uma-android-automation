@@ -582,15 +582,14 @@ const TrainingEventSettings = () => {
     return (
         <View style={styles.root}>
             <SearchPageProvider page="TrainingEventSettings" scrollViewRef={scrollViewRef}>
+                <PageHeader title="Training Event Settings" />
                 <ScrollView
                     ref={scrollViewRef}
-                    stickyHeaderIndices={[0]}
                     nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ flexGrow: 1 }}
                 >
-                    <PageHeader title="Training Event Settings" />
                     <View className="m-1">
                         <Section label="General">
                             <SearchableItem

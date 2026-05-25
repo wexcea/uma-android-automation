@@ -11,11 +11,12 @@ export interface StickyPageHeaderProps {
 }
 
 /**
- * Pin-on-scroll wrapper for the app's primary page header. Renders a solid `bg` background.
- * Consumer should place this as the first child of a `ScrollView` with `stickyHeaderIndices={[0]}` so it pins on scroll.
+ * Top-bar wrapper for the app's primary page header. Renders a solid `bg` background. Consumers should mount this as a sibling
+ * above their main scroll container - not inside a `ScrollView` - so the inner `Pressable`s do not lose touches to the parent
+ * scroll view's pan-responder on Android.
  *
  * @param props See `StickyPageHeaderProps`.
- * @returns Solid sticky bar.
+ * @returns Solid top bar.
  */
 export const StickyPageHeader = ({ children, style }: StickyPageHeaderProps) => {
     const { colors } = useTheme()

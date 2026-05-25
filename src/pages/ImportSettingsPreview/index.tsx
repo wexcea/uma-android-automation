@@ -157,8 +157,8 @@ const ImportSettingsPreview = () => {
 
     return (
         <View style={styles.root}>
-            <ScrollView style={styles.content} stickyHeaderIndices={[0]} showsVerticalScrollIndicator={true}>
-                <PageHeader title="Import Settings Preview" />
+            <PageHeader title="Import Settings Preview" />
+            <ScrollView style={styles.content} showsVerticalScrollIndicator={true}>
 
                 {changes.length === 0 ? (
                     <View style={styles.noChangesContainer}>

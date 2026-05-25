@@ -417,15 +417,14 @@ const Settings = () => {
     return (
         <View style={styles.root}>
             <SearchPageProvider page="SettingsMain" scrollViewRef={scrollViewRef}>
+                <PageHeader title="Settings" searchOnRight rightComponent={<ThemeToggle />} />
                 <ScrollView
                     ref={scrollViewRef}
-                    stickyHeaderIndices={[0]}
                     nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ flexGrow: 1 }}
                 >
-                    <PageHeader title="Settings" searchOnRight rightComponent={<ThemeToggle />} />
                     <View className="m-1">
                         {renderNavigationSections()}
                         {showHeavySections && renderMiscSettings()}
