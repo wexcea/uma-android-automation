@@ -1,23 +1,35 @@
 <AppUpdater>
   <update>
-    <latestVersion>5.6.1</latestVersion>
+    <latestVersion>5.6.2</latestVersion>
     <url>https://github.com/steve1316/uma-android-automation/releases</url>
     <releaseNotes>
-v5.6.1 - Changelog
+v5.6.2 - Changelog
 
-> [!NOTE]
-> Note that `armeabi-v7a` has been dropped in favor of `x86_64`. Installing this variant on x86 devices results in a significant performance boost. You may need to increase `Wait Delay` setting since the bot will now be going super fast in order to avoid issues because of it.
+New
+---
+- Add `Trackblazer Item Conservation` section under the `Scenario Overrides Settings` page with thresholds for `Energy Item Reserve`, `Cupcake Reserve`, `Master Hammer Finale Reserve`, `Artisan Hammer Min Stock for G2 / G3`, `Glow Stick Final Reserve`, and `Glow Stick Min Fans`.
+- Add `Prioritize Near-Max Friendship` toggle to the `Training Settings` page that applies an anticipatory rainbow multiplier in Year 2+ when a training has green/blue friendship bars near orange.
+- Add `Training Level Weighting` toggle to the `Training Settings` page that detects each facility's training level (1-5) via OCR and amplifies the top three priority stats' scores accordingly.
+- Add `Disable Per-Distance Stat Targets` toggle to the `Training Settings` page that treats every stat's target as the scenario stat cap.
+- Add long-press on option labels across the settings pages to copy the option name to the clipboard.
+- Add Android ripple feedback to `Button`, `Select`, `AlertDialog`, `CustomCheckbox`, `CustomSelect`, and `CustomSlider` press surfaces.
+- Add `Decision Tracer` instrumentation that emits a structured `Decision Report` block at the end of every main-screen turn, summarizing trainee state, decision-relevant settings, the chosen action, rejected alternatives, training selection, and item usage.
 
 Adjustments
 ---
-- Relax Trackblazer Glow Sticks conservation so the bot is willing to use them on top-tier G1 races instead of hoarding for later turns.
-- Speed/Wit trainings will now no longer be forcibly picked if failure is high with no Good-Luck Charm available and will fall back to resting instead.
+- Upgrade to `Expo SDK 56` and `React Native 0.85`, replace the deprecated `@expo/vector-icons` with `@react-native-vector-icons/ionicons`, and migrate to the new `expo-file-system` `File` and `Paths` API.
+- Gate `Trackblazer` race item conservation logic so it only kicks in from Turn 65 onward (right after Senior Year Summer training). Before that, the bot uses Hammers and Glow Sticks freely.
+- Ensure that `Royal Kale Juice` with a `Berry Sweet Cupcake` or `Plain Cupcake` in the same inventory can rescan again to use the cupcake after queuing the Kale Juice when you are already at GREAT mood.
+- Suppress the legacy extra-race fan-farming fallback when `Smart Race Solver` is enabled so the bot does not enter a race the solver did not plan.
+- Let `Smart Race Solver` override `Trackblazer`'s grade filter for `Pre-OP` races so a solver-planned Pre-OP race can actually execute.
+- Rest at critical energy with 3+ consecutive races even when a `Good-Luck Charm` is in inventory - the Charm only fires after `analyzeTrainings()` produces a selection with measured failure chance >= 20%, so it cannot protect the analysis itself.
+- Rename `Trackblazer Charm` and `Trackblazer Item Floor` settings to behavior-first names in the `Scenario Overrides Settings` page for clarity.
+- Group `Decision Report` inventory by category (Megaphones, Hammers, Energy, Cupcakes, etc.) and include `Trackblazer` race items.
 
 Fixes
 ---
-- Fix bug where long page titles in the frontend were overflowing off the right edge on narrow phones.
-- Fix bug where a conflict with healing at the Infirmary caused the date in memory to be stale.
-- Fix bug where the Trackblazer Megaphone duration counter was not decremented after completing a mandatory race, causing the buff timer to drift.
+- Fix bug where per-distance strategy was falling back to the blanket strategy on mandatory races.
+- Fix bug where `Smart Race Solver` ignored manual race locks at runtime and that locked races are not bundled into the schedule regeneration after a race loss.
 
     </releaseNotes>
   </update>
