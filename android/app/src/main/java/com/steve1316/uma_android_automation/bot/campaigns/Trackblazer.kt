@@ -169,6 +169,9 @@ class Trackblazer(game: Game) : Campaign(game) {
     /** Whether the Good-Luck Charm has been used this turn. */
     private var bUsedCharmToday: Boolean = false
 
+    /** Whether Royal Kale Juice was queued during the current inventory management pass. Reset at the start of each pass. Used to fire a cupcake in the same pass to offset the -1 mood penalty. */
+    private var bKaleJuiceQueuedThisPass: Boolean = false
+
     /** Whether a race hammer has been used this turn. */
     private var bUsedHammerToday: Boolean = false
 
@@ -2221,6 +2224,7 @@ class Trackblazer(game: Game) : Campaign(game) {
         if (date.day < 13 && !bDryRun) return
 
         MessageLog.i(TAG, "[TRACKBLAZER] Starting inventory management pass.")
+        bKaleJuiceQueuedThisPass = false
         val initialEnergy = trainee?.energy ?: 0
         val initialMood = trainee?.mood ?: Mood.NORMAL
         val initialMegaphoneTurnCounter = trainee?.megaphoneTurnCounter ?: 0
@@ -2472,7 +2476,10 @@ class Trackblazer(game: Game) : Campaign(game) {
         remainingItemsOfInterest: Set<String>,
         passStartEnergy: Int,
     ): String? {
-        if (isDisabled) {
+        // Cupcakes captured before Royal Kale Juice was queued will read as disabled (mood was still GREAT at scan time). Bypass the
+        // early-return when the flag is set so the recheck=true bitmap can decide; the game's dialog enables them once Juice is queued.
+        val isCupcake = itemName == "Berry Sweet Cupcake" || itemName == "Plain Cupcake"
+        if (isDisabled && !(isCupcake && bKaleJuiceQueuedThisPass)) {
             MessageLog.v(TAG, "[TRACKBLAZER] Item \"$itemName\" read as disabled in dialog, so skipping its usage.")
             return null
         }
@@ -2578,6 +2585,7 @@ class Trackblazer(game: Game) : Campaign(game) {
                     val oldMood = trainee.mood
                     trainee.energy = (trainee.energy + 100).coerceAtMost(100)
                     trainee.mood = trainee.mood.decrement()
+                    bKaleJuiceQueuedThisPass = true
                     MessageLog.i(TAG, "[TRACKBLAZER] Trainee energy and mood updated: $oldEnergy% -> ${trainee.energy}%, $oldMood -> ${trainee.mood}.")
                     return reason
                 }
@@ -2585,11 +2593,15 @@ class Trackblazer(game: Game) : Campaign(game) {
         }
 
         // Mood Items Check.
-        val shouldUseMoodItem = trainee.mood <= Mood.NORMAL && trainee.energy < 70
-        if (shouldUseMoodItem && (itemName == "Berry Sweet Cupcake" || itemName == "Plain Cupcake")) {
+        // The Kale-Juice-queued clause fires a cupcake in the same pass to offset the -1 mood penalty. Without it the existing
+        // `mood <= NORMAL && energy < 70` gate stays shut after Kale Juice (mood drops to GOOD, energy jumps to 100), wasting the reserve.
+        val moodDroppedByKaleJuice = isCupcake && bKaleJuiceQueuedThisPass
+        val shouldUseMoodItem = (trainee.mood <= Mood.NORMAL && trainee.energy < 70) || moodDroppedByKaleJuice
+        if (shouldUseMoodItem && isCupcake) {
             // Conservation: hold back `cupcakeReserveCount` cupcakes (Plain preferred) so Royal Kale Juice's -1 mood penalty can be offset.
             // Plain (+1 mood) is preferred for the reserve because Berry Sweet (+2 mood) would overshoot when paired with Kale Juice.
-            if (cupcakeReserveCount > 0) {
+            // Bypass the reserve when Kale Juice was queued in this pass: the reserved-for event is happening right now, so spend it.
+            if (cupcakeReserveCount > 0 && !bKaleJuiceQueuedThisPass) {
                 val plainCount = nextInventory["Plain Cupcake"] ?: 0
                 val berryCount = nextInventory["Berry Sweet Cupcake"] ?: 0
                 val totalCupcakes = plainCount + berryCount
@@ -2603,13 +2615,25 @@ class Trackblazer(game: Game) : Campaign(game) {
                 }
             }
 
-            // Very simple inline mood: use the first one seen if energy is low.
-            val reason = "Recovering mood (current: ${trainee.mood}, energy: ${trainee.energy}% < 70%)."
-            if (clickItemPlusButton(itemName, entry, "[TRACKBLAZER] Queuing $itemName for mood recovery.", nextInventory, reason = reason)) {
+            // Recheck reads a fresh bitmap when Kale Juice was queued earlier this pass, because the captured bitmap shows the
+            // pre-Juice disabled state (mood was still GREAT at scan time). The game's dialog enables cupcakes after Juice is queued.
+            val reason =
+                if (moodDroppedByKaleJuice) {
+                    "Offsetting Royal Kale Juice's -1 mood penalty (mood: ${trainee.mood} post-Juice)."
+                } else {
+                    "Recovering mood (current: ${trainee.mood}, energy: ${trainee.energy}% < 70%)."
+                }
+            if (clickItemPlusButton(itemName, entry, "[TRACKBLAZER] Queuing $itemName for mood recovery.", nextInventory, recheck = moodDroppedByKaleJuice, reason = reason)) {
                 val oldMood = trainee.mood
-                trainee.mood = if (itemName == "Berry Sweet Cupcake") Mood.GOOD else Mood.NORMAL
+                trainee.mood = if (itemName == "Berry Sweet Cupcake") trainee.mood.increment().increment() else trainee.mood.increment()
+                // Clear the flag so a second cupcake in the same pass doesn't double-spend the reserve when one is already enough to offset the -1.
+                if (moodDroppedByKaleJuice) bKaleJuiceQueuedThisPass = false
                 MessageLog.i(TAG, "[TRACKBLAZER] Trainee mood updated: $oldMood -> ${trainee.mood}.")
-                decisionTracer.recordItemDecision(itemName, DecisionTracer.ItemVerdict.USED, "Mood $oldMood -> ${trainee.mood} (energy ${trainee.energy}% < 70%)")
+                decisionTracer.recordItemDecision(
+                    itemName,
+                    DecisionTracer.ItemVerdict.USED,
+                    "Mood $oldMood -> ${trainee.mood} (${if (moodDroppedByKaleJuice) "Kale Juice offset" else "energy ${trainee.energy}% < 70%"})",
+                )
                 return reason
             }
         }
