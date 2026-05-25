@@ -8,7 +8,6 @@ import { FlashList } from "@shopify/flash-list"
 import { useTheme } from "../../context/ThemeContext"
 import { TrainingEventContext, defaultSettings } from "../../context/BotStateContext"
 import { SearchPageProvider } from "../../context/SearchPageContext"
-import CustomCheckbox from "../../components/CustomCheckbox"
 import CustomSelect from "../../components/CustomSelect"
 import SearchableItem from "../../components/SearchableItem"
 import { Row } from "../../components/ui/row"
@@ -815,13 +814,16 @@ const TrainingEventSettings = () => {
                                                 placeholder="Select Option"
                                                 width="100%"
                                             />
-                                            <CustomCheckbox
-                                                style={{ marginTop: 12 }}
-                                                checked={specialEventOverrides["Victory!"]?.enableEnergyBasedSelection || false}
-                                                onCheckedChange={(checked) => updateSpecialEventOverride("Victory!", "enableEnergyBasedSelection", checked)}
-                                                label="Energy-aware swap"
-                                                description={energyAwareHint}
-                                            />
+                                            <View style={{ flexDirection: "row", alignItems: "center", marginTop: SPACING.sm, gap: SPACING.md }}>
+                                                <View style={{ flex: 1 }}>
+                                                    <Text style={[TYPE.body, { color: colors.text, fontWeight: "600" as const }]}>Energy-aware swap</Text>
+                                                    <Text style={[TYPE.caption, { color: colors.textMuted, marginTop: 2 }]}>{energyAwareHint}</Text>
+                                                </View>
+                                                <Switch
+                                                    checked={specialEventOverrides["Victory!"]?.enableEnergyBasedSelection || false}
+                                                    onCheckedChange={(checked) => updateSpecialEventOverride("Victory!", "enableEnergyBasedSelection", checked)}
+                                                />
+                                            </View>
                                         </View>
 
                                         <View style={styles.section}>
@@ -833,13 +835,16 @@ const TrainingEventSettings = () => {
                                                 placeholder="Select Option"
                                                 width="100%"
                                             />
-                                            <CustomCheckbox
-                                                style={{ marginTop: 12 }}
-                                                checked={specialEventOverrides["Solid Showing"]?.enableEnergyBasedSelection || false}
-                                                onCheckedChange={(checked) => updateSpecialEventOverride("Solid Showing", "enableEnergyBasedSelection", checked)}
-                                                label="Energy-aware swap"
-                                                description={energyAwareHint}
-                                            />
+                                            <View style={{ flexDirection: "row", alignItems: "center", marginTop: SPACING.sm, gap: SPACING.md }}>
+                                                <View style={{ flex: 1 }}>
+                                                    <Text style={[TYPE.body, { color: colors.text, fontWeight: "600" as const }]}>Energy-aware swap</Text>
+                                                    <Text style={[TYPE.caption, { color: colors.textMuted, marginTop: 2 }]}>{energyAwareHint}</Text>
+                                                </View>
+                                                <Switch
+                                                    checked={specialEventOverrides["Solid Showing"]?.enableEnergyBasedSelection || false}
+                                                    onCheckedChange={(checked) => updateSpecialEventOverride("Solid Showing", "enableEnergyBasedSelection", checked)}
+                                                />
+                                            </View>
                                         </View>
 
                                         <View style={styles.section}>
@@ -851,13 +856,16 @@ const TrainingEventSettings = () => {
                                                 placeholder="Select Option"
                                                 width="100%"
                                             />
-                                            <CustomCheckbox
-                                                style={{ marginTop: 12 }}
-                                                checked={specialEventOverrides["Defeat"]?.enableEnergyBasedSelection || false}
-                                                onCheckedChange={(checked) => updateSpecialEventOverride("Defeat", "enableEnergyBasedSelection", checked)}
-                                                label="Energy-aware swap"
-                                                description={energyAwareHint}
-                                            />
+                                            <View style={{ flexDirection: "row", alignItems: "center", marginTop: SPACING.sm, gap: SPACING.md }}>
+                                                <View style={{ flex: 1 }}>
+                                                    <Text style={[TYPE.body, { color: colors.text, fontWeight: "600" as const }]}>Energy-aware swap</Text>
+                                                    <Text style={[TYPE.caption, { color: colors.textMuted, marginTop: 2 }]}>{energyAwareHint}</Text>
+                                                </View>
+                                                <Switch
+                                                    checked={specialEventOverrides["Defeat"]?.enableEnergyBasedSelection || false}
+                                                    onCheckedChange={(checked) => updateSpecialEventOverride("Defeat", "enableEnergyBasedSelection", checked)}
+                                                />
+                                            </View>
                                         </View>
                                     </View>
                                 )}
