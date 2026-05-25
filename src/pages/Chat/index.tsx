@@ -229,7 +229,8 @@ const Chat = () => {
             }
         } catch (err) {
             console.log("[Chat] error:", err)
-            setResult(null)
+            const msg = err instanceof Error ? err.message : String(err)
+            setResult({ answer: `Chat failed: ${msg}`, mode: "retrieveOnly", citations: [] })
         } finally {
             setIsSearching(false)
             setIsAborting(false)
