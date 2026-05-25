@@ -6,11 +6,9 @@ import { useTheme } from "../../context/ThemeContext"
 import { DebugContext, BotMetaContext } from "../../context/BotStateContext"
 import CustomSlider from "../../components/CustomSlider"
 import CustomCheckbox from "../../components/CustomCheckbox"
-import CustomSelect from "../../components/CustomSelect"
 import { Separator } from "../../components/ui/separator"
 import PageHeader from "../../components/PageHeader"
 import WarningContainer from "../../components/WarningContainer"
-import InfoContainer from "../../components/InfoContainer"
 import CustomButton from "../../components/CustomButton"
 import SearchableItem from "../../components/SearchableItem"
 import { SearchPageProvider } from "../../context/SearchPageContext"
@@ -20,14 +18,111 @@ import { GlassSurface } from "../../components/ui/glass-surface"
 import { Row } from "../../components/ui/row"
 import { Switch } from "../../components/ui/switch"
 import { SectionLabel } from "../../components/ui/section-label"
+import { SheetModal } from "../../components/ui/sheet-modal"
+import { ModalRadioRow } from "../../components/ui/modal-list"
+import { useModalShellStyles } from "../../components/ui/modal-shell-styles"
 import { TYPE } from "../../lib/type"
 import { SPACING } from "../../lib/spacing"
 import { RADII } from "../../lib/radii"
 
+/** Descriptor for a single diagnostic test surfaced in the Debug Tests section. Drives the mutually-exclusive Switch rows. */
+interface DebugTestDescriptor {
+    /** Settings key on `debug`. */
+    key:
+        | "debugMode_startTemplateMatchingTest"
+        | "debugMode_startSingleTrainingOCRTest"
+        | "debugMode_startComprehensiveTrainingOCRTest"
+        | "debugMode_startRaceListDetectionTest"
+        | "debugMode_startMainScreenUpdateTest"
+        | "debugMode_startSkillListBuyTest"
+        | "debugMode_startScrollBarDetectionTest"
+        | "debugMode_startTrackblazerRaceSelectionTest"
+        | "debugMode_startTrackblazerInventorySyncTest"
+        | "debugMode_startTrackblazerBuyItemsTest"
+    /** Stable id used for search registration. */
+    searchId: string
+    /** Visible Row title. */
+    title: string
+    /** Row description. */
+    description: string
+}
+
+/** Order matches the previous CustomCheckbox list so behavior is identical after the visual swap to Switch rows. */
+const DEBUG_TESTS: DebugTestDescriptor[] = [
+    {
+        key: "debugMode_startTemplateMatchingTest",
+        searchId: "debug-template-matching-test",
+        title: "Start Basic Template Matching Test",
+        description:
+            "Disables normal bot operations and starts the template match test. Only on the Home screen and will check if it can find certain essential buttons on the screen. It will also output what scale it had the most success with.",
+    },
+    {
+        key: "debugMode_startSingleTrainingOCRTest",
+        searchId: "debug-single-training-ocr-test",
+        title: "Start Single Training OCR Test",
+        description: "Disables normal bot operations and starts the single training OCR test. Only on the Training screen and tests the current training on display for stat gains and failure chances.",
+    },
+    {
+        key: "debugMode_startComprehensiveTrainingOCRTest",
+        searchId: "debug-comprehensive-training-ocr-test",
+        title: "Start Comprehensive Training OCR Test",
+        description: "Disables normal bot operations and starts the comprehensive training OCR test. Only on the Training screen and tests all 5 trainings for their stat gains and failure chances.",
+    },
+    {
+        key: "debugMode_startRaceListDetectionTest",
+        searchId: "debug-race-list-detection-test",
+        title: "Start Race List Detection Test",
+        description: "Disables normal bot operations and starts the Race List detection test. Only on the Race List screen and tests detecting the races with double star predictions currently on display.",
+    },
+    {
+        key: "debugMode_startMainScreenUpdateTest",
+        searchId: "debug-main-screen-update-test",
+        title: "Start Main Screen Update Test",
+        description: "Disables normal bot operations and starts the Main Screen update test. This test will go through all Main Screen updates and then print the Trainee information.",
+    },
+    {
+        key: "debugMode_startSkillListBuyTest",
+        searchId: "debug-skill-list-buy-test",
+        title: "Start Skill List Buy Test",
+        description:
+            "Processes the list of skills in the Skills screen, reads all skills in the list, logs a summary and then logs another summary of which skills it will buy to bring down the current Skill Points as close to zero as possible and then it will stop there without actually doing the buying.",
+    },
+    {
+        key: "debugMode_startScrollBarDetectionTest",
+        searchId: "debug-scrollbar-detection-test",
+        title: "Start Scrollbar Detection Test",
+        description: "Disables normal bot operations and starts the Scrollbar detection test. Detects the scrollbar on the current screen and attempts to scroll it up and down to verify functionality.",
+    },
+    {
+        key: "debugMode_startTrackblazerRaceSelectionTest",
+        searchId: "debug-trackblazer-race-selection-test",
+        title: "Start Trackblazer Race Selection Test",
+        description: "Disables normal bot operations and starts the Trackblazer race selection test. Navigates to the Race List if on the Main Screen and identifies the best race to run, including Rivals.",
+    },
+    {
+        key: "debugMode_startTrackblazerInventorySyncTest",
+        searchId: "debug-trackblazer-inventory-sync-test",
+        title: "Start Trackblazer Inventory Sync Test",
+        description: "Disables normal bot operations and starts the Trackblazer inventory sync test. Opens the Training Items dialog if on the Main Screen and logs inventory contents and quick-use intentions.",
+    },
+    {
+        key: "debugMode_startTrackblazerBuyItemsTest",
+        searchId: "debug-trackblazer-buy-items-test",
+        title: "Start Trackblazer Buy Items Test",
+        description: "Disables normal bot operations and starts the Trackblazer buy items test. Opens the Shop if on the Main Screen and logs shop contents and purchase intentions without actually buying anything.",
+    },
+]
+
+/** Available recording frame rate options surfaced in the Row+chip selector. */
+const FRAME_RATE_OPTIONS = [
+    { value: 30, label: "30 FPS" },
+    { value: 60, label: "60 FPS" },
+] as const
+
 /**
  * The Debug Settings page.
- * Provides controls for debug mode, template matching confidence/scale, screen recording settings (bit rate, frame rate, resolution), and
- * diagnostic tests (template matching, OCR, date, race list, aptitudes).
+ * Provides controls for debug mode, template matching confidence/scale, screen recording settings (bit rate, frame rate, resolution), and diagnostic tests (template matching, OCR, date, race list,
+ * aptitudes).
  */
 const DebugSettings = () => {
     usePerformanceLogging("DebugSettings")
@@ -35,36 +130,19 @@ const DebugSettings = () => {
     const { debug, updateDebug } = useContext(DebugContext)
     const { defaultSettings } = useContext(BotMetaContext)
     const scrollViewRef = useRef<ScrollView>(null)
-
-    /** List of all diagnostic debug test property names in debug. */
-    const debugTestKeys = [
-        "debugMode_startTemplateMatchingTest",
-        "debugMode_startSingleTrainingOCRTest",
-        "debugMode_startComprehensiveTrainingOCRTest",
-        "debugMode_startRaceListDetectionTest",
-        "debugMode_startMainScreenUpdateTest",
-        "debugMode_startSkillListBuyTest",
-        "debugMode_startScrollBarDetectionTest",
-        "debugMode_startTrackblazerRaceSelectionTest",
-        "debugMode_startTrackblazerInventorySyncTest",
-        "debugMode_startTrackblazerBuyItemsTest",
-    ] as const
+    const modalShellStyles = useModalShellStyles()
 
     /**
-     * Handles mutual exclusivity for diagnostic debug tests.
-     * When one test is enabled, all others are automatically disabled.
-     *
+     * Handles mutual exclusivity for diagnostic debug tests. When one test is enabled, all others are automatically disabled.
      * @param key The settings key of the test being toggled.
      * @param checked The new checked state.
      */
-    const handleDebugTestToggle = (key: (typeof debugTestKeys)[number], checked: boolean) => {
+    const handleDebugTestToggle = (key: DebugTestDescriptor["key"], checked: boolean) => {
         if (checked) {
-            // Create updates for all debug test keys, setting only the target one to true.
-            const updates = debugTestKeys.reduce((acc, currentKey) => {
-                acc[currentKey] = currentKey === key
+            const updates = DEBUG_TESTS.reduce((acc, t) => {
+                acc[t.key] = t.key === key
                 return acc
             }, {} as any)
-
             updateDebug(updates)
         } else {
             updateDebug({ [key]: false } as any)
@@ -78,26 +156,23 @@ const DebugSettings = () => {
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [isRefreshingOverlay, setIsRefreshingOverlay] = useState(false)
     const [isRefreshingBattery, setIsRefreshingBattery] = useState(false)
+    const [currentWizardStep, setCurrentWizardStep] = useState<number>(0)
+    const [frameRatePickerOpen, setFrameRatePickerOpen] = useState(false)
 
     /** Checks with the native module if the Accessibility Service is currently running. */
     const checkAccessibilityStatus = () => {
         setIsRefreshing(true)
         const startTime = Date.now()
-
         NativeModules.StartModule.getAccessibilityStatus()
             .then((status: { enabled: boolean; active: boolean }) => {
-                const elapsedTime = Date.now() - startTime
-                const remainingTime = Math.max(0, 200 - elapsedTime)
-
+                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
                 setTimeout(() => {
                     setAccessibilityStatus(status)
                     setIsRefreshing(false)
                 }, remainingTime)
             })
             .catch(() => {
-                const elapsedTime = Date.now() - startTime
-                const remainingTime = Math.max(0, 200 - elapsedTime)
-
+                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
                 setTimeout(() => {
                     setAccessibilityStatus({ enabled: false, active: false })
                     setIsRefreshing(false)
@@ -109,7 +184,6 @@ const DebugSettings = () => {
     const checkOverlayStatus = () => {
         setIsRefreshingOverlay(true)
         const startTime = Date.now()
-
         NativeModules.StartModule.getOverlayStatus()
             .then((status: { enabled: boolean }) => {
                 const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
@@ -131,7 +205,6 @@ const DebugSettings = () => {
     const checkBatteryStatus = () => {
         setIsRefreshingBattery(true)
         const startTime = Date.now()
-
         NativeModules.StartModule.getBatteryOptimizationStatus()
             .then((status: { enabled: boolean }) => {
                 const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
@@ -179,28 +252,51 @@ const DebugSettings = () => {
     const styles = useMemo(
         () =>
             StyleSheet.create({
-                root: {
-                    flex: 1,
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    margin: 10,
-                    backgroundColor: colors.bg,
+                root: { flex: 1, flexDirection: "column", justifyContent: "center", margin: 10, backgroundColor: colors.bg },
+                hostPad: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm },
+                sectionDescription: { ...TYPE.caption, color: colors.textMuted, lineHeight: 18, paddingHorizontal: SPACING.md, paddingTop: SPACING.sm },
+                chip: {
+                    ...TYPE.monoLabel,
+                    color: colors.brand,
+                    paddingHorizontal: SPACING.sm,
+                    paddingVertical: 2,
+                    backgroundColor: colors.brandSubtle,
+                    borderRadius: RADII.pill,
+                    overflow: "hidden",
                 },
-                infoLabel: {
-                    fontWeight: "bold",
-                    color: colors.text,
-                    fontSize: 14,
-                    lineHeight: 22,
-                    includeFontPadding: false,
+                wizardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: SPACING.md, paddingTop: SPACING.md },
+                stepperLabel: { ...TYPE.monoLabel, color: colors.textMuted },
+                dotsRow: { flexDirection: "row", gap: 6, alignItems: "center" },
+                dot: { width: 8, height: 8, borderRadius: 4, borderWidth: 1, borderColor: colors.borderHair },
+                dotFuture: { backgroundColor: "transparent" },
+                dotCurrent: { backgroundColor: colors.brand, borderColor: colors.brand },
+                dotPast: { backgroundColor: colors.brand, borderColor: colors.brand, opacity: 0.5 },
+                wizardBody: { paddingHorizontal: SPACING.md, paddingTop: SPACING.sm, paddingBottom: SPACING.md, gap: SPACING.sm },
+                wizardTitle: { ...TYPE.h2, color: colors.text },
+                wizardDescription: { ...TYPE.caption, color: colors.textMuted, lineHeight: 18 },
+                statusChipsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+                statusChip: {
+                    paddingHorizontal: SPACING.sm,
+                    paddingVertical: 3,
+                    borderRadius: RADII.pill,
+                    borderWidth: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
                 },
-                infoDescription: {
-                    fontSize: 14,
-                    color: colors.text,
-                    opacity: 0.7,
-                    lineHeight: 22,
-                    includeFontPadding: false,
-                    marginTop: 2,
-                },
+                statusChipGranted: { backgroundColor: colors.successSubtle, borderColor: colors.success },
+                statusChipMissing: { backgroundColor: "rgba(255, 90, 110, 0.10)", borderColor: colors.error },
+                statusChipPending: { backgroundColor: colors.surfaceRaised, borderColor: colors.borderHair },
+                statusChipText: { ...TYPE.monoLabel, fontSize: 10 },
+                inlineWarning: { ...TYPE.caption, color: colors.warningText, lineHeight: 18 },
+                actionRow: { flexDirection: "row", gap: 10, marginTop: SPACING.sm },
+                navRow: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: SPACING.md, paddingBottom: SPACING.md },
+                doneCard: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md, gap: SPACING.sm },
+                doneHeader: { flexDirection: "row", alignItems: "center", gap: SPACING.sm },
+                doneTitle: { ...TYPE.h2, color: colors.brand },
+                doneCheckRow: { flexDirection: "row", alignItems: "center", gap: SPACING.sm, paddingVertical: 2 },
+                doneCheckLabel: { ...TYPE.body, color: colors.text, flex: 1 },
+                recheckLink: { ...TYPE.caption, color: colors.brand, fontWeight: "600", marginTop: SPACING.sm },
             }),
         [colors]
     )
@@ -215,473 +311,385 @@ const DebugSettings = () => {
         }
     }, [rlvUrl])
 
+    // System checks wizard data. Each step describes one permission and the status, refresh, and open-settings handlers tied to it.
+    const wizardSteps = useMemo(
+        () => [
+            {
+                title: "Accessibility Service",
+                description: "The Accessibility Service allows the bot to perform clicks and gestures on your behalf.",
+                flags: [
+                    { label: "System Enabled", granted: accessibilityStatus?.enabled, ready: accessibilityStatus !== null },
+                    { label: "Internal State", granted: accessibilityStatus?.active, ready: accessibilityStatus !== null },
+                ],
+                granted: !!(accessibilityStatus?.enabled && accessibilityStatus?.active),
+                refresh: checkAccessibilityStatus,
+                refreshing: isRefreshing,
+                openSettings: () => NativeModules.StartModule.openAccessibilitySettings(),
+                inlineWarning: accessibilityStatus?.enabled && !accessibilityStatus?.active ? "The service is enabled but it seems Android killed it in the background. Toggling it off and back on in settings will restart it." : null,
+            },
+            {
+                title: "Overlay Permission",
+                description: "The Overlay (Display over other apps) permission allows the bot to render its on-screen control overlay.",
+                flags: [{ label: "Display over other apps", granted: overlayStatus?.enabled, ready: overlayStatus !== null }],
+                granted: !!overlayStatus?.enabled,
+                refresh: checkOverlayStatus,
+                refreshing: isRefreshingOverlay,
+                openSettings: () => NativeModules.StartModule.openOverlaySettings(),
+                inlineWarning: null,
+            },
+            {
+                title: "Battery Optimization",
+                description: "Disabling battery optimization for this app prevents Android from killing the bot during long-running automation runs.",
+                flags: [{ label: "Ignoring battery optimization", granted: batteryStatus?.enabled, ready: batteryStatus !== null }],
+                granted: !!batteryStatus?.enabled,
+                refresh: checkBatteryStatus,
+                refreshing: isRefreshingBattery,
+                openSettings: () => NativeModules.StartModule.openBatteryOptimizationSettings(),
+                inlineWarning: null,
+            },
+        ],
+        [accessibilityStatus, overlayStatus, batteryStatus, isRefreshing, isRefreshingOverlay, isRefreshingBattery]
+    )
+
+    const allChecksPassed = wizardSteps.every((s) => s.granted)
+    const activeStep = wizardSteps[currentWizardStep]
+    const currentFrameRateLabel = FRAME_RATE_OPTIONS.find((o) => o.value === debug.recordingFrameRate)?.label ?? "30 FPS"
+
     return (
         <View style={styles.root}>
             <SearchPageProvider page="DebugSettings" scrollViewRef={scrollViewRef}>
                 <PageHeader title="Debug Settings" />
-                <ScrollView
-                    ref={scrollViewRef}
-                    nestedScrollEnabled={true}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ flexGrow: 1 }}
-                >
+                <ScrollView ref={scrollViewRef} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                     <View className="m-1">
-                        <View style={{ marginTop: 16 }}>
-                            {/* Enable Debug Mode */}
+                        {/* //////////////////////////////////////////////////////////////////////////////////////////////////
+                            //////////////////////////////////////////////////////////////////////////////////////////////////
+                            Debug Mode */}
+                        <Section label="Debug Mode">
                             <SearchableItem id="enable-debug-mode" title="Enable Debug Mode" description="Allows debugging messages in the log and test images to be created in the /temp/ folder.">
                                 <Row
-                                    title="Debug Mode"
+                                    title="Enable Debug Mode"
                                     description="Verbose logging and test image capture"
                                     right={<Switch checked={debug.enableDebugMode} onCheckedChange={(checked) => updateDebug({ enableDebugMode: checked })} />}
                                 />
                             </SearchableItem>
+                        </Section>
+                        {debug.enableDebugMode && <WarningContainer style={{ marginTop: 0, marginBottom: SPACING.md }}>⚠️ Significantly extends the average runtime of the bot due to increased IO operations.</WarningContainer>}
 
-                            {debug.enableDebugMode && (
-                                <WarningContainer style={{ marginTop: 8 }}>⚠️ Significantly extends the average runtime of the bot due to increased IO operations.</WarningContainer>
-                            )}
-
-                            {/* Template Match Confidence Slider */}
-                            <CustomSlider
-                                searchId="template-match-confidence"
-                                value={debug.templateMatchConfidence}
-                                placeholder={defaultSettings.debug.templateMatchConfidence}
-                                onValueChange={(value) => {
-                                    updateDebug({ templateMatchConfidence: value })
-                                }}
-                                onSlidingComplete={(value) => {
-                                    updateDebug({ templateMatchConfidence: value })
-                                }}
-                                min={0.5}
-                                max={1.0}
-                                step={0.01}
-                                label="Adjust Confidence for Template Matching"
-                                labelUnit=""
-                                showValue={true}
-                                showLabels={true}
-                                description="Sets the minimum confidence level for template matching with 1080p as the baseline. Consider lowering this to something like 0.7 or 70% at lower resolutions. Making it too low will cause the bot to match on too many things as false positives."
-                            />
-
-                            {/* Template Match Custom Scale Slider */}
-                            <CustomSlider
-                                searchId="template-match-custom-scale"
-                                value={debug.templateMatchCustomScale}
-                                placeholder={defaultSettings.debug.templateMatchCustomScale}
-                                onValueChange={(value) => {
-                                    updateDebug({ templateMatchCustomScale: value })
-                                }}
-                                onSlidingComplete={(value) => {
-                                    updateDebug({ templateMatchCustomScale: value })
-                                }}
-                                min={0.5}
-                                max={3.0}
-                                step={0.01}
-                                label="Set the Custom Image Scale for Template Matching"
-                                labelUnit=""
-                                showValue={true}
-                                showLabels={true}
-                                description="Manually set the scale to do template matching. The Basic Template Matching Test can help find your recommended scale. Making it too low or too high will cause the bot to match on too little or too many things as false positives."
-                            />
-
-                            {/* OCR Threshold Slider */}
-                            <CustomSlider
-                                searchId="ocr-threshold"
-                                value={debug.ocrThreshold}
-                                placeholder={defaultSettings.debug.ocrThreshold}
-                                onValueChange={(value: number) => {
-                                    updateDebug({ ocrThreshold: value })
-                                }}
-                                onSlidingComplete={(value: number) => {
-                                    updateDebug({ ocrThreshold: value })
-                                }}
-                                min={100}
-                                max={255}
-                                step={5}
-                                label="OCR Threshold"
-                                labelUnit=""
-                                showValue={true}
-                                showLabels={true}
-                                description="The brightness threshold used to distinguish text from the background during OCR. Note: This setting does not affect high-precision features like Stat Detection or Training Failure Chance detection, as they use specialized processing."
-                            />
-
-                            <Separator style={{ marginVertical: 16 }} />
-
-                            {/* Remote Log Viewer card. */}
-                            <View style={{ marginTop: SPACING.lg }}>
-                                <SectionLabel label="Remote Log Viewer" />
-                                <GlassSurface>
-                                    <View style={{ padding: SPACING.md, gap: SPACING.sm }}>
-                                        <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING.sm }}>
-                                            <View style={{ width: 28, height: 28, borderRadius: 999, backgroundColor: colors.brandSubtle, alignItems: "center", justifyContent: "center" }}>
-                                                <Ionicons name="cellular-outline" size={14} color={colors.brand} />
-                                            </View>
-                                            <View style={{ flex: 1 }}>
-                                                <Text style={{ ...TYPE.body, color: colors.text, fontWeight: "600" as const }}>Remote Log Viewer</Text>
-                                                <Text style={{ ...TYPE.caption, color: colors.textMuted }}>Same WiFi required</Text>
-                                            </View>
-                                            <SearchableItem
-                                                id="settings-enable-remote-log-viewer"
-                                                title="Enable Remote Log Viewer"
-                                                description="Starts an HTTP server on this device when the bot runs. Open the URL shown below in a browser on your computer to view logs in real-time."
-                                            >
-                                                <Switch checked={debug.enableRemoteLogViewer} onCheckedChange={(checked) => updateDebug({ enableRemoteLogViewer: checked })} />
-                                            </SearchableItem>
-                                        </View>
-                                        {debug.enableRemoteLogViewer && (
-                                            <>
-                                                <Pressable
-                                                    onPress={handleCopyRlvUrl}
-                                                    android_ripple={{ color: colors.ripple, foreground: true }}
-                                                    style={{
-                                                        padding: SPACING.sm,
-                                                        backgroundColor: colors.surfaceRaised,
-                                                        borderRadius: RADII.md,
-                                                        flexDirection: "row",
-                                                        alignItems: "center",
-                                                        gap: SPACING.sm,
-                                                    }}
-                                                >
-                                                    <Text style={{ ...TYPE.monoLabel, color: colors.brand, flex: 1 }}>{rlvUrl}</Text>
-                                                    <Ionicons name="copy-outline" size={14} color={colors.textMuted} />
-                                                </Pressable>
-                                                <Text style={{ ...TYPE.caption, color: colors.textMuted }}>Port {debug.remoteLogViewerPort} · Active</Text>
-                                                <CustomSlider
-                                                    searchId="settings-remote-log-viewer-port"
-                                                    searchCondition={debug.enableRemoteLogViewer}
-                                                    parentId="settings-enable-remote-log-viewer"
-                                                    value={debug.remoteLogViewerPort}
-                                                    placeholder={defaultSettings.debug.remoteLogViewerPort}
-                                                    onValueChange={(value) => updateDebug({ remoteLogViewerPort: value })}
-                                                    onSlidingComplete={(value) => updateDebug({ remoteLogViewerPort: value })}
-                                                    min={1024}
-                                                    max={65535}
-                                                    step={1}
-                                                    showValue
-                                                    showLabels
-                                                    label="Server Port"
-                                                    description="Port number for the log stream server. Change only if the default conflicts with another service."
-                                                />
-                                                {deviceIp === "10.0.2.15" && (
-                                                    <Text style={{ ...TYPE.caption, color: colors.warningText }}>
-                                                        Emulator detected - direct connection to {deviceIp} will fail. Use ADB port forwarding instead.
-                                                    </Text>
-                                                )}
-                                            </>
-                                        )}
-                                    </View>
-                                </GlassSurface>
+                        {/* //////////////////////////////////////////////////////////////////////////////////////////////////
+                            //////////////////////////////////////////////////////////////////////////////////////////////////
+                            Image/OCR Recognition */}
+                        <Section label="Image/OCR Recognition">
+                            <View style={styles.hostPad}>
+                                <CustomSlider
+                                    searchId="template-match-confidence"
+                                    value={debug.templateMatchConfidence}
+                                    placeholder={defaultSettings.debug.templateMatchConfidence}
+                                    onValueChange={(value) => updateDebug({ templateMatchConfidence: value })}
+                                    onSlidingComplete={(value) => updateDebug({ templateMatchConfidence: value })}
+                                    min={0.5}
+                                    max={1.0}
+                                    step={0.01}
+                                    label="Template Match Confidence"
+                                    labelUnit=""
+                                    showValue={true}
+                                    showLabels={true}
+                                    description="Sets the minimum confidence level for template matching with 1080p as the baseline. Consider lowering this to something like 0.7 or 70% at lower resolutions. Making it too low will cause the bot to match on too many things as false positives."
+                                />
                             </View>
+                            <View style={styles.hostPad}>
+                                <CustomSlider
+                                    searchId="template-match-custom-scale"
+                                    value={debug.templateMatchCustomScale}
+                                    placeholder={defaultSettings.debug.templateMatchCustomScale}
+                                    onValueChange={(value) => updateDebug({ templateMatchCustomScale: value })}
+                                    onSlidingComplete={(value) => updateDebug({ templateMatchCustomScale: value })}
+                                    min={0.5}
+                                    max={3.0}
+                                    step={0.01}
+                                    label="Template Match Custom Scale"
+                                    labelUnit=""
+                                    showValue={true}
+                                    showLabels={true}
+                                    description="Manually set the scale to do template matching. The Basic Template Matching Test can help find your recommended scale. Making it too low or too high will cause the bot to match on too little or too many things as false positives."
+                                />
+                            </View>
+                            <View style={styles.hostPad}>
+                                <CustomSlider
+                                    searchId="ocr-threshold"
+                                    value={debug.ocrThreshold}
+                                    placeholder={defaultSettings.debug.ocrThreshold}
+                                    onValueChange={(value: number) => updateDebug({ ocrThreshold: value })}
+                                    onSlidingComplete={(value: number) => updateDebug({ ocrThreshold: value })}
+                                    min={100}
+                                    max={255}
+                                    step={5}
+                                    label="OCR Threshold"
+                                    labelUnit=""
+                                    showValue={true}
+                                    showLabels={true}
+                                    description="The brightness threshold used to distinguish text from the background during OCR. Note: This setting does not affect high-precision features like Stat Detection or Training Failure Chance detection, as they use specialized processing."
+                                />
+                            </View>
+                        </Section>
 
-                            <Separator style={{ marginVertical: 16 }} />
-
-                            <Section label="Screen Recording Settings">
-                                <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
-                                    <Text style={[TYPE.caption, { color: colors.textMuted, marginBottom: SPACING.md }]}>Configure the quality settings for screen recording.</Text>
-
-                                    {/* Enable Screen Recording Checkbox */}
-                                    <CustomCheckbox
-                                        searchId="enable-screen-recording"
-                                        checked={debug.enableScreenRecording}
-                                        onCheckedChange={(checked) => {
-                                            updateDebug({ enableScreenRecording: checked })
-                                        }}
-                                        label="Enable Screen Recording"
-                                        description="Records the screen while the bot is running. The mp4 file will be saved to the /recordings folder of the app's data directory. Note that performance and battery life may be impacted while recording."
-                                    />
-
-                                    {/* Recording Bit Rate Slider */}
-                                    <CustomSlider
-                                        searchId="recording-bit-rate"
-                                        searchCondition={debug.enableScreenRecording}
-                                        parentId="enable-screen-recording"
-                                        value={debug.recordingBitRate}
-                                        placeholder={defaultSettings.debug.recordingBitRate}
-                                        onValueChange={(value) => {
-                                            updateDebug({ recordingBitRate: value })
-                                        }}
-                                        onSlidingComplete={(value) => {
-                                            updateDebug({ recordingBitRate: value })
-                                        }}
-                                        min={1}
-                                        max={20}
-                                        step={1}
-                                        label="Recording Quality (Bit Rate)"
-                                        labelUnit=" Mbps"
-                                        showValue={true}
-                                        showLabels={true}
-                                        description="Sets the video bit rate for screen recording. Higher values produce better quality but larger file sizes."
-                                    />
-
-                                    {/* Recording Frame Rate Select */}
-                                    <CustomSelect
-                                        searchId="recording-frame-rate"
-                                        searchCondition={debug.enableScreenRecording}
-                                        parentId="enable-screen-recording"
-                                        value={debug.recordingFrameRate.toString()}
-                                        options={[
-                                            { value: "30", label: "30 FPS" },
-                                            { value: "60", label: "60 FPS" },
-                                        ]}
-                                        onValueChange={(value) => {
-                                            if (value) {
-                                                updateDebug({ recordingFrameRate: parseInt(value, 10) })
-                                            }
-                                        }}
-                                        label="Recording Frame Rate"
-                                        description="Sets the frame rate for screen recording."
-                                        placeholder="Select Frame Rate for Recording"
-                                        style={{ marginTop: 8, marginBottom: 16 }}
-                                    />
-
-                                    {/* Recording Resolution Scale Slider */}
-                                    <CustomSlider
-                                        searchId="recording-resolution-scale"
-                                        searchCondition={debug.enableScreenRecording}
-                                        parentId="enable-screen-recording"
-                                        value={debug.recordingResolutionScale}
-                                        placeholder={defaultSettings.debug.recordingResolutionScale}
-                                        onValueChange={(value) => {
-                                            updateDebug({ recordingResolutionScale: value })
-                                        }}
-                                        onSlidingComplete={(value) => {
-                                            updateDebug({ recordingResolutionScale: value })
-                                        }}
-                                        min={0.25}
-                                        max={1.0}
-                                        step={0.05}
-                                        label="Recording Resolution Scale"
-                                        labelUnit=""
-                                        showValue={true}
-                                        showLabels={true}
-                                        description="Scales the recording resolution. Lower values produce smaller file sizes but lower quality. 1.0 = full resolution, 0.5 = half resolution."
-                                    />
+                        {/* //////////////////////////////////////////////////////////////////////////////////////////////////
+                            //////////////////////////////////////////////////////////////////////////////////////////////////
+                            Remote Log Viewer */}
+                        <View style={{ marginTop: SPACING.lg }}>
+                            <SectionLabel label="Remote Log Viewer" />
+                            <GlassSurface>
+                                <View style={{ padding: SPACING.md, gap: SPACING.sm }}>
+                                    <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING.sm }}>
+                                        <View style={{ width: 28, height: 28, borderRadius: 999, backgroundColor: colors.brandSubtle, alignItems: "center", justifyContent: "center" }}>
+                                            <Ionicons name="cellular-outline" size={14} color={colors.brand} />
+                                        </View>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ ...TYPE.body, color: colors.text, fontWeight: "600" as const }}>Remote Log Viewer</Text>
+                                            <Text style={{ ...TYPE.caption, color: colors.textMuted }}>Same WiFi required</Text>
+                                        </View>
+                                        <SearchableItem
+                                            id="settings-enable-remote-log-viewer"
+                                            title="Enable Remote Log Viewer"
+                                            description="Starts an HTTP server on this device when the bot runs. Open the URL shown below in a browser on your computer to view logs in real-time."
+                                        >
+                                            <Switch checked={debug.enableRemoteLogViewer} onCheckedChange={(checked) => updateDebug({ enableRemoteLogViewer: checked })} />
+                                        </SearchableItem>
+                                    </View>
+                                    {debug.enableRemoteLogViewer && (
+                                        <>
+                                            <Pressable
+                                                onPress={handleCopyRlvUrl}
+                                                android_ripple={{ color: colors.ripple, foreground: true }}
+                                                style={{ padding: SPACING.sm, backgroundColor: colors.surfaceRaised, borderRadius: RADII.md, flexDirection: "row", alignItems: "center", gap: SPACING.sm }}
+                                            >
+                                                <Text style={{ ...TYPE.monoLabel, color: colors.brand, flex: 1 }}>{rlvUrl}</Text>
+                                                <Ionicons name="copy-outline" size={14} color={colors.textMuted} />
+                                            </Pressable>
+                                            <Text style={{ ...TYPE.caption, color: colors.textMuted }}>Port {debug.remoteLogViewerPort} · Active</Text>
+                                            <CustomSlider
+                                                searchId="settings-remote-log-viewer-port"
+                                                searchCondition={debug.enableRemoteLogViewer}
+                                                parentId="settings-enable-remote-log-viewer"
+                                                value={debug.remoteLogViewerPort}
+                                                placeholder={defaultSettings.debug.remoteLogViewerPort}
+                                                onValueChange={(value) => updateDebug({ remoteLogViewerPort: value })}
+                                                onSlidingComplete={(value) => updateDebug({ remoteLogViewerPort: value })}
+                                                min={1024}
+                                                max={65535}
+                                                step={1}
+                                                showValue
+                                                showLabels
+                                                label="Server Port"
+                                                description="Port number for the log stream server. Change only if the default conflicts with another service."
+                                            />
+                                            {deviceIp === "10.0.2.15" && <Text style={{ ...TYPE.caption, color: colors.warningText }}>Emulator detected - direct connection to {deviceIp} will fail. Use ADB port forwarding instead.</Text>}
+                                        </>
+                                    )}
                                 </View>
-                            </Section>
+                            </GlassSurface>
+                        </View>
 
-                            <Separator style={{ marginVertical: 16 }} />
+                        <Separator style={{ marginVertical: 16 }} />
 
-                            <SearchableItem
-                                id="debug-accessibility-service-check"
-                                title="Accessibility Service Check"
-                                description="The Accessibility Service allows the bot to perform clicks and gestures on your behalf."
-                            >
-                                <Section label="Accessibility Service Check">
-                                    <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
-                                        <Text style={[TYPE.caption, { color: colors.textMuted, marginBottom: SPACING.md }]}>
-                                            The Accessibility Service allows the bot to perform clicks and gestures on your behalf.
-                                        </Text>
-                                        <InfoContainer style={{ marginTop: 0 }}>
-                                            <View>
-                                                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                                                    <Text style={styles.infoLabel}>System Enabled: </Text>
-                                                    <Text style={[styles.infoLabel, { color: accessibilityStatus?.enabled ? colors.success : colors.error }]}>
-                                                        {accessibilityStatus === null ? "Checking..." : accessibilityStatus.enabled ? "✅ Registered" : "❌ Not Enabled"}
-                                                    </Text>
-                                                </View>
-                                                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                                                    <Text style={styles.infoLabel}>Internal State: </Text>
-                                                    <Text style={[styles.infoLabel, { color: accessibilityStatus?.active ? colors.success : colors.error }]}>
-                                                        {accessibilityStatus === null ? "Checking..." : accessibilityStatus.active ? "✅ Ready" : "❌ Not Initialized"}
-                                                    </Text>
-                                                </View>
+                        {/* //////////////////////////////////////////////////////////////////////////////////////////////////
+                            //////////////////////////////////////////////////////////////////////////////////////////////////
+                            Screen Recording Settings */}
+                        <Section label="Screen Recording Settings">
+                            <View style={styles.hostPad}>
+                                <Text style={[TYPE.caption, { color: colors.textMuted, marginBottom: SPACING.md }]}>Configure the quality settings for screen recording.</Text>
+                                <CustomCheckbox
+                                    searchId="enable-screen-recording"
+                                    checked={debug.enableScreenRecording}
+                                    onCheckedChange={(checked) => updateDebug({ enableScreenRecording: checked })}
+                                    label="Enable Screen Recording"
+                                    description="Records the screen while the bot is running. The mp4 file will be saved to the /recordings folder of the app's data directory. Note that performance and battery life may be impacted while recording."
+                                />
+                                <CustomSlider
+                                    searchId="recording-bit-rate"
+                                    searchCondition={debug.enableScreenRecording}
+                                    parentId="enable-screen-recording"
+                                    value={debug.recordingBitRate}
+                                    placeholder={defaultSettings.debug.recordingBitRate}
+                                    onValueChange={(value) => updateDebug({ recordingBitRate: value })}
+                                    onSlidingComplete={(value) => updateDebug({ recordingBitRate: value })}
+                                    min={1}
+                                    max={20}
+                                    step={1}
+                                    label="Recording Quality (Bit Rate)"
+                                    labelUnit=" Mbps"
+                                    showValue={true}
+                                    showLabels={true}
+                                    description="Sets the video bit rate for screen recording. Higher values produce better quality but larger file sizes."
+                                />
+                            </View>
+                            {debug.enableScreenRecording && (
+                                <SearchableItem
+                                    id="recording-frame-rate"
+                                    title="Recording Frame Rate"
+                                    description="Sets the frame rate for screen recording."
+                                    parentId="enable-screen-recording"
+                                    condition={debug.enableScreenRecording}
+                                >
+                                    <Row
+                                        title="Recording Frame Rate"
+                                        description="Sets the frame rate for screen recording."
+                                        onPress={() => setFrameRatePickerOpen(true)}
+                                        right={<Text style={styles.chip}>{currentFrameRateLabel}</Text>}
+                                    />
+                                </SearchableItem>
+                            )}
+                            <View style={styles.hostPad}>
+                                <CustomSlider
+                                    searchId="recording-resolution-scale"
+                                    searchCondition={debug.enableScreenRecording}
+                                    parentId="enable-screen-recording"
+                                    value={debug.recordingResolutionScale}
+                                    placeholder={defaultSettings.debug.recordingResolutionScale}
+                                    onValueChange={(value) => updateDebug({ recordingResolutionScale: value })}
+                                    onSlidingComplete={(value) => updateDebug({ recordingResolutionScale: value })}
+                                    min={0.25}
+                                    max={1.0}
+                                    step={0.05}
+                                    label="Recording Resolution Scale"
+                                    labelUnit=""
+                                    showValue={true}
+                                    showLabels={true}
+                                    description="Scales the recording resolution. Lower values produce smaller file sizes but lower quality. 1.0 = full resolution, 0.5 = half resolution."
+                                />
+                            </View>
+                        </Section>
 
-                                                {accessibilityStatus?.enabled && !accessibilityStatus?.active && (
-                                                    <Text style={styles.infoDescription}>
-                                                        The service is enabled but it seems Android killed it in the background. Toggling it off and back on in settings will restart it.
-                                                    </Text>
-                                                )}
-
-                                                <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
-                                                    <CustomButton variant="outline" onPress={() => checkAccessibilityStatus()} isLoading={isRefreshing} disabled={isRefreshing}>
-                                                        Refresh Status
-                                                    </CustomButton>
-                                                    <CustomButton variant="default" onPress={() => NativeModules.StartModule.openAccessibilitySettings()}>
-                                                        Open Settings
-                                                    </CustomButton>
-                                                </View>
-                                            </View>
-                                        </InfoContainer>
+                        {/* //////////////////////////////////////////////////////////////////////////////////////////////////
+                            //////////////////////////////////////////////////////////////////////////////////////////////////
+                            System Checks (wizard) */}
+                        <Section label="System Checks">
+                            {allChecksPassed ? (
+                                <View style={styles.doneCard}>
+                                    <View style={styles.doneHeader}>
+                                        <Ionicons name="checkmark-circle" size={20} color={colors.brand} />
+                                        <Text style={styles.doneTitle}>All system checks passed</Text>
                                     </View>
-                                </Section>
-                            </SearchableItem>
-
-                            <SearchableItem
-                                id="debug-overlay-permission-check"
-                                title="Overlay Permission Check"
-                                description="The Overlay (Display over other apps) permission allows the bot to render its on-screen control overlay."
-                            >
-                                <Section label="Overlay Permission Check">
-                                    <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
-                                        <Text style={[TYPE.caption, { color: colors.textMuted, marginBottom: SPACING.md }]}>
-                                            The Overlay (Display over other apps) permission allows the bot to render its on-screen control overlay.
-                                        </Text>
-                                        <InfoContainer style={{ marginTop: 0 }}>
-                                            <View>
-                                                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                                                    <Text style={styles.infoLabel}>Display over other apps: </Text>
-                                                    <Text style={[styles.infoLabel, { color: overlayStatus?.enabled ? colors.success : colors.error }]}>
-                                                        {overlayStatus === null ? "Checking..." : overlayStatus.enabled ? "✅ Granted" : "❌ Not Granted"}
-                                                    </Text>
-                                                </View>
-
-                                                <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
-                                                    <CustomButton variant="outline" onPress={() => checkOverlayStatus()} isLoading={isRefreshingOverlay} disabled={isRefreshingOverlay}>
-                                                        Refresh Status
-                                                    </CustomButton>
-                                                    <CustomButton variant="default" onPress={() => NativeModules.StartModule.openOverlaySettings()}>
-                                                        Open Settings
-                                                    </CustomButton>
-                                                </View>
-                                            </View>
-                                        </InfoContainer>
+                                    {wizardSteps.map((step) => (
+                                        <View key={step.title} style={styles.doneCheckRow}>
+                                            <Ionicons name="checkmark" size={16} color={colors.brand} />
+                                            <Text style={styles.doneCheckLabel}>{step.title}</Text>
+                                        </View>
+                                    ))}
+                                    <Pressable onPress={() => setCurrentWizardStep(0)} android_ripple={{ color: colors.ripple, foreground: false }} hitSlop={8}>
+                                        <Text style={styles.recheckLink}>Re-check</Text>
+                                    </Pressable>
+                                </View>
+                            ) : (
+                                <>
+                                    <View style={styles.wizardHeader}>
+                                        <Text style={styles.stepperLabel}>STEP {currentWizardStep + 1} OF {wizardSteps.length}</Text>
+                                        <View style={styles.dotsRow}>
+                                            {wizardSteps.map((_, idx) => (
+                                                <View
+                                                    key={idx}
+                                                    style={[styles.dot, idx === currentWizardStep ? styles.dotCurrent : idx < currentWizardStep ? styles.dotPast : styles.dotFuture]}
+                                                />
+                                            ))}
+                                        </View>
                                     </View>
-                                </Section>
-                            </SearchableItem>
-
-                            <SearchableItem
-                                id="debug-battery-optimization-check"
-                                title="Battery Optimization Check"
-                                description="Disabling battery optimization for this app prevents Android from killing the bot during long-running automation runs."
-                            >
-                                <Section label="Battery Optimization Check">
-                                    <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
-                                        <Text style={[TYPE.caption, { color: colors.textMuted, marginBottom: SPACING.md }]}>
-                                            Disabling battery optimization for this app prevents Android from killing the bot during long-running automation runs.
-                                        </Text>
-                                        <InfoContainer style={{ marginTop: 0 }}>
-                                            <View>
-                                                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                                                    <Text style={styles.infoLabel}>Ignoring battery optimization: </Text>
-                                                    <Text style={[styles.infoLabel, { color: batteryStatus?.enabled ? colors.success : colors.error }]}>
-                                                        {batteryStatus === null ? "Checking..." : batteryStatus.enabled ? "✅ Yes" : "❌ No"}
-                                                    </Text>
-                                                </View>
-
-                                                <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
-                                                    <CustomButton variant="outline" onPress={() => checkBatteryStatus()} isLoading={isRefreshingBattery} disabled={isRefreshingBattery}>
-                                                        Refresh Status
-                                                    </CustomButton>
-                                                    <CustomButton variant="default" onPress={() => NativeModules.StartModule.openBatteryOptimizationSettings()}>
-                                                        Open Settings
-                                                    </CustomButton>
-                                                </View>
-                                            </View>
-                                        </InfoContainer>
+                                    <View style={styles.wizardBody}>
+                                        <Text style={styles.wizardTitle}>{activeStep.title}</Text>
+                                        <View style={styles.statusChipsRow}>
+                                            {activeStep.flags.map((flag) => {
+                                                const chipStyle = !flag.ready ? styles.statusChipPending : flag.granted ? styles.statusChipGranted : styles.statusChipMissing
+                                                const chipColor = !flag.ready ? colors.textMuted : flag.granted ? colors.success : colors.error
+                                                const chipText = !flag.ready ? "Checking..." : flag.granted ? "✅ Granted" : "❌ Missing"
+                                                return (
+                                                    <View key={flag.label} style={[styles.statusChip, chipStyle]}>
+                                                        <Text style={[styles.statusChipText, { color: chipColor }]}>{flag.label}</Text>
+                                                        <Text style={[styles.statusChipText, { color: chipColor }]}>·</Text>
+                                                        <Text style={[styles.statusChipText, { color: chipColor }]}>{chipText}</Text>
+                                                    </View>
+                                                )
+                                            })}
+                                        </View>
+                                        <Text style={styles.wizardDescription}>{activeStep.description}</Text>
+                                        {activeStep.inlineWarning != null && <Text style={styles.inlineWarning}>{activeStep.inlineWarning}</Text>}
+                                        <View style={styles.actionRow}>
+                                            <CustomButton variant="outline" onPress={activeStep.refresh} isLoading={activeStep.refreshing} disabled={activeStep.refreshing}>
+                                                Refresh
+                                            </CustomButton>
+                                            <CustomButton variant="primary" onPress={activeStep.openSettings}>
+                                                Open Settings
+                                            </CustomButton>
+                                        </View>
                                     </View>
-                                </Section>
-                            </SearchableItem>
+                                    <View style={styles.navRow}>
+                                        <CustomButton variant="ghost" disabled={currentWizardStep === 0} onPress={() => setCurrentWizardStep((s) => Math.max(0, s - 1))}>
+                                            ← Back
+                                        </CustomButton>
+                                        <CustomButton variant="ghost" disabled={currentWizardStep === wizardSteps.length - 1} onPress={() => setCurrentWizardStep((s) => Math.min(wizardSteps.length - 1, s + 1))}>
+                                            Next →
+                                        </CustomButton>
+                                    </View>
+                                </>
+                            )}
+                        </Section>
 
-                            <Separator style={{ marginVertical: 16 }} />
-
-                            <Section label="Debug Tests">
-                                <View style={{ paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
-                                    <Text style={[TYPE.caption, { color: colors.textMuted, marginBottom: SPACING.md }]}>
+                        {/* //////////////////////////////////////////////////////////////////////////////////////////////////
+                            //////////////////////////////////////////////////////////////////////////////////////////////////
+                            Debug Tests */}
+                        <View style={{ marginTop: SPACING.sm, marginBottom: SPACING.lg }}>
+                            <SectionLabel label="Debug Tests" />
+                            <View style={{ backgroundColor: colors.surface, borderRadius: RADII.lg, borderWidth: 1, borderColor: colors.borderHair, overflow: "hidden" }}>
+                                <View style={{ paddingHorizontal: SPACING.md, paddingTop: SPACING.md, paddingBottom: SPACING.sm }}>
+                                    <Text style={[TYPE.caption, { color: colors.textMuted, lineHeight: 18, marginBottom: SPACING.sm }]}>
                                         Run diagnostic tests to verify template matching and OCR functionality. Only one test can be enabled at a time.
                                     </Text>
-
-                                    {/* Warning message for debug tests */}
-                                    <WarningContainer style={{ marginBottom: 16 }}>
-                                        {
-                                            "⚠️ Only one debug test can be enabled at a time. Enabling a test will automatically disable the others.\n\nHaving Debug Mode enabled will output more helpful logs."
-                                        }
+                                    <WarningContainer style={{ marginTop: 0 }}>
+                                        {"⚠️ Only one debug test can be enabled at a time. Enabling a test will automatically disable the others.\n\nHaving Debug Mode enabled will output more helpful logs."}
                                     </WarningContainer>
-
-                                    {/* Checkboxes for enabling Debug Tests */}
-                                    <CustomCheckbox
-                                        searchId="debug-template-matching-test"
-                                        checked={debug.debugMode_startTemplateMatchingTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startTemplateMatchingTest", checked)}
-                                        label="Start Basic Template Matching Test"
-                                        description="Disables normal bot operations and starts the template match test. Only on the Home screen and will check if it can find certain essential buttons on the screen. It will also output what scale it had the most success with."
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <CustomCheckbox
-                                        searchId="debug-single-training-ocr-test"
-                                        checked={debug.debugMode_startSingleTrainingOCRTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startSingleTrainingOCRTest", checked)}
-                                        label="Start Single Training OCR Test"
-                                        description="Disables normal bot operations and starts the single training OCR test. Only on the Training screen and tests the current training on display for stat gains and failure chances."
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <CustomCheckbox
-                                        searchId="debug-comprehensive-training-ocr-test"
-                                        checked={debug.debugMode_startComprehensiveTrainingOCRTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startComprehensiveTrainingOCRTest", checked)}
-                                        label="Start Comprehensive Training OCR Test"
-                                        description="Disables normal bot operations and starts the comprehensive training OCR test. Only on the Training screen and tests all 5 trainings for their stat gains and failure chances."
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <CustomCheckbox
-                                        searchId="debug-race-list-detection-test"
-                                        checked={debug.debugMode_startRaceListDetectionTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startRaceListDetectionTest", checked)}
-                                        label="Start Race List Detection Test"
-                                        description="Disables normal bot operations and starts the Race List detection test. Only on the Race List screen and tests detecting the races with double star predictions currently on display."
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <CustomCheckbox
-                                        searchId="debug-main-screen-update-test"
-                                        checked={debug.debugMode_startMainScreenUpdateTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startMainScreenUpdateTest", checked)}
-                                        label="Start Main Screen Update Test"
-                                        description="Disables normal bot operations and starts the Main Screen update test. This test will go through all Main Screen updates and then print the Trainee information."
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <CustomCheckbox
-                                        searchId="debug-skill-list-buy-test"
-                                        checked={debug.debugMode_startSkillListBuyTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startSkillListBuyTest", checked)}
-                                        label="Start Skill List Buy Test"
-                                        description="Processes the list of skills in the Skills screen, reads all skills in the list, logs a summary and then logs another summary of which skills it will buy to bring down the current Skill Points as close to zero as possible and then it will stop there without actually doing the buying."
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <CustomCheckbox
-                                        searchId="debug-scrollbar-detection-test"
-                                        checked={debug.debugMode_startScrollBarDetectionTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startScrollBarDetectionTest", checked)}
-                                        label="Start Scrollbar Detection Test"
-                                        description="Disables normal bot operations and starts the Scrollbar detection test. Detects the scrollbar on the current screen and attempts to scroll it up and down to verify functionality."
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <CustomCheckbox
-                                        searchId="debug-trackblazer-race-selection-test"
-                                        checked={debug.debugMode_startTrackblazerRaceSelectionTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startTrackblazerRaceSelectionTest", checked)}
-                                        label="Start Trackblazer Race Selection Test"
-                                        description="Disables normal bot operations and starts the Trackblazer race selection test. Navigates to the Race List if on the Main Screen and identifies the best race to run, including Rivals."
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <CustomCheckbox
-                                        searchId="debug-trackblazer-inventory-sync-test"
-                                        checked={debug.debugMode_startTrackblazerInventorySyncTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startTrackblazerInventorySyncTest", checked)}
-                                        label="Start Trackblazer Inventory Sync Test"
-                                        description="Disables normal bot operations and starts the Trackblazer inventory sync test. Opens the Training Items dialog if on the Main Screen and logs inventory contents and quick-use intentions."
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <CustomCheckbox
-                                        searchId="debug-trackblazer-buy-items-test"
-                                        checked={debug.debugMode_startTrackblazerBuyItemsTest}
-                                        onCheckedChange={(checked) => handleDebugTestToggle("debugMode_startTrackblazerBuyItemsTest", checked)}
-                                        label="Start Trackblazer Buy Items Test"
-                                        description="Disables normal bot operations and starts the Trackblazer buy items test. Opens the Shop if on the Main Screen and logs shop contents and purchase intentions without actually buying anything."
-                                        style={{ marginTop: 10 }}
-                                    />
                                 </View>
-                            </Section>
+                                {DEBUG_TESTS.map((test, idx) => (
+                                    <View key={test.key}>
+                                        <SearchableItem id={test.searchId} title={test.title} description={test.description}>
+                                            <Row
+                                                title={test.title}
+                                                description={test.description}
+                                                right={<Switch checked={!!debug[test.key]} onCheckedChange={(checked) => handleDebugTestToggle(test.key, checked)} />}
+                                            />
+                                        </SearchableItem>
+                                        {idx < DEBUG_TESTS.length - 1 && <View style={{ height: 1, backgroundColor: colors.borderHair, marginLeft: SPACING.lg }} />}
+                                    </View>
+                                ))}
+                            </View>
                         </View>
                     </View>
                 </ScrollView>
             </SearchPageProvider>
+
+            <SheetModal
+                visible={frameRatePickerOpen}
+                onRequestClose={() => setFrameRatePickerOpen(false)}
+                header={
+                    <View style={modalShellStyles.modalHeaderRow}>
+                        <Text style={modalShellStyles.modalTitleMono}>RECORDING FRAME RATE</Text>
+                        <Pressable style={modalShellStyles.modalCloseChip} onPress={() => setFrameRatePickerOpen(false)} android_ripple={{ color: colors.ripple, foreground: true }} accessibilityLabel="Close">
+                            <Ionicons name="close" size={18} color={colors.text} />
+                        </Pressable>
+                    </View>
+                }
+                footer={null}
+            >
+                <View style={modalShellStyles.modalBodyList}>
+                    {FRAME_RATE_OPTIONS.map((o) => (
+                        <ModalRadioRow
+                            key={o.value}
+                            label={o.label}
+                            selected={o.value === debug.recordingFrameRate}
+                            onPress={() => {
+                                updateDebug({ recordingFrameRate: o.value })
+                                setFrameRatePickerOpen(false)
+                            }}
+                        />
+                    ))}
+                </View>
+            </SheetModal>
         </View>
     )
 }
