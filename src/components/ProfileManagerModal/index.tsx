@@ -147,15 +147,6 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                 renameSave: { borderColor: colors.brand, backgroundColor: colors.brand },
                 renameCancel: { borderColor: colors.borderHair },
                 renameChipText: { ...TYPE.caption, fontWeight: "600" as const },
-                footerBtn: {
-                    paddingVertical: SPACING.sm,
-                    borderRadius: RADII.md,
-                    borderWidth: 1,
-                    borderColor: colors.borderHair,
-                    alignItems: "center",
-                    overflow: "hidden",
-                },
-                footerBtnText: { ...TYPE.body, color: colors.text, fontWeight: "600" as const },
                 deleteBtn: {
                     flex: 1,
                     paddingVertical: SPACING.sm,
@@ -351,15 +342,9 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
         </View>
     )
 
-    const footer = (
-        <Pressable onPress={onClose} style={styles.footerBtn} android_ripple={{ color: colors.ripple, foreground: true }} accessibilityRole="button">
-            <Text style={styles.footerBtnText}>Close</Text>
-        </Pressable>
-    )
-
     return (
         <>
-            <SheetModal visible={visible} onRequestClose={onClose} header={header} footer={footer}>
+            <SheetModal visible={visible} onRequestClose={onClose} header={header} footer={null}>
                 {profiles.length === 0 ? (
                     <View style={styles.emptyState}>
                         <Text style={styles.emptyText}>No profiles yet.</Text>
