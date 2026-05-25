@@ -11,15 +11,15 @@ import { GlassSurface } from "../ui/glass-surface"
 export interface CampaignCardProps {
     /** Active campaign name displayed prominently. */
     campaign: string
-    /** Tap handler that opens the campaign picker. */
-    onSwitch: () => void
+    /** Tap handler that opens the campaign picker. When omitted, the Switch button is hidden (use this when only one scenario is selectable). */
+    onSwitch?: () => void
 }
 
 /**
  * "Currently editing: X" hero card used at the top of Scenario Overrides.
  * @param campaign Active campaign name.
- * @param onSwitch Opens the campaign picker.
- * @returns Glass-backed card with the active campaign label and a Switch button.
+ * @param onSwitch Opens the campaign picker. If omitted, the Switch button is hidden.
+ * @returns Glass-backed card with the active campaign label and (optionally) a Switch button.
  */
 const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onSwitch }) => {
     const { colors } = useTheme()
@@ -54,10 +54,12 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onSwitch }) => {
                     <Text style={styles.lbl}>CURRENTLY EDITING</Text>
                     <Text style={styles.name}>{campaign}</Text>
                 </View>
-                <Pressable onPress={onSwitch} style={styles.btn} accessibilityRole="button" android_ripple={{ color: colors.ripple, foreground: true }}>
-                    <Text style={styles.btnLabel}>Switch</Text>
-                    <Ionicons name="chevron-down" size={14} color={colors.text} />
-                </Pressable>
+                {onSwitch ? (
+                    <Pressable onPress={onSwitch} style={styles.btn} accessibilityRole="button" android_ripple={{ color: colors.ripple, foreground: true }}>
+                        <Text style={styles.btnLabel}>Switch</Text>
+                        <Ionicons name="chevron-down" size={14} color={colors.text} />
+                    </Pressable>
+                ) : null}
             </View>
         </GlassSurface>
     )
