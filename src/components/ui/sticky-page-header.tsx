@@ -24,7 +24,7 @@ export const StickyPageHeader = ({ children, style }: StickyPageHeaderProps) => 
             style={[
                 {
                     backgroundColor: colors.bg,
-                    paddingHorizontal: SPACING.lg,
+                    paddingHorizontal: 0,
                     paddingVertical: SPACING.sm,
                 },
                 style,
