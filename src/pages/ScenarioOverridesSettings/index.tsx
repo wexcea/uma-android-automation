@@ -2,25 +2,32 @@ import { useMemo, useContext, useRef, useState, useCallback, useEffect } from "r
 import { View, Text, ScrollView, StyleSheet, Image, Pressable, InteractionManager } from "react-native"
 import { Divider } from "react-native-paper"
 import { useRoute } from "@react-navigation/native"
-import { useNavigation } from "@react-navigation/native"
+import Ionicons from "@react-native-vector-icons/ionicons"
 import { useTheme } from "../../context/ThemeContext"
-import { ScenarioOverridesContext, BotMetaContext, GeneralMiscContext, Settings } from "../../context/BotStateContext"
+import { ScenarioOverridesContext, BotMetaContext, Settings } from "../../context/BotStateContext"
 import { SearchPageProvider } from "../../context/SearchPageContext"
 import CustomSlider from "../../components/CustomSlider"
-import CustomCheckbox from "../../components/CustomCheckbox"
 import CustomButton from "../../components/CustomButton"
 import PageHeader from "../../components/PageHeader"
 import { Input } from "../../components/ui/input"
+import { Row } from "../../components/ui/row"
+import { Switch } from "../../components/ui/switch"
+import { SheetModal } from "../../components/ui/sheet-modal"
+import { ModalRadioRow } from "../../components/ui/modal-list"
+import { useModalShellStyles } from "../../components/ui/modal-shell-styles"
+import SearchableItem from "../../components/SearchableItem"
 import { CircleCheckBig, Trash2 } from "lucide-react-native"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import trackblazerIcons from "./icons"
-import { Section } from "../../components/ui/section"
 import { SectionLabel } from "../../components/ui/section-label"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../../components/ui/alert-dialog"
 import CampaignCard from "../../components/CampaignCard"
 import { TYPE } from "../../lib/type"
 import { SPACING } from "../../lib/spacing"
 import { RADII } from "../../lib/radii"
+
+/** Scenarios that currently have a dedicated set of overrides on this page. Only these appear in the campaign picker, since picking any other scenario would render nothing. */
+const SCENARIOS_WITH_OVERRIDES = ["Trackblazer"] as const
 
 /**
  * The Scenario Overrides Settings page.
@@ -31,15 +38,17 @@ const ScenarioOverridesSettings = () => {
     const { colors } = useTheme()
     const { scenarioOverrides, updateScenarioOverrides } = useContext(ScenarioOverridesContext)
     const { defaultSettings } = useContext(BotMetaContext)
-    const { general } = useContext(GeneralMiscContext)
     const route = useRoute<any>()
-    const navigation = useNavigation<any>()
     const scrollViewRef = useRef<ScrollView>(null)
+    const modalShellStyles = useModalShellStyles()
 
     const [searchQuery, setSearchQuery] = useState("")
     const [showResetAll, setShowResetAll] = useState(false)
+    const [scenarioPickerOpen, setScenarioPickerOpen] = useState(false)
 
-    const activeCampaign = (general.scenario as string) || "Trackblazer"
+    // Which scenario the page is currently editing overrides for. Independent of the bot's active scenario (`general.scenario`) so switching campaigns here does not change the bot's actual run target.
+    const [editingCampaign, setEditingCampaign] = useState<string>(SCENARIOS_WITH_OVERRIDES[0])
+    const activeCampaign = editingCampaign
 
     // Two-phase mount, mirroring the TrainingSettings deferral pattern from PR #299. Renders the page header on the first paint
     // so navigation feels instant; the heavy accordion body commits one tick later via InteractionManager. When navigating in
@@ -91,10 +100,10 @@ const ScenarioOverridesSettings = () => {
         [scenarioOverrides.trackblazerExcludedItems, updateOverrideSetting]
     )
 
-    /** Navigate to the Home page where the campaign picker lives. */
+    /** Open the inline scenario picker so the user can switch the active campaign without leaving this page. */
     const handleSwitch = useCallback(() => {
-        navigation.navigate("Home" as never)
-    }, [navigation])
+        setScenarioPickerOpen(true)
+    }, [])
 
     /** Reset Racing section sliders to defaults. */
     const resetRacingDefaults = useCallback(() => {
@@ -206,7 +215,7 @@ const ScenarioOverridesSettings = () => {
                 >
                     <View className="m-1">
                         <View style={{ marginBottom: SPACING.lg }}>
-                            <CampaignCard campaign={activeCampaign} onSwitch={handleSwitch} />
+                            <CampaignCard campaign={activeCampaign} onSwitch={SCENARIOS_WITH_OVERRIDES.length > 1 ? handleSwitch : undefined} />
                         </View>
 
                         {showBody && (
@@ -256,7 +265,7 @@ const ScenarioOverridesSettings = () => {
                                             <Text style={{ fontSize: 14, color: colors.text, opacity: 0.7, marginBottom: 12 }}>
                                                 Select which race grades should allow using a Race Retry in the Trackblazer scenario.
                                             </Text>
-                                            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                                            <View style={{ flexDirection: "row", flexWrap: "wrap", marginHorizontal: 20 }}>
                                                 {["G1", "G2", "G3"].map((grade) => {
                                                     const selected = scenarioOverrides.trackblazerRetryRacesBeforeFinalGrades.includes(grade)
                                                     return (
@@ -295,7 +304,7 @@ const ScenarioOverridesSettings = () => {
                                             <Text style={{ fontSize: 14, color: colors.text, opacity: 0.7, marginBottom: 12 }}>
                                                 Select preferred track distances for extra race selection. Matching races will be prioritized. Leave empty for no preference.
                                             </Text>
-                                            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                                            <View style={{ flexDirection: "row", flexWrap: "wrap", marginHorizontal: 20 }}>
                                                 {["Sprint", "Mile", "Medium", "Long"].map((distance) => {
                                                     const selected = scenarioOverrides.trackblazerPreferredDistances.includes(distance)
                                                     return (
@@ -334,7 +343,7 @@ const ScenarioOverridesSettings = () => {
                                             <Text style={{ fontSize: 14, color: colors.text, opacity: 0.7, marginBottom: 12 }}>
                                                 Select preferred track surfaces for extra race selection. Matching races will be prioritized. Leave empty for no preference.
                                             </Text>
-                                            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                                            <View style={{ flexDirection: "row", flexWrap: "wrap", marginHorizontal: 20 }}>
                                                 {["Turf", "Dirt"].map((surface) => {
                                                     const selected = scenarioOverrides.trackblazerPreferredSurfaces.includes(surface)
                                                     return (
@@ -435,41 +444,63 @@ const ScenarioOverridesSettings = () => {
                                         </View>
 
                                         <View style={styles.section}>
-                                            <CustomSlider
-                                                searchId="trackblazer-irregular-training-min-stat-gain"
-                                                value={scenarioOverrides.trackblazerIrregularTrainingMinStatGain}
-                                                placeholder={defaultSettings.scenarioOverrides.trackblazerIrregularTrainingMinStatGain}
-                                                onValueChange={(value) => updateOverrideSetting("trackblazerIrregularTrainingMinStatGain", value)}
-                                                onSlidingComplete={(value) => updateOverrideSetting("trackblazerIrregularTrainingMinStatGain", value)}
-                                                min={20}
-                                                max={100}
-                                                step={5}
-                                                label="Minimum Main Stat Gain for Irregular Training"
-                                                labelUnit=""
-                                                showValue={true}
-                                                showLabels={true}
-                                                description="Sets the minimum main stat gain required to skip racing and perform Irregular Training instead."
-                                            />
-                                        </View>
-
-                                        <View style={styles.section}>
-                                            <CustomCheckbox
-                                                searchId="trackblazer-enable-irregular-training"
-                                                checked={scenarioOverrides.trackblazerEnableIrregularTraining}
-                                                onCheckedChange={(checked) => updateOverrideSetting("trackblazerEnableIrregularTraining", checked)}
-                                                label="Enable Irregular Training"
+                                            <SearchableItem
+                                                id="trackblazer-enable-irregular-training"
+                                                title="Enable Irregular Training"
                                                 description="When enabled, the bot will occasionally check for highly profitable training sessions before opting for extra races."
-                                            />
+                                            >
+                                                <Row
+                                                    title="Enable Irregular Training"
+                                                    description="When enabled, the bot will occasionally check for highly profitable training sessions before opting for extra races."
+                                                    right={
+                                                        <Switch
+                                                            checked={scenarioOverrides.trackblazerEnableIrregularTraining}
+                                                            onCheckedChange={(checked) => updateOverrideSetting("trackblazerEnableIrregularTraining", checked)}
+                                                        />
+                                                    }
+                                                />
+                                            </SearchableItem>
                                         </View>
 
+                                        {scenarioOverrides.trackblazerEnableIrregularTraining && (
+                                            <View style={styles.section}>
+                                                <CustomSlider
+                                                    searchId="trackblazer-irregular-training-min-stat-gain"
+                                                    searchCondition={scenarioOverrides.trackblazerEnableIrregularTraining}
+                                                    parentId="trackblazer-enable-irregular-training"
+                                                    value={scenarioOverrides.trackblazerIrregularTrainingMinStatGain}
+                                                    placeholder={defaultSettings.scenarioOverrides.trackblazerIrregularTrainingMinStatGain}
+                                                    onValueChange={(value) => updateOverrideSetting("trackblazerIrregularTrainingMinStatGain", value)}
+                                                    onSlidingComplete={(value) => updateOverrideSetting("trackblazerIrregularTrainingMinStatGain", value)}
+                                                    min={20}
+                                                    max={100}
+                                                    step={5}
+                                                    label="Minimum Main Stat Gain for Irregular Training"
+                                                    labelUnit=""
+                                                    showValue={true}
+                                                    showLabels={true}
+                                                    description="Sets the minimum main stat gain required to skip racing and perform Irregular Training instead."
+                                                />
+                                            </View>
+                                        )}
+
                                         <View style={styles.section}>
-                                            <CustomCheckbox
-                                                searchId="trackblazer-whistle-forces-training"
-                                                checked={scenarioOverrides.trackblazerWhistleForcesTraining}
-                                                onCheckedChange={(checked) => updateOverrideSetting("trackblazerWhistleForcesTraining", checked)}
-                                                label="Reset Whistle Forces Training"
+                                            <SearchableItem
+                                                id="trackblazer-whistle-forces-training"
+                                                title="Reset Whistle Forces Training"
                                                 description="Whether or not using a Reset Whistle means it can ignore the failure chance thresholds in the Training Settings page. If enabled, the bot will pick the best available training after usage even if it's risky."
-                                            />
+                                            >
+                                                <Row
+                                                    title="Reset Whistle Forces Training"
+                                                    description="When enabled, picks the best available training after using a Reset Whistle even if its failure chance is above the threshold in Training Settings."
+                                                    right={
+                                                        <Switch
+                                                            checked={scenarioOverrides.trackblazerWhistleForcesTraining}
+                                                            onCheckedChange={(checked) => updateOverrideSetting("trackblazerWhistleForcesTraining", checked)}
+                                                        />
+                                                    }
+                                                />
+                                            </SearchableItem>
                                         </View>
                                     </View>
                                 </View>
@@ -501,7 +532,7 @@ const ScenarioOverridesSettings = () => {
                                             <Text style={{ fontSize: 14, color: colors.text, opacity: 0.7, marginBottom: 12 }}>
                                                 Select which race grades should trigger a shop check after the race in the Trackblazer scenario.
                                             </Text>
-                                            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                                            <View style={{ flexDirection: "row", flexWrap: "wrap", marginHorizontal: 20 }}>
                                                 {["G1", "G2", "G3"].map((grade) => {
                                                     const selected = scenarioOverrides.trackblazerShopCheckGrades.includes(grade)
                                                     return (
@@ -784,6 +815,39 @@ const ScenarioOverridesSettings = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <SheetModal
+                visible={scenarioPickerOpen}
+                onRequestClose={() => setScenarioPickerOpen(false)}
+                header={
+                    <View style={modalShellStyles.modalHeaderRow}>
+                        <Text style={modalShellStyles.modalTitleMono}>SWITCH CAMPAIGN</Text>
+                        <Pressable
+                            style={modalShellStyles.modalCloseChip}
+                            onPress={() => setScenarioPickerOpen(false)}
+                            android_ripple={{ color: colors.ripple, foreground: true }}
+                            accessibilityLabel="Close"
+                        >
+                            <Ionicons name="close" size={18} color={colors.text} />
+                        </Pressable>
+                    </View>
+                }
+                footer={null}
+            >
+                <View style={modalShellStyles.modalBodyList}>
+                    {SCENARIOS_WITH_OVERRIDES.map((scenario) => (
+                        <ModalRadioRow
+                            key={scenario}
+                            label={scenario}
+                            selected={scenario === editingCampaign}
+                            onPress={() => {
+                                setEditingCampaign(scenario)
+                                setScenarioPickerOpen(false)
+                            }}
+                        />
+                    ))}
+                </View>
+            </SheetModal>
         </View>
     )
 }
