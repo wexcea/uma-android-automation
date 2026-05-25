@@ -18,6 +18,8 @@ export interface SectionProps {
     defaultOpen?: boolean
     /** When true, skip the outer card (background, border, radius) and the default bottom margin. Used when nesting inside another `Section`. */
     bare?: boolean
+    /** Optional right slot rendered inline with the section label (e.g. a Reset chip). When `collapsible`, this sits before the chevron. */
+    labelRight?: React.ReactNode
     /** Outer container style override. */
     style?: StyleProp<ViewStyle>
 }
@@ -29,7 +31,7 @@ export interface SectionProps {
  * @param props See `SectionProps`.
  * @returns Label + card with children stacked vertically.
  */
-export const Section = ({ label, children, collapsible = false, defaultOpen = true, bare = false, style }: SectionProps) => {
+export const Section = ({ label, children, collapsible = false, defaultOpen = true, bare = false, labelRight, style }: SectionProps) => {
     const { colors } = useTheme()
     const [open, setOpen] = useState(defaultOpen)
     const items = useMemo(() => Children.toArray(children).filter(Boolean), [children])
@@ -40,6 +42,15 @@ export const Section = ({ label, children, collapsible = false, defaultOpen = tr
     }
 
     const chevronIcon = collapsible ? <Ionicons name={open ? "chevron-up" : "chevron-down"} size={16} color={colors.textMuted} /> : null
+    const headerRight =
+        labelRight != null && chevronIcon != null ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: SPACING.sm }}>
+                {labelRight}
+                {chevronIcon}
+            </View>
+        ) : (
+            (labelRight ?? chevronIcon)
+        )
 
     const cardStyle = bare ? undefined : { backgroundColor: colors.surface, borderRadius: RADII.lg, borderWidth: 1, borderColor: colors.borderHair, overflow: "hidden" as const }
 
@@ -47,10 +58,10 @@ export const Section = ({ label, children, collapsible = false, defaultOpen = tr
         <View style={[{ marginTop: SPACING.sm, marginBottom: bare ? 0 : collapsible && !open ? SPACING.xs : SPACING.lg }, style]}>
             {collapsible ? (
                 <Pressable onPress={toggle} android_ripple={{ color: colors.ripple, foreground: false }} hitSlop={6}>
-                    <SectionLabel label={label} right={chevronIcon} />
+                    <SectionLabel label={label} right={headerRight} />
                 </Pressable>
             ) : (
-                <SectionLabel label={label} />
+                <SectionLabel label={label} right={headerRight} />
             )}
             {open ? (
                 <View style={cardStyle}>
