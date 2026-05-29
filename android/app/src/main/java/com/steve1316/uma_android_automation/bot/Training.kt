@@ -280,7 +280,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
      *
      * @property ratioBreakpoints Completion-percent boundaries that bucket each stat into a ratio-multiplier tier. Must have exactly one fewer entry than `ratioValues`. Defaults to [30, 50, 70, 90, 110, 130].
      * @property ratioValues Multipliers paired with `ratioBreakpoints`, indexed by which bucket the stat's completion percent falls into. Index 0 applies when completion < `ratioBreakpoints[0]`; the final entry applies when completion is above every breakpoint.
-     * @property priorityCoefficient Linear coefficient applied to `(activePriority.size - priorityIndex)` to produce the per-stat priority multiplier. Higher values make the user's stat priority list a bigger factor in scoring.
+     * @property priorityCoefficient Linear coefficient applied to `(activePriority.size - priorityIndex)` to produce the per-stat priority multiplier. Default 0.5 makes priority a primary driver: in a 4-stat list, the top stat receives a 3.0x multiplier and the bottom a 1.5x.
      * @property levelBoostRank1Factor Weight applied to the level-boost multiplier when the stat is the top-priority entry. Combines with the OCR-detected training level to amplify the score for high-level priority trainings.
      * @property levelBoostRank2Factor As `levelBoostRank1Factor`, applied to the second-priority stat.
      * @property levelBoostRank3Factor As `levelBoostRank1Factor`, applied to the third-priority stat. Ranks 4+ receive no boost.
@@ -311,7 +311,7 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
     data class TrainingScoringConstants(
         val ratioBreakpoints: List<Double> = listOf(30.0, 50.0, 70.0, 90.0, 110.0, 130.0),
         val ratioValues: List<Double> = listOf(5.0, 4.0, 3.0, 2.0, 1.0, 0.5, 0.3),
-        val priorityCoefficient: Double = 0.1,
+        val priorityCoefficient: Double = 0.5,
         val levelBoostRank1Factor: Double = 0.75,
         val levelBoostRank2Factor: Double = 0.25,
         val levelBoostRank3Factor: Double = 0.10,
@@ -774,21 +774,9 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                         if (bucket == -1) values.last() else values[bucket]
                     }
 
-                    // Priority-based tiebreaker (only applies when completion is similar).
-                    // Find the completion percentage of the highest priority stat for comparison.
-                    val highestPriorityStat: StatName? = activePriority.firstOrNull()
-                    val highestPriorityCompletion =
-                        if (highestPriorityStat != null) {
-                            val hpCurrent = config.currentStats[highestPriorityStat] ?: 0
-                            val hpTarget = config.statTargets[highestPriorityStat] ?: 1
-                            (hpCurrent.toDouble() / hpTarget) * 100.0
-                        } else {
-                            completionPercent
-                        }
-
-                    // Only apply priority bonus if this stat's completion is within 10% of highest priority stat.
+                    // Priority multiplier: stats higher in the user's list get a larger score boost.
                     val priorityMultiplier =
-                        if (priorityIndex != -1 && kotlin.math.abs(completionPercent - highestPriorityCompletion) <= 10.0) {
+                        if (priorityIndex != -1) {
                             1.0 + (config.scoring.priorityCoefficient * (activePriority.size - priorityIndex))
                         } else {
                             1.0

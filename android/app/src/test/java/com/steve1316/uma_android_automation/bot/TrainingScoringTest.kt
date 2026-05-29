@@ -821,6 +821,7 @@ class TrainingScoringTest {
         val preferredDistance: String,
         val date: GameDate,
         val expectedTraining: StatName,
+        val statPrioritization: List<StatName>? = null,
     ) {
         // Override toString() to only show the description in test names.
         override fun toString(): String = description
@@ -921,6 +922,7 @@ class TrainingScoringTest {
                     preferredDistance = "Medium",
                     date = GameDate(year = DateYear.CLASSIC, month = DateMonth.AUGUST, phase = DatePhase.EARLY),
                     expectedTraining = StatName.POWER,
+                    statPrioritization = listOf(StatName.POWER, StatName.STAMINA, StatName.SPEED, StatName.WIT, StatName.GUTS),
                 ),
                 TrainingTestCase(
                     description = "Senior Year Early Jul - Speed with high main stat gain, rainbow bonus and fillable gauges",
@@ -1019,6 +1021,7 @@ class TrainingScoringTest {
             createDefaultConfig(
                 trainingOptions = trainingOptions,
                 currentStats = statsToMap(testCase.currentStats),
+                statPrioritization = testCase.statPrioritization ?: listOf(StatName.SPEED, StatName.STAMINA, StatName.POWER, StatName.WIT, StatName.GUTS),
                 preferredDistance = testCase.preferredDistance,
                 currentDate = testCase.date,
                 scenario = "Unity Cup",
@@ -1360,7 +1363,7 @@ class TrainingScoringTest {
         val c = TrainingScoringConstants()
         assertEquals(listOf(30.0, 50.0, 70.0, 90.0, 110.0, 130.0), c.ratioBreakpoints)
         assertEquals(listOf(5.0, 4.0, 3.0, 2.0, 1.0, 0.5, 0.3), c.ratioValues)
-        assertEquals(0.1, c.priorityCoefficient)
+        assertEquals(0.5, c.priorityCoefficient)
         assertEquals(0.75, c.levelBoostRank1Factor)
         assertEquals(0.25, c.levelBoostRank2Factor)
         assertEquals(0.10, c.levelBoostRank3Factor)
@@ -1459,5 +1462,78 @@ class TrainingScoringTest {
 
         // Default: Guts +22 below 30, no bonus. Custom: threshold 20, bonus fires.
         assertTrue(customScore > defaultScore * 1.9, "Lowering the Guts threshold should activate the 2x main-stat bonus")
+    }
+
+    @Test
+    @DisplayName("Priority multiplier applies regardless of completion gap to top-priority stat")
+    fun testPriorityMultiplierIgnoresCompletionGap() {
+        // Stats configured so Wit is far behind in completion (10%), Speed is far ahead (90%).
+        // Under the old 10% gate, Speed would receive no priority bonus. Under the new design, it must.
+        val currentStats =
+            mapOf(
+                StatName.SPEED to 720,
+                StatName.STAMINA to 0,
+                StatName.POWER to 0,
+                StatName.GUTS to 0,
+                StatName.WIT to 80,
+            )
+        val speedTraining =
+            createDefaultTrainingOption(
+                name = StatName.SPEED,
+                statGains = statGainsToMap(intArrayOf(10, 0, 0, 0, 0)),
+            )
+
+        val config =
+            createDefaultConfig(
+                trainingOptions = listOf(speedTraining),
+                currentStats = currentStats,
+                statPrioritization = listOf(StatName.WIT, StatName.SPEED, StatName.POWER, StatName.STAMINA, StatName.GUTS),
+            )
+
+        val scoreWithPriorityActive = calculateStatEfficiencyScore(config, speedTraining)
+
+        // Compare against a config where Speed is not in the priority list at all.
+        val configNoPriority =
+            config.copy(statPrioritization = listOf(StatName.WIT, StatName.STAMINA, StatName.GUTS, StatName.POWER))
+        val scoreWithoutPriority = calculateStatEfficiencyScore(configNoPriority, speedTraining)
+
+        assertTrue(
+            scoreWithPriorityActive > scoreWithoutPriority,
+            "Speed at index 1 in the priority list must outscore Speed not in the priority list, even when its completion is far above Wit's",
+        )
+    }
+
+    @Test
+    @DisplayName("Priority coefficient 0.5 yields 3.0x for top of a 4-stat list")
+    fun testPriorityCoefficientYieldsExpectedTopMultiplier() {
+        // Plain Wit training, no rainbows, no main-stat bonus, with Wit at the top of a 4-stat list.
+        val witTraining =
+            createDefaultTrainingOption(
+                name = StatName.WIT,
+                statGains = statGainsToMap(intArrayOf(0, 0, 0, 0, 5)),
+            )
+        val witLast =
+            createDefaultTrainingOption(
+                name = StatName.WIT,
+                statGains = statGainsToMap(intArrayOf(0, 0, 0, 0, 5)),
+            )
+
+        val configTop =
+            createDefaultConfig(
+                trainingOptions = listOf(witTraining),
+                statPrioritization = listOf(StatName.WIT, StatName.POWER, StatName.SPEED, StatName.STAMINA),
+            )
+        val configBottom =
+            createDefaultConfig(
+                trainingOptions = listOf(witLast),
+                statPrioritization = listOf(StatName.POWER, StatName.SPEED, StatName.STAMINA, StatName.WIT),
+            )
+
+        val topScore = calculateStatEfficiencyScore(configTop, witTraining)
+        val bottomScore = calculateStatEfficiencyScore(configBottom, witLast)
+
+        // Top: 1.0 + 0.5 * 4 = 3.0. Bottom: 1.0 + 0.5 * 1 = 1.5. Ratio 2.0.
+        val ratio = topScore / bottomScore
+        assertEquals(2.0, ratio, 0.01, "Top-of-list priority should be 2x stronger than bottom-of-list under coefficient 0.5")
     }
 }
