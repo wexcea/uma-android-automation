@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useContext, useRef, useState, useEffect } from "react"
-import { View, Text, ScrollView, StyleSheet, NativeModules, Pressable, AppState, AppStateStatus } from "react-native"
+import { View, Text, ScrollView, StyleSheet, NativeModules, Pressable, AppState, AppStateStatus, ActivityIndicator } from "react-native"
 import Ionicons from "@react-native-vector-icons/ionicons"
 import * as Clipboard from "expo-clipboard"
 import { useTheme } from "../../context/ThemeContext"
@@ -157,6 +157,8 @@ const DebugSettings = () => {
     const [isRefreshingOverlay, setIsRefreshingOverlay] = useState(false)
     const [isRefreshingBattery, setIsRefreshingBattery] = useState(false)
     const [currentWizardStep, setCurrentWizardStep] = useState<number>(0)
+    const [recheckingIndex, setRecheckingIndex] = useState<number | null>(null)
+    const recheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const [frameRatePickerOpen, setFrameRatePickerOpen] = useState(false)
 
     /** Checks with the native module if the Accessibility Service is currently running. */
@@ -353,6 +355,41 @@ const DebugSettings = () => {
 
     const allChecksPassed = wizardSteps.every((s) => s.granted)
     const activeStep = wizardSteps[currentWizardStep]
+
+    // Clear any pending re-check animation timer when the component unmounts so we don't update state on a stale instance.
+    useEffect(() => {
+        return () => {
+            if (recheckTimerRef.current) clearTimeout(recheckTimerRef.current)
+        }
+    }, [])
+
+    /**
+     * Sequentially re-run each system check with a small visual delay so the user sees the progress sweep through the rows.
+     * If any check flips to failing, the parent conditional swaps the doneCard for the wizard view automatically.
+     */
+    const handleRecheckAll = useCallback(() => {
+        if (recheckTimerRef.current) clearTimeout(recheckTimerRef.current)
+        setCurrentWizardStep(0)
+        const steps = wizardSteps
+        if (steps.length === 0) return
+        setRecheckingIndex(0)
+        steps[0].refresh()
+        let i = 1
+        const advance = () => {
+            if (i < steps.length) {
+                setRecheckingIndex(i)
+                steps[i].refresh()
+                i++
+                recheckTimerRef.current = setTimeout(advance, 350)
+            } else {
+                recheckTimerRef.current = setTimeout(() => {
+                    setRecheckingIndex(null)
+                    recheckTimerRef.current = null
+                }, 350)
+            }
+        }
+        recheckTimerRef.current = setTimeout(advance, 350)
+    }, [wizardSteps])
     const currentFrameRateLabel = FRAME_RATE_OPTIONS.find((o) => o.value === debug.recordingFrameRate)?.label ?? "30 FPS"
 
     return (
@@ -566,17 +603,31 @@ const DebugSettings = () => {
                             {allChecksPassed ? (
                                 <View style={styles.doneCard}>
                                     <View style={styles.doneHeader}>
-                                        <Ionicons name="checkmark-circle" size={20} color={colors.brand} />
-                                        <Text style={styles.doneTitle}>All system checks passed</Text>
+                                        {recheckingIndex !== null ? (
+                                            <ActivityIndicator size="small" color={colors.brand} style={{ width: 20, height: 20 }} />
+                                        ) : (
+                                            <Ionicons name="checkmark-circle" size={20} color={colors.brand} />
+                                        )}
+                                        <Text style={styles.doneTitle}>{recheckingIndex !== null ? "Re-checking system checks..." : "All system checks passed"}</Text>
                                     </View>
-                                    {wizardSteps.map((step) => (
+                                    {wizardSteps.map((step, idx) => (
                                         <View key={step.title} style={styles.doneCheckRow}>
-                                            <Ionicons name="checkmark" size={16} color={colors.brand} />
+                                            {recheckingIndex === idx ? (
+                                                <ActivityIndicator size="small" color={colors.brand} style={{ width: 16, height: 16 }} />
+                                            ) : (
+                                                <Ionicons name="checkmark" size={16} color={colors.brand} />
+                                            )}
                                             <Text style={styles.doneCheckLabel}>{step.title}</Text>
                                         </View>
                                     ))}
-                                    <Pressable onPress={() => setCurrentWizardStep(0)} android_ripple={{ color: colors.ripple, foreground: false }} hitSlop={8}>
-                                        <Text style={styles.recheckLink}>Re-check</Text>
+                                    <Pressable
+                                        onPress={handleRecheckAll}
+                                        disabled={recheckingIndex !== null}
+                                        android_ripple={{ color: colors.ripple, foreground: false }}
+                                        hitSlop={8}
+                                        style={{ alignSelf: "flex-start", opacity: recheckingIndex !== null ? 0.5 : 1 }}
+                                    >
+                                        <Text style={styles.recheckLink}>{recheckingIndex !== null ? "Re-checking..." : "Re-check"}</Text>
                                     </Pressable>
                                 </View>
                             ) : (
