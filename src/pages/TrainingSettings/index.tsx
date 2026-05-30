@@ -32,7 +32,7 @@ import Ionicons from "@react-native-vector-icons/ionicons"
 
 /**
  * The Training Settings page.
- * Provides configuration for stat prioritization, blacklists, failure chance thresholds, spark targets, risky training, distance overrides,
+ * Provides configuration for stat prioritization, blacklists, failure chance thresholds, risky training, distance overrides,
  * stat target sliders per distance, and profile management (creation, switching, and overwriting).
  */
 const TrainingSettings = () => {
