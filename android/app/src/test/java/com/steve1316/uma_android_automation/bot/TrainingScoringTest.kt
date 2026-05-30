@@ -1446,8 +1446,9 @@ class TrainingScoringTest {
         val configDefault = createDefaultConfig(trainingOptions = listOf(gutsTraining))
         val customConstants =
             TrainingScoringConstants(
-                mainStatThresholds = mapOf(StatName.GUTS to 20) +
-                    StatName.entries.filter { it != StatName.GUTS }.associateWith { 30 },
+                mainStatThresholds =
+                    mapOf(StatName.GUTS to 20) +
+                        StatName.entries.filter { it != StatName.GUTS }.associateWith { 30 },
             )
         val configCustom =
             configDefault.copy(scoring = customConstants)

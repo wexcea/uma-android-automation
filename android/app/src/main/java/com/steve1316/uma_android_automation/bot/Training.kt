@@ -760,12 +760,13 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
 
                     // Ratio-based multiplier: Stats furthest behind get the highest priority.
                     // Buckets (default constants): <30% -> 5.0 (severely behind), <50% -> 4.0, <70% -> 3.0, <90% -> 2.0, <110% -> 1.0 (at target), <130% -> 0.5, else -> 0.3 (well over).
-                    val ratioMultiplier = run {
-                        val breakpoints = config.scoring.ratioBreakpoints
-                        val values = config.scoring.ratioValues
-                        val bucket = breakpoints.indexOfFirst { completionPercent < it }
-                        if (bucket == -1) values.last() else values[bucket]
-                    }
+                    val ratioMultiplier =
+                        run {
+                            val breakpoints = config.scoring.ratioBreakpoints
+                            val values = config.scoring.ratioValues
+                            val bucket = breakpoints.indexOfFirst { completionPercent < it }
+                            if (bucket == -1) values.last() else values[bucket]
+                        }
 
                     // Priority multiplier: stats higher in the user's list get a larger score boost.
                     val priorityMultiplier =
@@ -2320,8 +2321,9 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                     if (completion < 70.0) {
                         keyFactors.add("${selected.name} stat is at ${String.format("%.0f", completion)}% of target (behind, higher priority).")
                     }
-                    val mainThreshold = config.scoring.mainStatThresholds[selected.name]
-                        ?: error("No mainStatThresholds entry for ${selected.name}")
+                    val mainThreshold =
+                        config.scoring.mainStatThresholds[selected.name]
+                            ?: error("No mainStatThresholds entry for ${selected.name}")
                     if (mainGain >= mainThreshold && selected.numRainbow == 0) {
                         keyFactors.add("High main stat gain of $mainGain (potential undetected rainbow bonus).")
                     }
