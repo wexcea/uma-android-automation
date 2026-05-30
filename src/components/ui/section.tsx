@@ -18,6 +18,10 @@ export interface SectionProps {
     defaultOpen?: boolean
     /** When true, skip the outer card (background, border, radius) and the default bottom margin. Used when nesting inside another `Section`. */
     bare?: boolean
+    /** Controls the first inter-child hairline (between child[0] and child[1]). Set to false to suppress it (e.g. when child[0] is a section description block that should visually fuse with the first row). Default: true. */
+    firstDivider?: boolean
+    /** Controls the last inter-child hairline (between child[N-2] and child[N-1]). Set to false to suppress it. Default: true. */
+    lastDivider?: boolean
     /** Optional right slot rendered inline with the section label (e.g. a Reset chip). When `collapsible`, this sits before the chevron. */
     labelRight?: React.ReactNode
     /** Outer container style override. */
@@ -31,7 +35,7 @@ export interface SectionProps {
  * @param props See `SectionProps`.
  * @returns Label + card with children stacked vertically.
  */
-export const Section = ({ label, children, collapsible = false, defaultOpen = true, bare = false, labelRight, style }: SectionProps) => {
+export const Section = ({ label, children, collapsible = false, defaultOpen = true, bare = false, firstDivider = true, lastDivider = true, labelRight, style }: SectionProps) => {
     const { colors } = useTheme()
     const [open, setOpen] = useState(defaultOpen)
     const items = useMemo(() => Children.toArray(children).filter(Boolean), [children])
@@ -65,12 +69,18 @@ export const Section = ({ label, children, collapsible = false, defaultOpen = tr
             )}
             {open ? (
                 <View style={cardStyle}>
-                    {items.map((child, idx) => (
-                        <View key={idx}>
-                            {child}
-                            {idx < items.length - 1 ? <View style={{ height: 1, backgroundColor: colors.borderHair, marginLeft: SPACING.lg }} /> : null}
-                        </View>
-                    ))}
+                    {items.map((child, idx) => {
+                        const isLastChild = idx === items.length - 1
+                        let showDivider = !isLastChild
+                        if (idx === 0 && !firstDivider) showDivider = false
+                        if (idx === items.length - 2 && !lastDivider) showDivider = false
+                        return (
+                            <View key={idx}>
+                                {child}
+                                {showDivider ? <View style={{ height: 1, backgroundColor: colors.borderHair, marginLeft: SPACING.lg }} /> : null}
+                            </View>
+                        )
+                    })}
                 </View>
             ) : null}
         </View>
