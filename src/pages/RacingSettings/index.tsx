@@ -231,7 +231,7 @@ const RacingSettings = () => {
                             >
                                 <Row
                                     title="Ignore Low Energy Racing Block"
-                                    description="Skip the safety check that prevents racing at <=1% energy after 3+ consecutive races. Useful to avoid the larger -80 penalty from skipping derby races."
+                                    description="When enabled, the Trackblazer bot will not block racing when energy is critically low (<=1%) with 3+ consecutive races."
                                     right={<Switch checked={ignoreLowEnergyRacingBlock} onCheckedChange={(checked) => updateRacingSetting("ignoreLowEnergyRacingBlock", checked)} />}
                                 />
                             </SearchableItem>
@@ -251,7 +251,7 @@ const RacingSettings = () => {
                             >
                                 <Row
                                     title="Allow Daily Free Race Retry"
-                                    description="When enabled, the bot will retry a failed mandatory race only if the daily free retry is still available."
+                                    description="When enabled, the bot will attempt to retry a failed mandatory race only if the daily free race retry is available."
                                     right={<Switch checked={enableFreeRaceRetry} onCheckedChange={(checked) => updateRacingSetting("enableFreeRaceRetry", checked)} />}
                                 />
                             </SearchableItem>
@@ -262,7 +262,7 @@ const RacingSettings = () => {
                             >
                                 <Row
                                     title="Complete Career on Failure"
-                                    description="Proceed to the career completion screen when a mandatory race fails after retries are exhausted, instead of stopping at the Try Again dialog."
+                                    description="When enabled, the bot will proceed to the career completion screen when a mandatory race fails and retries are exhausted."
                                     right={<Switch checked={enableCompleteCareerOnFailure} onCheckedChange={(checked) => updateRacingSetting("enableCompleteCareerOnFailure", checked)} />}
                                 />
                             </SearchableItem>
@@ -273,7 +273,7 @@ const RacingSettings = () => {
                             >
                                 <Row
                                     title="Stop on Mandatory Races"
-                                    description="When enabled, the bot will automatically stop when it encounters a mandatory race, allowing you to handle them manually."
+                                    description="When enabled, the bot will automatically stop when it encounters a mandatory race, allowing you to manually handle them."
                                     right={<Switch checked={enableStopOnMandatoryRaces} onCheckedChange={(checked) => updateRacingSetting("enableStopOnMandatoryRaces", checked)} />}
                                 />
                             </SearchableItem>
@@ -302,7 +302,7 @@ const RacingSettings = () => {
                             >
                                 <Row
                                     title="Per-Distance Strategy"
-                                    description="Set different race strategies per track distance (Short, Mile, Medium, Long) instead of a single strategy for all races."
+                                    description="When enabled, allows setting different race strategies for each track distance."
                                     right={<Switch checked={enablePerDistanceStrategy} onCheckedChange={(checked) => updateRacingSetting("enablePerDistanceStrategy", checked)} />}
                                 />
                             </SearchableItem>
@@ -312,7 +312,7 @@ const RacingSettings = () => {
                                     <SearchableItem id="junior-year-race-strategy" title="Junior Year Race Strategy" description="The race strategy to use for all races during Junior Year.">
                                         <Row
                                             title="Junior Year Strategy"
-                                            description="Strategy used for all races during Junior Year. Auto picks the strategy closest to the front of the pack."
+                                            description="The race strategy to use for all races during Junior Year."
                                             onPress={() => setJuniorPickerOpen(true)}
                                             right={renderStrategyPill(juniorYearRaceStrategy)}
                                         />
@@ -324,7 +324,7 @@ const RacingSettings = () => {
                                     >
                                         <Row
                                             title="Original Strategy"
-                                            description="Strategy used for races in Year 2 and beyond. Default leaves the current in-game strategy alone."
+                                            description="The race strategy to reset to after Junior Year. The bot will use this strategy for races in Year 2 and beyond."
                                             onPress={() => setOriginalPickerOpen(true)}
                                             right={renderStrategyPill(originalRaceStrategy)}
                                         />

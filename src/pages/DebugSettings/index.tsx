@@ -368,7 +368,7 @@ const DebugSettings = () => {
                             <SearchableItem id="enable-debug-mode" title="Enable Debug Mode" description="Allows debugging messages in the log and test images to be created in the /temp/ folder.">
                                 <Row
                                     title="Enable Debug Mode"
-                                    description="Verbose logging and test image capture"
+                                    description="Allows debugging messages in the log and test images to be created in the /temp/ folder."
                                     right={<Switch checked={debug.enableDebugMode} onCheckedChange={(checked) => updateDebug({ enableDebugMode: checked })} />}
                                 />
                             </SearchableItem>

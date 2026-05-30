@@ -492,7 +492,7 @@ const ScenarioOverridesSettings = () => {
                                             >
                                                 <Row
                                                     title="Reset Whistle Forces Training"
-                                                    description="When enabled, picks the best available training after using a Reset Whistle even if its failure chance is above the threshold in Training Settings."
+                                                    description="Whether or not using a Reset Whistle means it can ignore the failure chance thresholds in the Training Settings page. If enabled, the bot will pick the best available training after usage even if it's risky."
                                                     right={
                                                         <Switch
                                                             checked={scenarioOverrides.trackblazerWhistleForcesTraining}

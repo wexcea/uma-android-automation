@@ -19,19 +19,19 @@ const searchConfig: SearchOption[] = [
     {
         id: "settings-stop-before-finals",
         title: "Stop before Finals",
-        description: "Stops the bot on turn 72 so you can purchase skills before the final races.",
+        description: "Pause to buy skills before the final races",
         page: "SettingsMain",
     },
     {
         id: "settings-crane-game-attempt",
         title: "Enable Crane Game Attempt",
-        description: "When enabled, the bot will attempt to complete the crane game. By default, the bot will stop when it is detected.",
+        description: "Attempt to complete the crane game instead of stopping",
         page: "SettingsMain",
     },
     {
         id: "settings-enable-settings-display",
         title: "Enable Settings Display in Message Log",
-        description: "Shows current bot configuration settings at the top of the message log.",
+        description: "Show current bot configuration in the message log",
         page: "SettingsMain",
     },
     {
@@ -43,7 +43,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "settings-wait-delay",
         title: "Wait Delay",
-        description: "Sets the delay between actions and imaging operations. Lowering this will make the bot run much faster.",
+        description: "Sets the delay between actions and imaging operations. Lowering this will make the bot run much faster at the risk of the bot losing track of its location after loading/connecting screens.",
         page: "SettingsMain",
     },
     {
@@ -91,7 +91,7 @@ const searchConfig: SearchOption[] = [
         id: "summer-training-stat-priority",
         title: "Summer Training Prioritization",
         description:
-            "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer with no facility progression, so a different ordering than regular training may be optimal.",
+            "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer, so a different ordering than regular training may be optimal.",
         page: "TrainingSettings",
     },
     {
@@ -149,13 +149,13 @@ const searchConfig: SearchOption[] = [
         id: "enable-training-level-weighting",
         title: "Weight Score by Training Level",
         description:
-            "When enabled (Year 2+), the bot reads each training's level (1-5) via OCR and boosts the score for trainings whose stat sits in the top 3 of your Stat Prioritization list. Helps the bot stick with stats you have invested in. OCR is skipped during Pre-Debut, Junior, and Summer.",
+            "When enabled (Year 2+), the bot reads each training's level (1-5) via OCR and boosts the score for trainings whose stat sits in the top 3 of your Stat Prioritization list. Helps the bot stick with stats you've invested in. OCR is skipped during Pre-Debut, Junior, and Summer.",
         page: "TrainingSettings",
     },
     {
         id: "must-rest-before-summer",
         title: "Must Rest before Summer",
-        description: "Forces the bot to rest during June Late Phase in Classic and Senior Years to ensure enough energy for Summer Training in July.",
+        description: "Optimizes June Late Phase in Classic and Senior Years for Summer Training. If Energy < 70%, it will Rest. If Energy >= 70% and Mood < Great, it will recover Mood. If Energy >= 70% and Mood is Great, it will train Wit.",
         page: "TrainingSettings",
     },
     {
@@ -175,7 +175,7 @@ const searchConfig: SearchOption[] = [
         id: "enable-prioritize-near-max-friendship",
         title: "Prioritize Near-Max Friendship Bars",
         description:
-            "When enabled (Year 2+), trainings with multiple green/blue friendship bars close to maxing receive an anticipatory rainbow multiplier (up to 1.6x), helping the bot favor them so the bars cross into orange and unlock real rainbow training on later turns. Does not stack with the actual rainbow bonus.",
+            "When enabled (Year 2+), trainings with multiple green/blue friendship bars close to maxing receive an anticipatory rainbow multiplier, helping the bot favor them so the bars cross into orange and unlock rainbow training on later turns. Does not stack with the actual rainbow bonus.",
         page: "TrainingSettings",
     },
     {
@@ -188,41 +188,39 @@ const searchConfig: SearchOption[] = [
     {
         id: "preferred-distance-override",
         title: "Preferred Distance Override",
-        description: "Set the preferred race distance for training targets.",
+        description: "Set the preferred race distance for training targets. Auto picks based on character aptitudes.",
         page: "TrainingSettings",
     },
     {
         id: "disable-stat-targets",
         title: "Disable Stat Targets",
         description:
-            "When enabled, all per-distance stat targets are ignored. Every stat is treated as having a target equal to the in-game stat cap (1200), so the bot keeps pushing your top priority stats even after they would normally be considered done. Useful when you want strict adherence to your Stat Prioritization list.",
+            "When enabled, all per-distance stat targets below are ignored. Every stat is treated as having a target equal to the in-game stat cap (1200), so the bot will keep pushing your top priority stats even after they would normally be considered 'done.' Useful when you want strict adherence to your Stat Prioritization list.",
         page: "TrainingSettings",
     },
     {
         id: "stat-targets-by-distance",
         title: "Stat Targets by Distance",
-        description:
-            "Set target values for each stat based on race distance. These stat targets are derived from past Champion Meetings. The bot will prioritize training stats that are below these targets.",
+        description: "Set target values for each stat based on race distance.",
         page: "TrainingSettings",
     },
     {
         id: "training-year-milestone-targets",
         title: "Training Year Milestone Targets",
-        description:
-            "Controls how aggressively the bot paces stat training across the three in-game years. The bot will target a scaled percentage of your stat targets during Junior and Classic Year, ramping up to the full target by Senior Year.",
+        description: "Controls how aggressively the bot paces stat training during the Pre-Debut, Junior and Classic Years.",
         page: "TrainingSettings",
     },
     {
         id: "classic-milestone-percent",
         title: "End of Junior Year Milestone",
-        description: "Percentage of the primary stat targets to aim for by the end of Junior Year. Default: 33%.",
+        description: "Percentage of the primary stat targets to aim for by the end of Junior Year.",
         page: "TrainingSettings",
         parentId: "training-year-milestone-targets",
     },
     {
         id: "senior-milestone-percent",
         title: "End of Classic Year Milestone",
-        description: "Percentage of the primary stat targets to aim for by the end of Classic Year. Default: 66%.",
+        description: "Percentage of the primary stat targets to aim for by the end of Classic Year.",
         page: "TrainingSettings",
         parentId: "training-year-milestone-targets",
     },
@@ -258,14 +256,14 @@ const searchConfig: SearchOption[] = [
     {
         id: "automatic-ocr-retry-training",
         title: "Enable Automatic OCR Retry for Training Events",
-        description: "When enabled, the bot will automatically retry OCR detection if the initial attempt for a training event title fails or has low confidence.",
+        description: "When enabled, the bot will automatically retry OCR detection with adjusted settings if the initial attempt for a training event title fails or has low confidence.",
         page: "TrainingEventSettings",
         parentId: "ocr-recognition-settings-title",
     },
     {
         id: "ocr-confidence-training",
         title: "OCR Confidence for Training Events",
-        description: "The minimum confidence level required for a Training Event title to be considered a match.",
+        description: "The minimum confidence level required for a Training Event title to be considered a match. Higher values ensure more accurate recognition but may lead to more missed events.",
         page: "TrainingEventSettings",
         parentId: "ocr-recognition-settings-title",
     },
@@ -284,7 +282,7 @@ const searchConfig: SearchOption[] = [
         id: "ocr-threshold",
         title: "OCR Threshold",
         description:
-            "Adjust the threshold for OCR text detection. Higher values make text detection more strict, lower values make it more lenient. Note: This setting does not affect high-precision features like Stat Detection or Training Failure Chance detection.",
+            "The brightness threshold used to distinguish text from the background during OCR. Note: This setting does not affect high-precision features like Stat Detection or Training Failure Chance detection, as they use specialized processing.",
         page: "DebugSettings",
     },
 
@@ -300,7 +298,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "days-to-run-extra-races",
         title: "Days to Run Extra Races",
-        description: "Controls when extra races can be run using modulo arithmetic.",
+        description: "Extra races are eligible only on days where current day % value == 0. For example, 5 means days 5, 10, 15, etc. Has no effect when Smart Race Solver is enabled.",
         page: "RacingSettings",
     },
     {
@@ -312,7 +310,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "ignore-low-energy-racing-block",
         title: "Ignore Low Energy Racing Block",
-        description: "When enabled, the Trackblazer bot will not block racing when energy is critically low with consecutive races.",
+        description: "When enabled, the Trackblazer bot will not block racing when energy is critically low (<=1%) with 3+ consecutive races.",
         page: "RacingSettings",
     },
     {
@@ -331,8 +329,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "enable-complete-career-on-failure",
         title: "Complete Career on Failure",
-        description:
-            "When enabled, the bot will proceed to the career completion screen when a mandatory race is failed and it has run out of retries (or if retries are disabled). This is as opposed to the bot stopping at the Try Again dialog.",
+        description: "When enabled, the bot will proceed to the career completion screen when a mandatory race fails and retries are exhausted.",
         page: "RacingSettings",
     },
     {
@@ -356,7 +353,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "enable-per-distance-strategy",
         title: "Per-Distance Strategy",
-        description: "When enabled, allows setting different race strategies for each track distance instead of a single strategy for all races.",
+        description: "When enabled, allows setting different race strategies for each track distance.",
         page: "RacingSettings",
     },
     {
@@ -423,7 +420,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "user-in-game-race-agenda",
         title: "Select User In-Game Race Agenda",
-        description: "The in-game race agenda to use when 'Enable User In-Game Race Agenda' is enabled.",
+        description: "The in-game race agenda the bot loads when the toggle above is enabled.",
         page: "RacingSettings",
         parentId: "enable-user-in-game-race-agenda",
     },
@@ -477,15 +474,14 @@ const searchConfig: SearchOption[] = [
     {
         id: "smart-solver-aptitudes",
         title: "Aptitudes",
-        description: "Distance and surface aptitude grades. Races below the threshold are excluded from the candidate pool.",
+        description: "Distance and surface aptitude grades. Races below the threshold are skipped by the solver.",
         page: "SmartRaceSolverSettings",
         parentId: "enable-smart-race-solver",
     },
     {
         id: "smart-solver-aptitude-threshold",
         title: "Aptitude Threshold",
-        description:
-            "Minimum aptitude (distance AND surface) required for a race to be eligible. Includes toggles to allow OP / Pre-OP races (off by default; useful for weak characters like Haru Urara) and to allow racing during the Classic / Senior summer training camps (off by default).",
+        description: "Minimum aptitude (distance AND surface) required for a race to be eligible.",
         page: "SmartRaceSolverSettings",
         parentId: "enable-smart-race-solver",
     },
@@ -500,36 +496,35 @@ const searchConfig: SearchOption[] = [
         id: "smart-solver-forced-epithets",
         title: "Forced Epithets",
         description:
-            "Epithets the solver MUST complete. If completion becomes impossible (for example a needed race was already lost), the solver stops planning. Use sparingly — each forced epithet narrows what the solver can pick.",
+            "Epithets the solver MUST complete. If completion becomes impossible (for example a needed race was already lost), the solver stops planning. Use sparingly - each forced epithet narrows what the solver can pick.",
         page: "SmartRaceSolverSettings",
         parentId: "enable-smart-race-solver",
     },
     {
         id: "smart-solver-optimize-mode",
         title: "Optimization Mode",
-        description:
-            "Pick whether the Smart Race Solver chases stat epitaphs only or also emphasizes fan-heavy races (G1s, big G3s) alongside epitaphs. Switching modes snaps the editable weight sliders to a fresh preset; you can still tune each slider afterward.",
+        description: "Pick whether the solver chases stat epitaphs or also emphasizes fan-heavy races.",
         page: "SmartRaceSolverSettings",
         parentId: "enable-smart-race-solver",
     },
     {
         id: "smart-solver-weights",
         title: "Scoring Weights",
-        description: "Advanced multipliers for how the solver balances race rewards, epithet completion, fan rewards, and penalties for racing too often or in summer.",
+        description: "Tune how the solver balances race value, epithet completion, fan rewards, and penalties.",
         page: "SmartRaceSolverSettings",
         parentId: "enable-smart-race-solver",
     },
     {
         id: "smart-solver-calendar-preview",
         title: "Schedule Preview",
-        description: "Solver's 72-turn schedule rendered as 3 year-cards. Tap any cell to lock it, delete its pick, or switch to an alternative race. Tap Recalculate to apply changes.",
+        description: "Solver's initial schedule across the 72-turn career, computed from the current configuration. Does not account for in-run wins or losses.",
         page: "SmartRaceSolverSettings",
         parentId: "enable-smart-race-solver",
     },
     {
         id: "smart-solver-epithet-rewards",
         title: "Epithet Rewards",
-        description: "Lists each selected and projected epithet alongside its reward (stat bonus or skill hint).",
+        description: "Rewards for each selected and projected epithet.",
         page: "SmartRaceSolverSettings",
         parentId: "enable-smart-race-solver",
     },
@@ -547,8 +542,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "enable-skill-point-check",
         title: "Enable Skill Point Check",
-        description:
-            "Enables check for a certain skill point threshold. When the threshold is reached, the bot is stopped. This can be changed to allow the selected Skill Plan to spend those points instead of stopping the bot.",
+        description: "Stop the bot when the skill point threshold is reached",
         page: "Skills",
     },
     {
@@ -561,7 +555,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "skill-point-check-plan",
         title: "Enable Skill Plan Upon Meeting Threshold",
-        description: "Instead of stopping the bot, this will run the Skill Plan to spend the skill points when the threshold is met.",
+        description: "Purchase skills based on this plan's configuration",
         page: "Skills",
         parentId: "enable-skill-point-check",
     },
@@ -584,34 +578,34 @@ const searchConfig: SearchOption[] = [
     {
         id: "enable-skill-plan-skillPointCheck",
         title: "Enable Skill Point Check Plan (Beta)",
-        description: "When enabled, the bot will attempt to purchase skills based on the following configuration.",
+        description: "Purchase skills based on this plan's configuration",
         page: "Skills",
     },
     {
         id: "enable-buy-negative-skills-SkillPlanSettingsSkillPointCheck",
         title: "Purchase All Negative Skills",
-        description: "When enabled, the bot will attempt to purchase all negative skills (i.e. Firm Conditions ×).",
+        description: "Attempt to buy all negative skills (e.g. Firm Conditions x)",
         page: "Skills",
         parentId: "enable-skill-plan-skillPointCheck",
     },
     {
         id: "exclude-green-skills-SkillPlanSettingsSkillPointCheck",
         title: "Skip All Green Skills",
-        description: "When enabled, no green (stat-trigger) skills will be purchased by this plan.",
+        description: "Exclude green stat-trigger skills",
         page: "Skills",
         parentId: "enable-skill-plan-skillPointCheck",
     },
     {
         id: "exclude-red-skills-SkillPlanSettingsSkillPointCheck",
         title: "Skip All Red Skills (Debuffs)",
-        description: "When enabled, no red skills (debuffs like Intimidate, Speed Eater, Tether, Intense Gaze) will be purchased by this plan.",
+        description: "Exclude red debuff skills",
         page: "Skills",
         parentId: "enable-skill-plan-skillPointCheck",
     },
     {
         id: "exclude-unique-skills-SkillPlanSettingsSkillPointCheck",
         title: "Skip All Unique Skills",
-        description: "When enabled, no inherited unique (legacy) skills will be purchased by this plan, even if they appear in the planned skills list.",
+        description: "Exclude inherited unique (legacy) skills",
         page: "Skills",
         parentId: "enable-skill-plan-skillPointCheck",
     },
@@ -622,34 +616,34 @@ const searchConfig: SearchOption[] = [
     {
         id: "enable-skill-plan-preFinals",
         title: "Enable Pre-Finals Plan (Beta)",
-        description: "When enabled, the bot will attempt to purchase skills based on the following configuration.",
+        description: "Purchase skills based on this plan's configuration",
         page: "Skills",
     },
     {
         id: "enable-buy-negative-skills-SkillPlanSettingsPreFinals",
         title: "Purchase All Negative Skills",
-        description: "When enabled, the bot will attempt to purchase all negative skills (i.e. Firm Conditions ×).",
+        description: "Attempt to buy all negative skills (e.g. Firm Conditions x)",
         page: "Skills",
         parentId: "enable-skill-plan-preFinals",
     },
     {
         id: "exclude-green-skills-SkillPlanSettingsPreFinals",
         title: "Skip All Green Skills",
-        description: "When enabled, no green (stat-trigger) skills will be purchased by this plan.",
+        description: "Exclude green stat-trigger skills",
         page: "Skills",
         parentId: "enable-skill-plan-preFinals",
     },
     {
         id: "exclude-red-skills-SkillPlanSettingsPreFinals",
         title: "Skip All Red Skills (Debuffs)",
-        description: "When enabled, no red skills (debuffs like Intimidate, Speed Eater, Tether, Intense Gaze) will be purchased by this plan.",
+        description: "Exclude red debuff skills",
         page: "Skills",
         parentId: "enable-skill-plan-preFinals",
     },
     {
         id: "exclude-unique-skills-SkillPlanSettingsPreFinals",
         title: "Skip All Unique Skills",
-        description: "When enabled, no inherited unique (legacy) skills will be purchased by this plan, even if they appear in the planned skills list.",
+        description: "Exclude inherited unique (legacy) skills",
         page: "Skills",
         parentId: "enable-skill-plan-preFinals",
     },
@@ -660,34 +654,34 @@ const searchConfig: SearchOption[] = [
     {
         id: "enable-skill-plan-careerComplete",
         title: "Enable Career Complete Plan (Beta)",
-        description: "When enabled, the bot will attempt to purchase skills based on the following configuration.",
+        description: "Purchase skills based on this plan's configuration",
         page: "Skills",
     },
     {
         id: "enable-buy-negative-skills-SkillPlanSettingsCareerComplete",
         title: "Purchase All Negative Skills",
-        description: "When enabled, the bot will attempt to purchase all negative skills (i.e. Firm Conditions ×).",
+        description: "Attempt to buy all negative skills (e.g. Firm Conditions x)",
         page: "Skills",
         parentId: "enable-skill-plan-careerComplete",
     },
     {
         id: "exclude-green-skills-SkillPlanSettingsCareerComplete",
         title: "Skip All Green Skills",
-        description: "When enabled, no green (stat-trigger) skills will be purchased by this plan.",
+        description: "Exclude green stat-trigger skills",
         page: "Skills",
         parentId: "enable-skill-plan-careerComplete",
     },
     {
         id: "exclude-red-skills-SkillPlanSettingsCareerComplete",
         title: "Skip All Red Skills (Debuffs)",
-        description: "When enabled, no red skills (debuffs like Intimidate, Speed Eater, Tether, Intense Gaze) will be purchased by this plan.",
+        description: "Exclude red debuff skills",
         page: "Skills",
         parentId: "enable-skill-plan-careerComplete",
     },
     {
         id: "exclude-unique-skills-SkillPlanSettingsCareerComplete",
         title: "Skip All Unique Skills",
-        description: "When enabled, no inherited unique (legacy) skills will be purchased by this plan, even if they appear in the planned skills list.",
+        description: "Exclude inherited unique (legacy) skills",
         page: "Skills",
         parentId: "enable-skill-plan-careerComplete",
     },
@@ -698,13 +692,13 @@ const searchConfig: SearchOption[] = [
     {
         id: "trackblazer-consecutive-races-limit",
         title: "Trackblazer Consecutive Races Limit",
-        description: "Sets the maximum number of consecutive races the bot is allowed to run in the Trackblazer scenario before stopping.",
+        description: "Sets the maximum number of consecutive races the bot is allowed to run in the Trackblazer scenario before stopping. Note that a -30 stat penalty can apply starting from 3 consecutive races.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-energy-threshold",
         title: "Trackblazer Energy Threshold",
-        description: "Sets the energy threshold below which the bot will use energy recovery items in the Trackblazer scenario.",
+        description: "The energy level below which the bot will attempt to use energy-restoring items in the Trackblazer scenario.",
         page: "ScenarioOverridesSettings",
     },
     {
@@ -717,20 +711,20 @@ const searchConfig: SearchOption[] = [
         id: "trackblazer-skip-risky-charm-training-below-gain",
         title: "Trackblazer Skip Risky Charm Training Below Stat Gain",
         description:
-            "When a Good-Luck Charm is available to override a risky training's failure chance, skip that training anyway if its main stat gain is below this value. Prevents committing the Charm to low-value risky picks in the Trackblazer scenario.",
+            "When a Good-Luck Charm is available to override a risky training's failure chance, skip that training anyway if its main stat gain is below this value. Prevents committing the Charm to low-value risky picks.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-skip-bad-mood-items-below-gain",
         title: "Trackblazer Skip Items During Bad Mood Below Stat Gain",
         description:
-            "When mood is BAD or AWFUL, refuse to use Reset Whistle, Good-Luck Charm, or Megaphone if the selected training's main stat gain is below this floor. Prevents wasting items on structurally low-return turns where the mood multiplier caps the stat gains.",
+            "When mood is BAD or AWFUL, refuse to use Reset Whistle / Good-Luck Charm / Megaphone if the selected training's main stat gain is below this floor. Prevents wasting items on structurally low-return turns where the mood multiplier caps the stat gains.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-max-retries-per-race",
         title: "Trackblazer Max Retries per Race",
-        description: "Sets the maximum number of retries allowed for a single race in the Trackblazer scenario.",
+        description: "The maximum number of times the bot will attempt to retry a failed race in the Trackblazer scenario.",
         page: "ScenarioOverridesSettings",
     },
     {
@@ -749,7 +743,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "trackblazer-enable-irregular-training",
         title: "Trackblazer Enable Irregular Training",
-        description: "When enabled, the bot will check for highly profitable training sessions before opting for extra races.",
+        description: "When enabled, the bot will occasionally check for highly profitable training sessions before opting for extra races.",
         page: "ScenarioOverridesSettings",
     },
     {
@@ -785,50 +779,43 @@ const searchConfig: SearchOption[] = [
     {
         id: "trackblazer-energy-item-reserve",
         title: "Trackblazer Energy Item Emergency Reserve",
-        description:
-            "Number of energy items (lowest-tier first) the Trackblazer bot keeps reserved for emergency race recovery when energy hits 1% or below with 3+ consecutive races. Set to 0 to disable the reserve and use energy items freely.",
+        description: "Number of energy items (lowest-tier first) to keep reserved for emergency race recovery when energy hits 1% or below with 3+ consecutive races.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-cupcake-reserve",
         title: "Trackblazer Cupcake Reserve for Kale Juice Synergy",
-        description:
-            "Number of cupcakes (Plain preferred) the Trackblazer bot keeps so the mood penalty from Royal Kale Juice can be offset. Set to 0 to disable the reserve and use cupcakes freely for mood.",
+        description: "Number of cupcakes (Plain preferred) to keep so the mood penalty from Royal Kale Juice can be offset.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-master-hammer-finale-reserve",
         title: "Trackblazer Master Cleat Hammer Finale Reserve",
-        description:
-            "Master Cleat Hammers the Trackblazer bot holds back for the Finale days (73-75). Pre-finale days only spend the surplus above this reserve, and only on G1/G2 races. Set to 0 to disable the reserve.",
+        description: "Master Cleat Hammers held back for the Finale days (73-75). Pre-finale days only spend the surplus above this reserve, and only on G1/G2 races.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-artisan-hammer-min-stock-for-g3",
         title: "Trackblazer Artisan Hammer Min Stock for G3",
-        description:
-            "Minimum Artisan Cleat Hammer inventory before the Trackblazer bot is allowed to spend one on a G3 race. Set to 0 to always allow G3 use (as long as stock is positive).",
+        description: "Minimum Artisan Cleat Hammer inventory before the bot is allowed to spend one on a G3 race.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-artisan-hammer-min-stock-for-g2",
         title: "Trackblazer Artisan Hammer Min Stock for G2",
-        description:
-            "Minimum Artisan Cleat Hammer inventory before the Trackblazer bot is allowed to spend one on a G2 race. G1 is always allowed. Set to 0 to always allow G2 use (as long as stock is positive).",
+        description: "Minimum Artisan Cleat Hammer inventory before the bot is allowed to spend one on a G2 race. G1 is always allowed.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-glow-stick-final-reserve",
         title: "Trackblazer Glow Stick Final-Day Reserve",
-        description:
-            "Glow Sticks the Trackblazer bot holds back for Day 75 (the Final). Pre-final-day races only spend sticks above this reserve. Set to 0 to disable the reserve.",
+        description: "Glow Sticks held back for Day 75 (the Final). Pre-final-day races only spend sticks above this reserve.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-glow-stick-min-fans",
         title: "Trackblazer Glow Stick Minimum Fans",
-        description:
-            "Minimum projected fan gain on a race before the Trackblazer bot uses a Glow Stick on it. Applies on standard and finale days. Set to 0 to use Glow Sticks on any race.",
+        description: "Minimum projected fan gain on a race before the bot uses a Glow Stick on it. Applies on standard and finale days.",
         page: "ScenarioOverridesSettings",
     },
 
@@ -838,7 +825,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "enableDiscordNotifications",
         title: "Enable Discord Notifications",
-        description: "When enabled, the Discord bot will send a DM notification when it stops, including the run status and any error messages.",
+        description: "DM run results when the bot stops",
         page: "DiscordSettings",
     },
     {
@@ -1003,7 +990,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "llm-enable-ask-the-docs",
         title: "Enable Ask the Docs feature",
-        description: "Show the Ask the Docs page in the navigation drawer. Off by default; toggling on reveals the chatbot entry without affecting model downloads or retrieve-only search.",
+        description: "Show the Ask the Docs page in the navigation drawer and reveal the rest of these LLM options. Off by default.",
         page: "LLMSettings",
     },
     {

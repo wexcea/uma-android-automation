@@ -142,7 +142,7 @@ const StyleSection: React.FC = () => {
                 >
                     <Row
                         title="Running Style"
-                        description="Filter considered skills based on the preferred running style."
+                        description="Dictates which skills are considered for purchase based on the preferred running style."
                         onPress={() => setOpenPicker("running")}
                         right={chipFor(runningChip)}
                     />
@@ -154,7 +154,7 @@ const StyleSection: React.FC = () => {
                 >
                     <Row
                         title="Track Distance"
-                        description="Filter considered skills based on the track distance."
+                        description="Dictates which skills are considered for purchase based on the track distance."
                         onPress={() => setOpenPicker("distance")}
                         right={chipFor(distanceChip)}
                     />
@@ -166,7 +166,7 @@ const StyleSection: React.FC = () => {
                 >
                     <Row
                         title="Track Surface"
-                        description="Filter considered skills based on the terrain."
+                        description="Dictates which skills are considered for purchase based on the terrain."
                         onPress={() => setOpenPicker("surface")}
                         right={chipFor(surfaceChip)}
                     />

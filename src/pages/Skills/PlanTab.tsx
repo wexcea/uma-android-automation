@@ -273,21 +273,21 @@ const PlanTab: React.FC<PlanTabProps> = ({ planKey }) => {
                 <SearchableItem id={`exclude-green-skills-${config.name}`} title="Skip All Green Skills" description="Exclude green stat-trigger skills">
                     <Row
                         title="Skip Green Skills"
-                        description="Exclude green stat-trigger skills from consideration."
+                        description="Exclude green stat-trigger skills"
                         right={<Switch checked={excludeGreenSkills} onCheckedChange={(checked) => updatePlanSetting("excludeGreenSkills", checked)} />}
                     />
                 </SearchableItem>
                 <SearchableItem id={`exclude-red-skills-${config.name}`} title="Skip All Red Skills (Debuffs)" description="Exclude red debuff skills">
                     <Row
                         title="Skip Red Skills"
-                        description="Exclude red debuff skills from consideration."
+                        description="Exclude red debuff skills"
                         right={<Switch checked={excludeRedSkills} onCheckedChange={(checked) => updatePlanSetting("excludeRedSkills", checked)} />}
                     />
                 </SearchableItem>
                 <SearchableItem id={`exclude-unique-skills-${config.name}`} title="Skip All Unique Skills" description="Exclude inherited unique (legacy) skills">
                     <Row
                         title="Skip Unique Skills"
-                        description="Exclude inherited unique (legacy) skills from consideration."
+                        description="Exclude inherited unique (legacy) skills"
                         right={<Switch checked={excludeUniqueSkills} onCheckedChange={(checked) => updatePlanSetting("excludeUniqueSkills", checked)} />}
                     />
                 </SearchableItem>
@@ -362,7 +362,7 @@ const PlanTab: React.FC<PlanTabProps> = ({ planKey }) => {
                 <SearchableItem id={`show-selected-skills-${config.name}`} title="Show Only Selected Skills" description="Filter the list to only currently-selected skills">
                     <Row
                         title="Show Only Selected Skills"
-                        description="Filter the list to display only the skills already in the current Plan or Blacklist."
+                        description="Filter the list to only currently-selected skills"
                         right={
                             <Switch
                                 checked={activeIds.length === 0 ? false : showSelected}

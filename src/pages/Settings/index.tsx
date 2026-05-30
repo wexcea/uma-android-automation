@@ -221,7 +221,7 @@ const Settings = () => {
                     <SearchableItem id="settings-stop-before-finals" title="Stop before Finals" description="Pause to buy skills before the final races">
                         <Row
                             title="Stop before Finals"
-                            description="Pause to buy skills before the final races."
+                            description="Pause to buy skills before the final races"
                             right={<Switch checked={general.enableStopBeforeFinals} onCheckedChange={(checked) => updateGeneral({ enableStopBeforeFinals: checked })} />}
                         />
                     </SearchableItem>
@@ -229,7 +229,7 @@ const Settings = () => {
                     <SearchableItem id="settings-stop-at-date" title="Stop at Date" description="Stop on one or more specified dates">
                         <Row
                             title="Stop at Date"
-                            description="Stop the bot on one or more specified dates. The bot stops at the earliest matching date it reaches."
+                            description="Stop on one or more specified dates"
                             right={<Switch checked={general.enableStopAtDate} onCheckedChange={(checked) => updateGeneral({ enableStopAtDate: checked })} />}
                         />
                     </SearchableItem>
@@ -237,7 +237,7 @@ const Settings = () => {
                     <SearchableItem id="settings-crane-game-attempt" title="Enable Crane Game Attempt" description="Attempt to complete the crane game instead of stopping">
                         <Row
                             title="Enable Crane Game Attempt"
-                            description="When enabled, the bot attempts to complete the crane game. By default, the bot stops when it is detected."
+                            description="Attempt to complete the crane game instead of stopping"
                             right={<Switch checked={general.enableCraneGameAttempt} onCheckedChange={(checked) => updateGeneral({ enableCraneGameAttempt: checked })} />}
                         />
                     </SearchableItem>
@@ -245,7 +245,7 @@ const Settings = () => {
                     <SearchableItem id="settings-enable-settings-display" title="Enable Settings Display in Message Log" description="Show current bot configuration in the message log">
                         <Row
                             title="Enable Settings Display in Message Log"
-                            description="Shows current bot configuration settings at the top of the message log."
+                            description="Show current bot configuration in the message log"
                             right={<Switch checked={misc.enableSettingsDisplay} onCheckedChange={(checked) => updateMisc({ enableSettingsDisplay: checked })} />}
                         />
                     </SearchableItem>

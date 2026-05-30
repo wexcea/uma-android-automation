@@ -1158,7 +1158,7 @@ const SmartRaceSolverSettings = () => {
                         >
                             <Row
                                 title="Smart Race Solver"
-                                description="Let the solver pick races automatically"
+                                description="Plans every turn of the career to maximize score by targeting epithet rewards. The bot only races when the solver picks a race; other turns become training or rest."
                                 right={<Switch checked={enableSmartRaceSolver} onCheckedChange={(checked) => updateRacingSetting("enableSmartRaceSolver", checked)} />}
                             />
                         </SearchableItem>
@@ -1274,7 +1274,7 @@ const SmartRaceSolverSettings = () => {
                                 >
                                     <View style={sectionsDisabledStyle}>
                                         <Text style={styles.sectionTitle}>Aptitudes</Text>
-                                        <Text style={styles.description}>S = best, G = worst. Tap to set.</Text>
+                                        <Text style={styles.description}>Distance and surface aptitude grades. Races below the threshold are skipped by the solver.</Text>
                                         {renderAptitudeRow("Sprint", "Sprint")}
                                         {renderAptitudeRow("Mile", "Mile")}
                                         {renderAptitudeRow("Medium", "Medium")}
@@ -1296,11 +1296,7 @@ const SmartRaceSolverSettings = () => {
                                 >
                                     <View style={sectionsDisabledStyle}>
                                         <Text style={styles.sectionTitle}>Aptitude Threshold</Text>
-                                        <Text style={styles.description}>
-                                            Minimum aptitude rank a race needs in BOTH its distance type and surface for the solver to consider it. Races below this rank are dropped entirely, even if
-                                            they would complete an epithet. C is a sensible default for most characters; raise to B/A to be stricter, lower to E/F if you have a weak character with
-                                            limited aptitudes.
-                                        </Text>
+                                        <Text style={styles.description}>Minimum aptitude (distance AND surface) required for a race to be eligible.</Text>
                                         <View style={styles.aptButtons}>
                                             {APTITUDE_RANKS.map((rank) => {
                                                 const active = weights.aptitudeThreshold === rank
@@ -1375,9 +1371,7 @@ const SmartRaceSolverSettings = () => {
                                             <Text style={styles.sectionTitle}>
                                                 Target Epithets (<Text style={[TYPE.monoValue, { color: colors.text }]}>{targetEpithets.length}</Text> selected)
                                             </Text>
-                                            <Text style={styles.description}>
-                                                Epithets the solver will pursue if doing so improves the schedule. The solver may pick smaller races (G2/G3/OP) just to complete a targeted epithet, even when those races wouldn't otherwise be worth racing. The schedule is still allowed to skip a target if it would hurt overall score - for guaranteed completion use Forced Epithets instead.
-                                            </Text>
+                                            <Text style={styles.description}>Epithets the solver actively pursues. Selecting one biases the schedule toward completing it.</Text>
                                             <Input style={styles.input} value={epithetSearch} onChangeText={setEpithetSearch} placeholder={`Search ${allEpithets.length} epithets…`} />
                                             <ScrollView style={styles.epithetList} nestedScrollEnabled keyboardShouldPersistTaps="handled">
                                                 <View style={styles.row}>
@@ -1399,9 +1393,7 @@ const SmartRaceSolverSettings = () => {
                                             <Text style={styles.sectionTitle}>
                                                 Forced Epithets (<Text style={[TYPE.monoValue, { color: colors.text }]}>{forcedEpithets.length}</Text> selected)
                                             </Text>
-                                            <Text style={styles.description}>
-                                                Epithets the solver MUST complete. If a forced epithet becomes impossible (e.g. a required race is already lost), the solver fails and falls back. Use sparingly - every forced epithet shrinks the search space and may push the solver to skip otherwise-valuable races just to satisfy the constraint.
-                                            </Text>
+                                            <Text style={styles.description}>Epithets the solver MUST complete. If completion becomes impossible (for example a needed race was already lost), the solver stops planning. Use sparingly - each forced epithet narrows what the solver can pick.</Text>
                                             <Input style={styles.input} value={forcedEpithetSearch} onChangeText={setForcedEpithetSearch} placeholder={`Search ${allEpithets.length} epithets…`} />
                                             <ScrollView style={styles.epithetList} nestedScrollEnabled keyboardShouldPersistTaps="handled">
                                                 <View style={styles.row}>
@@ -1460,8 +1452,7 @@ const SmartRaceSolverSettings = () => {
                                     <View style={sectionsDisabledStyle}>
                                         <Text style={styles.sectionTitle}>Scoring Weights</Text>
                                         <Text style={styles.description}>
-                                            Advanced settings that fine-tune how the solver values races vs. epithets and what it penalizes. Defaults work for most runs — only change these if you know
-                                            how they interact.
+                                            Tune how the solver balances race value, epithet completion, fan rewards, and penalties.
                                         </Text>
                                         <Section label="Show advanced weights" collapsible defaultOpen={false}>
                                             <View style={{ padding: SPACING.md }}>
@@ -1606,10 +1597,7 @@ const SmartRaceSolverSettings = () => {
                                 >
                                     <View style={sectionsDisabledStyle}>
                                         <Text style={styles.sectionTitle}>Schedule Preview</Text>
-                                        <Text style={styles.description}>
-                                            Preview of the schedule the solver would start with. Tap a cell to lock it, delete its pick, or switch to an alternative race. Does not reflect mid-run
-                                            dynamic re-planning.
-                                        </Text>
+                                        <Text style={styles.description}>Solver's initial schedule across the 72-turn career, computed from the current configuration. Does not account for in-run wins or losses.</Text>
                                         {!previewLoading && !previewError && preview && previewStats && (
                                             <Text style={[styles.inputDescription, { fontStyle: "italic", marginTop: 2 }]}>
                                                 Note: Projected Fan Gain is the raw sum of each scheduled race's base fan reward and does not factor in in-game fan bonuses and other fan sources.

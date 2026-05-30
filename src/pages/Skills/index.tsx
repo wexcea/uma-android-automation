@@ -108,7 +108,7 @@ const Skills: React.FC<{ route?: { params?: SkillsRouteParams } }> = ({ route })
                         <SearchableItem id="enable-skill-point-check" title="Enable Skill Point Check" description="Stop the bot when the skill point threshold is reached">
                             <Row
                                 title="Enable Skill Point Check"
-                                description="Enables check for a skill point threshold. When reached, the bot stops (or runs the Skill Plan, see below). Disabling this also disables the Skill Point Check Plan, since the plan depends on it."
+                                description="Stop the bot when the skill point threshold is reached"
                                 right={
                                     <Switch
                                         checked={skills.enableSkillPointCheck}
@@ -157,11 +157,7 @@ const Skills: React.FC<{ route?: { params?: SkillsRouteParams } }> = ({ route })
                     >
                         <Row
                             title={`Enable ${activeConfig.title} Plan (Beta)`}
-                            description={
-                                isSkillPointCheck
-                                    ? "Instead of stopping when the threshold is met, run this Skill Plan to spend the points."
-                                    : "When enabled, the bot purchases skills based on the configuration below."
-                            }
+                            description="Purchase skills based on this plan's configuration"
                             right={<Switch checked={enabled} onCheckedChange={(checked) => updatePlanSetting("enabled", checked)} />}
                         />
                     </SearchableItem>
@@ -173,7 +169,7 @@ const Skills: React.FC<{ route?: { params?: SkillsRouteParams } }> = ({ route })
                         >
                             <Row
                                 title="Purchase All Negative Skills"
-                                description="When enabled, the bot will attempt to purchase all negative skills (i.e. Firm Conditions x)."
+                                description="Attempt to buy all negative skills (e.g. Firm Conditions x)"
                                 right={<Switch checked={enableBuyNegativeSkills} onCheckedChange={(checked) => updatePlanSetting("enableBuyNegativeSkills", checked)} />}
                             />
                         </SearchableItem>

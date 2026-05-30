@@ -600,7 +600,7 @@ const TrainingSettings = () => {
                                         (value) => setSummerTrainingStatPriorityItems(value),
                                         summerTrainingPrioritizationModalVisible,
                                         setSummerTrainingPrioritizationModalVisible,
-                                        "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer with no facility progression, so a different ordering than regular training may be optimal.",
+                                        "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer, so a different ordering than regular training may be optimal.",
                                         "priority",
                                         "summer-training-stat-priority"
                                     )}
@@ -693,7 +693,7 @@ const TrainingSettings = () => {
                                     >
                                         <Row
                                             title="Prioritize Skill Hints"
-                                            description="Bypass stat priorities to chase skill hints."
+                                            description="When enabled, the bot will prioritize acquiring skill hints, bypassing stat prioritization and blacklist, while still being constrained by the failure chance thresholds."
                                             right={<Switch checked={enablePrioritizeSkillHints} onCheckedChange={(checked) => updateTrainingSetting("enablePrioritizeSkillHints", checked)} />}
                                         />
                                     </SearchableItem>
@@ -704,7 +704,7 @@ const TrainingSettings = () => {
                                     >
                                         <Row
                                             title="Must Rest before Summer"
-                                            description="Optimize June late phase for summer training."
+                                            description="Optimizes June Late Phase in Classic and Senior Years for Summer Training. If Energy < 70%, it will Rest. If Energy >= 70% and Mood < Great, it will recover Mood. If Energy >= 70% and Mood is Great, it will train Wit."
                                             right={<Switch checked={mustRestBeforeSummer} onCheckedChange={(checked) => updateTrainingSetting("mustRestBeforeSummer", checked)} />}
                                         />
                                     </SearchableItem>
@@ -715,7 +715,7 @@ const TrainingSettings = () => {
                                     >
                                         <Row
                                             title="Train Wit During Finale"
-                                            description="Use URA finale turns (73-75) to train Wit."
+                                            description="When enabled, the bot will train Wit during URA finale turns (73, 74, 75) instead of recovering energy or mood, even if the failure chance is high."
                                             right={<Switch checked={trainWitDuringFinale} onCheckedChange={(checked) => updateTrainingSetting("trainWitDuringFinale", checked)} />}
                                         />
                                     </SearchableItem>
@@ -742,7 +742,7 @@ const TrainingSettings = () => {
                                     >
                                         <Row
                                             title="Weight Score by Training Level"
-                                            description="Boost score for top-3 stat trainings (Year 2+)."
+                                            description="When enabled (Year 2+), the bot reads each training's level (1-5) via OCR and boosts the score for trainings whose stat sits in the top 3 of your Stat Prioritization list. Helps the bot stick with stats you've invested in. OCR is skipped during Pre-Debut, Junior, and Summer."
                                             right={
                                                 <Switch
                                                     checked={enableTrainingLevelWeighting}
@@ -758,7 +758,7 @@ const TrainingSettings = () => {
                                     >
                                         <Row
                                             title="Rainbow Training Bonus"
-                                            description="Big score boost for rainbow trainings (Year 2+)."
+                                            description="When enabled (Year 2+), rainbow trainings receive a significant bonus to their score, making them more likely to be selected. This is highly dependent on device configuration and may result in false positives."
                                             right={
                                                 <Switch
                                                     checked={enableRainbowTrainingBonus}
@@ -770,11 +770,11 @@ const TrainingSettings = () => {
                                     <SearchableItem
                                         id="enable-prioritize-near-max-friendship"
                                         title="Prioritize Near-Max Friendship Bars"
-                                        description="When enabled (Year 2+), trainings with multiple green/blue friendship bars close to maxing receive an anticipatory rainbow multiplier (up to 1.6x), helping the bot favor them so the bars cross into orange and unlock rainbow training on later turns. Does not stack with the actual rainbow bonus."
+                                        description="When enabled (Year 2+), trainings with multiple green/blue friendship bars close to maxing receive an anticipatory rainbow multiplier, helping the bot favor them so the bars cross into orange and unlock rainbow training on later turns. Does not stack with the actual rainbow bonus."
                                     >
                                         <Row
                                             title="Near-Max Friendship Boost"
-                                            description="Anticipatory bonus to push bars into rainbow."
+                                            description="When enabled (Year 2+), trainings with multiple green/blue friendship bars close to maxing receive an anticipatory rainbow multiplier, helping the bot favor them so the bars cross into orange and unlock rainbow training on later turns. Does not stack with the actual rainbow bonus."
                                             right={
                                                 <Switch
                                                     checked={enablePrioritizeNearMaxFriendship}
@@ -793,7 +793,7 @@ const TrainingSettings = () => {
                                     >
                                         <Row
                                             title="Training Analysis Validation"
-                                            description="Validate selected stat during analysis (slower)."
+                                            description="When enabled, the bot will validate the current selected stat during training analysis. This helps prevent the bot from accidentally training a stat during analysis at the cost of a significant increase in scenario completion time."
                                             right={
                                                 <Switch
                                                     checked={enableTrainingAnalysisValidation}
@@ -809,7 +809,7 @@ const TrainingSettings = () => {
                                     >
                                         <Row
                                             title="YOLO Stat Detection"
-                                            description="Use a YOLOv8 model instead of OCR for stat gains."
+                                            description="When enabled, the bot will use a custom YOLOv8 model for high-precision stat gain detection. This replaces the standard OCR/Template matching for stat gains."
                                             right={<Switch checked={enableYoloStatDetection} onCheckedChange={(checked) => updateTrainingSetting("enableYoloStatDetection", checked)} />}
                                         />
                                     </SearchableItem>
@@ -828,7 +828,7 @@ const TrainingSettings = () => {
                                     >
                                         <Row
                                             title="Preferred Distance"
-                                            description="Auto picks from aptitudes; override to lock a distance."
+                                            description="Set the preferred race distance for training targets. Auto picks based on character aptitudes."
                                             right={
                                                 <CustomSelect
                                                     value={preferredDistanceOverride}
@@ -853,7 +853,7 @@ const TrainingSettings = () => {
                                     >
                                         <Row
                                             title="Disable Stat Targets"
-                                            description="Ignore per-distance targets; treat everything as cap."
+                                            description="When enabled, all per-distance stat targets below are ignored. Every stat is treated as having a target equal to the in-game stat cap (1200), so the bot will keep pushing your top priority stats even after they would normally be considered 'done.' Useful when you want strict adherence to your Stat Prioritization list."
                                             right={<Switch checked={disableStatTargets} onCheckedChange={(checked) => updateTrainingSetting("disableStatTargets", checked)} />}
                                         />
                                     </SearchableItem>
@@ -863,9 +863,7 @@ const TrainingSettings = () => {
                                         <SearchableItem id="stat-targets-by-distance" title="Stat Targets by Distance" description="Set target values for each stat based on race distance.">
                                             <View style={{ paddingHorizontal: SPACING.md, paddingTop: SPACING.md, paddingBottom: SPACING.xs }}>
                                                 <Text style={[TYPE.body, { color: colors.text, fontWeight: "600" as const }]}>Stat Targets by Distance</Text>
-                                                <Text style={[TYPE.caption, { color: colors.textMuted, marginTop: 2 }]}>
-                                                    Per-distance stat targets are derived from past Champion Meetings. The bot prioritizes training stats below these targets.
-                                                </Text>
+                                                <Text style={[TYPE.caption, { color: colors.textMuted, marginTop: 2 }]}>Set target values for each stat based on race distance.</Text>
                                             </View>
                                         </SearchableItem>
 
@@ -1190,9 +1188,7 @@ const TrainingSettings = () => {
                                         >
                                             <View style={styles.groupHeader}>
                                                 <Text style={styles.groupHeaderTitle}>Year Milestone Pacing</Text>
-                                                <Text style={styles.groupHeaderDescription}>
-                                                    Targets a scaled percentage of your stat targets before Senior Year, ramping up to 100% by the Finale. Set both sliders to 100% to disable milestone pacing.
-                                                </Text>
+                                                <Text style={styles.groupHeaderDescription}>Controls how aggressively the bot paces stat training during the Pre-Debut, Junior and Classic Years.</Text>
                                             </View>
                                         </SearchableItem>
                                         <View style={[styles.sliderShell, { paddingTop: 0 }]}>
@@ -1212,7 +1208,7 @@ const TrainingSettings = () => {
                                                     labelUnit="%"
                                                     showValue={true}
                                                     showLabels={true}
-                                                    description="Default: 33%. Higher values push the bot harder in Junior Year."
+                                                    description="Percentage of the primary stat targets to aim for by the end of Junior Year."
                                                 />
                                             </SearchableItem>
                                         </View>
@@ -1234,7 +1230,7 @@ const TrainingSettings = () => {
                                                 labelUnit="%"
                                                 showValue={true}
                                                 showLabels={true}
-                                                description="Default: 66%. Higher values push the bot harder in Classic Year."
+                                                description="Percentage of the primary stat targets to aim for by the end of Classic Year."
                                             />
                                         </SearchableItem>
                                     </View>

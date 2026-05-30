@@ -510,7 +510,7 @@ const LLMSettings = () => {
                     >
                         <Row
                             title="Ask the Docs"
-                            description="On-device LLM that summarizes docs"
+                            description="Show the Ask the Docs page in the navigation drawer and reveal the rest of these LLM options. Off by default."
                             right={<Switch checked={enableAskTheDocs} onCheckedChange={(checked) => updateChat({ enableAskTheDocs: checked })} />}
                         />
                     </SearchableItem>
