@@ -17,7 +17,7 @@ export interface WizardStep {
 }
 
 /** Props for `WizardSteps`. */
-export interface WizardStepsProps {
+interface WizardStepsProps {
     /** Ordered steps. */
     steps: WizardStep[]
     /** Index (0-based) of the currently active step. */

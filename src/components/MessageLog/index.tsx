@@ -462,7 +462,7 @@ const MessageLog = () => {
      * @param width The width of the content.
      * @param height The height of the content.
      */
-    const handleContentSizeChange = useCallback((width: number, height: number) => {
+    const handleContentSizeChange = useCallback((_width: number, height: number) => {
         if (height > 0) {
             setContentHeight(height)
         }

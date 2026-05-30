@@ -10,7 +10,7 @@ import CustomButton from "../CustomButton"
 export type HeroStatus = "ready" | "running" | "stopped" | "error"
 
 /** Props for `HeroStatusCard`. */
-export interface HeroStatusCardProps {
+interface HeroStatusCardProps {
     /** Current bot status pill. */
     status: HeroStatus
     /** Active profile name (e.g. "Default"). */

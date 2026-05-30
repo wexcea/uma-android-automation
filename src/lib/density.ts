@@ -5,7 +5,7 @@
 // Single switch controlling row padding and body font size. Production ships `"airy"`.
 // Flip to `"compact"` locally to experiment with a denser layout. Not exposed as a user-facing toggle.
 
-export type Density = "airy" | "compact"
+type Density = "airy" | "compact"
 
 export const DENSITY: Density = "airy"
 

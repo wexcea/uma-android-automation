@@ -16,7 +16,7 @@ import { initLlama, LlamaContext } from "llama.rn"
  * ```
  */
 
-export interface LoadOptions {
+interface LoadOptions {
     /** KV-cache size (input + output tokens combined). Default 4096. */
     nCtx?: number
     /** GPU layers to offload. Default 0 (CPU-only) for max device compatibility. */
@@ -29,7 +29,7 @@ export interface LoadOptions {
  * One turn of the conversation passed to the model. Mirrors the OpenAI chat-completion shape that `llama.rn`
  * accepts directly, so callers can build the array without an additional conversion step.
  */
-export interface ChatMessage {
+interface ChatMessage {
     /** Author of the message; `system` is the grounding scaffold, `user` is the question, `assistant` is prior answers. */
     role: "system" | "user" | "assistant"
     /** Raw message text. The Chat page packs the system prompt plus retrieved excerpts into a single `system` content string. */
@@ -37,7 +37,7 @@ export interface ChatMessage {
 }
 
 /** Per-call generation parameters forwarded to `llama.rn`'s `context.completion`. */
-export interface ChatOptions {
+interface ChatOptions {
     /** Ordered conversation turns; the last entry is the question being answered. */
     messages: ChatMessage[]
     /** Hard cap on tokens generated for this answer (`n_predict`). Defaults to 768. */
@@ -75,7 +75,7 @@ export interface ChatStats {
 }
 
 /** Final shape returned by `chat`: the assembled answer plus optional engine timing stats. */
-export interface ChatResult {
+interface ChatResult {
     /** Full concatenated answer text after all tokens have been streamed. Empty string when llama.rn returned a non-string `text`. */
     text: string
     /** Generation timing block from llama.rn's `timings`, or `null` when the engine didn't report one. */
@@ -232,44 +232,6 @@ export async function stop(): Promise<void> {
     } catch {
         // Ignore: stop is best-effort and the underlying completion will resolve on its own.
     }
-}
-
-/**
- * Release the currently-loaded context, freeing RAM. Safe to call when nothing is loaded.
- *
- * @returns A promise that resolves once the underlying llama.rn release call has settled; failures during
- *   release are swallowed (the context may already be in a bad state) and do not propagate.
- */
-export async function release(): Promise<void> {
-    if (currentContext) {
-        try {
-            await currentContext.release()
-        } catch {
-            // Best-effort.
-        }
-    }
-    currentContext = null
-    currentModelPath = null
-    currentLoadOpts = {}
-}
-
-/**
- * Reports whether a context is currently loaded. Useful for the UI to disable Chat input until a model is ready.
- *
- * @returns `true` when a llama.rn context is held in memory, `false` otherwise.
- */
-export function isLoaded(): boolean {
-    return currentContext !== null
-}
-
-/**
- * Path of the currently-loaded model, if any.
- *
- * @returns Absolute filesystem path passed to `ensureContext` for the live context, or `null` when no
- *   context is loaded.
- */
-export function loadedModelPath(): string | null {
-    return currentModelPath
 }
 
 /**

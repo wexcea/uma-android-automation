@@ -1,4 +1,4 @@
-import { PerformanceLogger, performanceLogger } from "../performanceLogger"
+import { PerformanceLogger } from "../performanceLogger"
 
 describe("PerformanceLogger", () => {
     beforeEach(() => {

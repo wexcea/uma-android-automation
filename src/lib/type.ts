@@ -23,5 +23,3 @@ export const TYPE = {
     /** Uppercase section labels and stat captions. */
     monoLabel: { fontFamily: "GeistMono_600SemiBold", fontSize: 11, letterSpacing: 0.7, textTransform: "uppercase" } as TextStyle,
 } as const
-
-export type TypeKey = keyof typeof TYPE

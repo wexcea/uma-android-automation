@@ -12,5 +12,3 @@ export const RADII = {
     xl: 14,
     pill: 999,
 } as const
-
-export type RadiusKey = keyof typeof RADII

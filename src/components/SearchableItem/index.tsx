@@ -76,7 +76,7 @@ const SearchableItemContent = ({ id, children, scrollViewRef, style }: Searchabl
                     try {
                         viewRef.current.measureLayout(
                             finalScrollViewRef.current as any,
-                            (x: number, y: number) => {
+                            (_x: number, y: number) => {
                                 // Scroll slightly above the item so it's not hugging the top edge.
                                 finalScrollViewRef.current.scrollTo({ y: Math.max(0, y - 20), animated: true })
                             },

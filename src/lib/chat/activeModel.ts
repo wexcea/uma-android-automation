@@ -15,7 +15,7 @@ export const ACTIVE_MODEL_SETTING = { category: "chat", key: "activeModelFilenam
  *
  * Mirrors the Kotlin side exactly - any field rename here must also land in `LLMChatModule.listModels`.
  */
-export interface DownloadedModel {
+interface DownloadedModel {
     /** Bare filename of the GGUF on disk (e.g. `qwen2.5-1.5b-instruct-q4_k_m.gguf`). */
     filename: string
     /** Absolute path inside app-private storage. Pass to `llama.rn` directly. */
@@ -32,7 +32,7 @@ export interface DownloadedModel {
  * Returned by `resolveActiveModel` so call sites don't accidentally branch on metadata they shouldn't trust
  * (e.g. `sizeBytes` is not refreshed once a model is loaded).
  */
-export interface ResolvedModel {
+interface ResolvedModel {
     /** Bare filename of the chosen model. */
     filename: string
     /** Absolute path on disk to feed to `llama.rn`. */

@@ -20,7 +20,6 @@ import { loadDeviceCapabilities, shouldSuggestX8664Variant } from "../../lib/cha
 import HeroStatusCard, { HeroStatus } from "../../components/HeroStatusCard"
 import { useProfileContext, DEFAULT_PROFILE_NAME } from "../../context/ProfileContext"
 import { SPACING } from "../../lib/spacing"
-import { TYPE } from "../../lib/type"
 
 
 const styles = StyleSheet.create({

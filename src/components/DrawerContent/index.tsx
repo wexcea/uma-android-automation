@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useContext, useRef, useCallback } from "react"
-import { View, Text, StyleSheet, Pressable, Linking, ScrollView, NativeModules } from "react-native"
+import { View, Text, StyleSheet, Pressable, Linking, NativeModules } from "react-native"
 import { DrawerContentScrollView, DrawerContentComponentProps, useDrawerStatus } from "@react-navigation/drawer"
 import { CommonActions } from "@react-navigation/native"
 import Ionicons from "@react-native-vector-icons/ionicons"

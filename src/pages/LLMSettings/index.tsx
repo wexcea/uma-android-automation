@@ -24,8 +24,6 @@ import { DEFAULTS as TUNING_DEFAULTS, saveTuning } from "../../lib/chat/chatSett
 import { ACTIVE_MODEL_SETTING } from "../../lib/chat/activeModel"
 import { EMBEDDER_SHA256, EMBEDDER_SIZE_BYTES, EMBEDDER_URL, isEmbedderReady } from "../../lib/chat/embedder"
 import {
-    accelerationTier,
-    accelerationTierLabel,
     type DeviceCapabilities,
     fetchModelSizeBytes,
     formatBytes,
@@ -274,7 +272,6 @@ const LLMSettings = () => {
             .catch(() => undefined)
     }, [])
 
-    const tier = useMemo(() => accelerationTier(deviceCaps?.cpuFeatures ?? [], deviceCaps?.abi), [deviceCaps])
     const recommended = useMemo(() => recommendedPreset(deviceCaps), [deviceCaps])
 
     const handleDownload = useCallback(async () => {
@@ -390,24 +387,6 @@ const LLMSettings = () => {
         }
         return "Preparing download..."
     }, [embedderState])
-
-    const handleDelete = useCallback(() => {
-        const totalMB = Math.round(downloadedModels.reduce((acc, m) => acc + m.sizeBytes, 0) / 1024 / 1024)
-        Alert.alert("Delete every downloaded chat model?", `Frees ~${totalMB} MB across ${downloadedModels.length} file${downloadedModels.length === 1 ? "" : "s"}.`, [
-            { text: "Cancel", style: "cancel" },
-            {
-                text: "Delete",
-                style: "destructive",
-                onPress: async () => {
-                    await NativeModules.LLMChatModule.deleteModel()
-                    setActiveModelFilename(null)
-                    NativeModules.LLMChatModule.setActiveModel("")
-                    databaseManager.saveSetting(ACTIVE_MODEL_SETTING.category, ACTIVE_MODEL_SETTING.key, "", true).catch(() => undefined)
-                    await refreshModels()
-                },
-            },
-        ])
-    }, [downloadedModels, refreshModels])
 
     const isDownloading = downloadState?.status === "running" || downloadState?.status === "pending" || downloadState?.status === "paused"
 

@@ -81,7 +81,7 @@ export const charactersForEpithet = (e: EpithetEntry): string[] => {
  * @returns `{ kind: "stat" | "hint" | "unknown"; amount }` where `amount` is `per_stat * stat_count` for stat rewards,
  *   the level for hint rewards, and 0 otherwise.
  */
-export const epithetReward = (e: EpithetEntry): { kind: "stat" | "hint" | "unknown"; amount: number } => {
+const epithetReward = (e: EpithetEntry): { kind: "stat" | "hint" | "unknown"; amount: number } => {
     const bullets = e.bullet_points ?? []
     if (bullets.length === 0) return { kind: "unknown", amount: 0 }
     const ordered = [bullets[bullets.length - 1], ...bullets.slice(0, -1)]
@@ -211,7 +211,7 @@ export const epithetsForRace = (race: RaceEntry): EpithetEntry[] => {
  * @param ep Epithet whose matcher list should be evaluated.
  * @returns Indices into `ep.matchers` for matchers satisfied by `race`. Empty when none fire.
  */
-export const matchingMatcherIndicesForRace = (race: RaceEntry, ep: EpithetEntry): number[] => {
+const matchingMatcherIndicesForRace = (race: RaceEntry, ep: EpithetEntry): number[] => {
     const matchers = ep.matchers ?? []
     const out: number[] = []
     for (let i = 0; i < matchers.length; i++) {
@@ -315,7 +315,7 @@ export const conditionLabelsForRaceAndEpithet = (race: RaceEntry, ep: EpithetEnt
  * @param racesByKey Lookup table from race key to race entry.
  * @returns Progress for the matcher, or null when the matcher type isn't progress-trackable.
  */
-export const matcherProgress = (upToTurn: number, matcher: Record<string, unknown>, preview: SchedulePreview, racesByKey: Record<string, RaceEntry>): MatcherProgress | null => {
+const matcherProgress = (upToTurn: number, matcher: Record<string, unknown>, preview: SchedulePreview, racesByKey: Record<string, RaceEntry>): MatcherProgress | null => {
     const winsUpTo: Array<{ turn: number; race: RaceEntry }> = []
     for (const [turnStr, dec] of Object.entries(preview.decisions)) {
         const t = parseInt(turnStr, 10)
@@ -414,7 +414,7 @@ export const epithetProgress = (upToTurn: number, ep: EpithetEntry, preview: Sch
  * @param visited Names already on the recursion stack; callers usually pass the default empty set.
  * @returns True when every matcher on the epithet is satisfied at `upToTurn`.
  */
-export const isEpithetCompletedAtTurn = (
+const isEpithetCompletedAtTurn = (
     epName: string,
     upToTurn: number,
     epithetsByName: Map<string, EpithetEntry>,

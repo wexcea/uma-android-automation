@@ -8,7 +8,7 @@ import { RADII } from "../../lib/radii"
 import { GlassSurface } from "../ui/glass-surface"
 
 /** Props for `CampaignCard`. */
-export interface CampaignCardProps {
+interface CampaignCardProps {
     /** Active campaign name displayed prominently. */
     campaign: string
     /** Tap handler that opens the campaign picker. When omitted, the Switch button is hidden (use this when only one scenario is selectable). */

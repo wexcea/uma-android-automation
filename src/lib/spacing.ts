@@ -13,5 +13,3 @@ export const SPACING = {
     xl: 24,
     xxl: 32,
 } as const
-
-export type SpacingKey = keyof typeof SPACING

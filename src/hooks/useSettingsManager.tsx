@@ -16,7 +16,7 @@ export { deepMerge, convertSettingsToBatch, applyMigrations }
  */
 export const useSettingsManager = () => {
     // Track whether settings are currently being saved.
-    const [isSaving, setIsSaving] = useState(false)
+    const [, setIsSaving] = useState(false)
     const [migrationCompleted, setMigrationCompleted] = useState(false)
 
     const { setSettings, setReadyStatus } = useContext(BotMetaContext)
@@ -44,7 +44,6 @@ export const useSettingsManager = () => {
 
     // Direct database operations.
     const isSQLiteInitialized = databaseManager.isInitialized()
-    const isSQLiteSaving = false
 
     // Auto-load settings when SQLite is initialized.
     useEffect(() => {
