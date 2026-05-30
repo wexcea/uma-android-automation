@@ -806,7 +806,7 @@ const TrainingEventSettings = () => {
                                             <Text style={{ fontSize: 16, fontWeight: "600", color: colors.text, marginBottom: 12 }}>Victory!</Text>
                                             <CustomSelect
                                                 options={victoryOptions}
-                                                value={specialEventOverrides["Victory!"]?.selectedOption || "Option 2: Energy -5 and random stat gain"}
+                                                value={specialEventOverrides["Victory!"]?.selectedOption || "Option 1: Energy -15 and random stat gain"}
                                                 onValueChange={(value) => updateSpecialEventOverride("Victory!", "selectedOption", value)}
                                                 placeholder="Select Option"
                                                 width="100%"
@@ -827,7 +827,7 @@ const TrainingEventSettings = () => {
                                             <Text style={{ fontSize: 16, fontWeight: "600", color: colors.text, marginBottom: 12 }}>Solid Showing</Text>
                                             <CustomSelect
                                                 options={solidShowingOptions}
-                                                value={specialEventOverrides["Solid Showing"]?.selectedOption || "Option 2: Energy -5/-20 and random stat gain"}
+                                                value={specialEventOverrides["Solid Showing"]?.selectedOption || "Option 1: Energy -15 and random stat gain"}
                                                 onValueChange={(value) => updateSpecialEventOverride("Solid Showing", "selectedOption", value)}
                                                 placeholder="Select Option"
                                                 width="100%"
