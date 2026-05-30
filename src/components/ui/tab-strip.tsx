@@ -56,7 +56,7 @@ const TabStrip: React.FC<TabStripProps> = ({ items, activeKey, onChange, style }
                     alignItems: "center",
                 },
                 tabActive: { backgroundColor: colors.brand },
-                label: { ...TYPE.body, color: colors.text, fontWeight: "600" },
+                label: { ...TYPE.body, fontSize: 13, lineHeight: 18, color: colors.text, fontWeight: "600" },
                 labelActive: { color: colors.onBrand },
             }),
         [colors]
