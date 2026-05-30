@@ -212,6 +212,12 @@ class Trackblazer(game: Game) : Campaign(game) {
     /** Threshold for energy level to use energy items. */
     private var energyThresholdToUseEnergyItems: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerEnergyThreshold", 40)
 
+    /**
+     * Energy floor below which Summer / Finale prioritization is suppressed so queued items
+     * (megaphones, ankle weights, charms) are not wasted on a train click the game will refuse.
+     */
+    private val forceTrainEnergyFloor: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerForceTrainEnergyFloor", 20)
+
     /** Number of energy items (lowest-tier first across `energyItemConservationOrder`) held back as the emergency-race-recovery reserve. 0 = no reserve. */
     private val energyItemReserveCount: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerEnergyItemReserve", 1)
 
@@ -1084,6 +1090,7 @@ class Trackblazer(game: Game) : Campaign(game) {
         DecisionTracer
             .SettingsSnapshot()
             .add("Trackblazer Energy Threshold", energyThresholdToUseEnergyItems)
+            .add("Force-Train Energy Floor", forceTrainEnergyFloor)
             .add("Skip Risky Charm Training Below Gain", minCharmGain)
             .add("Consecutive Races Limit", consecutiveRacesLimit)
             .add("Skip Bad-Mood Items Below Gain", lowMainStatGainItemFloor)
@@ -1211,7 +1218,7 @@ class Trackblazer(game: Game) : Campaign(game) {
 
     override fun decideNextAction(): MainScreenAction {
         // Energy floor for always train priorities to avoid wasting items.
-        val canSafelyTrain = trainee.energy > 20
+        val canSafelyTrain = trainee.energy > forceTrainEnergyFloor
 
         // Summer Training: Train during July and August in Classic/Senior.
         if (canSafelyTrain && date.isSummer() && !(racing.skipSummerTrainingForAgenda && racing.enableUserInGameRaceAgenda)) {

@@ -702,6 +702,13 @@ const searchConfig: SearchOption[] = [
         page: "ScenarioOverridesSettings",
     },
     {
+        id: "trackblazer-force-train-energy-floor",
+        title: "Trackblazer Force-Train Energy Floor (Summer/Finale)",
+        description:
+            "During Summer and the Finale, the Trackblazer scenario normally always picks training. If energy is at or below this floor, the bot skips that override and falls through to the standard decision flow so items are not queued for a training with little hope for success.",
+        page: "ScenarioOverridesSettings",
+    },
+    {
         id: "trackblazer-shop-check-grades",
         title: "Trackblazer Shop Check Grades",
         description: "Select which race grades should trigger a shop check after the race in the Trackblazer scenario.",

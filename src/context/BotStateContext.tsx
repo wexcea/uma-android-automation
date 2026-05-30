@@ -206,6 +206,7 @@ export interface Settings {
     scenarioOverrides: {
         trackblazerConsecutiveRacesLimit: number
         trackblazerEnergyThreshold: number
+        trackblazerForceTrainEnergyFloor: number
         trackblazerShopCheckGrades: string[]
         trackblazerSkipRiskyCharmTrainingBelowGain: number
         trackblazerSkipBadMoodItemsBelowGain: number
@@ -456,6 +457,7 @@ export const defaultSettings: Settings = {
     scenarioOverrides: {
         trackblazerConsecutiveRacesLimit: 5,
         trackblazerEnergyThreshold: 40,
+        trackblazerForceTrainEnergyFloor: 20,
         trackblazerShopCheckGrades: ["G1", "G2", "G3"],
         trackblazerSkipRiskyCharmTrainingBelowGain: 30,
         trackblazerSkipBadMoodItemsBelowGain: 15,
