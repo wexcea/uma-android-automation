@@ -40,7 +40,7 @@ export interface SheetModalProps {
  */
 const SheetModalImpl = ({ visible, onRequestClose, header, children, footer, heightFraction = 0.82, dismissOnBackdropPress = true, scrollableBody = true }: SheetModalProps) => {
     const { colors } = useTheme()
-    const clamped = Math.max(0.4, Math.min(0.95, heightFraction))
+    const clamped = Math.max(0.4, Math.min(0.50, heightFraction))
     const cardHeight = Math.round(Dimensions.get("window").height * clamped)
     const styles = useMemo(
         () =>
