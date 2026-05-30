@@ -212,6 +212,12 @@ class Trackblazer(game: Game) : Campaign(game) {
     /** Threshold for energy level to use energy items. */
     private var energyThresholdToUseEnergyItems: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerEnergyThreshold", 40)
 
+    /**
+     * Energy floor below which Summer / Finale prioritization is suppressed so queued items
+     * (megaphones, ankle weights, charms) are not wasted on a train click the game will refuse.
+     */
+    private val forceTrainEnergyFloor: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerForceTrainEnergyFloor", 20)
+
     /** Number of energy items (lowest-tier first across `energyItemConservationOrder`) held back as the emergency-race-recovery reserve. 0 = no reserve. */
     private val energyItemReserveCount: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerEnergyItemReserve", 1)
 
@@ -1084,6 +1090,7 @@ class Trackblazer(game: Game) : Campaign(game) {
         DecisionTracer
             .SettingsSnapshot()
             .add("Trackblazer Energy Threshold", energyThresholdToUseEnergyItems)
+            .add("Force-Train Energy Floor", forceTrainEnergyFloor)
             .add("Skip Risky Charm Training Below Gain", minCharmGain)
             .add("Consecutive Races Limit", consecutiveRacesLimit)
             .add("Skip Bad-Mood Items Below Gain", lowMainStatGainItemFloor)
@@ -1210,15 +1217,18 @@ class Trackblazer(game: Game) : Campaign(game) {
     }
 
     override fun decideNextAction(): MainScreenAction {
+        // Energy floor for always train priorities to avoid wasting items.
+        val canSafelyTrain = trainee.energy > forceTrainEnergyFloor
+
         // Summer Training: Train during July and August in Classic/Senior.
-        if (date.isSummer() && !(racing.skipSummerTrainingForAgenda && racing.enableUserInGameRaceAgenda)) {
+        if (canSafelyTrain && date.isSummer() && !(racing.skipSummerTrainingForAgenda && racing.enableUserInGameRaceAgenda)) {
             MessageLog.i(TAG, "[TRACKBLAZER] It is Summer. Prioritizing training.")
             decisionTracer.recordActionChoice(MainScreenAction.TRAIN, "Trackblazer: Summer prioritizes training")
             return MainScreenAction.TRAIN
         }
 
         // Finale: Train during the final 3 turns (Qualifier, Semifinal, Finals).
-        if (date.bIsFinaleSeason && date.day >= 73) {
+        if (canSafelyTrain && date.bIsFinaleSeason && date.day >= 73) {
             MessageLog.i(TAG, "[TRACKBLAZER] It is the Finale. Prioritizing training.")
             decisionTracer.recordActionChoice(MainScreenAction.TRAIN, "Trackblazer: Finale (day >= 73) prioritizes training")
             return MainScreenAction.TRAIN
@@ -1699,10 +1709,25 @@ class Trackblazer(game: Game) : Campaign(game) {
 
         // Finalize by closing the dialog.
         MessageLog.i(TAG, "[TRACKBLAZER] Closing training items dialog.")
-        if (ButtonClose.check(game.imageUtils, tries = 50)) {
-            game.wait(1.0)
-            ButtonClose.click(game.imageUtils)
-            game.wait(1.0)
+        val maxCloseAttempts = 3
+        var closeAttempt = 0
+        while (closeAttempt < maxCloseAttempts) {
+            if (ButtonClose.check(game.imageUtils, tries = 50)) {
+                game.wait(1.0)
+                ButtonClose.click(game.imageUtils)
+                game.wait(1.0)
+            }
+            if (!ButtonConfirmUse.check(game.imageUtils, tries = 5)) {
+                break
+            }
+            closeAttempt++
+            if (closeAttempt < maxCloseAttempts) {
+                MessageLog.w(TAG, "[WARN] confirmAndCloseItemDialog:: Training Items dialog still visible after close attempt $closeAttempt/$maxCloseAttempts. Retrying.")
+                game.wait(1.0)
+            }
+        }
+        if (closeAttempt >= maxCloseAttempts) {
+            MessageLog.e(TAG, "[ERROR] confirmAndCloseItemDialog:: Training Items dialog did not close after $maxCloseAttempts attempts. The next training click may misfire.")
         }
 
         // Clear the training analysis cache so that the bot re-evaluates the training options if it re-enters the training screen.

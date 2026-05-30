@@ -43,7 +43,8 @@ const searchConfig: SearchOption[] = [
     {
         id: "settings-wait-delay",
         title: "Wait Delay",
-        description: "Sets the delay between actions and imaging operations. Lowering this will make the bot run much faster at the risk of the bot losing track of its location after loading/connecting screens.",
+        description:
+            "Sets the delay between actions and imaging operations. Lowering this will make the bot run much faster at the risk of the bot losing track of its location after loading/connecting screens.",
         page: "SettingsMain",
     },
     {
@@ -90,8 +91,7 @@ const searchConfig: SearchOption[] = [
     {
         id: "summer-training-stat-priority",
         title: "Summer Training Prioritization",
-        description:
-            "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer, so a different ordering than regular training may be optimal.",
+        description: "Select the priority order of stats used during Summer Training. Facility levels are maxed during summer, so a different ordering than regular training may be optimal.",
         page: "TrainingSettings",
     },
     {
@@ -99,13 +99,6 @@ const searchConfig: SearchOption[] = [
         title: "Disable Training on Maxed Stats",
         description: "When enabled, training will be skipped for stats that have reached their maximum value.",
         page: "TrainingSettings",
-    },
-    {
-        id: "manual-stat-cap",
-        title: "Manual Stat Cap",
-        description: "Set a custom stat cap for all stats. Training will be skipped when any stat reaches this value (if 'Disable Training on Maxed Stats' is enabled).",
-        page: "TrainingSettings",
-        parentId: "disable-training-on-maxed-stats",
     },
     {
         id: "maximum-failure-chance",
@@ -155,7 +148,8 @@ const searchConfig: SearchOption[] = [
     {
         id: "must-rest-before-summer",
         title: "Must Rest before Summer",
-        description: "Optimizes June Late Phase in Classic and Senior Years for Summer Training. If Energy < 70%, it will Rest. If Energy >= 70% and Mood < Great, it will recover Mood. If Energy >= 70% and Mood is Great, it will train Wit.",
+        description:
+            "Optimizes June Late Phase in Classic and Senior Years for Summer Training. If Energy < 70%, it will Rest. If Energy >= 70% and Mood < Great, it will recover Mood. If Energy >= 70% and Mood is Great, it will train Wit.",
         page: "TrainingSettings",
     },
     {
@@ -211,14 +205,14 @@ const searchConfig: SearchOption[] = [
         page: "TrainingSettings",
     },
     {
-        id: "classic-milestone-percent",
+        id: "junior-milestone-percent",
         title: "End of Junior Year Milestone",
         description: "Percentage of the primary stat targets to aim for by the end of Junior Year.",
         page: "TrainingSettings",
         parentId: "training-year-milestone-targets",
     },
     {
-        id: "senior-milestone-percent",
+        id: "classic-milestone-percent",
         title: "End of Classic Year Milestone",
         description: "Percentage of the primary stat targets to aim for by the end of Classic Year.",
         page: "TrainingSettings",
@@ -248,7 +242,7 @@ const searchConfig: SearchOption[] = [
         page: "TrainingEventSettings",
     },
     {
-        id: "ocr-recognition-settings-title",
+        id: "ocr-recognition-settings",
         title: "OCR Recognition Settings",
         description: "Configure settings for detecting and recognizing Training Event titles using OCR.",
         page: "TrainingEventSettings",
@@ -258,21 +252,21 @@ const searchConfig: SearchOption[] = [
         title: "Enable Automatic OCR Retry for Training Events",
         description: "When enabled, the bot will automatically retry OCR detection with adjusted settings if the initial attempt for a training event title fails or has low confidence.",
         page: "TrainingEventSettings",
-        parentId: "ocr-recognition-settings-title",
+        parentId: "ocr-recognition-settings",
     },
     {
         id: "ocr-confidence-training",
         title: "OCR Confidence for Training Events",
         description: "The minimum confidence level required for a Training Event title to be considered a match. Higher values ensure more accurate recognition but may lead to more missed events.",
         page: "TrainingEventSettings",
-        parentId: "ocr-recognition-settings-title",
+        parentId: "ocr-recognition-settings",
     },
     {
         id: "hide-ocr-comparison-results-training",
         title: "Hide OCR String Comparison Results",
         description: "If enabled, the bot will suppress detailed logging of individual string similarity scores during training event detection to keep the logs cleaner.",
         page: "TrainingEventSettings",
-        parentId: "ocr-recognition-settings-title",
+        parentId: "ocr-recognition-settings",
     },
 
     // ============================================================
@@ -340,13 +334,13 @@ const searchConfig: SearchOption[] = [
     },
     {
         id: "junior-year-race-strategy",
-        title: "Junior Year Race Strategy",
+        title: "Junior Year Strategy",
         description: "The race strategy to use for all races during Junior Year.",
         page: "RacingSettings",
     },
     {
         id: "original-race-strategy",
-        title: "Original Race Strategy",
+        title: "Original Strategy",
         description: "The race strategy to reset to after Junior Year. The bot will use this strategy for races in Year 2 and beyond.",
         page: "RacingSettings",
     },
@@ -419,7 +413,7 @@ const searchConfig: SearchOption[] = [
     },
     {
         id: "user-in-game-race-agenda",
-        title: "Select User In-Game Race Agenda",
+        title: "Select Agenda",
         description: "The in-game race agenda the bot loads when the toggle above is enabled.",
         page: "RacingSettings",
         parentId: "enable-user-in-game-race-agenda",
@@ -554,7 +548,7 @@ const searchConfig: SearchOption[] = [
     },
     {
         id: "skill-point-check-plan",
-        title: "Enable Skill Plan Upon Meeting Threshold",
+        title: "Enable Skill Point Check Plan",
         description: "Purchase skills based on this plan's configuration",
         page: "Skills",
         parentId: "enable-skill-point-check",
@@ -576,38 +570,32 @@ const searchConfig: SearchOption[] = [
     // Skill Plan Settings — Skill Point Check
     // ============================================================
     {
-        id: "enable-skill-plan-skillPointCheck",
-        title: "Enable Skill Point Check Plan (Beta)",
-        description: "Purchase skills based on this plan's configuration",
-        page: "Skills",
-    },
-    {
         id: "enable-buy-negative-skills-SkillPlanSettingsSkillPointCheck",
         title: "Purchase All Negative Skills",
         description: "Attempt to buy all negative skills (e.g. Firm Conditions x)",
         page: "Skills",
-        parentId: "enable-skill-plan-skillPointCheck",
+        parentId: "skill-point-check-plan",
     },
     {
         id: "exclude-green-skills-SkillPlanSettingsSkillPointCheck",
         title: "Skip All Green Skills",
         description: "Exclude green stat-trigger skills",
         page: "Skills",
-        parentId: "enable-skill-plan-skillPointCheck",
+        parentId: "skill-point-check-plan",
     },
     {
         id: "exclude-red-skills-SkillPlanSettingsSkillPointCheck",
         title: "Skip All Red Skills (Debuffs)",
         description: "Exclude red debuff skills",
         page: "Skills",
-        parentId: "enable-skill-plan-skillPointCheck",
+        parentId: "skill-point-check-plan",
     },
     {
         id: "exclude-unique-skills-SkillPlanSettingsSkillPointCheck",
         title: "Skip All Unique Skills",
         description: "Exclude inherited unique (legacy) skills",
         page: "Skills",
-        parentId: "enable-skill-plan-skillPointCheck",
+        parentId: "skill-point-check-plan",
     },
 
     // ============================================================
@@ -615,7 +603,7 @@ const searchConfig: SearchOption[] = [
     // ============================================================
     {
         id: "enable-skill-plan-preFinals",
-        title: "Enable Pre-Finals Plan (Beta)",
+        title: "Enable Pre-Finals Plan",
         description: "Purchase skills based on this plan's configuration",
         page: "Skills",
     },
@@ -653,7 +641,7 @@ const searchConfig: SearchOption[] = [
     // ============================================================
     {
         id: "enable-skill-plan-careerComplete",
-        title: "Enable Career Complete Plan (Beta)",
+        title: "Enable Career Complete Plan",
         description: "Purchase skills based on this plan's configuration",
         page: "Skills",
     },
@@ -692,13 +680,21 @@ const searchConfig: SearchOption[] = [
     {
         id: "trackblazer-consecutive-races-limit",
         title: "Trackblazer Consecutive Races Limit",
-        description: "Sets the maximum number of consecutive races the bot is allowed to run in the Trackblazer scenario before stopping. Note that a -30 stat penalty can apply starting from 3 consecutive races.",
+        description:
+            "Sets the maximum number of consecutive races the bot is allowed to run in the Trackblazer scenario before stopping. Note that a -30 stat penalty can apply starting from 3 consecutive races.",
         page: "ScenarioOverridesSettings",
     },
     {
         id: "trackblazer-energy-threshold",
         title: "Trackblazer Energy Threshold",
         description: "The energy level below which the bot will attempt to use energy-restoring items in the Trackblazer scenario.",
+        page: "ScenarioOverridesSettings",
+    },
+    {
+        id: "trackblazer-force-train-energy-floor",
+        title: "Trackblazer Force-Train Energy Floor (Summer/Finale)",
+        description:
+            "During Summer and the Finale, the Trackblazer scenario normally always picks training. If energy is at or below this floor, the bot skips that override and falls through to the standard decision flow so items are not queued for a training with little hope for success.",
         page: "ScenarioOverridesSettings",
     },
     {
@@ -1052,14 +1048,14 @@ const searchConfig: SearchOption[] = [
     },
     {
         id: "llm-citation-char-cap",
-        title: "Context per citation",
+        title: "Context per citation (chars)",
         description:
             "How much of each retrieved doc section is fed to the chatbot LLM. Larger caps give the model more material to summarize from but consume more of the model's context window budget.",
         page: "LLMSettings",
     },
     {
         id: "llm-model-context-window",
-        title: "Model context window",
+        title: "Model context window (tokens)",
         description: "Engine KV-cache size for the chatbot LLM. 4096 tokens is the default; raising it requires the loaded model to support it. Changing this reloads the model on the next chat call.",
         page: "LLMSettings",
     },

@@ -116,6 +116,7 @@ const ScenarioOverridesSettings = () => {
     /** Reset Energy & Resources section sliders to defaults. */
     const resetEnergyDefaults = useCallback(() => {
         updateOverrideSetting("trackblazerEnergyThreshold", defaultSettings.scenarioOverrides.trackblazerEnergyThreshold)
+        updateOverrideSetting("trackblazerForceTrainEnergyFloor", defaultSettings.scenarioOverrides.trackblazerForceTrainEnergyFloor)
         updateOverrideSetting("trackblazerSkipBadMoodItemsBelowGain", defaultSettings.scenarioOverrides.trackblazerSkipBadMoodItemsBelowGain)
     }, [updateOverrideSetting, defaultSettings])
 
@@ -382,6 +383,24 @@ const ScenarioOverridesSettings = () => {
                                             showValue={true}
                                             showLabels={true}
                                             description="The energy level below which the bot will attempt to use energy-restoring items in the Trackblazer scenario."
+                                        />
+                                    </View>
+
+                                    <View style={{ padding: SPACING.md }}>
+                                        <CustomSlider
+                                            searchId="trackblazer-force-train-energy-floor"
+                                            value={scenarioOverrides.trackblazerForceTrainEnergyFloor}
+                                            placeholder={defaultSettings.scenarioOverrides.trackblazerForceTrainEnergyFloor}
+                                            onValueChange={(value) => updateOverrideSetting("trackblazerForceTrainEnergyFloor", value)}
+                                            onSlidingComplete={(value) => updateOverrideSetting("trackblazerForceTrainEnergyFloor", value)}
+                                            min={0}
+                                            max={50}
+                                            step={5}
+                                            label="Force-Train Energy Floor (Summer/Finale)"
+                                            labelUnit=""
+                                            showValue={true}
+                                            showLabels={true}
+                                            description="During Summer and the Finale, the Trackblazer scenario normally always picks training. If energy is at or below this floor, the bot skips that override and falls through to the standard decision flow so items are not queued for a training with little hope for success."
                                         />
                                     </View>
 

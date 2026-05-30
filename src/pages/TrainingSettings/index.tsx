@@ -1168,7 +1168,7 @@ const TrainingSettings = () => {
                                         </SearchableItem>
                                         <View style={[styles.sliderShell, { paddingTop: 0 }]}>
                                             <SearchableItem
-                                                id="classic-milestone-percent"
+                                                id="junior-milestone-percent"
                                                 title="End of Junior Year Milestone"
                                                 description="Percentage of the primary stat targets to aim for by the end of Junior Year."
                                             >
@@ -1190,7 +1190,7 @@ const TrainingSettings = () => {
                                     </View>
                                     <View style={styles.sliderShell}>
                                         <SearchableItem
-                                            id="senior-milestone-percent"
+                                            id="classic-milestone-percent"
                                             title="End of Classic Year Milestone"
                                             description="Percentage of the primary stat targets to aim for by the end of Classic Year."
                                         >
