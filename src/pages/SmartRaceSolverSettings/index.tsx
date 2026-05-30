@@ -631,7 +631,15 @@ const SmartRaceSolverSettings = () => {
                 chipCondition: { color: colors.textMuted, fontSize: 10, fontStyle: "italic", marginTop: 2 },
                 chipConditionActive: { color: colors.onBrand, fontSize: 10, fontStyle: "italic", marginTop: 2, opacity: 0.8 },
                 chipNoMatcherDot: { position: "absolute", top: 8, right: 8, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.destructive },
-                distanceChip: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, overflow: "hidden" },
+                distanceChip: {
+                    paddingHorizontal: SPACING.md,
+                    paddingVertical: SPACING.xs,
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    backgroundColor: colors.surface,
+                    overflow: "hidden",
+                },
                 distanceChipActive: { backgroundColor: colors.brand, borderColor: colors.brand },
                 distanceChipText: { color: colors.text, fontSize: 12, fontWeight: "600" },
                 distanceChipTextActive: { color: colors.onBrand, fontSize: 12, fontWeight: "700" },
@@ -1435,9 +1443,9 @@ const SmartRaceSolverSettings = () => {
                                                 })}
                                             </View>
                                             <Text style={[styles.inputDescription, { marginBottom: 0, marginTop: 8 }]}>
-                                                Stat Epitaphs (default) optimizes purely for stat-bearing epithets and ignores reward fans.{"\n\n"}Fans + Epitaphs adds a per-fan score so fan-rich races (G1s,
-                                                big G3s) become more attractive alongside epithets.{"\n\n"}Switching modes snaps the editable Race Value, Epithet Value, and Fan Weight sliders to a fresh
-                                                preset; you can still tune each slider afterward, and tapping the active mode again resets back to the preset.
+                                                Stat Epitaphs (default) optimizes purely for stat-bearing epithets and ignores reward fans.{"\n\n"}Fans + Epitaphs adds a per-fan score so fan-rich
+                                                races (G1s, big G3s) become more attractive alongside epithets.{"\n\n"}Switching modes snaps the editable Race Value, Epithet Value, and Fan Weight
+                                                sliders to a fresh preset; you can still tune each slider afterward, and tapping the active mode again resets back to the preset.
                                             </Text>
                                         </View>
                                     </SearchableItem>

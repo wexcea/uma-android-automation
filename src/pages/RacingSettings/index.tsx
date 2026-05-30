@@ -165,12 +165,7 @@ const RacingSettings = () => {
     const renderStrategyOptions = (current: string, onSelect: (value: RaceStrategy) => void) => (
         <View style={modalShellStyles.modalBodyList}>
             {RACE_STRATEGY_OPTIONS.map((option) => (
-                <ModalRadioRow
-                    key={option}
-                    label={option}
-                    selected={option === current}
-                    onPress={() => onSelect(option)}
-                />
+                <ModalRadioRow key={option} label={option} selected={option === current} onPress={() => onSelect(option)} />
             ))}
         </View>
     )
@@ -179,13 +174,7 @@ const RacingSettings = () => {
         <View style={styles.root}>
             <SearchPageProvider page="RacingSettings" scrollViewRef={scrollViewRef}>
                 <PageHeader title="Racing Settings" />
-                <ScrollView
-                    ref={scrollViewRef}
-                    nestedScrollEnabled={true}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ flexGrow: 1 }}
-                >
+                <ScrollView ref={scrollViewRef} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                     <View className="m-1">
                         {/* //////////////////////////////////////////////////////////////////////////////////////////////////
                             //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -441,7 +430,9 @@ const RacingSettings = () => {
                                     >
                                         <View style={{ padding: SPACING.md, gap: SPACING.xs }}>
                                             <Text style={[TYPE.body, { color: colors.text, fontWeight: "500" as const }]}>Custom Agenda Title (Optional)</Text>
-                                            <Text style={[TYPE.caption, { color: colors.textMuted }]}>If you renamed your agenda in-game, enter the custom title here. Leave blank to use the selected agenda name above.</Text>
+                                            <Text style={[TYPE.caption, { color: colors.textMuted }]}>
+                                                If you renamed your agenda in-game, enter the custom title here. Leave blank to use the selected agenda name above.
+                                            </Text>
                                             <TextInput
                                                 style={[styles.input, { marginTop: SPACING.sm }]}
                                                 value={customAgendaTitle}

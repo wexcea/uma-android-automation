@@ -56,7 +56,8 @@ const DEBUG_TESTS: DebugTestDescriptor[] = [
         key: "debugMode_startSingleTrainingOCRTest",
         searchId: "debug-single-training-ocr-test",
         title: "Start Single Training OCR Test",
-        description: "Disables normal bot operations and starts the single training OCR test. Only on the Training screen and tests the current training on display for stat gains and failure chances.",
+        description:
+            "Disables normal bot operations and starts the single training OCR test. Only on the Training screen and tests the current training on display for stat gains and failure chances.",
     },
     {
         key: "debugMode_startComprehensiveTrainingOCRTest",
@@ -68,7 +69,8 @@ const DEBUG_TESTS: DebugTestDescriptor[] = [
         key: "debugMode_startRaceListDetectionTest",
         searchId: "debug-race-list-detection-test",
         title: "Start Race List Detection Test",
-        description: "Disables normal bot operations and starts the Race List detection test. Only on the Race List screen and tests detecting the races with double star predictions currently on display.",
+        description:
+            "Disables normal bot operations and starts the Race List detection test. Only on the Race List screen and tests detecting the races with double star predictions currently on display.",
     },
     {
         key: "debugMode_startMainScreenUpdateTest",
@@ -87,25 +89,29 @@ const DEBUG_TESTS: DebugTestDescriptor[] = [
         key: "debugMode_startScrollBarDetectionTest",
         searchId: "debug-scrollbar-detection-test",
         title: "Start Scrollbar Detection Test",
-        description: "Disables normal bot operations and starts the Scrollbar detection test. Detects the scrollbar on the current screen and attempts to scroll it up and down to verify functionality.",
+        description:
+            "Disables normal bot operations and starts the Scrollbar detection test. Detects the scrollbar on the current screen and attempts to scroll it up and down to verify functionality.",
     },
     {
         key: "debugMode_startTrackblazerRaceSelectionTest",
         searchId: "debug-trackblazer-race-selection-test",
         title: "Start Trackblazer Race Selection Test",
-        description: "Disables normal bot operations and starts the Trackblazer race selection test. Navigates to the Race List if on the Main Screen and identifies the best race to run, including Rivals.",
+        description:
+            "Disables normal bot operations and starts the Trackblazer race selection test. Navigates to the Race List if on the Main Screen and identifies the best race to run, including Rivals.",
     },
     {
         key: "debugMode_startTrackblazerInventorySyncTest",
         searchId: "debug-trackblazer-inventory-sync-test",
         title: "Start Trackblazer Inventory Sync Test",
-        description: "Disables normal bot operations and starts the Trackblazer inventory sync test. Opens the Training Items dialog if on the Main Screen and logs inventory contents and quick-use intentions.",
+        description:
+            "Disables normal bot operations and starts the Trackblazer inventory sync test. Opens the Training Items dialog if on the Main Screen and logs inventory contents and quick-use intentions.",
     },
     {
         key: "debugMode_startTrackblazerBuyItemsTest",
         searchId: "debug-trackblazer-buy-items-test",
         title: "Start Trackblazer Buy Items Test",
-        description: "Disables normal bot operations and starts the Trackblazer buy items test. Opens the Shop if on the Main Screen and logs shop contents and purchase intentions without actually buying anything.",
+        description:
+            "Disables normal bot operations and starts the Trackblazer buy items test. Opens the Shop if on the Main Screen and logs shop contents and purchase intentions without actually buying anything.",
     },
 ]
 
@@ -323,7 +329,10 @@ const DebugSettings = () => {
                 refresh: checkAccessibilityStatus,
                 refreshing: isRefreshing,
                 openSettings: () => NativeModules.StartModule.openAccessibilitySettings(),
-                inlineWarning: accessibilityStatus?.enabled && !accessibilityStatus?.active ? "The service is enabled but it seems Android killed it in the background. Toggling it off and back on in settings will restart it." : null,
+                inlineWarning:
+                    accessibilityStatus?.enabled && !accessibilityStatus?.active
+                        ? "The service is enabled but it seems Android killed it in the background. Toggling it off and back on in settings will restart it."
+                        : null,
             },
             {
                 title: "Overlay Permission",
@@ -406,7 +415,11 @@ const DebugSettings = () => {
                                 />
                             </SearchableItem>
                         </Section>
-                        {debug.enableDebugMode && <WarningContainer style={{ marginTop: 0, marginBottom: SPACING.md }}>⚠️ Significantly extends the average runtime of the bot due to increased IO operations.</WarningContainer>}
+                        {debug.enableDebugMode && (
+                            <WarningContainer style={{ marginTop: 0, marginBottom: SPACING.md }}>
+                                ⚠️ Significantly extends the average runtime of the bot due to increased IO operations.
+                            </WarningContainer>
+                        )}
 
                         {/* //////////////////////////////////////////////////////////////////////////////////////////////////
                             //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -516,7 +529,11 @@ const DebugSettings = () => {
                                             label="Server Port"
                                             description="Port number for the log stream server. Change only if the default conflicts with another service."
                                         />
-                                        {deviceIp === "10.0.2.15" && <Text style={{ ...TYPE.caption, color: colors.warningText }}>Emulator detected - direct connection to {deviceIp} will fail. Use ADB port forwarding instead.</Text>}
+                                        {deviceIp === "10.0.2.15" && (
+                                            <Text style={{ ...TYPE.caption, color: colors.warningText }}>
+                                                Emulator detected - direct connection to {deviceIp} will fail. Use ADB port forwarding instead.
+                                            </Text>
+                                        )}
                                     </>
                                 )}
                             </View>
@@ -633,13 +650,12 @@ const DebugSettings = () => {
                             ) : (
                                 <>
                                     <View style={styles.wizardHeader}>
-                                        <Text style={styles.stepperLabel}>STEP {currentWizardStep + 1} OF {wizardSteps.length}</Text>
+                                        <Text style={styles.stepperLabel}>
+                                            STEP {currentWizardStep + 1} OF {wizardSteps.length}
+                                        </Text>
                                         <View style={styles.dotsRow}>
                                             {wizardSteps.map((_, idx) => (
-                                                <View
-                                                    key={idx}
-                                                    style={[styles.dot, idx === currentWizardStep ? styles.dotCurrent : idx < currentWizardStep ? styles.dotPast : styles.dotFuture]}
-                                                />
+                                                <View key={idx} style={[styles.dot, idx === currentWizardStep ? styles.dotCurrent : idx < currentWizardStep ? styles.dotPast : styles.dotFuture]} />
                                             ))}
                                         </View>
                                     </View>
@@ -674,7 +690,11 @@ const DebugSettings = () => {
                                         <CustomButton variant="ghost" disabled={currentWizardStep === 0} onPress={() => setCurrentWizardStep((s) => Math.max(0, s - 1))}>
                                             ← Back
                                         </CustomButton>
-                                        <CustomButton variant="ghost" disabled={currentWizardStep === wizardSteps.length - 1} onPress={() => setCurrentWizardStep((s) => Math.min(wizardSteps.length - 1, s + 1))}>
+                                        <CustomButton
+                                            variant="ghost"
+                                            disabled={currentWizardStep === wizardSteps.length - 1}
+                                            onPress={() => setCurrentWizardStep((s) => Math.min(wizardSteps.length - 1, s + 1))}
+                                        >
                                             Next →
                                         </CustomButton>
                                     </View>
@@ -720,7 +740,12 @@ const DebugSettings = () => {
                 header={
                     <View style={modalShellStyles.modalHeaderRow}>
                         <Text style={modalShellStyles.modalTitleMono}>RECORDING FRAME RATE</Text>
-                        <Pressable style={modalShellStyles.modalCloseChip} onPress={() => setFrameRatePickerOpen(false)} android_ripple={{ color: colors.ripple, foreground: true }} accessibilityLabel="Close">
+                        <Pressable
+                            style={modalShellStyles.modalCloseChip}
+                            onPress={() => setFrameRatePickerOpen(false)}
+                            android_ripple={{ color: colors.ripple, foreground: true }}
+                            accessibilityLabel="Close"
+                        >
                             <Ionicons name="close" size={18} color={colors.text} />
                         </Pressable>
                     </View>

@@ -194,12 +194,7 @@ const Settings = () => {
                 </Section>
 
                 <Section label="TOOLS">
-                    <Row
-                        title="Ask the Docs"
-                        description="On-device docs chat powered by the LLM engine."
-                        right={chevron}
-                        onPress={() => navigation.navigate("Chat" as never)}
-                    />
+                    <Row title="Ask the Docs" description="On-device docs chat powered by the LLM engine." right={chevron} onPress={() => navigation.navigate("Chat" as never)} />
                     <Row
                         title="Event Log Visualizer (Beta)"
                         description="Import logs and view a day-by-day timeline of actions."
@@ -377,35 +372,35 @@ const Settings = () => {
                         />
                     </View>
                 </Section>
-                        
+
                 <Section label="DATA MANAGEMENT">
                     <SearchableItem id="settings-management-title" title="Settings Management" description="Import and export settings from JSON file or access the app's data directory.">
                         <View style={{ padding: SPACING.md }}>
                             <View style={styles.managementGrid}>
-                            <Pressable style={styles.managementTile} android_ripple={{ color: colors.ripple, foreground: true }} onPress={handleImportSettings}>
-                                <Ionicons name="download-outline" size={24} color={colors.brand} />
-                                <Text style={styles.managementTileLabel}>Import</Text>
-                                <Text style={styles.managementTileCaption}>Load from JSON</Text>
-                            </Pressable>
-                            <Pressable style={styles.managementTile} android_ripple={{ color: colors.ripple, foreground: true }} onPress={handleExportSettings}>
-                                <Ionicons name="share-outline" size={24} color={colors.brand} />
-                                <Text style={styles.managementTileLabel}>Export</Text>
-                                <Text style={styles.managementTileCaption}>Save to JSON</Text>
-                            </Pressable>
-                            <Pressable style={styles.managementTile} android_ripple={{ color: colors.ripple, foreground: true }} onPress={openDataDirectory}>
-                                <Ionicons name="folder-outline" size={24} color={colors.brand} />
-                                <Text style={styles.managementTileLabel}>Data</Text>
-                                <Text style={styles.managementTileCaption}>Open folder</Text>
-                            </Pressable>
-                            <Pressable
-                                style={[styles.managementTile, styles.managementTileDanger]}
-                                android_ripple={{ color: colors.ripple, foreground: true }}
-                                onPress={() => setShowResetDialog(true)}
-                            >
-                                <Ionicons name="refresh-outline" size={24} color={colors.destructive} />
-                                <Text style={[styles.managementTileLabel, { color: colors.destructive }]}>Reset</Text>
-                                <Text style={styles.managementTileCaption}>Restore defaults</Text>
-                            </Pressable>
+                                <Pressable style={styles.managementTile} android_ripple={{ color: colors.ripple, foreground: true }} onPress={handleImportSettings}>
+                                    <Ionicons name="download-outline" size={24} color={colors.brand} />
+                                    <Text style={styles.managementTileLabel}>Import</Text>
+                                    <Text style={styles.managementTileCaption}>Load from JSON</Text>
+                                </Pressable>
+                                <Pressable style={styles.managementTile} android_ripple={{ color: colors.ripple, foreground: true }} onPress={handleExportSettings}>
+                                    <Ionicons name="share-outline" size={24} color={colors.brand} />
+                                    <Text style={styles.managementTileLabel}>Export</Text>
+                                    <Text style={styles.managementTileCaption}>Save to JSON</Text>
+                                </Pressable>
+                                <Pressable style={styles.managementTile} android_ripple={{ color: colors.ripple, foreground: true }} onPress={openDataDirectory}>
+                                    <Ionicons name="folder-outline" size={24} color={colors.brand} />
+                                    <Text style={styles.managementTileLabel}>Data</Text>
+                                    <Text style={styles.managementTileCaption}>Open folder</Text>
+                                </Pressable>
+                                <Pressable
+                                    style={[styles.managementTile, styles.managementTileDanger]}
+                                    android_ripple={{ color: colors.ripple, foreground: true }}
+                                    onPress={() => setShowResetDialog(true)}
+                                >
+                                    <Ionicons name="refresh-outline" size={24} color={colors.destructive} />
+                                    <Text style={[styles.managementTileLabel, { color: colors.destructive }]}>Reset</Text>
+                                    <Text style={styles.managementTileCaption}>Restore defaults</Text>
+                                </Pressable>
                             </View>
                         </View>
                     </SearchableItem>
@@ -430,13 +425,7 @@ const Settings = () => {
         <View style={styles.root}>
             <SearchPageProvider page="SettingsMain" scrollViewRef={scrollViewRef}>
                 <PageHeader title="Settings" searchOnRight rightComponent={<ThemeToggle />} />
-                <ScrollView
-                    ref={scrollViewRef}
-                    nestedScrollEnabled={true}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ flexGrow: 1 }}
-                >
+                <ScrollView ref={scrollViewRef} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
                     <View className="m-1">
                         {renderNavigationSections()}
                         {showHeavySections && renderMiscSettings()}

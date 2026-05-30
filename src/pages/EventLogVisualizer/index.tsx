@@ -217,11 +217,7 @@ const EventLogVisualizer: React.FC = () => {
                     </Tooltip>
                 </View>
 
-                <Row
-                    title="Show trigger lines"
-                    description="Display the log lines behind each action"
-                    right={<Switch checked={showTriggers} onCheckedChange={setShowTriggers} />}
-                />
+                <Row title="Show trigger lines" description="Display the log lines behind each action" right={<Switch checked={showTriggers} onCheckedChange={setShowTriggers} />} />
 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                     <View style={[styles.toggleContainer, { flex: 1 }]}>

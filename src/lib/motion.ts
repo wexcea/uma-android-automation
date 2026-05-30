@@ -18,3 +18,4 @@ export const MOTION = {
         easeInOut: Easing.bezier(0.65, 0, 0.35, 1),
     },
 } as const
+

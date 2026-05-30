@@ -404,68 +404,69 @@ const Chat = () => {
         <KeyboardAvoidingView style={styles.root} behavior="padding">
             <PageHeader title="Ask the Docs" />
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, paddingBottom: SPACING.xl }}>
-            <InfoCallout title="About" collapsible={false} style={{ marginVertical: SPACING.md }}>
-                <Text style={[TYPE.caption, { color: colors.textMuted }]}>
-                    Ask the Docs answers questions about this app by searching its bundled documentation and source code, all on-device.{"\n\n"}Responses are grounded in README.md, HOW_IT_WORKS.md, in-app option descriptions, and the app's Kotlin source code. Fully offline.
-                </Text>
-            </InfoCallout>
-            {activeModelFilename !== undefined && (
-                <Section label="Model">
-                    <View style={{ padding: SPACING.md }}>
-                        {downloadedModels.length > 0 ? (
-                            <View style={styles.modelSelectorRow}>
-                                <Text style={styles.modelStatus}>Model:</Text>
-                                <View style={styles.modelSelectorControl}>
-                                    <CustomSelect
-                                        options={downloadedModels.map((f) => ({ value: f, label: f }))}
-                                        value={activeModelFilename ?? undefined}
-                                        onValueChange={handleSelectModel}
-                                        placeholder="Select a model"
-                                        groupLabel="Downloaded models"
-                                    />
+                <InfoCallout title="About" collapsible={false} style={{ marginVertical: SPACING.md }}>
+                    <Text style={[TYPE.caption, { color: colors.textMuted }]}>
+                        Ask the Docs answers questions about this app by searching its bundled documentation and source code, all on-device.{"\n\n"}Responses are grounded in README.md,
+                        HOW_IT_WORKS.md, in-app option descriptions, and the app's Kotlin source code. Fully offline.
+                    </Text>
+                </InfoCallout>
+                {activeModelFilename !== undefined && (
+                    <Section label="Model">
+                        <View style={{ padding: SPACING.md }}>
+                            {downloadedModels.length > 0 ? (
+                                <View style={styles.modelSelectorRow}>
+                                    <Text style={styles.modelStatus}>Model:</Text>
+                                    <View style={styles.modelSelectorControl}>
+                                        <CustomSelect
+                                            options={downloadedModels.map((f) => ({ value: f, label: f }))}
+                                            value={activeModelFilename ?? undefined}
+                                            onValueChange={handleSelectModel}
+                                            placeholder="Select a model"
+                                            groupLabel="Downloaded models"
+                                        />
+                                    </View>
                                 </View>
-                            </View>
-                        ) : (
-                            <Text style={styles.modelStatusInactive}>No model · retrieve-only mode</Text>
-                        )}
-                    </View>
-                </Section>
-            )}
+                            ) : (
+                                <Text style={styles.modelStatusInactive}>No model · retrieve-only mode</Text>
+                            )}
+                        </View>
+                    </Section>
+                )}
 
-            {embedderReady === false ? (
-                <Section label="Setup">
-                    <View style={{ padding: SPACING.md }}>
-                        <Text style={styles.embedderCtaTitle}>Engine not installed</Text>
-                        <Text style={styles.embedderCtaBody}>
-                            Ask the Docs needs to download a small embedder (~22 MB) before it can search the documentation. Open LLM Settings to start the download.
-                        </Text>
-                    </View>
-                </Section>
-            ) : (
-                <Section label="Ask a Question">
-                    <View style={{ padding: SPACING.md, gap: SPACING.sm }}>
-                        <TextInput
-                            style={styles.input}
-                            value={query}
-                            onChangeText={setQuery}
-                            placeholder="Ask a question about the app..."
-                            placeholderTextColor={colors.textMuted}
-                            multiline
-                            textAlignVertical="top"
-                            editable={!isSearching}
-                        />
-                        {isSearching ? (
-                            <CustomButton variant="destructive" onPress={handleStop} disabled={isAborting} isLoading={true}>
-                                {isAborting ? "Stopping..." : "Stop"}
-                            </CustomButton>
-                        ) : (
-                            <CustomButton variant="primary" onPress={handleSearch} disabled={query.trim().length === 0 || !tuning}>
-                                Ask
-                            </CustomButton>
-                        )}
-                    </View>
-                </Section>
-            )}
+                {embedderReady === false ? (
+                    <Section label="Setup">
+                        <View style={{ padding: SPACING.md }}>
+                            <Text style={styles.embedderCtaTitle}>Engine not installed</Text>
+                            <Text style={styles.embedderCtaBody}>
+                                Ask the Docs needs to download a small embedder (~22 MB) before it can search the documentation. Open LLM Settings to start the download.
+                            </Text>
+                        </View>
+                    </Section>
+                ) : (
+                    <Section label="Ask a Question">
+                        <View style={{ padding: SPACING.md, gap: SPACING.sm }}>
+                            <TextInput
+                                style={styles.input}
+                                value={query}
+                                onChangeText={setQuery}
+                                placeholder="Ask a question about the app..."
+                                placeholderTextColor={colors.textMuted}
+                                multiline
+                                textAlignVertical="top"
+                                editable={!isSearching}
+                            />
+                            {isSearching ? (
+                                <CustomButton variant="destructive" onPress={handleStop} disabled={isAborting} isLoading={true}>
+                                    {isAborting ? "Stopping..." : "Stop"}
+                                </CustomButton>
+                            ) : (
+                                <CustomButton variant="primary" onPress={handleSearch} disabled={query.trim().length === 0 || !tuning}>
+                                    Ask
+                                </CustomButton>
+                            )}
+                        </View>
+                    </Section>
+                )}
 
                 {history.length > 0 && (
                     <Section

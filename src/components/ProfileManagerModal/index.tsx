@@ -367,18 +367,10 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                                                 autoCapitalize="words"
                                                 autoCorrect={false}
                                             />
-                                            <Pressable
-                                                style={[styles.renameChip, styles.renameSave]}
-                                                onPress={handleUpdateProfile}
-                                                android_ripple={{ color: colors.ripple, foreground: true }}
-                                            >
+                                            <Pressable style={[styles.renameChip, styles.renameSave]} onPress={handleUpdateProfile} android_ripple={{ color: colors.ripple, foreground: true }}>
                                                 <Text style={[styles.renameChipText, { color: colors.onBrand }]}>Save</Text>
                                             </Pressable>
-                                            <Pressable
-                                                style={[styles.renameChip, styles.renameCancel]}
-                                                onPress={handleCancelEdit}
-                                                android_ripple={{ color: colors.ripple, foreground: true }}
-                                            >
+                                            <Pressable style={[styles.renameChip, styles.renameCancel]} onPress={handleCancelEdit} android_ripple={{ color: colors.ripple, foreground: true }}>
                                                 <Text style={[styles.renameChipText, { color: colors.text }]}>Cancel</Text>
                                             </Pressable>
                                         </View>
@@ -393,11 +385,7 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                                                 ) : null}
                                             </View>
                                             <View style={styles.actionsRow}>
-                                                <Pressable
-                                                    style={styles.action}
-                                                    onPress={() => handleEditProfile(profile.id)}
-                                                    android_ripple={{ color: colors.ripple, foreground: true }}
-                                                >
+                                                <Pressable style={styles.action} onPress={() => handleEditProfile(profile.id)} android_ripple={{ color: colors.ripple, foreground: true }}>
                                                     <Text style={styles.actionText}>Rename</Text>
                                                 </Pressable>
                                                 {onOverwriteSettings ? (
@@ -445,20 +433,10 @@ const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
                 </View>
                 <Text style={styles.deleteBody}>Are you sure you want to delete this profile? This action cannot be undone.</Text>
                 <View style={styles.deleteButtons}>
-                    <Pressable
-                        onPress={handleDeleteCancel}
-                        style={[styles.deleteBtn, styles.deleteBtnCancel]}
-                        android_ripple={{ color: colors.ripple, foreground: true }}
-                        accessibilityRole="button"
-                    >
+                    <Pressable onPress={handleDeleteCancel} style={[styles.deleteBtn, styles.deleteBtnCancel]} android_ripple={{ color: colors.ripple, foreground: true }} accessibilityRole="button">
                         <Text style={styles.deleteBtnText}>Cancel</Text>
                     </Pressable>
-                    <Pressable
-                        onPress={handleDeleteConfirm}
-                        style={[styles.deleteBtn, styles.deleteBtnConfirm]}
-                        android_ripple={{ color: colors.ripple, foreground: true }}
-                        accessibilityRole="button"
-                    >
+                    <Pressable onPress={handleDeleteConfirm} style={[styles.deleteBtn, styles.deleteBtnConfirm]} android_ripple={{ color: colors.ripple, foreground: true }} accessibilityRole="button">
                         <Text style={[styles.deleteBtnText, styles.deleteBtnTextConfirm]}>Delete</Text>
                     </Pressable>
                 </View>

@@ -122,15 +122,7 @@ const DraggablePriorityList = ({ items, selectedItems, onSelectionChange, onOrde
         <View style={style}>
             <Text style={styles.tip}>DRAG TO REORDER - TOP = HIGHEST</Text>
 
-            {selectedData.length > 0 ? (
-                <DragList
-                    data={selectedData}
-                    keyExtractor={(item) => item.id}
-                    onReordered={handleReordered}
-                    renderItem={renderSelectedItem}
-                    scrollEnabled={false}
-                />
-            ) : null}
+            {selectedData.length > 0 ? <DragList data={selectedData} keyExtractor={(item) => item.id} onReordered={handleReordered} renderItem={renderSelectedItem} scrollEnabled={false} /> : null}
 
             {selectedData.length > 0 && unselected.length > 0 ? <View style={styles.separator} /> : null}
 

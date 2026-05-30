@@ -459,7 +459,7 @@ const MessageLog = () => {
 
     /**
      * Handle content size changes to update content height.
-     * @param width The width of the content.
+     * @param _width The width of the content (unused).
      * @param height The height of the content.
      */
     const handleContentSizeChange = useCallback((_width: number, height: number) => {

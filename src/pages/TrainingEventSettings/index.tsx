@@ -406,23 +406,26 @@ const TrainingEventSettings = () => {
      * Render a single event item for the selection list.
      * @param event The event data to render.
      */
-    const renderEventItem = useCallback(({ item: event }: { item: { key: string; characterOrSupport: string; eventName: string; options: string[]; type: "character" | "support" | "scenario" } }) => {
-        return (
-            <Pressable
-                style={styles.eventRow}
-                android_ripple={{ color: colors.ripple, foreground: true }}
-                accessibilityRole="button"
-                onPress={() => {
-                    setSelectedEventForOption(event)
-                    setEventOverrideModalVisible(false)
-                    setOptionSelectionModalVisible(true)
-                }}
-            >
-                <Text style={styles.eventTag}>{event.characterOrSupport.toUpperCase()}</Text>
-                <Text style={styles.eventName}>{event.eventName}</Text>
-            </Pressable>
-        )
-    }, [colors])
+    const renderEventItem = useCallback(
+        ({ item: event }: { item: { key: string; characterOrSupport: string; eventName: string; options: string[]; type: "character" | "support" | "scenario" } }) => {
+            return (
+                <Pressable
+                    style={styles.eventRow}
+                    android_ripple={{ color: colors.ripple, foreground: true }}
+                    accessibilityRole="button"
+                    onPress={() => {
+                        setSelectedEventForOption(event)
+                        setEventOverrideModalVisible(false)
+                        setOptionSelectionModalVisible(true)
+                    }}
+                >
+                    <Text style={styles.eventTag}>{event.characterOrSupport.toUpperCase()}</Text>
+                    <Text style={styles.eventName}>{event.eventName}</Text>
+                </Pressable>
+            )
+        },
+        [colors]
+    )
 
     /**
      * Extract a unique key for an event item in the list.

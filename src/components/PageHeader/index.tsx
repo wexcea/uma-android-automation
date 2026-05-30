@@ -336,12 +336,7 @@ const PageHeader = ({ title, showHomeButton = true, titleComponent, leftComponen
             <View style={styles.header}>
                 <View style={[styles.headerLeft, { flex: 1, minWidth: 0 }]}>
                     {/* Hamburger menu button */}
-                    <Pressable
-                        onPress={openDrawer}
-                        style={styles.menuButton}
-                        android_ripple={{ color: colors.ripple, foreground: true }}
-                        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                    >
+                    <Pressable onPress={openDrawer} style={styles.menuButton} android_ripple={{ color: colors.ripple, foreground: true }} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                         <Ionicons name="menu" size={28} color={colors.text} />
                     </Pressable>
 

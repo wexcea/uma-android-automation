@@ -58,18 +58,9 @@ function Switch(props: SwitchPrimitives.RootProps & React.RefAttributes<SwitchPr
     )
 
     return (
-        <SwitchPrimitives.Root
-            checked={checked}
-            disabled={disabled}
-            style={[styles.root, checked ? styles.rootOn : styles.rootOff, disabled && { opacity: 0.5 }]}
-            {...rest}
-        >
+        <SwitchPrimitives.Root checked={checked} disabled={disabled} style={[styles.root, checked ? styles.rootOn : styles.rootOff, disabled && { opacity: 0.5 }]} {...rest}>
             <SwitchPrimitives.Thumb
-                style={[
-                    styles.thumb,
-                    checked ? styles.thumbOn : styles.thumbOff,
-                    Platform.OS === "web" ? ({ transitionProperty: "transform", transitionDuration: "150ms" } as object) : undefined,
-                ]}
+                style={[styles.thumb, checked ? styles.thumbOn : styles.thumbOff, Platform.OS === "web" ? ({ transitionProperty: "transform", transitionDuration: "150ms" } as object) : undefined]}
             />
         </SwitchPrimitives.Root>
     )

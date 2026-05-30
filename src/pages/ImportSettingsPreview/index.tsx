@@ -159,7 +159,6 @@ const ImportSettingsPreview = () => {
         <View style={styles.root}>
             <PageHeader title="Import Settings Preview" />
             <ScrollView style={styles.content} showsVerticalScrollIndicator={true}>
-
                 {changes.length === 0 ? (
                     <View style={styles.noChangesContainer}>
                         <Text style={styles.noChangesText}>No settings would be changed. The imported settings are identical to your current settings.</Text>

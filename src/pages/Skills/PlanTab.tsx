@@ -267,7 +267,8 @@ const PlanTab: React.FC<PlanTabProps> = ({ planKey }) => {
             <Section label="Skill Type Filters">
                 <View style={{ padding: SPACING.md }}>
                     <Text style={styles.sectionDescription}>
-                        Exclude entire skill color categories from purchase. Useful when the Spending Strategies "Best Skills First" or "Optimize Rank" is picking unwanted skills like debuffs or stat boosts.
+                        Exclude entire skill color categories from purchase. Useful when the Spending Strategies "Best Skills First" or "Optimize Rank" is picking unwanted skills like debuffs or stat
+                        boosts.
                     </Text>
                 </View>
                 <SearchableItem id={`exclude-green-skills-${config.name}`} title="Skip All Green Skills" description="Exclude green stat-trigger skills">
@@ -336,11 +337,7 @@ const PlanTab: React.FC<PlanTabProps> = ({ planKey }) => {
                     </View>
 
                     <View style={styles.modeTabsRow}>
-                        <Pressable
-                            onPress={() => setSelectionMode("plan")}
-                            style={[styles.modeTab, isPlanMode && styles.modeTabActive]}
-                            android_ripple={{ color: colors.ripple, foreground: true }}
-                        >
+                        <Pressable onPress={() => setSelectionMode("plan")} style={[styles.modeTab, isPlanMode && styles.modeTabActive]} android_ripple={{ color: colors.ripple, foreground: true }}>
                             <Text style={[styles.modeTabLabel, isPlanMode && styles.modeTabLabelActive]}>
                                 Plan (<Text style={TYPE.monoValue}>{planIds.length}</Text>)
                             </Text>

@@ -21,7 +21,6 @@ import HeroStatusCard, { HeroStatus } from "../../components/HeroStatusCard"
 import { useProfileContext, DEFAULT_PROFILE_NAME } from "../../context/ProfileContext"
 import { SPACING } from "../../lib/spacing"
 
-
 const styles = StyleSheet.create({
     root: {
         flex: 1,

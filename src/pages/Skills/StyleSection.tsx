@@ -104,12 +104,7 @@ const StyleSection: React.FC = () => {
             header={
                 <View style={modalShellStyles.modalHeaderRow}>
                     <Text style={modalShellStyles.modalTitleMono}>{titleMono}</Text>
-                    <Pressable
-                        style={modalShellStyles.modalCloseChip}
-                        onPress={() => setOpenPicker(null)}
-                        android_ripple={{ color: colors.ripple, foreground: true }}
-                        accessibilityLabel="Close"
-                    >
+                    <Pressable style={modalShellStyles.modalCloseChip} onPress={() => setOpenPicker(null)} android_ripple={{ color: colors.ripple, foreground: true }} accessibilityLabel="Close">
                         <Ionicons name="close" size={18} color={colors.text} />
                     </Pressable>
                 </View>
@@ -135,11 +130,7 @@ const StyleSection: React.FC = () => {
     return (
         <>
             <Section label="Style">
-                <SearchableItem
-                    id="skill-plan-running-style"
-                    title="Running Style for Skills"
-                    description="Dictates which skills are considered for purchase based on the preferred running style."
-                >
+                <SearchableItem id="skill-plan-running-style" title="Running Style for Skills" description="Dictates which skills are considered for purchase based on the preferred running style.">
                     <Row
                         title="Running Style"
                         description="Dictates which skills are considered for purchase based on the preferred running style."
@@ -147,11 +138,7 @@ const StyleSection: React.FC = () => {
                         right={chipFor(runningChip)}
                     />
                 </SearchableItem>
-                <SearchableItem
-                    id="preferred-distance-override"
-                    title="Track Distance for Skills"
-                    description="Dictates which skills are considered for purchase based on the track distance."
-                >
+                <SearchableItem id="preferred-distance-override" title="Track Distance for Skills" description="Dictates which skills are considered for purchase based on the track distance.">
                     <Row
                         title="Track Distance"
                         description="Dictates which skills are considered for purchase based on the track distance."
@@ -159,11 +146,7 @@ const StyleSection: React.FC = () => {
                         right={chipFor(distanceChip)}
                     />
                 </SearchableItem>
-                <SearchableItem
-                    id="preferred-track-surface"
-                    title="Track Surface for Skills"
-                    description="Dictates which skills are considered for purchase based on the terrain."
-                >
+                <SearchableItem id="preferred-track-surface" title="Track Surface for Skills" description="Dictates which skills are considered for purchase based on the terrain.">
                     <Row
                         title="Track Surface"
                         description="Dictates which skills are considered for purchase based on the terrain."
