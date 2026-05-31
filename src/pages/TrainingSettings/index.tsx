@@ -29,6 +29,7 @@ import { RADII } from "../../lib/radii"
 import { MOTION } from "../../lib/motion"
 import { ROW_PADDING_Y } from "../../lib/density"
 import Ionicons from "@react-native-vector-icons/ionicons"
+import { TrainingScoringSandbox } from "../../components/TrainingScoringSandbox"
 
 /**
  * The Training Settings page.
@@ -61,6 +62,7 @@ const TrainingSettings = () => {
     }, [])
     const [snackbarVisible, setSnackbarVisible] = useState(false)
     const [snackbarMessage, setSnackbarMessage] = useState("")
+    const [scoringSandboxOpen, setScoringSandboxOpen] = useState(false)
 
     // Initialize local state from settings, with fallback to defaults.
     const [statPrioritizationItems, setStatPrioritizationItems] = useState<string[]>(() =>
@@ -1171,11 +1173,16 @@ const TrainingSettings = () => {
                                         </SearchableItem>
                                     </View>
                                 </Section>
+
+                                <Section label="Scoring Sandbox">
+                                    <Row title="Test scoring in sandbox" description="Open a modal to preview how the training scoring formula reacts to synthetic inputs." onPress={() => setScoringSandboxOpen(true)} />
+                                </Section>
                             </>
                         )}
                     </View>
                 </ScrollView>
             </SearchPageProvider>
+            <TrainingScoringSandbox open={scoringSandboxOpen} onClose={() => setScoringSandboxOpen(false)} />
             <Snackbar
                 visible={snackbarVisible}
                 onDismiss={() => setSnackbarVisible(false)}
