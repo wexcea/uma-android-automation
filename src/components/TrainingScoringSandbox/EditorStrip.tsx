@@ -139,13 +139,7 @@ export function EditorStrip({ scenario, dispatch }: EditorStripProps): React.Rea
                 </View>
                 <View style={styles.group}>
                     <Text style={styles.label}>Orange</Text>
-                    <Stepper
-                        value={t.friendBars.orange}
-                        onChange={(v) => dispatch({ type: "set-friend-bar", training: selected, tier: "orange", count: v })}
-                        min={0}
-                        step={1}
-                        accent="orange"
-                    />
+                    <Stepper value={t.friendBars.orange} onChange={(v) => dispatch({ type: "set-friend-bar", training: selected, tier: "orange", count: v })} min={0} step={1} accent="orange" />
                 </View>
             </View>
         </View>

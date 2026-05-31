@@ -106,25 +106,13 @@ export function Stepper(props: StepperProps): React.ReactElement {
 
     return (
         <View style={styles.root} testID={testID}>
-            <Pressable
-                accessibilityLabel="Decrease"
-                accessibilityRole="button"
-                disabled={minusDisabled}
-                onPress={() => onChange(value - step)}
-                style={styles.button}
-            >
+            <Pressable accessibilityLabel="Decrease" accessibilityRole="button" disabled={minusDisabled} onPress={() => onChange(value - step)} style={styles.button}>
                 <Text style={[styles.buttonLabel, minusDisabled && styles.buttonLabelDisabled]}>-</Text>
             </Pressable>
             <View style={styles.chip}>
                 <Text style={styles.chipLabel}>{String(value)}</Text>
             </View>
-            <Pressable
-                accessibilityLabel="Increase"
-                accessibilityRole="button"
-                disabled={plusDisabled}
-                onPress={() => onChange(value + step)}
-                style={styles.button}
-            >
+            <Pressable accessibilityLabel="Increase" accessibilityRole="button" disabled={plusDisabled} onPress={() => onChange(value + step)} style={styles.button}>
                 <Text style={[styles.buttonLabel, plusDisabled && styles.buttonLabelDisabled]}>+</Text>
             </Pressable>
         </View>

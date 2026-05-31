@@ -1175,7 +1175,11 @@ const TrainingSettings = () => {
                                 </Section>
 
                                 <Section label="Scoring Sandbox">
-                                    <Row title="Test scoring in sandbox" description="Open a modal to preview how the training scoring formula reacts to synthetic inputs." onPress={() => setScoringSandboxOpen(true)} />
+                                    <Row
+                                        title="Test scoring in sandbox"
+                                        description="Open a modal to preview how the training scoring formula reacts to synthetic inputs."
+                                        onPress={() => setScoringSandboxOpen(true)}
+                                    />
                                 </Section>
                             </>
                         )}
