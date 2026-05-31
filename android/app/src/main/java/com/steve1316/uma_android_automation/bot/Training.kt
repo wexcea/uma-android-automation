@@ -459,36 +459,40 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
          */
         fun scoringConstantsFromMap(settings: Map<String, Any?>, defaults: TrainingScoringConstants = TrainingScoringConstants()): TrainingScoringConstants {
             fun d(key: String, fallback: Double): Double = (settings[key] as? Number)?.toDouble()?.takeIf { it.isFinite() } ?: fallback
+
             fun i(key: String, fallback: Int): Int = (settings[key] as? Number)?.toInt() ?: fallback
             return defaults.copy(
-                ratioBreakpoints = listOf(
-                    d("ratioBreakpoint1", defaults.ratioBreakpoints[0]),
-                    d("ratioBreakpoint2", defaults.ratioBreakpoints[1]),
-                    d("ratioBreakpoint3", defaults.ratioBreakpoints[2]),
-                    d("ratioBreakpoint4", defaults.ratioBreakpoints[3]),
-                    d("ratioBreakpoint5", defaults.ratioBreakpoints[4]),
-                    d("ratioBreakpoint6", defaults.ratioBreakpoints[5]),
-                ),
-                ratioValues = listOf(
-                    d("ratioValue1", defaults.ratioValues[0]),
-                    d("ratioValue2", defaults.ratioValues[1]),
-                    d("ratioValue3", defaults.ratioValues[2]),
-                    d("ratioValue4", defaults.ratioValues[3]),
-                    d("ratioValue5", defaults.ratioValues[4]),
-                    d("ratioValue6", defaults.ratioValues[5]),
-                    d("ratioValue7", defaults.ratioValues[6]),
-                ),
+                ratioBreakpoints =
+                    listOf(
+                        d("ratioBreakpoint1", defaults.ratioBreakpoints[0]),
+                        d("ratioBreakpoint2", defaults.ratioBreakpoints[1]),
+                        d("ratioBreakpoint3", defaults.ratioBreakpoints[2]),
+                        d("ratioBreakpoint4", defaults.ratioBreakpoints[3]),
+                        d("ratioBreakpoint5", defaults.ratioBreakpoints[4]),
+                        d("ratioBreakpoint6", defaults.ratioBreakpoints[5]),
+                    ),
+                ratioValues =
+                    listOf(
+                        d("ratioValue1", defaults.ratioValues[0]),
+                        d("ratioValue2", defaults.ratioValues[1]),
+                        d("ratioValue3", defaults.ratioValues[2]),
+                        d("ratioValue4", defaults.ratioValues[3]),
+                        d("ratioValue5", defaults.ratioValues[4]),
+                        d("ratioValue6", defaults.ratioValues[5]),
+                        d("ratioValue7", defaults.ratioValues[6]),
+                    ),
                 priorityCoefficient = d("priorityCoefficient", defaults.priorityCoefficient),
                 levelBoostRank1Factor = d("levelBoostRank1Factor", defaults.levelBoostRank1Factor),
                 levelBoostRank2Factor = d("levelBoostRank2Factor", defaults.levelBoostRank2Factor),
                 levelBoostRank3Factor = d("levelBoostRank3Factor", defaults.levelBoostRank3Factor),
-                mainStatThresholds = mapOf(
-                    StatName.SPEED to i("mainStatThresholdSpeed", defaults.mainStatThresholds[StatName.SPEED]!!),
-                    StatName.STAMINA to i("mainStatThresholdStamina", defaults.mainStatThresholds[StatName.STAMINA]!!),
-                    StatName.POWER to i("mainStatThresholdPower", defaults.mainStatThresholds[StatName.POWER]!!),
-                    StatName.GUTS to i("mainStatThresholdGuts", defaults.mainStatThresholds[StatName.GUTS]!!),
-                    StatName.WIT to i("mainStatThresholdWit", defaults.mainStatThresholds[StatName.WIT]!!),
-                ),
+                mainStatThresholds =
+                    mapOf(
+                        StatName.SPEED to i("mainStatThresholdSpeed", defaults.mainStatThresholds[StatName.SPEED]!!),
+                        StatName.STAMINA to i("mainStatThresholdStamina", defaults.mainStatThresholds[StatName.STAMINA]!!),
+                        StatName.POWER to i("mainStatThresholdPower", defaults.mainStatThresholds[StatName.POWER]!!),
+                        StatName.GUTS to i("mainStatThresholdGuts", defaults.mainStatThresholds[StatName.GUTS]!!),
+                        StatName.WIT to i("mainStatThresholdWit", defaults.mainStatThresholds[StatName.WIT]!!),
+                    ),
                 mainStatBonusMagnitude = d("mainStatBonusMagnitude", defaults.mainStatBonusMagnitude),
                 relationshipOrangeValue = d("relationshipOrangeValue", defaults.relationshipOrangeValue),
                 relationshipGreenValue = d("relationshipGreenValue", defaults.relationshipGreenValue),
@@ -522,18 +526,48 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
          */
         fun scoringConstantsFromSettings(): TrainingScoringConstants {
             val defaults = TrainingScoringConstants()
-            val keys = listOf(
-                "ratioBreakpoint1", "ratioBreakpoint2", "ratioBreakpoint3", "ratioBreakpoint4", "ratioBreakpoint5", "ratioBreakpoint6",
-                "ratioValue1", "ratioValue2", "ratioValue3", "ratioValue4", "ratioValue5", "ratioValue6", "ratioValue7",
-                "priorityCoefficient", "levelBoostRank1Factor", "levelBoostRank2Factor", "levelBoostRank3Factor",
-                "mainStatBonusMagnitude", "relationshipOrangeValue", "relationshipGreenValue", "relationshipBlueValue",
-                "relationshipDiminishingFactor", "relationshipEarlyGameBonus", "relationshipTrainerSupportBonus",
-                "skillHintPerHintScore", "skillHintOverrideScore",
-                "statWeightWithBars", "statWeightWithoutBars", "relationshipWeightWithBars", "miscWeight",
-                "juniorEarlyGameFlatBonus", "relationshipScale",
-                "rainbowMultiplierEnabled", "rainbowMultiplierDisabled", "rainbowPerInstanceBase", "rainbowPerInstanceDecay",
-                "anticipatoryMinFillPercent", "anticipatoryCoefficient", "anticipatoryCap",
-            )
+            val keys =
+                listOf(
+                    "ratioBreakpoint1",
+                    "ratioBreakpoint2",
+                    "ratioBreakpoint3",
+                    "ratioBreakpoint4",
+                    "ratioBreakpoint5",
+                    "ratioBreakpoint6",
+                    "ratioValue1",
+                    "ratioValue2",
+                    "ratioValue3",
+                    "ratioValue4",
+                    "ratioValue5",
+                    "ratioValue6",
+                    "ratioValue7",
+                    "priorityCoefficient",
+                    "levelBoostRank1Factor",
+                    "levelBoostRank2Factor",
+                    "levelBoostRank3Factor",
+                    "mainStatBonusMagnitude",
+                    "relationshipOrangeValue",
+                    "relationshipGreenValue",
+                    "relationshipBlueValue",
+                    "relationshipDiminishingFactor",
+                    "relationshipEarlyGameBonus",
+                    "relationshipTrainerSupportBonus",
+                    "skillHintPerHintScore",
+                    "skillHintOverrideScore",
+                    "statWeightWithBars",
+                    "statWeightWithoutBars",
+                    "relationshipWeightWithBars",
+                    "miscWeight",
+                    "juniorEarlyGameFlatBonus",
+                    "relationshipScale",
+                    "rainbowMultiplierEnabled",
+                    "rainbowMultiplierDisabled",
+                    "rainbowPerInstanceBase",
+                    "rainbowPerInstanceDecay",
+                    "anticipatoryMinFillPercent",
+                    "anticipatoryCoefficient",
+                    "anticipatoryCap",
+                )
             val intKeys = listOf("mainStatThresholdSpeed", "mainStatThresholdStamina", "mainStatThresholdPower", "mainStatThresholdGuts", "mainStatThresholdWit")
             // Use NaN as the per-key default so we can distinguish "user set it" from "missing"; scoringConstantsFromMap drops NaN via isFinite check.
             val map: MutableMap<String, Any?> = mutableMapOf()

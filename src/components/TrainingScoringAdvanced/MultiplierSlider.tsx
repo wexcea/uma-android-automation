@@ -44,16 +44,7 @@ export function MultiplierSlider({ entry, value, onChange }: MultiplierSliderPro
                     <Text style={[TYPE.monoValue, chipTextStyle]}>{formatValue(value, entry.step)}</Text>
                 </View>
             </View>
-            <CustomSlider
-                value={value}
-                onValueChange={onChange}
-                min={entry.min}
-                max={entry.max}
-                step={entry.step}
-                description={entry.description}
-                showValue={false}
-                showLabels={false}
-            />
+            <CustomSlider value={value} onValueChange={onChange} min={entry.min} max={entry.max} step={entry.step} description={entry.description} showValue={false} showLabels={false} />
         </View>
     )
 }
