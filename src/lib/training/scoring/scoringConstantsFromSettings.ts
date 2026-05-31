@@ -17,8 +17,9 @@ function num(settings: Settings, key: string, fallback: number): number {
 }
 
 /**
- * Build a `TrainingScoringConstants` from a settings record. Any missing key falls back to the matching field in `DEFAULT_TRAINING_SCORING_CONSTANTS`. Mirrors the Kotlin
- * `scoringConstantsFromSettings()` companion in `Training.kt`, using the same `"training"` namespace keys that `SettingsHelper` reads on the Android side.
+ * Build a `TrainingScoringConstants` from a settings record. Any missing key falls back to the matching field in `DEFAULT_TRAINING_SCORING_CONSTANTS`. The Kotlin
+ * counterpart (`scoringConstantsFromSettings()` companion in `Training.kt`) does not exist yet -- it will land alongside the Advanced settings UI and must use the
+ * same `"training"` namespace keys that this function reads.
  *
  * @param settings Settings record (typically loaded from AsyncStorage).
  * @returns A fully populated `TrainingScoringConstants` mirroring the user's saved overrides.
