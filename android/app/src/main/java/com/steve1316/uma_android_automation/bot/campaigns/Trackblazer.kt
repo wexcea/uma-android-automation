@@ -1240,6 +1240,16 @@ class Trackblazer(game: Game) : Campaign(game) {
         // charm only fires after analyzeTrainings produces a selected training with measured
         // failureChance >= 20, so it cannot protect a turn whose analysis is the thing at risk.
         if (trainee.energy <= 10 && consecutiveRaceCount >= 3) {
+            // Scheduled and mandatory races must always run. They take priority over this low-energy guard so an agenda race is never skipped.
+            val sourceBitmap = game.imageUtils.getSourceBitmap()
+            val bIsScheduledRaceDay = LabelScheduledRace.check(game.imageUtils, sourceBitmap = sourceBitmap)
+            val bIsMandatoryRaceDay = IconRaceDayRibbon.check(game.imageUtils, sourceBitmap = sourceBitmap) || IconGoalRibbon.check(game.imageUtils, sourceBitmap = sourceBitmap)
+            if (bIsScheduledRaceDay || bIsMandatoryRaceDay) {
+                MessageLog.i(TAG, "[TRACKBLAZER] Scheduled/mandatory race detected at low energy. Racing anyway - critical energy and consecutive-race limits are ignored for scheduled races.")
+                decisionTracer.recordActionChoice(MainScreenAction.RACE, "Scheduled/mandatory race overrides low-energy guard - scheduled races always run")
+                return MainScreenAction.RACE
+            }
+
             // Before resting, attempt to use a conserved energy item for emergency race recovery.
             val conserveItem = energyItemConservationOrder.firstOrNull { (currentInventory[it] ?: 0) > 0 }
             if (conserveItem != null) {
