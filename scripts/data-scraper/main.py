@@ -3,6 +3,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, WebDriverException
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import json
 import re
 import time
@@ -15,7 +17,7 @@ import bisect
 import requests
 
 IS_DELTA = True
-DELTA_BACKLOG_COUNT = 5
+DELTA_BACKLOG_COUNT = 10
 
 # Resolve the JSON output directory relative to this file so the scraper can be invoked from any CWD.
 # Layout: <repo>/scripts/data-scraper/main.py -> parents[2] is the repo root, then src/data.
@@ -581,6 +583,10 @@ class SkillScraper(BaseScraper):
         """
         driver = create_chromedriver()
         driver.get("https://game8.co/games/Umamusume-Pretty-Derby/archives/536805")
+
+        # Game8 renders the tier-list tables client-side after the initial page load,
+        # so wait for the first tier table to appear before querying any of them.
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//h4[@id='hs_1']/following-sibling::table[2]")))
 
         h4_tier_map = {
             "hs_1": 0,  # SS
@@ -1944,6 +1950,8 @@ class CharacterPresetScraper(BaseScraper):
     DISTANCE_KEYS = ("Sprint", "Mile", "Medium", "Long")
     SURFACE_KEYS = ("Turf", "Dirt")
     VALID_GRADES = ("S", "A", "B", "C", "D", "E", "F", "G")
+    # GameTora labels the sprint distance "Short". The rest of the labels match our output keys directly.
+    PAGE_LABEL_TO_KEY = {"Short": "Sprint", "Mile": "Mile", "Medium": "Medium", "Long": "Long", "Turf": "Turf", "Dirt": "Dirt"}
 
     def __init__(self):
         super().__init__("https://gametora.com/umamusume/characters", "characterPresets.json")
@@ -2034,44 +2042,43 @@ class CharacterPresetScraper(BaseScraper):
         driver.quit()
 
     def _extract_aptitudes(self, driver: webdriver.Chrome) -> Optional[Dict[str, str]]:
-        """Pulls the six grade letters from the character's aptitude panel.
+        """Pulls the distance and surface grade letters from the character's aptitude infobox.
 
-        GameTora renders aptitudes as a grid of label/value pairs. The labels are the
-        keys in `DISTANCE_KEYS` and `SURFACE_KEYS`. We tolerate selector drift by trying
-        a couple of class fragments before giving up.
+        GameTora renders each aptitude as an infobox row whose first child is the label and whose grade is an `<img>`
+        alt letter (e.g. "A", "G") inside a "characters_aptitude_rank_icon" element. Running-style rows (Front, Pace,
+        Late, End) share the same markup, so they are filtered out by `PAGE_LABEL_TO_KEY`. Class fragments are matched
+        by prefix to tolerate the hashed suffixes GameTora appends to its CSS-module class names.
 
         Args:
             driver: An active Selenium webdriver positioned on a character page.
 
         Returns:
-            Dict mapping each label to a one-letter grade. Returns `None` when the panel
-            isn't found at all so the caller can skip cleanly.
+            Dict mapping each output key to a one-letter grade. Returns `None` when no aptitude rows are found so the
+            caller can skip cleanly.
         """
-        candidates = (
-            "//div[contains(@class, 'character_aptitude') or contains(@class, 'aptitude_grid')]",
-            "//section[.//*[contains(text(),'Track aptitude')]]",
+        rows = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@class, 'characters_infobox_row_split')][.//*[contains(@class, 'characters_aptitude_rank_icon')]]",
         )
-        panel = None
-        for xpath in candidates:
-            els = driver.find_elements(By.XPATH, xpath)
-            if els:
-                panel = els[0]
-                break
-        if panel is None:
+        if not rows:
             return None
 
         out: Dict[str, str] = {}
-        for label in self.DISTANCE_KEYS + self.SURFACE_KEYS:
+        for row in rows:
             try:
-                cell = panel.find_element(
-                    By.XPATH,
-                    f".//*[normalize-space(text())='{label}']/following::*[contains(@class,'aptitude') or contains(@class,'grade')][1]",
-                )
-                grade = (cell.text or "").strip().upper()
-                if grade in self.VALID_GRADES:
-                    out[label] = grade
+                label = row.find_element(By.XPATH, "./*[1]").text.strip()
             except NoSuchElementException:
                 continue
+            key = self.PAGE_LABEL_TO_KEY.get(label)
+            if key is None:
+                continue
+            try:
+                icon_img = row.find_element(By.XPATH, ".//*[contains(@class, 'characters_aptitude_rank_icon')]//img")
+                grade = (icon_img.get_attribute("alt") or "").strip().upper()
+            except NoSuchElementException:
+                continue
+            if grade in self.VALID_GRADES:
+                out[key] = grade
         return out if out else None
 
 
