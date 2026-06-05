@@ -23,7 +23,7 @@ describe("SCORING_CONSTANTS_CATALOG", () => {
 
     test("six groups present", () => {
         const groups = new Set(SCORING_CONSTANTS_CATALOG.map((e) => e.group))
-        for (const g of ["priority", "ratio", "composition", "bonuses", "level", "misc"]) {
+        for (const g of ["priority", "ratio", "weight", "bonuses", "level", "misc"]) {
             expect(groups.has(g as any)).toBe(true)
         }
     })
@@ -35,10 +35,24 @@ describe("SCORING_CONSTANTS_CATALOG", () => {
         }
     })
 
-    test("ratio breakpoint and value entries belong to their monotonic groups", () => {
-        const breaks = SCORING_CONSTANTS_CATALOG.filter((e) => e.monotonicGroup === "ratio-breakpoints")
-        const vals = SCORING_CONSTANTS_CATALOG.filter((e) => e.monotonicGroup === "ratio-values")
-        expect(breaks.length).toBe(6)
-        expect(vals.length).toBe(7)
+    test("ratio multiplier entries belong to the ratio-multipliers monotonic group; breakpoints are not catalog entries", () => {
+        const multipliers = SCORING_CONSTANTS_CATALOG.filter((e) => e.monotonicGroup === "ratio-multipliers")
+        const breakpoints = SCORING_CONSTANTS_CATALOG.filter((e) => e.monotonicGroup === "ratio-breakpoints")
+        expect(multipliers.length).toBe(7)
+        expect(breakpoints.length).toBe(0)
+    })
+
+    test("every Misc-tab entry has a subgroup assigned", () => {
+        const miscEntries = SCORING_CONSTANTS_CATALOG.filter((e) => e.group === "misc")
+        expect(miscEntries.length).toBeGreaterThan(0)
+        const missing = miscEntries.filter((e) => e.subgroup === undefined).map((e) => e.key)
+        expect(missing).toEqual([])
+    })
+
+    test("every Misc-tab subgroup value is one of the 5 known sub-section identifiers", () => {
+        const allowed = new Set(["rel", "misc", "rainbow", "anticipatory", "unityCup"])
+        for (const entry of SCORING_CONSTANTS_CATALOG.filter((e) => e.group === "misc")) {
+            expect(allowed.has(entry.subgroup as string)).toBe(true)
+        }
     })
 })
