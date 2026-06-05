@@ -13,7 +13,6 @@ import { Text } from "../ui/text"
 import { initialScenario, scenarioReducer } from "./scenarioState"
 import { scenarioToScoring } from "./scenarioToScoring"
 import { StatTable } from "./StatTable"
-import { GlobalsStrip } from "./GlobalsStrip"
 import { TrainingCircleRow } from "./TrainingCircleRow"
 import { EditorStrip } from "./EditorStrip"
 
@@ -108,6 +107,15 @@ export function TrainingScoringSandbox({ open, onClose }: TrainingScoringSandbox
                     ...TYPE.caption,
                     color: colors.textMuted,
                     flexShrink: 1,
+                    lineHeight: 18,
+                    includeFontPadding: false,
+                    textAlignVertical: "center",
+                },
+                description: {
+                    ...TYPE.caption,
+                    color: colors.textMuted,
+                    lineHeight: 18,
+                    marginBottom: SPACING.sm,
                 },
                 buttonLabel: {
                     color: colors.onBrand,
@@ -136,9 +144,12 @@ export function TrainingScoringSandbox({ open, onClose }: TrainingScoringSandbox
     )
 
     return (
-        <SheetModal visible={open} onRequestClose={onClose} header={header} footer={footer}>
+        <SheetModal visible={open} onRequestClose={onClose} header={header} footer={footer} maxWidth={800} heightFraction={0.55}>
+            <Text style={styles.description}>
+                Preview which training the scoring formula would pick against a synthetic scenario. Edit the stat gains, trainee totals, and run-wide state below; the winning training is highlighted
+                in amber.
+            </Text>
             <StatTable scenario={scenario} dispatch={dispatch} />
-            <GlobalsStrip scenario={scenario} dispatch={dispatch} />
             <TrainingCircleRow scenario={scenario} scoresByTraining={scoresByTraining} winnerTraining={winnerTraining} dispatch={dispatch} />
             <EditorStrip scenario={scenario} dispatch={dispatch} />
         </SheetModal>

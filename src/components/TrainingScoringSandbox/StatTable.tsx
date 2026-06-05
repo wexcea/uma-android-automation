@@ -1,11 +1,12 @@
 import React, { useMemo } from "react"
-import { StyleSheet, View } from "react-native"
+import { StyleSheet, useWindowDimensions, View } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
 import { ALL_STAT_NAMES, StatName } from "../../lib/training/scoring"
 import { SPACING } from "../../lib/spacing"
 import { TYPE } from "../../lib/type"
 import { Text } from "../ui/text"
-import { Stepper } from "../ui/stepper"
+import { NARROW_BREAKPOINT_DP } from "./layout"
+import { NumberField } from "./NumberField"
 import { SandboxScenario, ScenarioAction } from "./scenarioState"
 
 const STAT_LABELS: Record<StatName, string> = {
@@ -16,20 +17,16 @@ const STAT_LABELS: Record<StatName, string> = {
     [StatName.WIT]: "Wit",
 }
 
-/**
- * Map a cumulative stat value (0-1200) to an in-game letter grade. Thresholds: <300 E, <600 D, <900 C, <1100 B, <1200 A, otherwise S.
- *
- * @param v Cumulative stat value.
- * @returns Single-letter grade.
- */
-function gradeForValue(v: number): string {
-    if (v < 300) return "E"
-    if (v < 600) return "D"
-    if (v < 900) return "C"
-    if (v < 1100) return "B"
-    if (v < 1200) return "A"
-    return "S"
+const STAT_LABELS_SHORT: Record<StatName, string> = {
+    [StatName.SPEED]: "Spd",
+    [StatName.STAMINA]: "Sta",
+    [StatName.POWER]: "Pwr",
+    [StatName.GUTS]: "Gut",
+    [StatName.WIT]: "Wit",
 }
+
+const LABEL_COL_WIDTH_WIDE = 140
+const LABEL_COL_WIDTH_NARROW = 70
 
 /** Props for `StatTable`. */
 export interface StatTableProps {
@@ -40,81 +37,89 @@ export interface StatTableProps {
 }
 
 /**
- * Horizontal 5-cell stat summary row. Each cell shows the per-training stat gain (green +N stepper), the stat name, and the trainee's
- * cumulative total (0-1200) with a letter-grade chip. The stat gain column tracks the currently selected training so users can dial each
- * column without leaving the editor strip.
+ * Two-row labeled grid showing stat data for all 5 stats side by side. The first row is the per-training stat gain for the currently selected training (a +N stepper). The
+ * second row is the trainee's cumulative stat total (0-1200). A header row above carries the stat name column titles, and the leftmost column carries the row labels
+ * ("Stat Gains", "Total Current Stats"). The grid uses a fixed-width label column and equal flex-1 stat columns so the steppers line up vertically across rows.
  *
  * @param props See `StatTableProps`.
- * @returns A row with 5 stat cells separated by hairline borders.
+ * @returns A 3-row grid (header + 2 data rows) with the leftmost column reserved for row labels.
  */
 export function StatTable({ scenario, dispatch }: StatTableProps): React.ReactElement {
     const { colors } = useTheme()
+    const { width } = useWindowDimensions()
+    const isNarrow = width < NARROW_BREAKPOINT_DP
     const selected = scenario.selectedTraining
     const current = scenario.trainings[selected]
+    const statLabels = isNarrow ? STAT_LABELS_SHORT : STAT_LABELS
+    const labelColWidth = isNarrow ? LABEL_COL_WIDTH_NARROW : LABEL_COL_WIDTH_WIDE
+    const numberFieldWidth = isNarrow ? 40 : 64
+    const rowGap = isNarrow ? SPACING.xs : SPACING.sm
 
     const styles = useMemo(
         () =>
             StyleSheet.create({
                 root: {
-                    flexDirection: "row",
-                    borderBottomWidth: StyleSheet.hairlineWidth,
-                    borderBottomColor: colors.borderHair,
-                },
-                cell: {
-                    flex: 1,
                     paddingVertical: SPACING.sm,
-                    paddingHorizontal: SPACING.xs,
-                    alignItems: "center",
-                    gap: 4,
-                    borderRightWidth: StyleSheet.hairlineWidth,
-                    borderRightColor: colors.borderHair,
+                    gap: SPACING.sm,
                 },
-                cellLast: {
-                    borderRightWidth: 0,
+                row: {
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: rowGap,
+                },
+                labelCell: {
+                    width: labelColWidth,
+                },
+                labelText: {
+                    ...TYPE.caption,
+                    color: colors.textMuted,
+                    fontWeight: "600",
+                    fontSize: isNarrow ? 11 : 12,
+                },
+                statCell: {
+                    flex: 1,
+                    alignItems: "center",
                 },
                 statName: {
                     ...TYPE.caption,
                     color: colors.textMuted,
                     fontWeight: "600",
-                },
-                gradeRow: {
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 6,
-                },
-                grade: {
-                    minWidth: 22,
-                    paddingHorizontal: 6,
-                    paddingVertical: 1,
-                    borderRadius: 999,
-                    backgroundColor: colors.brandSubtle,
-                    color: colors.brand,
-                    fontWeight: "700",
-                    fontSize: 12,
-                    textAlign: "center",
-                    overflow: "hidden",
+                    fontSize: isNarrow ? 11 : 12,
                 },
             }),
-        [colors]
+        [colors, labelColWidth, rowGap, isNarrow]
     )
 
     return (
         <View style={styles.root}>
-            {ALL_STAT_NAMES.map((stat, idx) => {
-                const gain = current.statGains[stat] ?? 0
-                const total = scenario.traineeTotals[stat] ?? 0
-                const isLast = idx === ALL_STAT_NAMES.length - 1
-                return (
-                    <View key={stat} style={[styles.cell, isLast && styles.cellLast]}>
-                        <Stepper value={gain} onChange={(v) => dispatch({ type: "set-stat-gain", training: selected, stat, value: v })} min={0} step={1} accent="green" />
-                        <Text style={styles.statName}>{STAT_LABELS[stat]}</Text>
-                        <View style={styles.gradeRow}>
-                            <Text style={styles.grade}>{gradeForValue(total)}</Text>
-                            <Stepper value={total} onChange={(v) => dispatch({ type: "set-trainee-total", stat, value: v })} min={0} max={1200} step={10} />
-                        </View>
+            <View style={styles.row}>
+                <View style={styles.labelCell} />
+                {ALL_STAT_NAMES.map((stat) => (
+                    <View key={stat} style={styles.statCell}>
+                        <Text style={styles.statName}>{statLabels[stat]}</Text>
                     </View>
-                )
-            })}
+                ))}
+            </View>
+            <View style={styles.row}>
+                <View style={styles.labelCell}>
+                    <Text style={styles.labelText}>Total Stat Gains</Text>
+                </View>
+                {ALL_STAT_NAMES.map((stat) => (
+                    <View key={stat} style={styles.statCell}>
+                        <NumberField value={current.statGains[stat] ?? 0} onChange={(v) => dispatch({ type: "set-stat-gain", training: selected, stat, value: v })} min={0} width={numberFieldWidth} />
+                    </View>
+                ))}
+            </View>
+            <View style={styles.row}>
+                <View style={styles.labelCell}>
+                    <Text style={styles.labelText}>Total Current Stats</Text>
+                </View>
+                {ALL_STAT_NAMES.map((stat) => (
+                    <View key={stat} style={styles.statCell}>
+                        <NumberField value={scenario.traineeTotals[stat] ?? 0} onChange={(v) => dispatch({ type: "set-trainee-total", stat, value: v })} min={0} max={1200} width={numberFieldWidth} />
+                    </View>
+                ))}
+            </View>
         </View>
     )
 }

@@ -1,10 +1,11 @@
 import React, { useMemo } from "react"
-import { Pressable, StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native"
 import { useTheme } from "../../context/ThemeContext"
 import { ALL_STAT_NAMES, StatName } from "../../lib/training/scoring"
 import { SPACING } from "../../lib/spacing"
 import { TYPE } from "../../lib/type"
 import { Text } from "../ui/text"
+import { NARROW_BREAKPOINT_DP } from "./layout"
 import { SandboxScenario, ScenarioAction } from "./scenarioState"
 
 const STAT_LABELS: Record<StatName, string> = {
@@ -12,6 +13,14 @@ const STAT_LABELS: Record<StatName, string> = {
     [StatName.STAMINA]: "Stamina",
     [StatName.POWER]: "Power",
     [StatName.GUTS]: "Guts",
+    [StatName.WIT]: "Wit",
+}
+
+const STAT_LABELS_SHORT: Record<StatName, string> = {
+    [StatName.SPEED]: "Spd",
+    [StatName.STAMINA]: "Sta",
+    [StatName.POWER]: "Pwr",
+    [StatName.GUTS]: "Gut",
     [StatName.WIT]: "Wit",
 }
 
@@ -45,24 +54,25 @@ export interface TrainingCircleRowProps {
  */
 export function TrainingCircleRow({ scenario, scoresByTraining, winnerTraining, dispatch }: TrainingCircleRowProps): React.ReactElement {
     const { colors } = useTheme()
+    const { width } = useWindowDimensions()
+    const isNarrow = width < NARROW_BREAKPOINT_DP
     const styles = useMemo(
         () =>
             StyleSheet.create({
                 root: {
                     flexDirection: "row",
-                    justifyContent: "space-between",
+                    justifyContent: "center",
                     alignItems: "flex-start",
                     paddingVertical: SPACING.sm,
-                    gap: 6,
+                    gap: isNarrow ? SPACING.sm : SPACING.xxl,
                 },
                 col: {
-                    flex: 1,
                     alignItems: "center",
                     gap: 4,
                 },
                 circle: {
-                    width: 60,
-                    height: 60,
+                    width: isNarrow ? 52 : 92,
+                    height: isNarrow ? 52 : 92,
                     borderRadius: 999,
                     backgroundColor: colors.surfaceRaised,
                     borderWidth: 1.5,
@@ -72,8 +82,8 @@ export function TrainingCircleRow({ scenario, scoresByTraining, winnerTraining, 
                     position: "relative",
                 },
                 circleSelected: {
-                    width: 72,
-                    height: 72,
+                    width: isNarrow ? 60 : 104,
+                    height: isNarrow ? 60 : 104,
                     borderColor: AMBER,
                     borderWidth: 2,
                 },
@@ -81,12 +91,12 @@ export function TrainingCircleRow({ scenario, scoresByTraining, winnerTraining, 
                     ...TYPE.caption,
                     color: colors.text,
                     fontWeight: "700",
-                    fontSize: 11,
+                    fontSize: isNarrow ? 10 : 13,
                 },
                 circleLv: {
                     ...TYPE.caption,
                     color: colors.textMuted,
-                    fontSize: 10,
+                    fontSize: isNarrow ? 8 : 11,
                 },
                 rainbowDot: {
                     position: "absolute",
@@ -123,7 +133,7 @@ export function TrainingCircleRow({ scenario, scoresByTraining, winnerTraining, 
                     color: AMBER,
                 },
             }),
-        [colors]
+        [colors, isNarrow]
     )
 
     return (
@@ -137,7 +147,7 @@ export function TrainingCircleRow({ scenario, scoresByTraining, winnerTraining, 
                     <View key={stat} style={styles.col}>
                         <Pressable onPress={() => dispatch({ type: "select-training", training: stat })} style={[styles.circle, isSelected && styles.circleSelected]}>
                             {t.rainbow ? <View style={styles.rainbowDot} /> : null}
-                            <Text style={styles.circleLabel}>{STAT_LABELS[stat]}</Text>
+                            <Text style={styles.circleLabel}>{(isNarrow ? STAT_LABELS_SHORT : STAT_LABELS)[stat]}</Text>
                             <Text style={styles.circleLv}>Lv {t.trainingLevel}</Text>
                             <View style={styles.tierRow}>
                                 {(["blue", "green", "orange"] as const).map((tier) =>
