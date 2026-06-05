@@ -275,8 +275,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
      * All tunable numeric constants used by the training scoring math. Each property keeps its current hardcoded value as the default so existing
      * behavior is preserved when no overrides are supplied. Future user settings will wire into the same struct.
      *
-     * @property ratioBreakpoints Completion-percent boundaries that bucket each stat into a ratio-multiplier tier. Must have exactly one fewer entry than `ratioValues`. Defaults to [30, 50, 70, 90, 110, 130].
-     * @property ratioValues Multipliers paired with `ratioBreakpoints`, indexed by which bucket the stat's completion percent falls into. Index 0 applies when completion < `ratioBreakpoints[0]`; the final entry applies when completion is above every breakpoint.
+     * @property ratioBreakpoints Completion-percent boundaries that bucket each stat into a ratio-multiplier tier. Fixed at [15, 30, 45, 60, 75, 90] and not user-tunable.
+     * @property ratioMultipliers Multipliers paired with `ratioBreakpoints`, indexed by which bucket the stat's completion percent falls into. Index 0 applies when completion is below `ratioBreakpoints[0]`. The final entry applies when completion is above every breakpoint.
      * @property priorityCoefficient Linear coefficient applied to `(activePriority.size - priorityIndex)` to produce the per-stat priority multiplier. Default 0.5 makes priority a primary driver: in a 4-stat list, the top stat receives a 3.0x multiplier and the bottom a 1.5x.
      * @property levelBoostRank1Factor Weight applied to the level-boost multiplier when the stat is the top-priority entry. Combines with the OCR-detected training level to amplify the score for high-level priority trainings.
      * @property levelBoostRank2Factor As `levelBoostRank1Factor`, applied to the second-priority stat.
@@ -306,8 +306,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
      * @property anticipatoryCap Maximum extra fraction the anticipatory multiplier can add (cap above 1.0). Kept below the real rainbow multiplier so anticipation never outranks a detected rainbow.
      */
     data class TrainingScoringConstants(
-        val ratioBreakpoints: List<Double> = listOf(30.0, 50.0, 70.0, 90.0, 110.0, 130.0),
-        val ratioValues: List<Double> = listOf(5.0, 4.0, 3.0, 2.0, 1.0, 0.5, 0.3),
+        val ratioBreakpoints: List<Double> = listOf(15.0, 30.0, 45.0, 60.0, 75.0, 90.0),
+        val ratioMultipliers: List<Double> = listOf(5.0, 4.0, 3.0, 2.0, 1.0, 0.5, 0.3),
         val priorityCoefficient: Double = 0.5,
         val levelBoostRank1Factor: Double = 0.75,
         val levelBoostRank2Factor: Double = 0.25,
@@ -339,13 +339,13 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
         val rainbowMultiplierDisabled: Double = 1.5,
         val rainbowPerInstanceBase: Double = 200.0,
         val rainbowPerInstanceDecay: Double = 0.5,
-        val anticipatoryMinFillPercent: Double = 10.0,
+        val anticipatoryMinFillPercent: Double = 50.0,
         val anticipatoryCoefficient: Double = 0.2,
         val anticipatoryCap: Double = 0.6,
     ) {
         init {
-            require(ratioValues.size == ratioBreakpoints.size + 1) {
-                "ratioValues must have exactly one more entry than ratioBreakpoints (got ${ratioValues.size} values vs ${ratioBreakpoints.size} breakpoints)"
+            require(ratioMultipliers.size == ratioBreakpoints.size + 1) {
+                "ratioMultipliers must have exactly one more entry than ratioBreakpoints (got ${ratioMultipliers.size} multipliers vs ${ratioBreakpoints.size} breakpoints)"
             }
         }
     }
@@ -462,24 +462,16 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
 
             fun i(key: String, fallback: Int): Int = (settings[key] as? Number)?.toInt() ?: fallback
             return defaults.copy(
-                ratioBreakpoints =
+                // Breakpoints are fixed and not user-tunable; always sourced from defaults.
+                ratioMultipliers =
                     listOf(
-                        d("ratioBreakpoint1", defaults.ratioBreakpoints[0]),
-                        d("ratioBreakpoint2", defaults.ratioBreakpoints[1]),
-                        d("ratioBreakpoint3", defaults.ratioBreakpoints[2]),
-                        d("ratioBreakpoint4", defaults.ratioBreakpoints[3]),
-                        d("ratioBreakpoint5", defaults.ratioBreakpoints[4]),
-                        d("ratioBreakpoint6", defaults.ratioBreakpoints[5]),
-                    ),
-                ratioValues =
-                    listOf(
-                        d("ratioValue1", defaults.ratioValues[0]),
-                        d("ratioValue2", defaults.ratioValues[1]),
-                        d("ratioValue3", defaults.ratioValues[2]),
-                        d("ratioValue4", defaults.ratioValues[3]),
-                        d("ratioValue5", defaults.ratioValues[4]),
-                        d("ratioValue6", defaults.ratioValues[5]),
-                        d("ratioValue7", defaults.ratioValues[6]),
+                        d("ratioMultiplier1", defaults.ratioMultipliers[0]),
+                        d("ratioMultiplier2", defaults.ratioMultipliers[1]),
+                        d("ratioMultiplier3", defaults.ratioMultipliers[2]),
+                        d("ratioMultiplier4", defaults.ratioMultipliers[3]),
+                        d("ratioMultiplier5", defaults.ratioMultipliers[4]),
+                        d("ratioMultiplier6", defaults.ratioMultipliers[5]),
+                        d("ratioMultiplier7", defaults.ratioMultipliers[6]),
                     ),
                 priorityCoefficient = d("priorityCoefficient", defaults.priorityCoefficient),
                 levelBoostRank1Factor = d("levelBoostRank1Factor", defaults.levelBoostRank1Factor),
@@ -528,19 +520,13 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             val defaults = TrainingScoringConstants()
             val keys =
                 listOf(
-                    "ratioBreakpoint1",
-                    "ratioBreakpoint2",
-                    "ratioBreakpoint3",
-                    "ratioBreakpoint4",
-                    "ratioBreakpoint5",
-                    "ratioBreakpoint6",
-                    "ratioValue1",
-                    "ratioValue2",
-                    "ratioValue3",
-                    "ratioValue4",
-                    "ratioValue5",
-                    "ratioValue6",
-                    "ratioValue7",
+                    "ratioMultiplier1",
+                    "ratioMultiplier2",
+                    "ratioMultiplier3",
+                    "ratioMultiplier4",
+                    "ratioMultiplier5",
+                    "ratioMultiplier6",
+                    "ratioMultiplier7",
                     "priorityCoefficient",
                     "levelBoostRank1Factor",
                     "levelBoostRank2Factor",
@@ -894,13 +880,13 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
                     val completionPercent = (currentStat.toDouble() / targetStat) * 100.0
 
                     // Ratio-based multiplier: Stats furthest behind get the highest priority.
-                    // Buckets (default constants): <30% -> 5.0 (severely behind), <50% -> 4.0, <70% -> 3.0, <90% -> 2.0, <110% -> 1.0 (at target), <130% -> 0.5, else -> 0.3 (well over).
+                    // Buckets (default multipliers): <15% -> 5.0 (severely behind), <30% -> 4.0, <45% -> 3.0, <60% -> 2.0, <75% -> 1.0, <90% -> 0.5, else -> 0.3 (at or past target).
                     val ratioMultiplier =
                         run {
                             val breakpoints = config.scoring.ratioBreakpoints
-                            val values = config.scoring.ratioValues
+                            val multipliers = config.scoring.ratioMultipliers
                             val bucket = breakpoints.indexOfFirst { completionPercent < it }
-                            if (bucket == -1) values.last() else values[bucket]
+                            if (bucket == -1) multipliers.last() else multipliers[bucket]
                         }
 
                     // Priority multiplier: stats higher in the user's list get a larger score boost.

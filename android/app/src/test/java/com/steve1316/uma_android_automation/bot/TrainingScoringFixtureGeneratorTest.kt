@@ -290,7 +290,7 @@ class TrainingScoringFixtureGeneratorTest {
 
         return TrainingScoringConstants(
             ratioBreakpoints = doubleList("ratioBreakpoints", defaults.ratioBreakpoints),
-            ratioValues = doubleList("ratioValues", defaults.ratioValues),
+            ratioMultipliers = doubleList("ratioMultipliers", defaults.ratioMultipliers),
             priorityCoefficient = json.optDouble("priorityCoefficient", defaults.priorityCoefficient),
             levelBoostRank1Factor = json.optDouble("levelBoostRank1Factor", defaults.levelBoostRank1Factor),
             levelBoostRank2Factor = json.optDouble("levelBoostRank2Factor", defaults.levelBoostRank2Factor),

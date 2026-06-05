@@ -386,9 +386,10 @@ class TrainingScoringTest {
         val aboveScore = calculateStatEfficiencyScore(configAbove, speedTraining)
 
         // belowScore is still > aboveScore because Speed at 400 has a higher ratio multiplier than Speed at 700,
-        // but the gap must be the documented ratio-bucket transition, not the old 2.5x spark on top of it.
+        // but the gap must come only from the documented ratio-bucket transition. Speed target is 800 for "Medium" so completion is 50% (below) and 87.5% (above),
+        // which land in different ratio buckets. The natural gap is bounded; a re-added 2.5x spark bonus on top would push the ratio well past 5x.
         val ratio = belowScore / aboveScore
-        assertTrue(ratio < 2.0, "Without the spark bonus the score gap between <600 and >=600 must be modest")
+        assertTrue(ratio < 5.0, "Without the spark bonus the score gap between <600 and >=600 must stay within bucket-transition range")
     }
 
     @Test
@@ -1357,8 +1358,8 @@ class TrainingScoringTest {
     @DisplayName("TrainingScoringConstants defaults match original hardcoded values")
     fun testScoringConstantsDefaults() {
         val c = TrainingScoringConstants()
-        assertEquals(listOf(30.0, 50.0, 70.0, 90.0, 110.0, 130.0), c.ratioBreakpoints)
-        assertEquals(listOf(5.0, 4.0, 3.0, 2.0, 1.0, 0.5, 0.3), c.ratioValues)
+        assertEquals(listOf(15.0, 30.0, 45.0, 60.0, 75.0, 90.0), c.ratioBreakpoints)
+        assertEquals(listOf(5.0, 4.0, 3.0, 2.0, 1.0, 0.5, 0.3), c.ratioMultipliers)
         assertEquals(0.5, c.priorityCoefficient)
         assertEquals(0.75, c.levelBoostRank1Factor)
         assertEquals(0.25, c.levelBoostRank2Factor)
@@ -1384,7 +1385,7 @@ class TrainingScoringTest {
         assertEquals(1.5, c.rainbowMultiplierDisabled)
         assertEquals(200.0, c.rainbowPerInstanceBase)
         assertEquals(0.5, c.rainbowPerInstanceDecay)
-        assertEquals(10.0, c.anticipatoryMinFillPercent)
+        assertEquals(50.0, c.anticipatoryMinFillPercent)
         assertEquals(0.2, c.anticipatoryCoefficient)
         assertEquals(0.6, c.anticipatoryCap)
     }
