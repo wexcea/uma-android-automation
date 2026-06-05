@@ -394,7 +394,9 @@ const RacingSettings = () => {
                             </SearchableItem>
                             {enableUserInGameRaceAgenda && (
                                 <>
-                                    <InfoContainer style={{ marginHorizontal: SPACING.md }}>Critical energy level and consecutive race limits are ignored for the user in-game racing agenda.</InfoContainer>
+                                    <InfoContainer style={{ marginHorizontal: SPACING.md }}>
+                                        Critical energy level and consecutive race limits are ignored for the user in-game racing agenda.
+                                    </InfoContainer>
                                     <SearchableItem
                                         id="user-in-game-race-agenda"
                                         title="Select Agenda"
