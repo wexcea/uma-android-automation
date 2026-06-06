@@ -18,8 +18,10 @@ export interface SheetModalProps {
     children: React.ReactNode
     /** Footer slot. Rendered below a hairline divider. */
     footer: React.ReactNode
-    /** Override the default 0.82 screen-height fraction. Clamped between 0.4 and 0.95. */
+    /** Override the default 0.80 screen-height fraction. Clamped between 0.4 and 0.95. */
     heightFraction?: number
+    /** Override the default 560px max width. Use when the modal hosts wider content (e.g. multi-column grids). */
+    maxWidth?: number
     /** Set false to disable tap-outside-to-dismiss. Default true. */
     dismissOnBackdropPress?: boolean
     /** When false, the body is wrapped in a `flex: 1` `View` instead of a `ScrollView`. Use for bodies that manage their own scroll (e.g. `FlashList`). Default true. */
@@ -37,13 +39,24 @@ export interface SheetModalProps {
  * @param subHeader Optional sticky slot rendered between the header and the scrollable body.
  * @param children Body slot rendered inside a flex-1 ScrollView.
  * @param footer Footer slot rendered below a hairline divider.
- * @param heightFraction Override the default 0.82 screen-height fraction. Clamped between 0.4 and 0.95.
+ * @param heightFraction Override the default 0.80 screen-height fraction. Clamped between 0.4 and 0.95.
  * @param dismissOnBackdropPress Set false to disable tap-outside-to-dismiss. Default true.
  * @returns A full-screen `Modal` with a centered card whose layout is header / optional sub-header / scrollable body / footer.
  */
-const SheetModalImpl = ({ visible, onRequestClose, header, subHeader, children, footer, heightFraction = 0.82, dismissOnBackdropPress = true, scrollableBody = true }: SheetModalProps) => {
+const SheetModalImpl = ({
+    visible,
+    onRequestClose,
+    header,
+    subHeader,
+    children,
+    footer,
+    heightFraction = 0.8,
+    maxWidth = 560,
+    dismissOnBackdropPress = true,
+    scrollableBody = true,
+}: SheetModalProps) => {
     const { colors } = useTheme()
-    const clamped = Math.max(0.4, Math.min(0.5, heightFraction))
+    const clamped = Math.max(0.4, Math.min(0.95, heightFraction))
     const cardHeight = Math.round(Dimensions.get("window").height * clamped)
     const styles = useMemo(
         () =>
@@ -52,7 +65,7 @@ const SheetModalImpl = ({ visible, onRequestClose, header, subHeader, children, 
                 backdrop: StyleSheet.absoluteFill as object,
                 card: {
                     width: "92%",
-                    maxWidth: 560,
+                    maxWidth,
                     height: cardHeight,
                     borderRadius: RADII.xl,
                     borderWidth: 1,
@@ -66,7 +79,7 @@ const SheetModalImpl = ({ visible, onRequestClose, header, subHeader, children, 
                 bodyContent: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md },
                 footer: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md },
             }),
-        [colors, cardHeight]
+        [colors, cardHeight, maxWidth]
     )
     return (
         <Modal transparent visible={visible} animationType="fade" onRequestClose={onRequestClose} statusBarTranslucent>

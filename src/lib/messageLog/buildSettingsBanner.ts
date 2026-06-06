@@ -1,4 +1,5 @@
 import { Settings } from "../../context/BotStateContext"
+import { SCORING_CONSTANTS_CATALOG } from "../training/scoringConstantsCatalog"
 
 /**
  * Length of `json` parsed as either a JSON array or object. Returns 0 on parse failure or empty input.
@@ -16,6 +17,26 @@ const safeJsonLength = (json: string): number => {
 }
 
 const csvCount = (csv: string): number => (csv ? csv.split(",").filter((s) => s.trim() !== "").length : 0)
+
+/**
+ * Build the optional Advanced Training Scoring section. Lists only catalog entries whose current value differs from the
+ * cataloged default. Returns an empty string when every entry is at its default so the banner stays uncluttered.
+ *
+ * @param training The `settings.training` slice that holds the dynamic scoring keys.
+ * @returns A leading-newline-prefixed section string, or "" when there are no overrides.
+ */
+const formatAdvancedScoringSection = (training: Settings["training"]): string => {
+    const record = training as unknown as Record<string, unknown>
+    const overrides: string[] = []
+    for (const entry of SCORING_CONSTANTS_CATALOG) {
+        const v = record[entry.key]
+        if (typeof v === "number" && Number.isFinite(v) && v !== entry.defaultValue) {
+            overrides.push(`  - ${entry.label}: ${v} (default ${entry.defaultValue})`)
+        }
+    }
+    if (overrides.length === 0) return ""
+    return `\n\n---------- Advanced Training Scoring ----------\n${overrides.join("\n")}`
+}
 
 const formatExcludedCategories = (plan: { excludeGreenSkills: boolean; excludeRedSkills: boolean; excludeUniqueSkills: boolean }): string => {
     const parts: string[] = []
@@ -112,7 +133,6 @@ export function buildSettingsBanner(settings: Settings): string {
             : ""
     }
 🔄 Disable Training on Maxed Stat: ${settings.training.disableTrainingOnMaxedStat ? "✅" : "❌"}
-✨ Focus on Sparks for Stat Targets: ${settings.training.focusOnSparkStatTarget.length === 0 ? "None" : settings.training.focusOnSparkStatTarget.join(", ")}
 📏 Preferred Distance Override: ${settings.training.preferredDistanceOverride === "Default" ? "Default" : settings.training.preferredDistanceOverride}
 🌈 Enable Rainbow Training Bonus: ${settings.training.enableRainbowTrainingBonus ? "✅" : "❌"}
 💞 Prioritize Near-Max Friendship: ${settings.training.enablePrioritizeNearMaxFriendship ? "✅" : "❌"}
@@ -130,7 +150,7 @@ export function buildSettingsBanner(settings: Settings): string {
 ${sprintTargetsString}
 ${mileTargetsString}
 ${mediumTargetsString}
-${longTargetsString}
+${longTargetsString}${formatAdvancedScoringSection(settings.training)}
 
 ---------- Racing Options ----------
 👥 Prioritize Farming Fans: ${settings.racing.enableFarmingFans ? "✅" : "❌"}

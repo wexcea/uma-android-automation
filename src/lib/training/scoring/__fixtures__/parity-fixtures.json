@@ -1,0 +1,58 @@
+[
+  {
+    "statEfficiency": 180.0625,
+    "raw": 246.075,
+    "id": "classic-wit-rainbow-tinted",
+    "relationship": 0,
+    "misc": 50
+  },
+  {
+    "statEfficiency": 155,
+    "raw": 123.5,
+    "id": "junior-speed-no-bars-no-rainbow",
+    "relationship": 0,
+    "misc": 50
+  },
+  {
+    "statEfficiency": 210,
+    "raw": 162,
+    "id": "classic-speed-low-completion",
+    "relationship": 0,
+    "misc": 50
+  },
+  {
+    "statEfficiency": 125.5,
+    "raw": 125.93251282051283,
+    "id": "classic-power-anticipatory",
+    "relationship": 36.79487179487179,
+    "misc": 50
+  },
+  {
+    "statEfficiency": 9.45,
+    "raw": 0,
+    "id": "senior-guts-stat-near-cap",
+    "relationship": 0,
+    "misc": 50
+  },
+  {
+    "statEfficiency": 82,
+    "raw": 66.58461538461538,
+    "id": "summer-wit-using-summer-priority",
+    "relationship": 23.846153846153847,
+    "misc": 50
+  },
+  {
+    "statEfficiency": 19,
+    "raw": 0,
+    "id": "blacklisted-stamina",
+    "relationship": 21.538461538461537,
+    "misc": 50
+  },
+  {
+    "statEfficiency": 35,
+    "raw": 3048.5384615384614,
+    "id": "skill-hint-override-fires",
+    "relationship": 65.38461538461539,
+    "misc": 10070
+  }
+]

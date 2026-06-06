@@ -22,6 +22,8 @@ export interface SectionProps {
     firstDivider?: boolean
     /** Controls the last inter-child hairline (between child[N-2] and child[N-1]). Set to false to suppress it. Default: true. */
     lastDivider?: boolean
+    /** When true, suppress every inter-child hairline. Use for sub-sections whose children are not a settings-row list (e.g. an informational strip followed by sliders that don't need visual separators). Default: false. */
+    noDividers?: boolean
     /** Optional right slot rendered inline with the section label (e.g. a Reset chip). When `collapsible`, this sits before the chevron. */
     labelRight?: React.ReactNode
     /** Outer container style override. */
@@ -35,7 +37,7 @@ export interface SectionProps {
  * @param props See `SectionProps`.
  * @returns Label + card with children stacked vertically.
  */
-export const Section = ({ label, children, collapsible = false, defaultOpen = true, bare = false, firstDivider = true, lastDivider = true, labelRight, style }: SectionProps) => {
+export const Section = ({ label, children, collapsible = false, defaultOpen = true, bare = false, firstDivider = true, lastDivider = true, noDividers = false, labelRight, style }: SectionProps) => {
     const { colors } = useTheme()
     const [open, setOpen] = useState(defaultOpen)
     const items = useMemo(() => Children.toArray(children).filter(Boolean), [children])
@@ -71,7 +73,7 @@ export const Section = ({ label, children, collapsible = false, defaultOpen = tr
                 <View style={cardStyle}>
                     {items.map((child, idx) => {
                         const isLastChild = idx === items.length - 1
-                        let showDivider = !isLastChild
+                        let showDivider = !isLastChild && !noDividers
                         if (idx === 0 && !firstDivider) showDivider = false
                         if (idx === items.length - 2 && !lastDivider) showDivider = false
                         return (

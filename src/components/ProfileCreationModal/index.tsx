@@ -113,7 +113,6 @@ const ProfileCreationModal: React.FC<ProfileCreationModalProps> = ({ visible, on
             { key: "SUMMER PRIORITY", value: joinOrNone(currentTrainingSettings.summerTrainingStatPriority) },
             { key: "MAX FAILURE", value: `${currentTrainingSettings.maximumFailureChance}%`, mono: true },
             { key: "DISABLE ON MAXED", value: yesNo(currentTrainingSettings.disableTrainingOnMaxedStat) },
-            { key: "FOCUS ON SPARKS", value: joinOrNone(currentTrainingSettings.focusOnSparkStatTarget) },
             { key: "RAINBOW BONUS", value: yesNo(currentTrainingSettings.enableRainbowTrainingBonus) },
             { key: "NEAR-MAX FRIEND", value: yesNo(currentTrainingSettings.enablePrioritizeNearMaxFriendship) },
             { key: "PREFERRED DIST", value: currentTrainingSettings.preferredDistanceOverride || "Auto" },

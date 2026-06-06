@@ -9,6 +9,7 @@ import com.steve1316.uma_android_automation.bot.Training.Companion.getRemainingF
 import com.steve1316.uma_android_automation.bot.Training.Companion.levelBoostMultiplier
 import com.steve1316.uma_android_automation.bot.Training.Companion.scoreFriendshipTraining
 import com.steve1316.uma_android_automation.bot.Training.Companion.scoreUnityCupTraining
+import com.steve1316.uma_android_automation.bot.Training.Companion.scoringConstantsFromMap
 import com.steve1316.uma_android_automation.bot.Training.TrainingConfig
 import com.steve1316.uma_android_automation.bot.Training.TrainingOption
 import com.steve1316.uma_android_automation.types.DateMonth
@@ -17,6 +18,7 @@ import com.steve1316.uma_android_automation.types.DateYear
 import com.steve1316.uma_android_automation.types.GameDate
 import com.steve1316.uma_android_automation.types.StatName
 import com.steve1316.uma_android_automation.utils.CustomImageUtils.BarFillResult
+import com.steve1316.uma_scoring.TrainingScoringConstants
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -127,7 +129,6 @@ class TrainingScoringTest {
         currentDate: GameDate = GameDate(year = DateYear.JUNIOR, month = DateMonth.JANUARY, phase = DatePhase.EARLY),
         scenario: String = "URA Finale",
         enableRainbowTrainingBonus: Boolean = true,
-        focusOnSparkStatTarget: List<StatName> = emptyList(),
         blacklist: List<StatName?> = emptyList(),
         disableTrainingOnMaxedStat: Boolean = false,
         skillHintsPerLocation: Map<StatName, Int> = StatName.entries.associateWith { 0 },
@@ -143,7 +144,6 @@ class TrainingScoringTest {
             currentDate = currentDate,
             scenario = scenario,
             enableRainbowTrainingBonus = enableRainbowTrainingBonus,
-            focusOnSparkStatTarget = focusOnSparkStatTarget,
             blacklist = blacklist,
             disableTrainingOnMaxedStat = disableTrainingOnMaxedStat,
             trainingOptions = trainingOptions,
@@ -358,9 +358,12 @@ class TrainingScoringTest {
     }
 
     @Test
-    @DisplayName("Spark bonus applies for stats below 600 when enabled")
-    fun testSparkBonusAppliesForLowStats() {
-        val currentStats =
+    @DisplayName("Stat efficiency score does not depend on a spark stat list (regression: focusOnSparkStatTarget is removed)")
+    fun testStatEfficiencyHasNoSparkBonus() {
+        // Speed below 600 used to receive a 2.5x bonus when in focusOnSparkStatTarget. That bonus is gone.
+        // Two configs differ only in whether Speed is below or above 600; without spark, the score difference
+        // must come only from ratio multiplier and other documented factors, not a 2.5x spark.
+        val belowSixHundred =
             mapOf(
                 StatName.SPEED to 400,
                 StatName.STAMINA to 400,
@@ -368,30 +371,25 @@ class TrainingScoringTest {
                 StatName.GUTS to 400,
                 StatName.WIT to 400,
             )
+        val aboveSixHundred = belowSixHundred + (StatName.SPEED to 700)
 
         val speedTraining =
             createDefaultTrainingOption(
                 name = StatName.SPEED,
-                statGains = statGainsToMap(intArrayOf(20, 0, 10, 0, 0)),
+                statGains = statGainsToMap(intArrayOf(10, 0, 0, 0, 0)),
             )
 
-        val configWithSpark =
-            createDefaultConfig(
-                trainingOptions = listOf(speedTraining),
-                currentStats = currentStats,
-                focusOnSparkStatTarget = listOf(StatName.SPEED),
-            )
-        val configWithoutSpark =
-            createDefaultConfig(
-                trainingOptions = listOf(speedTraining),
-                currentStats = currentStats,
-                focusOnSparkStatTarget = emptyList(),
-            )
+        val configBelow = createDefaultConfig(trainingOptions = listOf(speedTraining), currentStats = belowSixHundred)
+        val configAbove = createDefaultConfig(trainingOptions = listOf(speedTraining), currentStats = aboveSixHundred)
 
-        val sparkScore = calculateStatEfficiencyScore(configWithSpark, speedTraining)
-        val noSparkScore = calculateStatEfficiencyScore(configWithoutSpark, speedTraining)
+        val belowScore = calculateStatEfficiencyScore(configBelow, speedTraining)
+        val aboveScore = calculateStatEfficiencyScore(configAbove, speedTraining)
 
-        assertTrue(sparkScore > noSparkScore, "Spark bonus should increase score for stats below 600")
+        // belowScore is still > aboveScore because Speed at 400 has a higher ratio multiplier than Speed at 700,
+        // but the gap must come only from the documented ratio-bucket transition. Speed target is 800 for "Medium" so completion is 50% (below) and 87.5% (above),
+        // which land in different ratio buckets. The natural gap is bounded; a re-added 2.5x spark bonus on top would push the ratio well past 5x.
+        val ratio = belowScore / aboveScore
+        assertTrue(ratio < 5.0, "Without the spark bonus the score gap between <600 and >=600 must stay within bucket-transition range")
     }
 
     @Test
@@ -820,6 +818,7 @@ class TrainingScoringTest {
         val preferredDistance: String,
         val date: GameDate,
         val expectedTraining: StatName,
+        val statPrioritization: List<StatName>? = null,
     ) {
         // Override toString() to only show the description in test names.
         override fun toString(): String = description
@@ -920,6 +919,7 @@ class TrainingScoringTest {
                     preferredDistance = "Medium",
                     date = GameDate(year = DateYear.CLASSIC, month = DateMonth.AUGUST, phase = DatePhase.EARLY),
                     expectedTraining = StatName.POWER,
+                    statPrioritization = listOf(StatName.POWER, StatName.STAMINA, StatName.SPEED, StatName.WIT, StatName.GUTS),
                 ),
                 TrainingTestCase(
                     description = "Senior Year Early Jul - Speed with high main stat gain, rainbow bonus and fillable gauges",
@@ -1018,6 +1018,7 @@ class TrainingScoringTest {
             createDefaultConfig(
                 trainingOptions = trainingOptions,
                 currentStats = statsToMap(testCase.currentStats),
+                statPrioritization = testCase.statPrioritization ?: listOf(StatName.SPEED, StatName.STAMINA, StatName.POWER, StatName.WIT, StatName.GUTS),
                 preferredDistance = testCase.preferredDistance,
                 currentDate = testCase.date,
                 scenario = "Unity Cup",
@@ -1351,5 +1352,221 @@ class TrainingScoringTest {
     fun testDisableStatTargetsDefault() {
         val config = createDefaultConfig()
         assertEquals(false, config.disableStatTargets, "TrainingConfig.disableStatTargets should default to false")
+    }
+
+    @Test
+    @DisplayName("TrainingScoringConstants defaults match original hardcoded values")
+    fun testScoringConstantsDefaults() {
+        val c = TrainingScoringConstants()
+        assertEquals(listOf(15.0, 30.0, 45.0, 60.0, 75.0, 90.0), c.ratioBreakpoints)
+        assertEquals(listOf(5.0, 4.0, 3.0, 2.0, 1.0, 0.5, 0.3), c.ratioMultipliers)
+        assertEquals(0.5, c.priorityCoefficient)
+        assertEquals(0.75, c.levelBoostRank1Factor)
+        assertEquals(0.25, c.levelBoostRank2Factor)
+        assertEquals(0.10, c.levelBoostRank3Factor)
+        assertEquals(2.0, c.mainStatBonusMagnitude)
+        assertEquals(15, c.mainStatThresholds[StatName.WIT])
+        assertEquals(30, c.mainStatThresholds[StatName.SPEED])
+        assertEquals(0.0, c.relationshipOrangeValue)
+        assertEquals(1.0, c.relationshipGreenValue)
+        assertEquals(2.5, c.relationshipBlueValue)
+        assertEquals(0.5, c.relationshipDiminishingFactor)
+        assertEquals(1.3, c.relationshipEarlyGameBonus)
+        assertEquals(1.15, c.relationshipTrainerSupportBonus)
+        assertEquals(10.0, c.skillHintPerHintScore)
+        assertEquals(10000.0, c.skillHintOverrideScore)
+        assertEquals(0.6, c.statWeightWithBars)
+        assertEquals(0.7, c.statWeightWithoutBars)
+        assertEquals(0.1, c.relationshipWeightWithBars)
+        assertEquals(0.3, c.miscWeight)
+        assertEquals(200.0, c.juniorEarlyGameFlatBonus)
+        assertEquals(1.5, c.relationshipScale)
+        assertEquals(2.0, c.rainbowMultiplierEnabled)
+        assertEquals(1.5, c.rainbowMultiplierDisabled)
+        assertEquals(200.0, c.rainbowPerInstanceBase)
+        assertEquals(0.5, c.rainbowPerInstanceDecay)
+        assertEquals(50.0, c.anticipatoryMinFillPercent)
+        assertEquals(0.2, c.anticipatoryCoefficient)
+        assertEquals(0.6, c.anticipatoryCap)
+    }
+
+    @Test
+    @DisplayName("mainStatBonus fires for Wit at gain 15")
+    fun testWitMainStatBonusFiresAtFifteen() {
+        val witTraining =
+            createDefaultTrainingOption(
+                name = StatName.WIT,
+                statGains = statGainsToMap(intArrayOf(0, 0, 0, 0, 15)),
+            )
+        val below =
+            createDefaultTrainingOption(
+                name = StatName.WIT,
+                statGains = statGainsToMap(intArrayOf(0, 0, 0, 0, 14)),
+            )
+
+        val config = createDefaultConfig(trainingOptions = listOf(witTraining, below))
+
+        val withBonus = calculateStatEfficiencyScore(config, witTraining)
+        val withoutBonus = calculateStatEfficiencyScore(config, below)
+
+        // +15 Wit gets 2x bonus; +14 doesn't. Score ratio should be close to (15 * 2) / 14.
+        assertTrue(withBonus > withoutBonus * 2.0, "Wit at +15 should receive the 2x main-stat bonus while +14 does not")
+    }
+
+    @Test
+    @DisplayName("mainStatBonus still requires gain 30 for Speed/Stamina/Power/Guts")
+    fun testNonWitMainStatBonusRequiresThirty() {
+        val speedTraining =
+            createDefaultTrainingOption(
+                name = StatName.SPEED,
+                statGains = statGainsToMap(intArrayOf(29, 0, 0, 0, 0)),
+            )
+        val speedThreshold =
+            createDefaultTrainingOption(
+                name = StatName.SPEED,
+                statGains = statGainsToMap(intArrayOf(30, 0, 0, 0, 0)),
+            )
+
+        val config = createDefaultConfig(trainingOptions = listOf(speedTraining, speedThreshold))
+
+        val below = calculateStatEfficiencyScore(config, speedTraining)
+        val at = calculateStatEfficiencyScore(config, speedThreshold)
+
+        // +30 gets the 2x bonus; +29 doesn't. Expect a big jump despite only +1 gain.
+        assertTrue(at > below * 1.9, "Speed at +30 should receive the 2x main-stat bonus while +29 does not")
+    }
+
+    @Test
+    @DisplayName("mainStatBonus threshold is per-stat, configurable through TrainingScoringConstants")
+    fun testMainStatBonusThresholdIsConfigurable() {
+        val gutsTraining =
+            createDefaultTrainingOption(
+                name = StatName.GUTS,
+                statGains = statGainsToMap(intArrayOf(0, 0, 0, 22, 0)),
+            )
+
+        val configDefault = createDefaultConfig(trainingOptions = listOf(gutsTraining))
+        val customConstants =
+            TrainingScoringConstants(
+                mainStatThresholds =
+                    mapOf(StatName.GUTS to 20) +
+                        StatName.entries.filter { it != StatName.GUTS }.associateWith { 30 },
+            )
+        val configCustom =
+            configDefault.copy(scoring = customConstants)
+
+        val defaultScore = calculateStatEfficiencyScore(configDefault, gutsTraining)
+        val customScore = calculateStatEfficiencyScore(configCustom, gutsTraining)
+
+        // Default: Guts +22 below 30, no bonus. Custom: threshold 20, bonus fires.
+        assertTrue(customScore > defaultScore * 1.9, "Lowering the Guts threshold should activate the 2x main-stat bonus")
+    }
+
+    @Test
+    @DisplayName("Priority multiplier applies regardless of completion gap to top-priority stat")
+    fun testPriorityMultiplierIgnoresCompletionGap() {
+        // Stats configured so Wit is far behind in completion (10%), Speed is far ahead (90%).
+        // Under the old 10% gate, Speed would receive no priority bonus. Under the new design, it must.
+        val currentStats =
+            mapOf(
+                StatName.SPEED to 720,
+                StatName.STAMINA to 0,
+                StatName.POWER to 0,
+                StatName.GUTS to 0,
+                StatName.WIT to 80,
+            )
+        val speedTraining =
+            createDefaultTrainingOption(
+                name = StatName.SPEED,
+                statGains = statGainsToMap(intArrayOf(10, 0, 0, 0, 0)),
+            )
+
+        val config =
+            createDefaultConfig(
+                trainingOptions = listOf(speedTraining),
+                currentStats = currentStats,
+                statPrioritization = listOf(StatName.WIT, StatName.SPEED, StatName.POWER, StatName.STAMINA, StatName.GUTS),
+            )
+
+        val scoreWithPriorityActive = calculateStatEfficiencyScore(config, speedTraining)
+
+        // Compare against a config where Speed is not in the priority list at all.
+        val configNoPriority =
+            config.copy(statPrioritization = listOf(StatName.WIT, StatName.STAMINA, StatName.GUTS, StatName.POWER))
+        val scoreWithoutPriority = calculateStatEfficiencyScore(configNoPriority, speedTraining)
+
+        assertTrue(
+            scoreWithPriorityActive > scoreWithoutPriority,
+            "Speed at index 1 in the priority list must outscore Speed not in the priority list, even when its completion is far above Wit's",
+        )
+    }
+
+    @Test
+    @DisplayName("Priority coefficient 0.5 yields 3.0x for top of a 4-stat list")
+    fun testPriorityCoefficientYieldsExpectedTopMultiplier() {
+        // Plain Wit training, no rainbows, no main-stat bonus, with Wit at the top of a 4-stat list.
+        val witTraining =
+            createDefaultTrainingOption(
+                name = StatName.WIT,
+                statGains = statGainsToMap(intArrayOf(0, 0, 0, 0, 5)),
+            )
+        val witLast =
+            createDefaultTrainingOption(
+                name = StatName.WIT,
+                statGains = statGainsToMap(intArrayOf(0, 0, 0, 0, 5)),
+            )
+
+        val configTop =
+            createDefaultConfig(
+                trainingOptions = listOf(witTraining),
+                statPrioritization = listOf(StatName.WIT, StatName.POWER, StatName.SPEED, StatName.STAMINA),
+            )
+        val configBottom =
+            createDefaultConfig(
+                trainingOptions = listOf(witLast),
+                statPrioritization = listOf(StatName.POWER, StatName.SPEED, StatName.STAMINA, StatName.WIT),
+            )
+
+        val topScore = calculateStatEfficiencyScore(configTop, witTraining)
+        val bottomScore = calculateStatEfficiencyScore(configBottom, witLast)
+
+        // Top: 1.0 + 0.5 * 4 = 3.0. Bottom: 1.0 + 0.5 * 1 = 1.5. Ratio 2.0.
+        val ratio = topScore / bottomScore
+        assertEquals(2.0, ratio, 0.01, "Top-of-list priority should be 2x stronger than bottom-of-list under coefficient 0.5")
+    }
+
+    @Test
+    @DisplayName("scoringConstantsFromMap: empty map returns all defaults")
+    fun scoringConstantsFromMapEmptyReturnsDefaults() {
+        val defaults = TrainingScoringConstants()
+        val result = scoringConstantsFromMap(emptyMap())
+        assertEquals(defaults, result, "Empty settings map should yield defaults")
+    }
+
+    @Test
+    @DisplayName("scoringConstantsFromMap: single override applied, others remain default")
+    fun scoringConstantsFromMapSingleOverride() {
+        val defaults = TrainingScoringConstants()
+        val result = scoringConstantsFromMap(mapOf("priorityCoefficient" to 0.8))
+        assertEquals(0.8, result.priorityCoefficient, 1e-9, "priorityCoefficient should reflect override")
+        assertEquals(defaults.copy(priorityCoefficient = 0.8), result, "All other fields should match defaults")
+    }
+
+    @Test
+    @DisplayName("scoringConstantsFromMap: per-stat threshold override applied")
+    fun scoringConstantsFromMapStatThresholdOverride() {
+        val defaults = TrainingScoringConstants()
+        val result = scoringConstantsFromMap(mapOf("mainStatThresholdWit" to 25))
+        assertEquals(25, result.mainStatThresholds[StatName.WIT], "WIT threshold should reflect override")
+        assertEquals(defaults.mainStatThresholds[StatName.SPEED], result.mainStatThresholds[StatName.SPEED], "SPEED threshold unchanged")
+    }
+
+    @Test
+    @DisplayName("scoringConstantsFromMap: non-numeric or NaN values fall back to default")
+    fun scoringConstantsFromMapInvalidFallback() {
+        val defaults = TrainingScoringConstants()
+        val result = scoringConstantsFromMap(mapOf("priorityCoefficient" to "oops", "miscWeight" to Double.NaN))
+        assertEquals(defaults.priorityCoefficient, result.priorityCoefficient, 1e-9, "Non-numeric value should fall back")
+        assertEquals(defaults.miscWeight, result.miscWeight, 1e-9, "NaN value should fall back")
     }
 }

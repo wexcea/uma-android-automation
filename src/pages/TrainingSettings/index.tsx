@@ -29,10 +29,13 @@ import { RADII } from "../../lib/radii"
 import { MOTION } from "../../lib/motion"
 import { ROW_PADDING_Y } from "../../lib/density"
 import Ionicons from "@react-native-vector-icons/ionicons"
+import { TrainingScoringSandbox } from "../../components/TrainingScoringSandbox"
+import { TrainingScoringAdvanced } from "../../components/TrainingScoringAdvanced"
+import { StickySandboxButton } from "../../components/TrainingScoringAdvanced/StickySandboxButton"
 
 /**
  * The Training Settings page.
- * Provides configuration for stat prioritization, blacklists, failure chance thresholds, spark targets, risky training, distance overrides,
+ * Provides configuration for stat prioritization, blacklists, failure chance thresholds, risky training, distance overrides,
  * stat target sliders per distance, and profile management (creation, switching, and overwriting).
  */
 const TrainingSettings = () => {
@@ -49,7 +52,6 @@ const TrainingSettings = () => {
     const [prioritizationModalVisible, setPrioritizationModalVisible] = useState(false)
     const [eventChoicePrioritizationModalVisible, setEventChoicePrioritizationModalVisible] = useState(false)
     const [summerTrainingPrioritizationModalVisible, setSummerTrainingPrioritizationModalVisible] = useState(false)
-    const [sparkStatTargetModalVisible, setSparkStatTargetModalVisible] = useState(false)
     const [distanceOpen, setDistanceOpen] = useState<{ sprint: boolean; mile: boolean; medium: boolean; long: boolean }>({
         sprint: false,
         mile: false,
@@ -62,6 +64,8 @@ const TrainingSettings = () => {
     }, [])
     const [snackbarVisible, setSnackbarVisible] = useState(false)
     const [snackbarMessage, setSnackbarMessage] = useState("")
+    const [scoringSandboxOpen, setScoringSandboxOpen] = useState(false)
+    const [advancedExpanded, setAdvancedExpanded] = useState(false)
 
     // Initialize local state from settings, with fallback to defaults.
     const [statPrioritizationItems, setStatPrioritizationItems] = useState<string[]>(() =>
@@ -74,15 +78,6 @@ const TrainingSettings = () => {
         training?.summerTrainingStatPriority !== undefined ? training.summerTrainingStatPriority : defaultSettings.training.summerTrainingStatPriority
     )
     const [blacklistItems, setBlacklistItems] = useState<string[]>(() => (training?.trainingBlacklist !== undefined ? training.trainingBlacklist : defaultSettings.training.trainingBlacklist))
-    const [sparkStatTargetItems, setSparkStatTargetItems] = useState<string[]>(() => {
-        const value = training?.focusOnSparkStatTarget
-        // Ensure we always have an array (migration should handle this, but be safe).
-        if (Array.isArray(value)) {
-            return value
-        }
-        return defaultSettings.training.focusOnSparkStatTarget
-    })
-
     // Use a ref to track if the initial mount sync has been done to avoid redundant updates.
     const isMounted = useRef(false)
 
@@ -110,9 +105,8 @@ const TrainingSettings = () => {
             statPrioritization: statPrioritizationItems,
             eventChoiceStatPriority: eventChoiceStatPriorityItems,
             summerTrainingStatPriority: summerTrainingStatPriorityItems,
-            focusOnSparkStatTarget: sparkStatTargetItems,
         }),
-        [training, blacklistItems, statPrioritizationItems, eventChoiceStatPriorityItems, summerTrainingStatPriorityItems, sparkStatTargetItems]
+        [training, blacklistItems, statPrioritizationItems, eventChoiceStatPriorityItems, summerTrainingStatPriorityItems]
     )
 
     const trainingStatTargetSettings = useMemo(() => ({ ...defaultSettings.trainingStatTarget, ...trainingStatTarget }), [trainingStatTarget])
@@ -169,14 +163,6 @@ const TrainingSettings = () => {
         }
     }, [blacklistItems])
 
-    useEffect(() => {
-        if (isMounted.current) {
-            if (!shallowArrayEqual(training?.focusOnSparkStatTarget, sparkStatTargetItems)) {
-                updateTrainingSetting("focusOnSparkStatTarget", sparkStatTargetItems)
-            }
-        }
-    }, [sparkStatTargetItems])
-
     // Mark as mounted after the first render.
     useEffect(() => {
         isMounted.current = true
@@ -210,13 +196,6 @@ const TrainingSettings = () => {
             setSummerTrainingStatPriorityItems(newVal)
         }
     }, [training?.summerTrainingStatPriority])
-
-    useEffect(() => {
-        const newVal = training?.focusOnSparkStatTarget
-        if (newVal !== undefined && Array.isArray(newVal) && !shallowArrayEqual(newVal, sparkStatTargetItems)) {
-            setSparkStatTargetItems(newVal)
-        }
-    }, [training?.focusOnSparkStatTarget])
 
     // Sync currentProfileName from profile manager to settings context.
     // This is now purely for the BotStateContext as the ProfileContext is the source of truth for the UI.
@@ -709,19 +688,6 @@ const TrainingSettings = () => {
                                     </SearchableItem>
                                 </Section>
 
-                                <Section label="Sparks">
-                                    {renderStatSelector(
-                                        "Focus on Sparks",
-                                        sparkStatTargetItems,
-                                        (value) => setSparkStatTargetItems(value),
-                                        sparkStatTargetModalVisible,
-                                        setSparkStatTargetModalVisible,
-                                        "Select which stats should receive priority to get to at least 600 to get the best chance to receive 3* sparks.",
-                                        "checkbox",
-                                        "focus-on-sparks"
-                                    )}
-                                </Section>
-
                                 <Section label="Scoring">
                                     <SearchableItem
                                         id="enable-training-level-weighting"
@@ -1210,11 +1176,15 @@ const TrainingSettings = () => {
                                         </SearchableItem>
                                     </View>
                                 </Section>
+
+                                <TrainingScoringAdvanced onExpandedChange={setAdvancedExpanded} />
                             </>
                         )}
                     </View>
                 </ScrollView>
             </SearchPageProvider>
+            {advancedExpanded && <StickySandboxButton onPress={() => setScoringSandboxOpen(true)} />}
+            <TrainingScoringSandbox open={scoringSandboxOpen} onClose={() => setScoringSandboxOpen(false)} />
             <Snackbar
                 visible={snackbarVisible}
                 onDismiss={() => setSnackbarVisible(false)}

@@ -233,6 +233,9 @@ android {
 }
 
 dependencies {
+    // Shared scoring math (Kotlin Multiplatform module: commonMain hosts the canonical formulas, jvm target consumed here).
+    implementation(project(':scoring-shared'))
+
     // Automation Library
     implementation(libs.android.cv.automation.library)
     // implementation("com.github.steve1316:automation_library:TAG-SNAPSHOT") // Uncomment this for local testing and replace TAG with the snapshot versionName of the library.

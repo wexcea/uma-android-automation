@@ -133,12 +133,6 @@ const searchConfig: SearchOption[] = [
         parentId: "enable-riskier-training",
     },
     {
-        id: "focus-on-sparks",
-        title: "Focus on Sparks",
-        description: "Select which stats should receive priority to get to at least 600 to get the best chance to receive 3* sparks.",
-        page: "TrainingSettings",
-    },
-    {
         id: "enable-prioritize-skill-hints",
         title: "Prioritize Skill Hints",
         description: "When enabled, the bot will prioritize acquiring skill hints, bypassing stat prioritization and blacklist, while still being constrained by the failure chance thresholds.",
@@ -223,6 +217,48 @@ const searchConfig: SearchOption[] = [
         description: "Percentage of the primary stat targets to aim for by the end of Classic Year.",
         page: "TrainingSettings",
         parentId: "training-year-milestone-targets",
+    },
+    {
+        id: "training-scoring-sandbox",
+        title: "Scoring Sandbox",
+        description: "Preview which training the bot would pick for a hypothetical scenario.",
+        page: "TrainingSettings",
+    },
+    {
+        id: "training-scoring-priority-multiplier",
+        title: "Priority Multiplier",
+        description: "Tune how much priority order influences scoring.",
+        page: "TrainingSettings",
+    },
+    {
+        id: "training-scoring-ratio-curve",
+        title: "Ratio Curve",
+        description: "Tune the per-bucket ratio multipliers that drive stat-efficiency scoring. Buckets at 15/30/45/60/75/90% of target are fixed.",
+        page: "TrainingSettings",
+    },
+    {
+        id: "training-scoring-weights",
+        title: "Score Weights",
+        description: "Adjust how stat efficiency, relationships, and misc contribute to the final score.",
+        page: "TrainingSettings",
+    },
+    {
+        id: "training-scoring-main-stat-bonuses",
+        title: "Main Stat Bonuses",
+        description: "Adjust the per-stat gain thresholds that trigger the main-stat bonus.",
+        page: "TrainingSettings",
+    },
+    {
+        id: "training-scoring-level-boost",
+        title: "Level Boost",
+        description: "Adjust how training facility level amplifies the primary stat contribution.",
+        page: "TrainingSettings",
+    },
+    {
+        id: "training-scoring-misc",
+        title: "Misc Scoring",
+        description: "Tune rainbow, anticipatory, energy, and other misc scoring multipliers.",
+        page: "TrainingSettings",
     },
     // ============================================================
     // Training Event Settings

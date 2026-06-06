@@ -1,0 +1,232 @@
+[
+  {
+    "id": "classic-wit-rainbow-tinted",
+    "config": {
+      "currentStats": { "SPEED": 600, "STAMINA": 300, "POWER": 400, "GUTS": 200, "WIT": 500 },
+      "statPrioritization": ["WIT", "SPEED", "POWER", "STAMINA", "GUTS"],
+      "summerTrainingStatPriority": ["WIT", "SPEED", "POWER", "STAMINA", "GUTS"],
+      "statTargets": { "SPEED": 1200, "STAMINA": 1200, "POWER": 1200, "GUTS": 1200, "WIT": 1200 },
+      "currentDate": { "year": "CLASSIC", "day": 41, "bIsPreDebut": false, "isSummer": false },
+      "scenario": "URA",
+      "enableRainbowTrainingBonus": true,
+      "disableTrainingOnMaxedStat": false,
+      "enablePrioritizeSkillHints": false,
+      "enableTrainingLevelWeighting": true,
+      "disableStatTargets": false,
+      "enablePrioritizeNearMaxFriendship": true,
+      "statsTrainedOverBuffer": []
+    },
+    "training": {
+      "name": "WIT",
+      "statGains": { "WIT": 10, "STAMINA": 2 },
+      "failureChance": 0,
+      "relationshipBars": [
+        { "dominantColor": "orange", "fillPercent": 100, "isTrainerSupport": true }
+      ],
+      "numRainbow": 1,
+      "numSkillHints": 0,
+      "trainingLevel": 4
+    }
+  },
+  {
+    "id": "junior-speed-no-bars-no-rainbow",
+    "config": {
+      "currentStats": { "SPEED": 80, "STAMINA": 70, "POWER": 60, "GUTS": 50, "WIT": 90 },
+      "statPrioritization": ["SPEED", "STAMINA", "POWER", "WIT", "GUTS"],
+      "summerTrainingStatPriority": ["SPEED", "STAMINA", "POWER", "WIT", "GUTS"],
+      "statTargets": { "SPEED": 1100, "STAMINA": 600, "POWER": 600, "GUTS": 400, "WIT": 600 },
+      "currentDate": { "year": "JUNIOR", "day": 10, "bIsPreDebut": false, "isSummer": false },
+      "scenario": "URA",
+      "enableRainbowTrainingBonus": true,
+      "disableTrainingOnMaxedStat": false,
+      "enablePrioritizeSkillHints": false,
+      "enableTrainingLevelWeighting": false,
+      "disableStatTargets": false,
+      "enablePrioritizeNearMaxFriendship": false,
+      "statsTrainedOverBuffer": []
+    },
+    "training": {
+      "name": "SPEED",
+      "statGains": { "SPEED": 8, "STAMINA": 1 },
+      "failureChance": 4,
+      "relationshipBars": [],
+      "numRainbow": 0,
+      "numSkillHints": 0,
+      "trainingLevel": 1
+    }
+  },
+  {
+    "id": "classic-speed-low-completion",
+    "config": {
+      "currentStats": { "SPEED": 50, "STAMINA": 400, "POWER": 350, "GUTS": 200, "WIT": 300 },
+      "statPrioritization": ["SPEED", "STAMINA", "POWER", "WIT", "GUTS"],
+      "summerTrainingStatPriority": ["SPEED", "STAMINA", "POWER", "WIT", "GUTS"],
+      "statTargets": { "SPEED": 1200, "STAMINA": 900, "POWER": 800, "GUTS": 400, "WIT": 600 },
+      "currentDate": { "year": "CLASSIC", "day": 30, "bIsPreDebut": false, "isSummer": false },
+      "scenario": "URA",
+      "enableRainbowTrainingBonus": true,
+      "disableTrainingOnMaxedStat": false,
+      "enablePrioritizeSkillHints": false,
+      "enableTrainingLevelWeighting": false,
+      "disableStatTargets": false,
+      "enablePrioritizeNearMaxFriendship": false,
+      "statsTrainedOverBuffer": []
+    },
+    "training": {
+      "name": "SPEED",
+      "statGains": { "SPEED": 12 },
+      "failureChance": 3,
+      "relationshipBars": [],
+      "numRainbow": 0,
+      "numSkillHints": 0,
+      "trainingLevel": 3
+    }
+  },
+  {
+    "id": "classic-power-anticipatory",
+    "config": {
+      "currentStats": { "SPEED": 550, "STAMINA": 400, "POWER": 500, "GUTS": 250, "WIT": 450 },
+      "statPrioritization": ["POWER", "SPEED", "STAMINA", "WIT", "GUTS"],
+      "summerTrainingStatPriority": ["POWER", "SPEED", "STAMINA", "WIT", "GUTS"],
+      "statTargets": { "SPEED": 1200, "STAMINA": 800, "POWER": 1200, "GUTS": 400, "WIT": 700 },
+      "currentDate": { "year": "CLASSIC", "day": 35, "bIsPreDebut": false, "isSummer": false },
+      "scenario": "URA",
+      "enableRainbowTrainingBonus": true,
+      "disableTrainingOnMaxedStat": false,
+      "enablePrioritizeSkillHints": false,
+      "enableTrainingLevelWeighting": false,
+      "disableStatTargets": false,
+      "enablePrioritizeNearMaxFriendship": true,
+      "statsTrainedOverBuffer": []
+    },
+    "training": {
+      "name": "POWER",
+      "statGains": { "POWER": 11, "STAMINA": 2 },
+      "failureChance": 5,
+      "relationshipBars": [
+        { "dominantColor": "green", "fillPercent": 80, "isTrainerSupport": false },
+        { "dominantColor": "green", "fillPercent": 90, "isTrainerSupport": false },
+        { "dominantColor": "blue", "fillPercent": 5, "isTrainerSupport": false }
+      ],
+      "numRainbow": 0,
+      "numSkillHints": 0,
+      "trainingLevel": 3
+    }
+  },
+  {
+    "id": "senior-guts-stat-near-cap",
+    "config": {
+      "currentStats": { "SPEED": 1000, "STAMINA": 900, "POWER": 800, "GUTS": 1150, "WIT": 700 },
+      "statPrioritization": ["GUTS", "SPEED", "STAMINA", "POWER", "WIT"],
+      "summerTrainingStatPriority": ["GUTS", "SPEED", "STAMINA", "POWER", "WIT"],
+      "statTargets": { "SPEED": 1200, "STAMINA": 1100, "POWER": 1000, "GUTS": 1200, "WIT": 900 },
+      "currentDate": { "year": "SENIOR", "day": 55, "bIsPreDebut": false, "isSummer": false },
+      "scenario": "URA",
+      "enableRainbowTrainingBonus": true,
+      "disableTrainingOnMaxedStat": true,
+      "enablePrioritizeSkillHints": false,
+      "enableTrainingLevelWeighting": false,
+      "disableStatTargets": false,
+      "enablePrioritizeNearMaxFriendship": false,
+      "statsTrainedOverBuffer": []
+    },
+    "training": {
+      "name": "GUTS",
+      "statGains": { "GUTS": 9 },
+      "failureChance": 2,
+      "relationshipBars": [],
+      "numRainbow": 0,
+      "numSkillHints": 0,
+      "trainingLevel": 4
+    }
+  },
+  {
+    "id": "summer-wit-using-summer-priority",
+    "config": {
+      "currentStats": { "SPEED": 700, "STAMINA": 500, "POWER": 600, "GUTS": 300, "WIT": 550 },
+      "statPrioritization": ["SPEED", "STAMINA", "POWER", "GUTS", "WIT"],
+      "summerTrainingStatPriority": ["WIT", "SPEED", "POWER", "STAMINA", "GUTS"],
+      "statTargets": { "SPEED": 1200, "STAMINA": 1000, "POWER": 900, "GUTS": 500, "WIT": 1100 },
+      "currentDate": { "year": "CLASSIC", "day": 26, "bIsPreDebut": false, "isSummer": true },
+      "scenario": "URA",
+      "enableRainbowTrainingBonus": true,
+      "disableTrainingOnMaxedStat": false,
+      "enablePrioritizeSkillHints": false,
+      "enableTrainingLevelWeighting": false,
+      "disableStatTargets": false,
+      "enablePrioritizeNearMaxFriendship": false,
+      "statsTrainedOverBuffer": []
+    },
+    "training": {
+      "name": "WIT",
+      "statGains": { "WIT": 10, "SPEED": 2 },
+      "failureChance": 0,
+      "relationshipBars": [
+        { "dominantColor": "green", "fillPercent": 45, "isTrainerSupport": false }
+      ],
+      "numRainbow": 0,
+      "numSkillHints": 0,
+      "trainingLevel": 3
+    }
+  },
+  {
+    "id": "blacklisted-stamina",
+    "config": {
+      "currentStats": { "SPEED": 500, "STAMINA": 400, "POWER": 450, "GUTS": 200, "WIT": 350 },
+      "statPrioritization": ["SPEED", "POWER", "WIT", "GUTS", "STAMINA"],
+      "summerTrainingStatPriority": ["SPEED", "POWER", "WIT", "GUTS", "STAMINA"],
+      "statTargets": { "SPEED": 1200, "STAMINA": 600, "POWER": 1000, "GUTS": 400, "WIT": 800 },
+      "currentDate": { "year": "CLASSIC", "day": 20, "bIsPreDebut": false, "isSummer": false },
+      "scenario": "URA",
+      "enableRainbowTrainingBonus": true,
+      "blacklist": ["STAMINA"],
+      "disableTrainingOnMaxedStat": false,
+      "enablePrioritizeSkillHints": false,
+      "enableTrainingLevelWeighting": false,
+      "disableStatTargets": false,
+      "enablePrioritizeNearMaxFriendship": false,
+      "statsTrainedOverBuffer": []
+    },
+    "training": {
+      "name": "STAMINA",
+      "statGains": { "STAMINA": 10, "GUTS": 1 },
+      "failureChance": 3,
+      "relationshipBars": [
+        { "dominantColor": "green", "fillPercent": 60, "isTrainerSupport": false }
+      ],
+      "numRainbow": 0,
+      "numSkillHints": 0,
+      "trainingLevel": 2
+    }
+  },
+  {
+    "id": "skill-hint-override-fires",
+    "config": {
+      "currentStats": { "SPEED": 600, "STAMINA": 500, "POWER": 550, "GUTS": 300, "WIT": 480 },
+      "statPrioritization": ["SPEED", "STAMINA", "POWER", "WIT", "GUTS"],
+      "summerTrainingStatPriority": ["SPEED", "STAMINA", "POWER", "WIT", "GUTS"],
+      "statTargets": { "SPEED": 1200, "STAMINA": 1000, "POWER": 900, "GUTS": 500, "WIT": 900 },
+      "currentDate": { "year": "CLASSIC", "day": 25, "bIsPreDebut": false, "isSummer": false },
+      "scenario": "URA",
+      "enableRainbowTrainingBonus": true,
+      "disableTrainingOnMaxedStat": false,
+      "skillHintsPerLocation": { "WIT": 2 },
+      "enablePrioritizeSkillHints": true,
+      "enableTrainingLevelWeighting": false,
+      "disableStatTargets": false,
+      "enablePrioritizeNearMaxFriendship": false,
+      "statsTrainedOverBuffer": []
+    },
+    "training": {
+      "name": "WIT",
+      "statGains": { "WIT": 7, "SPEED": 1 },
+      "failureChance": 1,
+      "relationshipBars": [
+        { "dominantColor": "blue", "fillPercent": 30, "isTrainerSupport": false }
+      ],
+      "numRainbow": 0,
+      "numSkillHints": 2,
+      "trainingLevel": 2
+    }
+  }
+]

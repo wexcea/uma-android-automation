@@ -33,21 +33,9 @@ enum class FanCountClass {
     }
 }
 
-enum class StatName {
-    SPEED,
-    STAMINA,
-    POWER,
-    GUTS,
-    WIT,
-    ;
-
-    companion object {
-        /** Mapping of stat names to their corresponding enum entries. */
-        private val nameMap = entries.associateBy { it.name }
-
-        fun fromName(value: String): StatName? = nameMap[value.uppercase()]
-    }
-}
+// `StatName` is now defined in the shared scoring module so the same enum is consumed by both the Android bot (this file's old location) and the React Native sandbox. The
+// typealias preserves the original import path `com.steve1316.uma_android_automation.types.StatName` so every existing call site keeps working unchanged.
+typealias StatName = com.steve1316.uma_scoring.StatName
 
 enum class Aptitude {
     G,
@@ -228,24 +216,9 @@ enum class DateMonth(val shortName: String) {
     }
 }
 
-enum class DateYear(val longName: String) {
-    JUNIOR("JUNIOR YEAR"),
-    CLASSIC("CLASSIC YEAR"),
-    SENIOR("SENIOR YEAR"),
-    ;
-
-    companion object {
-        /** Mapping of year names to their corresponding enum entries. */
-        private val nameMap = entries.associateBy { it.name }
-
-        /** Mapping of ordinals to their corresponding year enum entries. */
-        private val ordinalMap = entries.associateBy { it.ordinal }
-
-        fun fromName(value: String): DateYear? = nameMap[value.uppercase()]
-
-        fun fromOrdinal(ordinal: Int): DateYear? = ordinalMap[ordinal]
-    }
-}
+// `DateYear` is now defined in the shared scoring module so both the Android bot and the React Native sandbox import the same enum. The typealias preserves the original
+// import path `com.steve1316.uma_android_automation.types.DateYear` so every existing call site keeps working unchanged.
+typealias DateYear = com.steve1316.uma_scoring.DateYear
 
 /** Defines the positive status effects that a trainee can have. */
 enum class PositiveStatus(val statusName: String) {
