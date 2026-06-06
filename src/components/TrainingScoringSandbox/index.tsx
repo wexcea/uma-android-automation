@@ -112,16 +112,8 @@ export function TrainingScoringSandbox({ open, onClose }: TrainingScoringSandbox
                 footerRow: {
                     flexDirection: "row",
                     alignItems: "center",
-                    justifyContent: "space-between",
+                    justifyContent: "flex-end",
                     gap: SPACING.md,
-                },
-                footerHint: {
-                    ...TYPE.caption,
-                    color: colors.textMuted,
-                    flexShrink: 1,
-                    lineHeight: 18,
-                    includeFontPadding: false,
-                    textAlignVertical: "center",
                 },
                 description: {
                     ...TYPE.caption,
@@ -151,7 +143,6 @@ export function TrainingScoringSandbox({ open, onClose }: TrainingScoringSandbox
 
     const footer = (
         <View style={styles.footerRow}>
-            <Text style={styles.footerHint}>Reading current advanced settings</Text>
             <Button onPress={() => dispatch({ type: "reset" })} variant="secondary" size="sm">
                 <Text style={styles.buttonLabel}>Reset</Text>
             </Button>
