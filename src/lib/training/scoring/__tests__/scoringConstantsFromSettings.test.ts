@@ -1,5 +1,5 @@
 // src/lib/training/scoring/__tests__/scoringConstantsFromSettings.test.ts
-import { scoringConstantsFromSettings } from "../scoringConstantsFromSettings"
+import { scoringConstantsFromSettings } from "../scoring"
 import { DEFAULT_TRAINING_SCORING_CONSTANTS, StatName } from "../types"
 
 describe("scoringConstantsFromSettings", () => {

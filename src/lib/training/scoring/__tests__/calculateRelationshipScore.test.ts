@@ -1,4 +1,4 @@
-import { calculateRelationshipScore } from "../calculateRelationshipScore"
+import { calculateRelationshipScore } from "../scoring"
 import { BarFillResult, DEFAULT_TRAINING_SCORING_CONSTANTS, DateYear, StatName, TrainingConfig, TrainingOption } from "../types"
 
 function makeConfig(overrides: Partial<TrainingConfig> = {}): TrainingConfig {

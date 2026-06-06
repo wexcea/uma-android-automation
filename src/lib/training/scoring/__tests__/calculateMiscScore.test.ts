@@ -1,5 +1,5 @@
 // src/lib/training/scoring/__tests__/calculateMiscScore.test.ts
-import { calculateMiscScore } from "../calculateMiscScore"
+import { calculateMiscScore } from "../scoring"
 import { DEFAULT_TRAINING_SCORING_CONSTANTS, DateYear, StatName, TrainingConfig, TrainingOption } from "../types"
 
 function makeConfig(overrides: Partial<TrainingConfig> = {}): TrainingConfig {

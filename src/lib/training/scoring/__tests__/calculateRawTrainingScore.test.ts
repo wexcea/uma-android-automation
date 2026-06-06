@@ -1,8 +1,8 @@
 // src/lib/training/scoring/__tests__/calculateRawTrainingScore.test.ts
-import { calculateRawTrainingScore } from "../calculateRawTrainingScore"
-import { calculateMiscScore } from "../calculateMiscScore"
-import { calculateRelationshipScore } from "../calculateRelationshipScore"
-import { calculateStatEfficiencyScore } from "../calculateStatEfficiencyScore"
+import { calculateRawTrainingScore } from "../scoring"
+import { calculateMiscScore } from "../scoring"
+import { calculateRelationshipScore } from "../scoring"
+import { calculateStatEfficiencyScore } from "../scoring"
 import { DEFAULT_TRAINING_SCORING_CONSTANTS, DateYear, StatName, TrainingConfig, TrainingOption } from "../types"
 
 function makeConfig(overrides: Partial<TrainingConfig> = {}): TrainingConfig {

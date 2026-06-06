@@ -1,4 +1,4 @@
-import { calculateStatEfficiencyScore } from "../calculateStatEfficiencyScore"
+import { calculateStatEfficiencyScore } from "../scoring"
 import { DEFAULT_TRAINING_SCORING_CONSTANTS, DateYear, StatName, TrainingConfig, TrainingOption } from "../types"
 
 function makeConfig(overrides: Partial<TrainingConfig> = {}): TrainingConfig {

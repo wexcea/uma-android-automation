@@ -1,4 +1,4 @@
-import { levelBoostMultiplier } from "../levelBoostMultiplier"
+import { levelBoostMultiplier } from "../scoring"
 import { DEFAULT_TRAINING_SCORING_CONSTANTS } from "../types"
 
 describe("levelBoostMultiplier", () => {

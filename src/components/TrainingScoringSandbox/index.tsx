@@ -161,9 +161,9 @@ export function TrainingScoringSandbox({ open, onClose }: TrainingScoringSandbox
     return (
         <SheetModal visible={open} onRequestClose={onClose} header={header} footer={footer} maxWidth={800} heightFraction={0.55}>
             <Text style={styles.description}>
-                Preview which training the scoring formula would pick against a synthetic scenario. Uses all current Training Settings - priority lists, blacklist,
-                Advanced multipliers, every feature toggle, and the selected scenario - except for the per-distance stat targets, which the sandbox always treats as a flat
-                1200 so the ratio buckets stay predictable. Edit the stat gains, trainee totals, and run-wide state below; the winning training is highlighted in amber.
+                Preview which training the scoring formula would pick against a synthetic scenario. Uses all current Training Settings - priority lists, blacklist, Advanced multipliers, every feature
+                toggle, and the selected scenario - except for the per-distance stat targets, which the sandbox always treats as a flat 1200 so the ratio buckets stay predictable. Edit the stat gains,
+                trainee totals, and run-wide state below; the winning training is highlighted in amber.
             </Text>
             <StatTable scenario={scenario} dispatch={dispatch} />
             <TrainingCircleRow scenario={scenario} scoresByTraining={scoresByTraining} winnerTraining={winnerTraining} dispatch={dispatch} />

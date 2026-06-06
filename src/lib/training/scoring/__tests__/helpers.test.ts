@@ -1,5 +1,5 @@
 // src/lib/training/scoring/__tests__/helpers.test.ts
-import { getCurrentStatCap, getFinaleStatBonus } from "../helpers"
+import { getCurrentStatCap, getFinaleStatBonus } from "../scoring"
 import { DEFAULT_TRAINING_SCORING_CONSTANTS, DateYear, StatName, TrainingConfig } from "../types"
 
 function makeConfig(overrides: Partial<TrainingConfig> = {}): TrainingConfig {
