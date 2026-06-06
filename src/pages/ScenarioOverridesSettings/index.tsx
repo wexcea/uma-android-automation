@@ -622,7 +622,7 @@ const ScenarioOverridesSettings = () => {
 
                                 {/* Item Conservation */}
                                 <Section label="Item Conservation" labelRight={makeResetLink(resetConservationDefaults)}>
-                                    <View style={{ padding: SPACING.md, paddingBottom: 0 }}>
+                                    <View style={{ padding: SPACING.md }}>
                                         <Text style={styles.conservationSectionIntro}>
                                             Controls how aggressively the bot saves items for high-value turns. Set any threshold to 0 to disable that conservation rule and use items freely.
                                         </Text>
