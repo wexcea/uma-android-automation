@@ -30,12 +30,24 @@ import com.steve1316.uma_android_automation.types.DateYear
 import com.steve1316.uma_android_automation.types.GameDate
 import com.steve1316.uma_android_automation.types.StatName
 import com.steve1316.uma_android_automation.utils.CustomImageUtils
+import com.steve1316.uma_scoring.TrainingScoringConstants
 import org.opencv.core.Point
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.pow
+import com.steve1316.uma_scoring.calculateMiscScore as sharedCalculateMiscScore
+import com.steve1316.uma_scoring.calculateRawTrainingScore as sharedCalculateRawTrainingScore
+import com.steve1316.uma_scoring.calculateRelationshipScore as sharedCalculateRelationshipScore
+import com.steve1316.uma_scoring.calculateStatEfficiencyScore as sharedCalculateStatEfficiencyScore
+import com.steve1316.uma_scoring.estimateFailureChanceFromEnergy as sharedEstimateFailureChanceFromEnergy
+import com.steve1316.uma_scoring.getCurrentStatCap as sharedGetCurrentStatCap
+import com.steve1316.uma_scoring.getFinaleStatBonus as sharedGetFinaleStatBonus
+import com.steve1316.uma_scoring.getRemainingFinaleRaces as sharedGetRemainingFinaleRaces
+import com.steve1316.uma_scoring.getScenarioStatCap as sharedGetScenarioStatCap
+import com.steve1316.uma_scoring.levelBoostMultiplier as sharedLevelBoostMultiplier
+import com.steve1316.uma_scoring.scoringConstantsFromMap as sharedScoringConstantsFromMap
 
 /**
  * Handle the training process, including analysis of options, scoring recommendations, and execution.
@@ -272,85 +284,6 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
     }
 
     /**
-     * All tunable numeric constants used by the training scoring math. Each property keeps its current hardcoded value as the default so existing
-     * behavior is preserved when no overrides are supplied. Future user settings will wire into the same struct.
-     *
-     * @property ratioBreakpoints Completion-percent boundaries that bucket each stat into a ratio-multiplier tier. Fixed at [15, 30, 45, 60, 75, 90] and not user-tunable.
-     * @property ratioMultipliers Multipliers paired with `ratioBreakpoints`, indexed by which bucket the stat's completion percent falls into. Index 0 applies when completion is below `ratioBreakpoints[0]`. The final entry applies when completion is above every breakpoint.
-     * @property priorityCoefficient Linear coefficient applied to `(activePriority.size - priorityIndex)` to produce the per-stat priority multiplier. Default 0.5 makes priority a primary driver: in a 4-stat list, the top stat receives a 3.0x multiplier and the bottom a 1.5x.
-     * @property levelBoostRank1Factor Weight applied to the level-boost multiplier when the stat is the top-priority entry. Combines with the OCR-detected training level to amplify the score for high-level priority trainings.
-     * @property levelBoostRank2Factor As `levelBoostRank1Factor`, applied to the second-priority stat.
-     * @property levelBoostRank3Factor As `levelBoostRank1Factor`, applied to the third-priority stat. Ranks 4+ receive no boost.
-     * @property mainStatThresholds Per-stat gain threshold at which a training's main-stat score receives the `mainStatBonusMagnitude` multiplier. Acts as a "this looks like an undetected rainbow" heuristic.
-     * @property mainStatBonusMagnitude Multiplier applied to a stat's score when the training's main-stat gain meets the per-stat threshold in `mainStatThresholds`.
-     * @property relationshipOrangeValue Base score contribution for an orange (early-stage) relationship bar.
-     * @property relationshipGreenValue Base score contribution for a green (mid-stage) relationship bar.
-     * @property relationshipBlueValue Base score contribution for a blue (near-rainbow) relationship bar.
-     * @property relationshipDiminishingFactor Coefficient on the bar's fill level for diminishing-returns scaling. Higher values penalize fuller bars more aggressively.
-     * @property relationshipEarlyGameBonus Multiplier applied to relationship score during Junior Year or pre-debut. Encourages relationship building when there is still time to benefit.
-     * @property relationshipTrainerSupportBonus Multiplier applied to bars belonging to the Trainer support card to slightly prefer Trainer over other supports.
-     * @property skillHintPerHintScore Score added per detected skill hint icon on a training.
-     * @property skillHintOverrideScore Floor added to the misc score when the user has enabled "prioritize skill hints" and any hints are present, ensuring skill-hint trainings outscore everything else.
-     * @property statWeightWithBars Weight applied to stat-efficiency score when the training has at least one relationship bar.
-     * @property statWeightWithoutBars Weight applied to stat-efficiency score when the training has no relationship bars (Trainer-only training).
-     * @property relationshipWeightWithBars Weight applied to relationship score in the raw-score composition when bars are present.
-     * @property miscWeight Weight applied to misc score in the raw-score composition.
-     * @property juniorEarlyGameFlatBonus Flat score bonus added during Junior Year to encourage gauge filling early.
-     * @property relationshipScale Multiplier applied to the aggregate relationship score before adding it to the Unity Cup raw score. Tuned to be a significant bonus without exceeding the rainbow burst threshold.
-     * @property rainbowMultiplierEnabled Multiplier applied to total score in Year 2+ when at least one rainbow is detected and the user has enabled the rainbow training bonus.
-     * @property rainbowMultiplierDisabled Multiplier applied when rainbows are detected but the user has disabled the rainbow training bonus. Kept below `rainbowMultiplierEnabled`.
-     * @property rainbowPerInstanceBase Base value for the per-rainbow bonus score, geometrically decayed by `rainbowPerInstanceDecay`.
-     * @property rainbowPerInstanceDecay Geometric decay factor for the per-rainbow bonus. Lower values mean each additional rainbow contributes less.
-     * @property anticipatoryMinFillPercent Minimum fill percent for a green or blue bar to count toward the anticipatory near-max-friendship multiplier.
-     * @property anticipatoryCoefficient Coefficient on the sum of qualifying bar fill ratios when computing the anticipatory multiplier.
-     * @property anticipatoryCap Maximum extra fraction the anticipatory multiplier can add (cap above 1.0). Kept below the real rainbow multiplier so anticipation never outranks a detected rainbow.
-     */
-    data class TrainingScoringConstants(
-        val ratioBreakpoints: List<Double> = listOf(15.0, 30.0, 45.0, 60.0, 75.0, 90.0),
-        val ratioMultipliers: List<Double> = listOf(5.0, 4.0, 3.0, 2.0, 1.0, 0.5, 0.3),
-        val priorityCoefficient: Double = 0.5,
-        val levelBoostRank1Factor: Double = 0.75,
-        val levelBoostRank2Factor: Double = 0.25,
-        val levelBoostRank3Factor: Double = 0.10,
-        val mainStatThresholds: Map<StatName, Int> =
-            mapOf(
-                StatName.SPEED to 30,
-                StatName.STAMINA to 30,
-                StatName.POWER to 30,
-                StatName.GUTS to 30,
-                StatName.WIT to 15,
-            ),
-        val mainStatBonusMagnitude: Double = 2.0,
-        val relationshipOrangeValue: Double = 0.0,
-        val relationshipGreenValue: Double = 1.0,
-        val relationshipBlueValue: Double = 2.5,
-        val relationshipDiminishingFactor: Double = 0.5,
-        val relationshipEarlyGameBonus: Double = 1.3,
-        val relationshipTrainerSupportBonus: Double = 1.15,
-        val skillHintPerHintScore: Double = 10.0,
-        val skillHintOverrideScore: Double = 10000.0,
-        val statWeightWithBars: Double = 0.6,
-        val statWeightWithoutBars: Double = 0.7,
-        val relationshipWeightWithBars: Double = 0.1,
-        val miscWeight: Double = 0.3,
-        val juniorEarlyGameFlatBonus: Double = 200.0,
-        val relationshipScale: Double = 1.5,
-        val rainbowMultiplierEnabled: Double = 2.0,
-        val rainbowMultiplierDisabled: Double = 1.5,
-        val rainbowPerInstanceBase: Double = 200.0,
-        val rainbowPerInstanceDecay: Double = 0.5,
-        val anticipatoryMinFillPercent: Double = 50.0,
-        val anticipatoryCoefficient: Double = 0.2,
-        val anticipatoryCap: Double = 0.6,
-    ) {
-        init {
-            require(ratioMultipliers.size == ratioBreakpoints.size + 1) {
-                "ratioMultipliers must have exactly one more entry than ratioBreakpoints (got ${ratioMultipliers.size} multipliers vs ${ratioBreakpoints.size} breakpoints)"
-            }
-        }
-    }
-
-    /**
      * Store configuration for training scoring calculations.
      *
      * @property currentStats Map of current character stats.
@@ -457,58 +390,8 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
          * @param defaults Defaults used when a key is missing or non-numeric. Almost always [TrainingScoringConstants] with no args.
          * @return A fully populated [TrainingScoringConstants] mirroring the supplied overrides.
          */
-        fun scoringConstantsFromMap(settings: Map<String, Any?>, defaults: TrainingScoringConstants = TrainingScoringConstants()): TrainingScoringConstants {
-            fun d(key: String, fallback: Double): Double = (settings[key] as? Number)?.toDouble()?.takeIf { it.isFinite() } ?: fallback
-
-            fun i(key: String, fallback: Int): Int = (settings[key] as? Number)?.toInt() ?: fallback
-            return defaults.copy(
-                // Breakpoints are fixed and not user-tunable; always sourced from defaults.
-                ratioMultipliers =
-                    listOf(
-                        d("ratioMultiplier1", defaults.ratioMultipliers[0]),
-                        d("ratioMultiplier2", defaults.ratioMultipliers[1]),
-                        d("ratioMultiplier3", defaults.ratioMultipliers[2]),
-                        d("ratioMultiplier4", defaults.ratioMultipliers[3]),
-                        d("ratioMultiplier5", defaults.ratioMultipliers[4]),
-                        d("ratioMultiplier6", defaults.ratioMultipliers[5]),
-                        d("ratioMultiplier7", defaults.ratioMultipliers[6]),
-                    ),
-                priorityCoefficient = d("priorityCoefficient", defaults.priorityCoefficient),
-                levelBoostRank1Factor = d("levelBoostRank1Factor", defaults.levelBoostRank1Factor),
-                levelBoostRank2Factor = d("levelBoostRank2Factor", defaults.levelBoostRank2Factor),
-                levelBoostRank3Factor = d("levelBoostRank3Factor", defaults.levelBoostRank3Factor),
-                mainStatThresholds =
-                    mapOf(
-                        StatName.SPEED to i("mainStatThresholdSpeed", defaults.mainStatThresholds[StatName.SPEED]!!),
-                        StatName.STAMINA to i("mainStatThresholdStamina", defaults.mainStatThresholds[StatName.STAMINA]!!),
-                        StatName.POWER to i("mainStatThresholdPower", defaults.mainStatThresholds[StatName.POWER]!!),
-                        StatName.GUTS to i("mainStatThresholdGuts", defaults.mainStatThresholds[StatName.GUTS]!!),
-                        StatName.WIT to i("mainStatThresholdWit", defaults.mainStatThresholds[StatName.WIT]!!),
-                    ),
-                mainStatBonusMagnitude = d("mainStatBonusMagnitude", defaults.mainStatBonusMagnitude),
-                relationshipOrangeValue = d("relationshipOrangeValue", defaults.relationshipOrangeValue),
-                relationshipGreenValue = d("relationshipGreenValue", defaults.relationshipGreenValue),
-                relationshipBlueValue = d("relationshipBlueValue", defaults.relationshipBlueValue),
-                relationshipDiminishingFactor = d("relationshipDiminishingFactor", defaults.relationshipDiminishingFactor),
-                relationshipEarlyGameBonus = d("relationshipEarlyGameBonus", defaults.relationshipEarlyGameBonus),
-                relationshipTrainerSupportBonus = d("relationshipTrainerSupportBonus", defaults.relationshipTrainerSupportBonus),
-                skillHintPerHintScore = d("skillHintPerHintScore", defaults.skillHintPerHintScore),
-                skillHintOverrideScore = d("skillHintOverrideScore", defaults.skillHintOverrideScore),
-                statWeightWithBars = d("statWeightWithBars", defaults.statWeightWithBars),
-                statWeightWithoutBars = d("statWeightWithoutBars", defaults.statWeightWithoutBars),
-                relationshipWeightWithBars = d("relationshipWeightWithBars", defaults.relationshipWeightWithBars),
-                miscWeight = d("miscWeight", defaults.miscWeight),
-                juniorEarlyGameFlatBonus = d("juniorEarlyGameFlatBonus", defaults.juniorEarlyGameFlatBonus),
-                relationshipScale = d("relationshipScale", defaults.relationshipScale),
-                rainbowMultiplierEnabled = d("rainbowMultiplierEnabled", defaults.rainbowMultiplierEnabled),
-                rainbowMultiplierDisabled = d("rainbowMultiplierDisabled", defaults.rainbowMultiplierDisabled),
-                rainbowPerInstanceBase = d("rainbowPerInstanceBase", defaults.rainbowPerInstanceBase),
-                rainbowPerInstanceDecay = d("rainbowPerInstanceDecay", defaults.rainbowPerInstanceDecay),
-                anticipatoryMinFillPercent = d("anticipatoryMinFillPercent", defaults.anticipatoryMinFillPercent),
-                anticipatoryCoefficient = d("anticipatoryCoefficient", defaults.anticipatoryCoefficient),
-                anticipatoryCap = d("anticipatoryCap", defaults.anticipatoryCap),
-            )
-        }
+        fun scoringConstantsFromMap(settings: Map<String, Any?>, defaults: TrainingScoringConstants = TrainingScoringConstants()): TrainingScoringConstants =
+            sharedScoringConstantsFromMap(settings, defaults)
 
         /**
          * Build a [TrainingScoringConstants] from persisted settings under the `training` namespace via [SettingsHelper]. Any missing key falls back to the
@@ -569,75 +452,20 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             return scoringConstantsFromMap(map, defaults)
         }
 
-        /**
-         * Retrieve the scenario-specific cap for a given stat.
-         *
-         * @param scenario The current training scenario.
-         * @param statName The stat name.
-         * @return The maximum value for the specified stat.
-         */
-        fun getScenarioStatCap(scenario: String, statName: StatName): Int {
-            return 1200
-        }
+        /** Adapter for the shared `getScenarioStatCap`. Currently a flat 1200 across scenarios; kept here so call sites in `:app` resolve the existing companion symbol. */
+        fun getScenarioStatCap(scenario: String, statName: StatName): Int = sharedGetScenarioStatCap(scenario, statName)
 
-        /**
-         * Retrieve the current stat cap based on the provided configuration.
-         *
-         * @param statName The stat name.
-         * @param config The current [TrainingConfig].
-         * @return The current maximum value for the specified stat.
-         */
-        fun getCurrentStatCap(statName: StatName, config: TrainingConfig): Int {
-            return getScenarioStatCap(config.scenario, statName)
-        }
+        /** Adapter for the shared `getCurrentStatCap`. Converts the Android-rich `TrainingConfig` at the boundary. */
+        fun getCurrentStatCap(statName: StatName, config: TrainingConfig): Int = sharedGetCurrentStatCap(statName, config.toScoring())
 
-        /** Stats gained per finale race win, per stat. Slightly above the actual +10 to account for misc event/card gains. */
-        private const val FINALE_RACE_STAT_BONUS = 15
+        /** Adapter for the shared `getRemainingFinaleRaces`. */
+        fun getRemainingFinaleRaces(currentDay: Int): Int = sharedGetRemainingFinaleRaces(currentDay)
 
-        /**
-         * Calculate the number of remaining finale races based on the current turn.
-         *
-         * Finale races occur on turns 73, 74, and 75. Before the finale (turn <= 72), all 3 races remain.
-         *
-         * @param currentDay The current turn number (1-75).
-         * @return The number of remaining finale races (0-3).
-         */
-        fun getRemainingFinaleRaces(currentDay: Int): Int {
-            return (75 - maxOf(currentDay, 72)).coerceAtLeast(0)
-        }
+        /** Adapter for the shared `getFinaleStatBonus`. */
+        fun getFinaleStatBonus(currentDay: Int): Int = sharedGetFinaleStatBonus(currentDay)
 
-        /**
-         * Calculate the expected total stat bonus from remaining finale race wins.
-         *
-         * @param currentDay The current turn number (1-75).
-         * @return The expected stat gain per stat from remaining finale races.
-         */
-        fun getFinaleStatBonus(currentDay: Int): Int {
-            return getRemainingFinaleRaces(currentDay) * FINALE_RACE_STAT_BONUS
-        }
-
-        /**
-         * Calculate the expected failure chance based on the character's current energy.
-         *
-         * @param currentEnergy The character's current energy (0-100).
-         * @param statName The training stat name.
-         * @return The mathematically expected failure chance percentage.
-         */
-        fun estimateFailureChanceFromEnergy(currentEnergy: Int, statName: StatName? = null): Int {
-            val energy = currentEnergy.coerceIn(0, 100)
-
-            val estimated =
-                if (statName == StatName.WIT) {
-                    // Exponential decay: f(e) = 161.4 * 0.9793^e - 81.4
-                    val raw = 161.4 * (0.9793.pow(energy.toDouble())) - 81.4
-                    raw.toInt()
-                } else {
-                    if (energy >= 50) 0 else (50 - energy) * 2
-                }
-
-            val clamped = estimated.coerceIn(0, 100)
-            return clamped
-        }
+        /** Adapter for the shared `estimateFailureChanceFromEnergy`. */
+        fun estimateFailureChanceFromEnergy(currentEnergy: Int, statName: StatName? = null): Int = sharedEstimateFailureChanceFromEnergy(currentEnergy, statName)
 
         /**
          * Cross-validate failure chances and return corrected values.
@@ -826,306 +654,21 @@ open class Training(protected val game: Game, protected val campaign: Campaign) 
             return score
         }
 
-        /**
-         * Compute the level-based amplifier for a stat's priority weight.
-         *
-         * Returns 1.0 when the feature is disabled or has no effect; values > 1.0 amplify the priority weight of stats that are both
-         * high in the user's priority list and have a high training level (1-5). Only ranks 1-3 receive any boost; rank 4-5 and
-         * training level 1 always return 1.0. At Lvl 5: rank 1 = 1.75x, rank 2 = 1.25x, rank 3 = 1.10x. The fade keeps the boost
-         * heavily concentrated on the user's top priority while still rewarding investment in their secondary.
-         *
-         * @param priorityRank The 1-indexed position of the stat in the active priority list (1 = highest priority).
-         * @param trainingLevel The detected training level (1-5), or null if OCR was unavailable.
-         * @param constants The [TrainingScoringConstants] supplying the per-rank boost factors.
-         * @return Multiplier in [1.0, 1.75].
-         */
-        fun levelBoostMultiplier(priorityRank: Int, trainingLevel: Int?, constants: TrainingScoringConstants = TrainingScoringConstants()): Double {
-            val level = trainingLevel ?: 1
-            if (level <= 1) return 1.0
-            val priorityFactor =
-                when (priorityRank) {
-                    1 -> constants.levelBoostRank1Factor
-                    2 -> constants.levelBoostRank2Factor
-                    3 -> constants.levelBoostRank3Factor
-                    else -> 0.0
-                }
-            val levelFactor = (level - 1) / 4.0
-            return 1.0 + priorityFactor * levelFactor
-        }
+        /** Adapter for the shared `levelBoostMultiplier`. Signature unchanged so existing call sites resolve. */
+        fun levelBoostMultiplier(priorityRank: Int, trainingLevel: Int?, constants: TrainingScoringConstants = TrainingScoringConstants()): Double =
+            sharedLevelBoostMultiplier(priorityRank, trainingLevel, constants)
 
-        /**
-         * Calculate the stat efficiency score based on the ratio completion toward targets.
-         *
-         * This method treats stat targets as desired ratios and scores training based on how well it balances the overall stat distribution.
-         *
-         * @param config The [TrainingConfig] containing global scoring inputs.
-         * @param training The [TrainingOption] to score.
-         * @return The raw score representing stat efficiency.
-         */
-        fun calculateStatEfficiencyScore(config: TrainingConfig, training: TrainingOption): Double {
-            var score = 0.0
+        /** Adapter for the shared `calculateStatEfficiencyScore`. Converts the Android-rich config + training at the boundary. */
+        fun calculateStatEfficiencyScore(config: TrainingConfig, training: TrainingOption): Double = sharedCalculateStatEfficiencyScore(config.toScoring(), training.toScoring())
 
-            // Use the Summer-specific priority list during Summer Training; otherwise use the regular list.
-            val activePriority = if (config.currentDate.isSummer()) config.summerTrainingStatPriority else config.statPrioritization
+        /** Adapter for the shared `calculateRelationshipScore`. */
+        fun calculateRelationshipScore(config: TrainingConfig, training: TrainingOption): Double = sharedCalculateRelationshipScore(config.toScoring(), training.toScoring())
 
-            for (statName in StatName.entries) {
-                val currentStat = config.currentStats[statName] ?: 0
-                val targetStat = config.statTargets[statName] ?: 0
-                val statGain = training.statGains[statName] ?: 0
+        /** Adapter for the shared `calculateMiscScore`. */
+        fun calculateMiscScore(config: TrainingConfig, training: TrainingOption): Double = sharedCalculateMiscScore(config.toScoring(), training.toScoring())
 
-                if (statGain > 0 && targetStat > 0) {
-                    val priorityIndex = activePriority.indexOf(statName)
-
-                    // Calculate completion percentage (how far along this stat is toward its target).
-                    val completionPercent = (currentStat.toDouble() / targetStat) * 100.0
-
-                    // Ratio-based multiplier: Stats furthest behind get the highest priority.
-                    // Buckets (default multipliers): <15% -> 5.0 (severely behind), <30% -> 4.0, <45% -> 3.0, <60% -> 2.0, <75% -> 1.0, <90% -> 0.5, else -> 0.3 (at or past target).
-                    val ratioMultiplier =
-                        run {
-                            val breakpoints = config.scoring.ratioBreakpoints
-                            val multipliers = config.scoring.ratioMultipliers
-                            val bucket = breakpoints.indexOfFirst { completionPercent < it }
-                            if (bucket == -1) multipliers.last() else multipliers[bucket]
-                        }
-
-                    // Priority multiplier: stats higher in the user's list get a larger score boost.
-                    val priorityMultiplier =
-                        if (priorityIndex != -1) {
-                            1.0 + (config.scoring.priorityCoefficient * (activePriority.size - priorityIndex))
-                        } else {
-                            1.0
-                        }
-
-                    // Level-based amplifier: when the feature is enabled, scale up the contribution from this training's primary stat
-                    // based on its OCR-detected training level (1-5) and its position in the priority list. See [levelBoostMultiplier].
-                    val levelMultiplier =
-                        if (config.enableTrainingLevelWeighting && statName == training.name && priorityIndex != -1) {
-                            levelBoostMultiplier(priorityIndex + 1, training.trainingLevel, config.scoring)
-                        } else {
-                            1.0
-                        }
-
-                    // Main stat gain bonus: If training improves its MAIN stat by a large amount, it is most likely an undetected rainbow.
-                    val isMainStat = training.name == statName
-                    val mainStatBonus =
-                        if (isMainStat && statGain >= (config.scoring.mainStatThresholds[statName] ?: error("No mainStatThresholds entry for $statName"))) {
-                            config.scoring.mainStatBonusMagnitude
-                        } else {
-                            1.0
-                        }
-
-                    val bonusNote = if (isMainStat && statGain >= (config.scoring.mainStatThresholds[statName] ?: error("No mainStatThresholds entry for $statName"))) " [HIGH MAIN STAT]" else ""
-                    val levelNote = if (levelMultiplier > 1.0) " [LVL ${training.trainingLevel} BOOST ${String.format("%.2f", levelMultiplier)}x]" else ""
-                    val completionString: String = String.format("%.2f", completionPercent)
-                    val ratioMultiplierString: String = String.format("%.2f", ratioMultiplier)
-                    val priorityMultiplierString: String = String.format("%.2f", priorityMultiplier)
-                    Log.d(
-                        TAG,
-                        "$statName: gain=$statGain, completion=$completionString%, " +
-                            "ratioMultiplierString=$ratioMultiplierString, priorityMultiplierString=${priorityMultiplierString}$bonusNote$levelNote",
-                    )
-
-                    // Calculate final score for this stat.
-                    var statScore = statGain.toDouble()
-                    statScore *= ratioMultiplier
-                    statScore *= priorityMultiplier
-                    statScore *= levelMultiplier
-                    statScore *= mainStatBonus
-
-                    score += statScore
-                }
-            }
-
-            return score
-        }
-
-        /**
-         * Calculate the relationship building score with diminishing returns.
-         *
-         * This method evaluates relationship bars based on their color and fill level, applying diminishing returns as bars fill up and early game bonuses.
-         *
-         * @param config The [TrainingConfig] containing global scoring inputs.
-         * @param training The [TrainingOption] to score.
-         * @return A normalized score (0-100) representing the relationship building value.
-         */
-        fun calculateRelationshipScore(config: TrainingConfig, training: TrainingOption): Double {
-            if (training.relationshipBars.isEmpty()) return 0.0
-
-            var score = 0.0
-            var maxScore = 0.0
-
-            for (bar in training.relationshipBars) {
-                val baseValue =
-                    when (bar.dominantColor) {
-                        "orange" -> config.scoring.relationshipOrangeValue
-                        "green" -> config.scoring.relationshipGreenValue
-                        "blue" -> config.scoring.relationshipBlueValue
-                        else -> 0.0
-                    }
-
-                if (baseValue > 0) {
-                    // Apply diminishing returns for relationship building.
-                    val fillLevel = bar.fillPercent / 100.0
-                    // Less valuable as bars fill up.
-                    val diminishingFactor = 1.0 - (fillLevel * config.scoring.relationshipDiminishingFactor)
-
-                    // Early game bonus for relationship building.
-                    val earlyGameBonus = if (config.currentDate.year == DateYear.JUNIOR || config.currentDate.bIsPreDebut) config.scoring.relationshipEarlyGameBonus else 1.0
-
-                    // Trainer support bonus to prioritize them slightly above regular supports.
-                    val trainerSupportBonus = if (bar.isTrainerSupport) config.scoring.relationshipTrainerSupportBonus else 1.0
-
-                    val contribution = baseValue * diminishingFactor * earlyGameBonus * trainerSupportBonus
-                    score += contribution
-                    maxScore += config.scoring.relationshipBlueValue * config.scoring.relationshipEarlyGameBonus
-                }
-            }
-
-            return if (maxScore > 0) (score / maxScore * 100.0) else 0.0
-        }
-
-        /**
-         * Calculate miscellaneous bonuses and penalties based on training properties.
-         *
-         * This method applies bonuses for skill hints that provide additional value to training sessions.
-         *
-         * @param config The [TrainingConfig] containing global scoring inputs.
-         * @param training The [TrainingOption] to score.
-         * @return A misc score between 0 and 100 representing situational bonuses.
-         */
-        fun calculateMiscScore(config: TrainingConfig, training: TrainingOption): Double {
-            // Start with neutral score.
-            var score = 50.0
-
-            val numSkillHints: Int = config.skillHintsPerLocation[training.name] ?: 0
-            score += config.scoring.skillHintPerHintScore * numSkillHints
-
-            // If skill hints are prioritized, and we found some, return a massive score to override other factors.
-            // This handles the case where skill hints only become visible after a training is selected.
-            if (config.enablePrioritizeSkillHints && numSkillHints > 0) {
-                return config.scoring.skillHintOverrideScore + score
-            }
-
-            return score.coerceIn(0.0, 100.0)
-        }
-
-        /**
-         * Calculate the raw training score without normalization.
-         *
-         * This method calculates raw high-level scores that will later be normalized based on the actual maximum score in the current training session.
-         *
-         * @param config The [TrainingConfig] containing global scoring inputs.
-         * @param training The [TrainingOption] to score.
-         * @return The raw score representing overall training value.
-         */
-        fun calculateRawTrainingScore(config: TrainingConfig, training: TrainingOption): Double {
-            if (training.name in config.blacklist) {
-                return 0.0
-            }
-
-            val currentStat: Int = config.currentStats.getOrDefault(training.name, 0)
-            val potentialStat: Int = currentStat + training.statGains.getOrElse(training.name) { 0 }
-            val statCap = getCurrentStatCap(training.name, config)
-            val finaleBonus = getFinaleStatBonus(config.currentDate.day)
-            val effectiveStatCap = statCap - 100 - finaleBonus
-
-            // Don't score for stats that are close to the absolute cap.
-            if (currentStat >= statCap) {
-                return 0.0
-            }
-
-            // Don't score for stats that are already above the buffer, unless it's a rainbow training
-            // and this stat haven't used its one-time allowance yet.
-            if (config.disableTrainingOnMaxedStat && currentStat >= effectiveStatCap) {
-                val canUseAllowance = training.numRainbow > 0 && training.name !in config.statsTrainedOverBuffer
-                if (!canUseAllowance) {
-                    return 0.0
-                } else {
-                    MessageLog.i(TAG, "[TRAINING] [${training.name}] Current stat ($currentStat) is at or over buffer ($effectiveStatCap), but allowing one-time rainbow training.")
-                }
-            }
-
-            if (potentialStat >= effectiveStatCap) {
-                val canUseAllowance = training.numRainbow > 0 && training.name !in config.statsTrainedOverBuffer
-                if (!canUseAllowance) {
-                    return 0.0
-                } else {
-                    MessageLog.i(TAG, "[TRAINING] [${training.name}] Potential stat ($potentialStat) would be over buffer ($effectiveStatCap), but allowing one-time rainbow training.")
-                }
-            }
-
-            var totalScore = 0.0
-
-            // 1. Stat Efficiency scoring
-            val statScore = calculateStatEfficiencyScore(config, training)
-
-            // 2. Friendship scoring
-            val relationshipScore = calculateRelationshipScore(config, training)
-
-            // 3. Misc-aware scoring
-            val miscScore = calculateMiscScore(config, training)
-
-            // Define scoring weights based on relationship bars presence.
-            val statWeight = if (training.relationshipBars.isNotEmpty()) config.scoring.statWeightWithBars else config.scoring.statWeightWithoutBars
-            val relationshipWeight = if (training.relationshipBars.isNotEmpty()) config.scoring.relationshipWeightWithBars else 0.0
-            val miscWeight = config.scoring.miscWeight
-
-            // Calculate weighted total score.
-            totalScore += statScore * statWeight
-            totalScore += relationshipScore * relationshipWeight
-            totalScore += miscScore * miscWeight
-
-            // 4. Rainbow training multiplier (Year 2+ only).
-            // Rainbow is heavily favored because it improves overall ratio balance.
-            val rainbowMultiplier =
-                if (training.numRainbow > 0 && config.currentDate.year > DateYear.JUNIOR) {
-                    if (config.enableRainbowTrainingBonus) {
-                        MessageLog.i(TAG, "[TRAINING] [${training.name}] ${training.numRainbow} rainbows detected. Adding multiplier to score.")
-                        config.scoring.rainbowMultiplierEnabled
-                    } else {
-                        MessageLog.i(TAG, "[TRAINING] [${training.name}] ${training.numRainbow} rainbows detected, but rainbow training bonus is not enabled.")
-                        config.scoring.rainbowMultiplierDisabled
-                    }
-                } else {
-                    1.0
-                }
-
-            // Apply rainbow multiplier to total score.
-            totalScore *= rainbowMultiplier
-
-            // 5. Anticipatory rainbow multiplier (Year 2+ only, when no real rainbows present).
-            // Each near-max (green/blue) friendship bar contributes fillPercent/100 to a sum, then 0.2 * sum is added to a 1.0 base, capped at +0.6.
-            // Caps at 1.6x to remain strictly below the real 2.0x rainbow multiplier so anticipation never outranks an actual rainbow.
-            if (
-                config.enablePrioritizeNearMaxFriendship &&
-                config.currentDate.year > DateYear.JUNIOR &&
-                training.numRainbow == 0 &&
-                training.relationshipBars.isNotEmpty()
-            ) {
-                var contributions = 0.0
-                var qualifyingBars = 0
-                for (bar in training.relationshipBars) {
-                    if ((bar.dominantColor == "green" || bar.dominantColor == "blue") && bar.fillPercent > config.scoring.anticipatoryMinFillPercent) {
-                        contributions += bar.fillPercent / 100.0
-                        qualifyingBars += 1
-                    }
-                }
-                if (qualifyingBars > 0) {
-                    val anticipatoryMultiplier = 1.0 + minOf(config.scoring.anticipatoryCap, config.scoring.anticipatoryCoefficient * contributions)
-                    MessageLog.i(
-                        TAG,
-                        "[TRAINING] [${training.name}] $qualifyingBars near-max friendship bar(s) detected (contributions=${String.format(
-                            "%.2f",
-                            contributions,
-                        )}). Applying anticipatory multiplier ${String.format("%.2fx", anticipatoryMultiplier)}.",
-                    )
-                    totalScore *= anticipatoryMultiplier
-                }
-            }
-
-            return totalScore.coerceAtLeast(0.0)
-        }
+        /** Adapter for the shared `calculateRawTrainingScore`. The shared function applies the full composition pipeline (stat efficiency + relationship + misc, rainbow + anticipatory multipliers). */
+        fun calculateRawTrainingScore(config: TrainingConfig, training: TrainingOption): Double = sharedCalculateRawTrainingScore(config.toScoring(), training.toScoring())
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////

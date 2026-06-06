@@ -6,7 +6,6 @@ import com.steve1316.uma_android_automation.bot.Training.Companion.calculateRela
 import com.steve1316.uma_android_automation.bot.Training.Companion.calculateStatEfficiencyScore
 import com.steve1316.uma_android_automation.bot.Training.TrainingConfig
 import com.steve1316.uma_android_automation.bot.Training.TrainingOption
-import com.steve1316.uma_android_automation.bot.Training.TrainingScoringConstants
 import com.steve1316.uma_android_automation.types.DateMonth
 import com.steve1316.uma_android_automation.types.DatePhase
 import com.steve1316.uma_android_automation.types.DateYear
@@ -14,6 +13,7 @@ import com.steve1316.uma_android_automation.types.GameDate
 import com.steve1316.uma_android_automation.types.StatName
 import com.steve1316.uma_android_automation.utils.CustomImageUtils.BarFillResult
 import com.steve1316.uma_android_automation.utils.CustomImageUtils.StatBlock
+import com.steve1316.uma_scoring.TrainingScoringConstants
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.DisplayName
