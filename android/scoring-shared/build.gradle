@@ -1,0 +1,32 @@
+// Kotlin Multiplatform module hosting the training-scoring math used by both runtimes:
+//   - jvm target: consumed by :app for the on-device bot scoring loop.
+//   - js  target: emitted as `uma-scoring` for the React Native sandbox preview.
+// The module has no Android, JVM-only, or Node-only dependencies; everything lives in commonMain.
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
+
+group = 'com.steve1316.uma_scoring'
+version = '1.0.0'
+
+kotlin {
+    jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = '17'
+        }
+    }
+    js {
+        moduleName = 'uma-scoring'
+        nodejs()
+        binaries.library()
+        generateTypeScriptDefinitions()
+    }
+
+    jvmToolchain(17)
+
+    sourceSets {
+        commonTest {
+            dependencies {
+                implementation kotlin('test')
+            }
+        }
+    }
+}
