@@ -329,7 +329,7 @@ class ScrollList private constructor(private val game: Game, private val bboxLis
                 var consecutiveNoNewFrames = 0
                 var scrollCount = 0
                 var bitmap: Bitmap = sourceBitmap
-                while (System.currentTimeMillis() - startTime < maxTimeMs && scrollCount < 40) {
+                while (System.currentTimeMillis() - startTime < maxTimeMs && scrollCount < 30) {
                     val frameEntries = detectEntriesByComponent(game, bitmap, fallbackComponent)
                     if (frameEntries.isEmpty() && scrollCount == 0) {
                         MessageLog.w(TAG, "[WARN] processWithFallback:: Failed to detect any entries using fallback component.")
@@ -348,7 +348,8 @@ class ScrollList private constructor(private val game: Game, private val bboxLis
                         }
                     }
 
-                    if (frameEntries.isNotEmpty() && newThisFrame == 0) consecutiveNoNewFrames++ else consecutiveNoNewFrames = 0
+                    // An empty frame counts as no-new-content too, so a list that empties out terminates instead of swiping to the hard cap.
+                    if (newThisFrame == 0) consecutiveNoNewFrames++ else consecutiveNoNewFrames = 0
                     if (consecutiveNoNewFrames >= 2) {
                         MessageLog.d(TAG, "[DEBUG] processWithFallback:: No new entries for 2 frames. Exiting (swipe mode).")
                         return true
@@ -849,7 +850,7 @@ class ScrollList private constructor(private val game: Game, private val bboxLis
         var consecutiveNoNewFrames = 0
         val maxNoNewFrames = 2
         var scrollCount = 0
-        val maxScrollCount = 40
+        val maxScrollCount = 30
 
         var index = 0
         while (System.currentTimeMillis() - startTime < maxTimeMs) {
@@ -886,7 +887,8 @@ class ScrollList private constructor(private val game: Game, private val bboxLis
 
             if (currentFrameEntries.isEmpty()) {
                 MessageLog.d(TAG, "[DEBUG] process:: No entries detected in current frame after retries.")
-                if (swipeMode) consecutiveNoNewFrames = 0
+                // An empty frame (after retries) is itself a no-new-content signal in swipe mode, so an empty list terminates instead of swiping to the hard cap.
+                if (swipeMode) consecutiveNoNewFrames++
             } else {
                 // Determine the overlap with the previous frame's entries using the provided keyExtractor.
                 var skipCount = 0
