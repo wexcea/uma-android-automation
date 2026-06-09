@@ -263,6 +263,19 @@ class Trackblazer(game: Game) : Campaign(game) {
      */
     private val lowMainStatGainItemFloor: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerSkipBadMoodItemsBelowGain", 15)
 
+    /** Per-tier minimum selected-training main stat gain required to spend each megaphone. 0 = always allowed. */
+    private val empoweringMegaphoneMinGain: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerSkipEmpoweringMegaphoneBelowGain", 0)
+    private val motivatingMegaphoneMinGain: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerSkipMotivatingMegaphoneBelowGain", 0)
+    private val coachingMegaphoneMinGain: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerSkipCoachingMegaphoneBelowGain", 0)
+
+    /** Megaphone item name -> its minimum-gain threshold, consumed by `MegaphoneSelection.bestEligibleMegaphone`. */
+    private val megaphoneThresholds: Map<String, Int> =
+        mapOf(
+            "Empowering Megaphone" to empoweringMegaphoneMinGain,
+            "Motivating Megaphone" to motivatingMegaphoneMinGain,
+            "Coaching Megaphone" to coachingMegaphoneMinGain,
+        )
+
     /** The frequency to check the shop after a race. */
     private val shopCheckFrequency: Int = SettingsHelper.getIntSetting("scenarioOverrides", "trackblazerShopCheckFrequency", 3)
 
@@ -1094,6 +1107,9 @@ class Trackblazer(game: Game) : Campaign(game) {
             .add("Skip Risky Charm Training Below Gain", minCharmGain)
             .add("Consecutive Races Limit", consecutiveRacesLimit)
             .add("Skip Bad-Mood Items Below Gain", lowMainStatGainItemFloor)
+            .add("Skip Empowering Megaphone Below Gain", empoweringMegaphoneMinGain)
+            .add("Skip Motivating Megaphone Below Gain", motivatingMegaphoneMinGain)
+            .add("Skip Coaching Megaphone Below Gain", coachingMegaphoneMinGain)
             .add("Whistle Forces Training", whistleForcesTraining)
             .add("Irregular Training", if (enableIrregularTraining) "on (min main $minIrregularGain)" else "off")
             .add("Enable In-Game Race Agenda", racing.enableUserInGameRaceAgenda)
@@ -2692,36 +2708,46 @@ class Trackblazer(game: Game) : Campaign(game) {
                 return null
             }
 
-            // Check if there is a better megaphone in inventory that we haven't seen yet OR that we know is disabled.
-            val betterMegaphones =
-                when (itemName) {
-                    "Motivating Megaphone" -> listOf("Empowering Megaphone")
-                    "Coaching Megaphone" -> listOf("Empowering Megaphone", "Motivating Megaphone")
-                    else -> emptyList()
-                }
+            // Per-tier stat threshold: a high-effect megaphone should not be spent on a low-gain turn.
+            val selectedMainGain = training.cachedAnalysisResults?.firstOrNull { it.name == trainingSelected }?.statGains?.get(trainingSelected) ?: 0
+            val threshold = megaphoneThresholds[itemName] ?: 0
+            if (selectedMainGain < threshold) {
+                MessageLog.i(
+                    TAG,
+                    "[TRACKBLAZER] Skipping $itemName: selected $trainingSelected main gain ($selectedMainGain) below threshold ($threshold). Trying a lower tier.",
+                )
+                decisionTracer.recordItemDecision(
+                    itemName,
+                    DecisionTracer.ItemVerdict.CONSERVED,
+                    "Main gain ($selectedMainGain) below per-tier threshold ($threshold)",
+                )
+                return null
+            }
 
-            val hasBetterAvailable =
-                betterMegaphones.any { better ->
-                    (nextInventory[better] ?: 0) > 0
-                }
+            // Only the best eligible megaphone in inventory should fire this turn; defer otherwise.
+            val bestEligible = MegaphoneSelection.bestEligibleMegaphone(selectedMainGain, nextInventory, megaphoneThresholds)
+            if (bestEligible != itemName) {
+                MessageLog.i(
+                    TAG,
+                    "[TRACKBLAZER] Holding $itemName: a better eligible megaphone (${bestEligible ?: "none"}) is available this turn.",
+                )
+                decisionTracer.recordItemDecision(
+                    itemName,
+                    DecisionTracer.ItemVerdict.CONSERVED,
+                    "Better eligible megaphone available this turn: ${bestEligible ?: "none"}",
+                )
+                return null
+            }
 
-            if (!hasBetterAvailable) {
-                val reason = "Increasing training gains for the next few turns."
-                if (clickItemPlusButton(itemName, entry, "[TRACKBLAZER] Queuing best available megaphone: \"$itemName\".", nextInventory, reason = reason)) {
-                    trainee.megaphoneTurnCounter =
-                        when (itemName) {
-                            "Empowering Megaphone" -> 2
-                            "Motivating Megaphone" -> 3
-                            "Coaching Megaphone" -> 4
-                            else -> 0
-                        }
-                    decisionTracer.recordItemDecision(
-                        itemName,
-                        DecisionTracer.ItemVerdict.USED,
-                        "Best megaphone in inventory; setting megaphone turn duration to ${trainee.megaphoneTurnCounter}",
-                    )
-                    return reason
-                }
+            val reason = "Increasing training gains for the next few turns."
+            if (clickItemPlusButton(itemName, entry, "[TRACKBLAZER] Queuing best eligible megaphone: \"$itemName\" (main gain $selectedMainGain >= threshold $threshold).", nextInventory, reason = reason)) {
+                trainee.megaphoneTurnCounter = MegaphoneSelection.durationFor(itemName)
+                decisionTracer.recordItemDecision(
+                    itemName,
+                    DecisionTracer.ItemVerdict.USED,
+                    "Best eligible megaphone (main gain $selectedMainGain >= threshold $threshold); setting megaphone turn duration to ${trainee.megaphoneTurnCounter}",
+                )
+                return reason
             }
         }
 
@@ -2816,13 +2842,13 @@ class Trackblazer(game: Game) : Campaign(game) {
         val hasStatItems = currentInventory.any { (name, count) -> count > 0 && shopList.statItemNames.contains(name) }
 
         val skipTrainingEffectItems = shouldConserveTrainingEffectItems(trainingSelected, trainee)
+        val selectedMainGainForMegaphone =
+            if (trainingSelected != null) training.cachedAnalysisResults?.firstOrNull { it.name == trainingSelected }?.statGains?.get(trainingSelected) ?: 0 else 0
         val hasMegaphones =
             !skipTrainingEffectItems &&
                 trainingSelected != null &&
                 trainee.megaphoneTurnCounter == 0 &&
-                currentInventory.any { (name, count) ->
-                    count > 0 && (name == "Empowering Megaphone" || name == "Motivating Megaphone" || name == "Coaching Megaphone")
-                }
+                MegaphoneSelection.bestEligibleMegaphone(selectedMainGainForMegaphone, currentInventory, megaphoneThresholds) != null
         val hasAnkleWeights =
             trainingSelected != null &&
                 currentInventory.any { (name, count) ->
