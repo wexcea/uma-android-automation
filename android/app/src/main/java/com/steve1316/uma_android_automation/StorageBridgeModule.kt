@@ -183,7 +183,11 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
         }
 
         try {
-            UserStorageManager.getInstance(appContext).setTreeUri(uri)
+            val ok = UserStorageManager.getInstance(appContext).setTreeUri(uri)
+            if (!ok) {
+                promise.reject("PERSIST_FAILED", "Could not persist the URI permission. The folder picker grant may have expired.")
+                return
+            }
             promise.resolve(uri.toString())
         } catch (e: Exception) {
             Log.e(TAG, "Failed to persist tree Uri", e)
