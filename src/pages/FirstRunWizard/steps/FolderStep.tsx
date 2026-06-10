@@ -76,9 +76,11 @@ const FolderStep = ({ onPick, onAdvance, onCtaChange }: Props) => {
         try {
             const uri = await storageBridge.pickFolder()
             if (uri == null) return
-            const folder = (await storageBridge.getCurrentFolder()) ?? { uri, name: uri }
-            setPicked(folder)
-            onPick(folder)
+            const folder = await storageBridge.getCurrentFolder()
+            if (folder) {
+                setPicked(folder)
+                onPick(folder)
+            }
         } catch (e) {
             setError("Couldn't open the folder picker. Retry?")
         }
@@ -86,8 +88,8 @@ const FolderStep = ({ onPick, onAdvance, onCtaChange }: Props) => {
 
     return (
         <View style={styles.root}>
-            <Text style={[styles.headline, { color: colors.foreground }]}>Where should the bot save your files?</Text>
-            <Text style={[styles.hint, { color: colors.muted }]}>
+            <Text style={[styles.headline, { color: colors.text }]}>Where should the bot save your files?</Text>
+            <Text style={[styles.hint, { color: colors.textMuted }]}>
                 Newer Android hides app folders from file managers. Pick somewhere visible like Documents/. We'll create logs/, recordings/, and backups/ inside.
             </Text>
             {picked == null ? (
@@ -95,14 +97,14 @@ const FolderStep = ({ onPick, onAdvance, onCtaChange }: Props) => {
             ) : (
                 <View style={[styles.selected, { borderColor: colors.success }]}>
                     <Text style={[styles.selectedLabel, { color: colors.success }]}>SELECTED</Text>
-                    <Text style={[styles.selectedName, { color: colors.foreground }]}>{picked.name}</Text>
-                    <Text style={[styles.selectedSub, { color: colors.muted }]}>logs/{"\n"}recordings/{"\n"}backups/</Text>
-                    <Text style={[styles.changeLink, { color: colors.muted }]} onPress={handlePick}>
+                    <Text style={[styles.selectedName, { color: colors.text }]}>{picked.name}</Text>
+                    <Text style={[styles.selectedSub, { color: colors.textMuted }]}>logs/{"\n"}recordings/{"\n"}backups/</Text>
+                    <Text style={[styles.changeLink, { color: colors.textMuted }]} onPress={handlePick}>
                         Change folder
                     </Text>
                 </View>
             )}
-            {error && <Text style={[styles.error, { color: "#e07b7b" }]}>{error}</Text>}
+            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
         </View>
     )
 }

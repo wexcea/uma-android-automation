@@ -10,7 +10,7 @@ jest.mock("../../../../lib/storageBridge", () => ({
     },
 }))
 jest.mock("../../../../context/ThemeContext", () => ({
-    useTheme: () => ({ colors: { background: "#000", foreground: "#fff", primary: "#5b9dff", success: "#7bd590", muted: "#a8aebb" } }),
+    useTheme: () => ({ colors: { background: "#000", text: "#fff", textMuted: "#a8aebb", primary: "#5b9dff", success: "#7bd590", error: "#e07b7b" } }),
 }))
 jest.mock("../../../../components/CustomButton", () => {
     const { Pressable, Text } = require("react-native")
@@ -49,11 +49,11 @@ describe("FolderStep", () => {
     })
 
     it("calls onPick on a successful pickFolder", async () => {
-        getCurrentFolder.mockResolvedValue(null)
+        getCurrentFolder.mockResolvedValueOnce(null).mockResolvedValueOnce({ uri: "content://newone", name: "NewOne" })
         pickFolder.mockResolvedValue("content://newone")
         const onPick = jest.fn()
         const { findByText } = render(<FolderStep onPick={onPick} onAdvance={jest.fn()} onCtaChange={jest.fn()} />)
         fireEvent.press(await findByText("Pick a folder"))
-        await waitFor(() => expect(onPick).toHaveBeenCalled())
+        await waitFor(() => expect(onPick).toHaveBeenCalledWith({ uri: "content://newone", name: "NewOne" }))
     })
 })
