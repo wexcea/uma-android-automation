@@ -413,7 +413,7 @@ const DebugSettings = () => {
                             //////////////////////////////////////////////////////////////////////////////////////////////////
                             System Checks (wizard) */}
                         <Section label="System Checks">
-                            <SystemChecksWizard />
+                            <SystemChecksWizard embeddedInWizard />
                         </Section>
 
                         <Section label="DEBUG SETTINGS">
