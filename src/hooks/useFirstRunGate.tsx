@@ -23,6 +23,10 @@ export const useFirstRunGate = (): FirstRunGate => {
         let cancelled = false
         ;(async () => {
             try {
+                // `useBootstrap` defers DB init behind `runAfterInteractions`, but the gate fires
+                // synchronously after first paint. Without this await, `loadSetting` throws
+                // "Database not initialized" and the catch silently treats every launch as a first run.
+                await databaseManager.initialize()
                 const value = await databaseManager.loadSetting("firstRun", "completed")
                 if (cancelled) return
                 setIsFirstRun(value !== true && value !== "true")
@@ -39,6 +43,7 @@ export const useFirstRunGate = (): FirstRunGate => {
     }, [])
 
     const markComplete = useCallback(async () => {
+        await databaseManager.initialize()
         await databaseManager.saveSetting("firstRun", "completed", true)
         setIsFirstRun(false)
     }, [])

@@ -4,16 +4,20 @@ import { useFirstRunGate } from "../useFirstRunGate"
 
 jest.mock("../../lib/database", () => ({
     databaseManager: {
+        initialize: jest.fn(),
         loadSetting: jest.fn(),
         saveSetting: jest.fn(),
     },
 }))
 
+const initialize = databaseManager.initialize as jest.Mock
 const loadSetting = databaseManager.loadSetting as jest.Mock
 const saveSetting = databaseManager.saveSetting as jest.Mock
 
 describe("useFirstRunGate", () => {
     beforeEach(() => {
+        initialize.mockReset()
+        initialize.mockResolvedValue(undefined)
         loadSetting.mockReset()
         saveSetting.mockReset()
     })
