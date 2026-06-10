@@ -122,6 +122,49 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
         }
     }
 
+    /** Count files under the legacy `getExternalFilesDir/logs` and `/recordings` directories so the JS
+     * first-run wizard can decide whether to show the migration step.
+     *
+     * @param promise Resolved with a map `{logs: number, recordings: number}`.
+     */
+    @ReactMethod
+    fun scanLegacyFiles(promise: Promise) {
+        try {
+            val (logs, recordings) = UserStorageManager.getInstance(appContext).scanLegacyFiles()
+            val map: WritableMap = Arguments.createMap()
+            map.putInt("logs", logs)
+            map.putInt("recordings", recordings)
+            promise.resolve(map)
+        } catch (e: Exception) {
+            Log.e(TAG, "scanLegacyFiles failed", e)
+            promise.reject("SCAN_FAILED", e.message ?: e.toString(), e)
+        }
+    }
+
+    /** Move or delete the files at the legacy paths. Mode is `"move"` (copy then delete) or `"delete"`
+     * (delete only).
+     *
+     * @param mode Either `"move"` or `"delete"`.
+     * @param promise Resolved with `{movedLogs, movedRecordings, error?, remaining?}`.
+     */
+    @ReactMethod
+    fun migrateLegacyFiles(mode: String, promise: Promise) {
+        try {
+            val result = UserStorageManager.getInstance(appContext).migrateLegacyFiles(mode)
+            val map: WritableMap = Arguments.createMap()
+            map.putInt("movedLogs", result.movedLogs)
+            map.putInt("movedRecordings", result.movedRecordings)
+            if (result.error != null) {
+                map.putString("error", result.error)
+                map.putInt("remaining", result.remaining)
+            }
+            promise.resolve(map)
+        } catch (e: Exception) {
+            Log.e(TAG, "migrateLegacyFiles failed", e)
+            promise.reject("MIGRATE_FAILED", e.message ?: e.toString(), e)
+        }
+    }
+
     override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode != REQUEST_CODE_PICK_FOLDER) return
         val promise = pendingPickPromise
