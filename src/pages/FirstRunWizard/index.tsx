@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { BackHandler, StyleSheet, Text, View } from "react-native"
 import CustomButton from "../../components/CustomButton"
-import { SystemCheckResults } from "../../components/SystemChecksWizard"
 import { useTheme } from "../../context/ThemeContext"
 import { useLegacyFileScan } from "../../hooks/useLegacyFileScan"
 import { storageBridge, PickedFolder, MigrationResult } from "../../lib/storageBridge"
@@ -46,7 +45,6 @@ const FirstRunWizard = ({ onComplete }: Props) => {
     const [outerStep, setOuterStep] = useState(0)
     const [, setPicked] = useState<PickedFolder | null>(null)
     const [, setMigrationOutcome] = useState<{ choice: MigrationChoice; result: MigrationResult | null } | null>(null)
-    const [, setSystemResults] = useState<SystemCheckResults | null>(null)
     const [outerCta, setOuterCta] = useState<CtaState | null>(null)
     const [pendingAdvance, setPendingAdvance] = useState(false)
     const [saveError, setSaveError] = useState<string | null>(null)
@@ -141,7 +139,7 @@ const FirstRunWizard = ({ onComplete }: Props) => {
                 if (!counts) return null
                 return <MigrationStep legacyCounts={counts} onChoice={handleMigrationChoice} onAdvance={advance} />
             case "systemChecks":
-                return <SystemChecksStep onSnapshot={setSystemResults} onAdvance={handleFinish} onCtaChange={setOuterCta} />
+                return <SystemChecksStep onAdvance={handleFinish} onCtaChange={setOuterCta} />
         }
     })()
 

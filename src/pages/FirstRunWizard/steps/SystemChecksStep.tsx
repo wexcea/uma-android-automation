@@ -5,9 +5,7 @@ import { CtaState } from "./FolderStep"
 
 /** Props for `SystemChecksStep`. */
 interface Props {
-    /** Called with the final snapshot of permission grants when the user has visited all checks. */
-    onSnapshot: (results: SystemCheckResults) => void
-    /** Called when the user taps the outer Finish button (only enabled once all checks visited). */
+    /** Called when the user taps the outer Finish button (only enabled once all permissions are granted). */
     onAdvance: () => void
     /** Footer CTA registration callback. */
     onCtaChange: (cta: CtaState | null) => void
@@ -17,28 +15,21 @@ const styles = StyleSheet.create({
     root: { flex: 1, padding: 16 },
 })
 
-/** Final step of the first-run wizard: walks the user through accessibility, overlay, battery via the
- * shared `SystemChecksWizard` component rendered with its standalone card chrome (same look as
- * Debug Settings). When the inner wizard reports `onAllVisited`, registers a Finish CTA that closes
- * the wizard.
+/** Final step of the first-run wizard. Hosts the shared `SystemChecksWizard` component and gates
+ * the outer wizard's Finish CTA on all three permissions being granted via the live
+ * `onPermissionsChange` callback.
  *
  * @param props See `Props`.
  * @returns A React node.
  */
-const SystemChecksStep = ({ onSnapshot, onAdvance, onCtaChange }: Props) => {
+const SystemChecksStep = ({ onAdvance, onCtaChange }: Props) => {
     const [granted, setGranted] = useState<SystemCheckResults | null>(null)
 
     // Latest-ref pattern so the effects don't re-run on parent callback identity changes.
-    const onSnapshotRef = useRef(onSnapshot)
     const onCtaChangeRef = useRef(onCtaChange)
     const onAdvanceRef = useRef(onAdvance)
-    useEffect(() => { onSnapshotRef.current = onSnapshot })
     useEffect(() => { onCtaChangeRef.current = onCtaChange })
     useEffect(() => { onAdvanceRef.current = onAdvance })
-
-    const handleAllVisited = useCallback((r: SystemCheckResults) => {
-        onSnapshotRef.current(r)
-    }, [])
 
     const handlePermissionsChange = useCallback((r: SystemCheckResults) => {
         setGranted(r)
@@ -58,7 +49,7 @@ const SystemChecksStep = ({ onSnapshot, onAdvance, onCtaChange }: Props) => {
 
     return (
         <View style={styles.root}>
-            <SystemChecksWizard onAllVisited={handleAllVisited} onPermissionsChange={handlePermissionsChange} />
+            <SystemChecksWizard onPermissionsChange={handlePermissionsChange} />
         </View>
     )
 }

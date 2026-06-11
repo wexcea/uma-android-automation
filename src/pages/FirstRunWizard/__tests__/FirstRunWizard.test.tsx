@@ -31,17 +31,13 @@ jest.mock("../../../components/SystemChecksWizard", () => {
     return {
         __esModule: true,
         default: ({
-            onAllVisited,
             onPermissionsChange,
         }: {
-            onAllVisited?: (r: { accessibility: boolean; overlay: boolean; battery: boolean }) => void
             onPermissionsChange?: (r: { accessibility: boolean; overlay: boolean; battery: boolean }) => void
         }) => (
             <Pressable
                 onPress={() => {
-                    const all = { accessibility: true, overlay: true, battery: true }
-                    onPermissionsChange?.(all)
-                    onAllVisited?.(all)
+                    onPermissionsChange?.({ accessibility: true, overlay: true, battery: true })
                 }}
             >
                 <Text>FAKE_VISIT_ALL</Text>
