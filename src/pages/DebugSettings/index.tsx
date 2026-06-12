@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useContext, useRef, useState, useEffect } from "react"
-import { View, Text, ScrollView, StyleSheet, NativeModules, Pressable, AppState, AppStateStatus, ActivityIndicator } from "react-native"
+import { View, Text, ScrollView, StyleSheet, NativeModules, Pressable } from "react-native"
 import Ionicons from "@react-native-vector-icons/ionicons"
 import * as Clipboard from "expo-clipboard"
 import { useTheme } from "../../context/ThemeContext"
@@ -7,8 +7,8 @@ import { DebugContext, BotMetaContext } from "../../context/BotStateContext"
 import CustomSlider from "../../components/CustomSlider"
 import PageHeader from "../../components/PageHeader"
 import WarningContainer from "../../components/WarningContainer"
-import CustomButton from "../../components/CustomButton"
 import SearchableItem from "../../components/SearchableItem"
+import SystemChecksWizard from "../../components/SystemChecksWizard"
 import { SearchPageProvider } from "../../context/SearchPageContext"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
 import { Section } from "../../components/ui/section"
@@ -152,79 +152,7 @@ const DebugSettings = () => {
     }
 
     const [deviceIp, setDeviceIp] = useState<string>("<phone-ip>")
-    const [accessibilityStatus, setAccessibilityStatus] = useState<{ enabled: boolean; active: boolean } | null>(null)
-    const [overlayStatus, setOverlayStatus] = useState<{ enabled: boolean } | null>(null)
-    const [batteryStatus, setBatteryStatus] = useState<{ enabled: boolean } | null>(null)
-    const [isRefreshing, setIsRefreshing] = useState(false)
-    const [isRefreshingOverlay, setIsRefreshingOverlay] = useState(false)
-    const [isRefreshingBattery, setIsRefreshingBattery] = useState(false)
-    const [currentWizardStep, setCurrentWizardStep] = useState<number>(0)
-    const [recheckingIndex, setRecheckingIndex] = useState<number | null>(null)
-    const recheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const [frameRatePickerOpen, setFrameRatePickerOpen] = useState(false)
-
-    /** Checks with the native module if the Accessibility Service is currently running. */
-    const checkAccessibilityStatus = () => {
-        setIsRefreshing(true)
-        const startTime = Date.now()
-        NativeModules.StartModule.getAccessibilityStatus()
-            .then((status: { enabled: boolean; active: boolean }) => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setAccessibilityStatus(status)
-                    setIsRefreshing(false)
-                }, remainingTime)
-            })
-            .catch(() => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setAccessibilityStatus({ enabled: false, active: false })
-                    setIsRefreshing(false)
-                }, remainingTime)
-            })
-    }
-
-    /** Checks with the native module if the Overlay (Display over other apps) permission is granted. */
-    const checkOverlayStatus = () => {
-        setIsRefreshingOverlay(true)
-        const startTime = Date.now()
-        NativeModules.StartModule.getOverlayStatus()
-            .then((status: { enabled: boolean }) => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setOverlayStatus(status)
-                    setIsRefreshingOverlay(false)
-                }, remainingTime)
-            })
-            .catch(() => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setOverlayStatus({ enabled: false })
-                    setIsRefreshingOverlay(false)
-                }, remainingTime)
-            })
-    }
-
-    /** Checks with the native module if the app is currently ignoring battery optimizations. */
-    const checkBatteryStatus = () => {
-        setIsRefreshingBattery(true)
-        const startTime = Date.now()
-        NativeModules.StartModule.getBatteryOptimizationStatus()
-            .then((status: { enabled: boolean }) => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setBatteryStatus(status)
-                    setIsRefreshingBattery(false)
-                }, remainingTime)
-            })
-            .catch(() => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setBatteryStatus({ enabled: false })
-                    setIsRefreshingBattery(false)
-                }, remainingTime)
-            })
-    }
 
     useEffect(() => {
         if (debug.enableRemoteLogViewer) {
@@ -233,25 +161,6 @@ const DebugSettings = () => {
                 .catch(() => setDeviceIp("<phone-ip>"))
         }
     }, [debug.enableRemoteLogViewer])
-
-    useEffect(() => {
-        checkAccessibilityStatus()
-        checkOverlayStatus()
-        checkBatteryStatus()
-
-        // Refresh all permission statuses whenever the app comes back into the foreground.
-        const subscription = AppState.addEventListener("change", (nextAppState: AppStateStatus) => {
-            if (nextAppState === "active") {
-                checkAccessibilityStatus()
-                checkOverlayStatus()
-                checkBatteryStatus()
-            }
-        })
-
-        return () => {
-            subscription.remove()
-        }
-    }, [])
 
     const styles = useMemo(
         () =>
@@ -268,39 +177,6 @@ const DebugSettings = () => {
                     borderRadius: RADII.pill,
                     overflow: "hidden",
                 },
-                wizardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: SPACING.md, paddingTop: SPACING.md },
-                stepperLabel: { ...TYPE.monoLabel, color: colors.textMuted },
-                dotsRow: { flexDirection: "row", gap: 6, alignItems: "center" },
-                dot: { width: 8, height: 8, borderRadius: 4, borderWidth: 1, borderColor: colors.borderHair },
-                dotFuture: { backgroundColor: "transparent" },
-                dotCurrent: { backgroundColor: colors.brand, borderColor: colors.brand },
-                dotPast: { backgroundColor: colors.brand, borderColor: colors.brand, opacity: 0.5 },
-                wizardBody: { paddingHorizontal: SPACING.md, paddingTop: SPACING.sm, paddingBottom: SPACING.md, gap: SPACING.sm },
-                wizardTitle: { ...TYPE.h2, color: colors.text },
-                wizardDescription: { ...TYPE.caption, color: colors.textMuted, lineHeight: 18 },
-                statusChipsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-                statusChip: {
-                    paddingHorizontal: SPACING.sm,
-                    paddingVertical: 3,
-                    borderRadius: RADII.pill,
-                    borderWidth: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 4,
-                },
-                statusChipGranted: { backgroundColor: colors.successSubtle, borderColor: colors.success },
-                statusChipMissing: { backgroundColor: "rgba(255, 90, 110, 0.10)", borderColor: colors.error },
-                statusChipPending: { backgroundColor: colors.surfaceRaised, borderColor: colors.borderHair },
-                statusChipText: { ...TYPE.monoLabel, fontSize: 10 },
-                inlineWarning: { ...TYPE.caption, color: colors.warningText, lineHeight: 18 },
-                actionRow: { flexDirection: "row", gap: 10, marginTop: SPACING.sm },
-                navRow: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: SPACING.md, paddingBottom: SPACING.md },
-                doneCard: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md, gap: SPACING.sm },
-                doneHeader: { flexDirection: "row", alignItems: "center", gap: SPACING.sm },
-                doneTitle: { ...TYPE.h2, color: colors.brand },
-                doneCheckRow: { flexDirection: "row", alignItems: "center", gap: SPACING.sm, paddingVertical: 2 },
-                doneCheckLabel: { ...TYPE.body, color: colors.text, flex: 1 },
-                recheckLink: { ...TYPE.caption, color: colors.brand, fontWeight: "600", marginTop: SPACING.sm },
             }),
         [colors]
     )
@@ -315,86 +191,6 @@ const DebugSettings = () => {
         }
     }, [rlvUrl])
 
-    // System checks wizard data. Each step describes one permission and the status, refresh, and open-settings handlers tied to it.
-    const wizardSteps = useMemo(
-        () => [
-            {
-                title: "Accessibility Service",
-                description: "The Accessibility Service allows the bot to perform clicks and gestures on your behalf.",
-                flags: [
-                    { label: "System Enabled", granted: accessibilityStatus?.enabled, ready: accessibilityStatus !== null },
-                    { label: "Internal State", granted: accessibilityStatus?.active, ready: accessibilityStatus !== null },
-                ],
-                granted: !!(accessibilityStatus?.enabled && accessibilityStatus?.active),
-                refresh: checkAccessibilityStatus,
-                refreshing: isRefreshing,
-                openSettings: () => NativeModules.StartModule.openAccessibilitySettings(),
-                inlineWarning:
-                    accessibilityStatus?.enabled && !accessibilityStatus?.active
-                        ? "The service is enabled but it seems Android killed it in the background. Toggling it off and back on in settings will restart it."
-                        : null,
-            },
-            {
-                title: "Overlay Permission",
-                description: "The Overlay (Display over other apps) permission allows the bot to render its on-screen control overlay.",
-                flags: [{ label: "Display over other apps", granted: overlayStatus?.enabled, ready: overlayStatus !== null }],
-                granted: !!overlayStatus?.enabled,
-                refresh: checkOverlayStatus,
-                refreshing: isRefreshingOverlay,
-                openSettings: () => NativeModules.StartModule.openOverlaySettings(),
-                inlineWarning: null,
-            },
-            {
-                title: "Battery Optimization",
-                description: "Disabling battery optimization for this app prevents Android from killing the bot during long-running automation runs.",
-                flags: [{ label: "Ignoring battery optimization", granted: batteryStatus?.enabled, ready: batteryStatus !== null }],
-                granted: !!batteryStatus?.enabled,
-                refresh: checkBatteryStatus,
-                refreshing: isRefreshingBattery,
-                openSettings: () => NativeModules.StartModule.openBatteryOptimizationSettings(),
-                inlineWarning: null,
-            },
-        ],
-        [accessibilityStatus, overlayStatus, batteryStatus, isRefreshing, isRefreshingOverlay, isRefreshingBattery]
-    )
-
-    const allChecksPassed = wizardSteps.every((s) => s.granted)
-    const activeStep = wizardSteps[currentWizardStep]
-
-    // Clear any pending re-check animation timer when the component unmounts so we don't update state on a stale instance.
-    useEffect(() => {
-        return () => {
-            if (recheckTimerRef.current) clearTimeout(recheckTimerRef.current)
-        }
-    }, [])
-
-    /**
-     * Sequentially re-run each system check with a small visual delay so the user sees the progress sweep through the rows.
-     * If any check flips to failing, the parent conditional swaps the doneCard for the wizard view automatically.
-     */
-    const handleRecheckAll = useCallback(() => {
-        if (recheckTimerRef.current) clearTimeout(recheckTimerRef.current)
-        setCurrentWizardStep(0)
-        const steps = wizardSteps
-        if (steps.length === 0) return
-        setRecheckingIndex(0)
-        steps[0].refresh()
-        let i = 1
-        const advance = () => {
-            if (i < steps.length) {
-                setRecheckingIndex(i)
-                steps[i].refresh()
-                i++
-                recheckTimerRef.current = setTimeout(advance, 350)
-            } else {
-                recheckTimerRef.current = setTimeout(() => {
-                    setRecheckingIndex(null)
-                    recheckTimerRef.current = null
-                }, 350)
-            }
-        }
-        recheckTimerRef.current = setTimeout(advance, 350)
-    }, [wizardSteps])
     const currentFrameRateLabel = FRAME_RATE_OPTIONS.find((o) => o.value === debug.recordingFrameRate)?.label ?? "30 FPS"
 
     return (
@@ -617,89 +413,7 @@ const DebugSettings = () => {
                             //////////////////////////////////////////////////////////////////////////////////////////////////
                             System Checks (wizard) */}
                         <Section label="System Checks">
-                            {allChecksPassed ? (
-                                <View style={styles.doneCard}>
-                                    <View style={styles.doneHeader}>
-                                        {recheckingIndex !== null ? (
-                                            <ActivityIndicator size="small" color={colors.brand} style={{ width: 20, height: 20 }} />
-                                        ) : (
-                                            <Ionicons name="checkmark-circle" size={20} color={colors.brand} />
-                                        )}
-                                        <Text style={styles.doneTitle}>{recheckingIndex !== null ? "Re-checking system checks..." : "All system checks passed"}</Text>
-                                    </View>
-                                    {wizardSteps.map((step, idx) => (
-                                        <View key={step.title} style={styles.doneCheckRow}>
-                                            {recheckingIndex === idx ? (
-                                                <ActivityIndicator size="small" color={colors.brand} style={{ width: 16, height: 16 }} />
-                                            ) : (
-                                                <Ionicons name="checkmark" size={16} color={colors.brand} />
-                                            )}
-                                            <Text style={styles.doneCheckLabel}>{step.title}</Text>
-                                        </View>
-                                    ))}
-                                    <Pressable
-                                        onPress={handleRecheckAll}
-                                        disabled={recheckingIndex !== null}
-                                        android_ripple={{ color: colors.ripple, foreground: false }}
-                                        hitSlop={8}
-                                        style={{ alignSelf: "flex-start", opacity: recheckingIndex !== null ? 0.5 : 1 }}
-                                    >
-                                        <Text style={styles.recheckLink}>{recheckingIndex !== null ? "Re-checking..." : "Re-check"}</Text>
-                                    </Pressable>
-                                </View>
-                            ) : (
-                                <>
-                                    <View style={styles.wizardHeader}>
-                                        <Text style={styles.stepperLabel}>
-                                            STEP {currentWizardStep + 1} OF {wizardSteps.length}
-                                        </Text>
-                                        <View style={styles.dotsRow}>
-                                            {wizardSteps.map((_, idx) => (
-                                                <View key={idx} style={[styles.dot, idx === currentWizardStep ? styles.dotCurrent : idx < currentWizardStep ? styles.dotPast : styles.dotFuture]} />
-                                            ))}
-                                        </View>
-                                    </View>
-                                    <View style={styles.wizardBody}>
-                                        <Text style={styles.wizardTitle}>{activeStep.title}</Text>
-                                        <View style={styles.statusChipsRow}>
-                                            {activeStep.flags.map((flag) => {
-                                                const chipStyle = !flag.ready ? styles.statusChipPending : flag.granted ? styles.statusChipGranted : styles.statusChipMissing
-                                                const chipColor = !flag.ready ? colors.textMuted : flag.granted ? colors.success : colors.error
-                                                const chipText = !flag.ready ? "Checking..." : flag.granted ? "✅ Granted" : "❌ Missing"
-                                                return (
-                                                    <View key={flag.label} style={[styles.statusChip, chipStyle]}>
-                                                        <Text style={[styles.statusChipText, { color: chipColor }]}>{flag.label}</Text>
-                                                        <Text style={[styles.statusChipText, { color: chipColor }]}>·</Text>
-                                                        <Text style={[styles.statusChipText, { color: chipColor }]}>{chipText}</Text>
-                                                    </View>
-                                                )
-                                            })}
-                                        </View>
-                                        <Text style={styles.wizardDescription}>{activeStep.description}</Text>
-                                        {activeStep.inlineWarning != null && <Text style={styles.inlineWarning}>{activeStep.inlineWarning}</Text>}
-                                        <View style={styles.actionRow}>
-                                            <CustomButton variant="outline" onPress={activeStep.refresh} isLoading={activeStep.refreshing} disabled={activeStep.refreshing}>
-                                                Refresh
-                                            </CustomButton>
-                                            <CustomButton variant="primary" onPress={activeStep.openSettings}>
-                                                Open Settings
-                                            </CustomButton>
-                                        </View>
-                                    </View>
-                                    <View style={styles.navRow}>
-                                        <CustomButton variant="ghost" disabled={currentWizardStep === 0} onPress={() => setCurrentWizardStep((s) => Math.max(0, s - 1))}>
-                                            ← Back
-                                        </CustomButton>
-                                        <CustomButton
-                                            variant="ghost"
-                                            disabled={currentWizardStep === wizardSteps.length - 1}
-                                            onPress={() => setCurrentWizardStep((s) => Math.min(wizardSteps.length - 1, s + 1))}
-                                        >
-                                            Next →
-                                        </CustomButton>
-                                    </View>
-                                </>
-                            )}
+                            <SystemChecksWizard embeddedInWizard />
                         </Section>
 
                         <Section label="DEBUG SETTINGS">

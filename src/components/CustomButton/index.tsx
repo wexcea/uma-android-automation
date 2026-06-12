@@ -88,12 +88,12 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     }
 
     /**
-     * Determine the text color based on variant and theme.
+     * Determine the text color based on variant and theme. When disabled, the parent button already applies `opacity: 0.5` via `getBackgroundColor`,
+     * so we still return the variant color here -- otherwise the text would inherit a default that's invisible against dark surfaces.
+     *
      * @returns The text color for the button.
      */
     const getTextColor = () => {
-        if (disabled) return { opacity: 0.5 }
-
         switch (variant) {
             case "destructive":
                 return { color: colors.destructiveForeground }

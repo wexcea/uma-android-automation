@@ -15,6 +15,8 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext"
 import { SearchProvider } from "./context/SearchRegistryContext"
 import { ProfileProvider } from "./context/ProfileContext"
 import { useBootstrap } from "./hooks/useBootstrap"
+import { useFirstRunGate } from "./hooks/useFirstRunGate"
+import FirstRunWizard from "./pages/FirstRunWizard"
 import Home from "./pages/Home"
 import Settings from "./pages/Settings"
 import TrainingSettings from "./pages/TrainingSettings"
@@ -97,12 +99,15 @@ function MainDrawer() {
 function AppWithBootstrap({ theme, colors }: { theme: string; colors: any }) {
     // Initialize app with bootstrap logic.
     useBootstrap()
+    const { ready, isFirstRun, markComplete } = useFirstRunGate()
+
+    if (!ready) return null
 
     return (
         <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: colors.background }}>
             <NavigationContainer theme={NAV_THEME[theme as "light" | "dark"]}>
                 <StatusBar style={theme === "light" ? "dark" : "light"} />
-                <MainDrawer />
+                {isFirstRun ? <FirstRunWizard onComplete={markComplete} /> : <MainDrawer />}
                 <PortalHost />
             </NavigationContainer>
         </SafeAreaView>

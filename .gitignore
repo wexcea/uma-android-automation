@@ -88,6 +88,8 @@ web-build/
 expo-env.d.ts
 
 .vscode/
+docs/
+.superpowers/
 
 # Indexer-side embedder cache (downloaded MiniLM ONNX kept out of the APK).
 .cache/
