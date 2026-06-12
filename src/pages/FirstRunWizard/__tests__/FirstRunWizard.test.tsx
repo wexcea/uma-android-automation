@@ -228,4 +228,18 @@ describe("FirstRunWizard", () => {
         fireEvent.press(finish)
         await waitFor(() => expect(onComplete.mock.calls.length).toBeGreaterThan(callsBefore))
     })
+
+    it("surfaces a partial-move banner when migrate fails and lets the user continue", async () => {
+        mockUseLegacyFileScan.mockReturnValue({ scanning: false, counts: { logs: 5, recordings: 2 }, hasLegacyFiles: true })
+        mockStorageBridge.getCurrentFolder.mockResolvedValue({ uri: "content://test", name: "Test" })
+        mockStorageBridge.migrateLegacyFiles.mockResolvedValue({ movedLogs: 1, movedRecordings: 0, error: "OUT_OF_SPACE", remaining: 6 })
+        const { findByText } = render(<FirstRunWizard onComplete={jest.fn()} />)
+
+        fireEvent.press(await findByText("Move them"))
+        await waitFor(() => expect(mockStorageBridge.migrateLegacyFiles).toHaveBeenCalledWith("move"))
+        expect(await findByText(/Moved 1 of 7 files\. Out of space on your new folder\./i)).toBeTruthy()
+
+        fireEvent.press(await findByText("Continue with partial move"))
+        expect(await findByText("Left at old location")).toBeTruthy()
+    })
 })

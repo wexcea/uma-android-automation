@@ -193,7 +193,12 @@ const FirstRunWizard = ({ onComplete }: Props) => {
         if (!canFinish) return
         setSaveError(null)
         setFinishing(true)
-        const ok = await storageBridge.validateAccess()
+        let ok = false
+        try {
+            ok = await storageBridge.validateAccess()
+        } catch {
+            ok = false
+        }
         if (!ok) {
             setFinishing(false)
             setPicked(null)
