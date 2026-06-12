@@ -78,18 +78,15 @@ describe("SystemChecksWizard", () => {
         expect(await findByText("Battery Optimization")).toBeTruthy()
     })
 
-    it("shows GRANTED chip and no expanded body for a granted permission", async () => {
+    it("hides the description on a granted row even when other rows are missing", async () => {
         ;(NativeModules.StartModule.getAccessibilityStatus as jest.Mock).mockResolvedValue({ enabled: true, active: true })
         ;(NativeModules.StartModule.getOverlayStatus as jest.Mock).mockResolvedValue({ enabled: false })
         ;(NativeModules.StartModule.getBatteryOptimizationStatus as jest.Mock).mockResolvedValue({ enabled: false })
 
-        const { findAllByText, queryByText } = render(<SystemChecksWizard />)
+        const { queryByText } = render(<SystemChecksWizard />)
         await waitFor(() => {
             jest.advanceTimersByTime(300)
         })
-        const granted = await findAllByText("GRANTED")
-        expect(granted.length).toBe(1)
-        // Accessibility's description should NOT be visible because the row is collapsed
         expect(queryByText(/perform clicks and gestures/i)).toBeNull()
     })
 
@@ -154,5 +151,44 @@ describe("SystemChecksWizard", () => {
         expect(NativeModules.StartModule.getAccessibilityStatus).toHaveBeenCalledTimes(2)
         expect(NativeModules.StartModule.getOverlayStatus).toHaveBeenCalledTimes(2)
         expect(NativeModules.StartModule.getBatteryOptimizationStatus).toHaveBeenCalledTimes(2)
+    })
+
+    it("expands only the topmost missing row when multiple are missing", async () => {
+        ;(NativeModules.StartModule.getAccessibilityStatus as jest.Mock).mockResolvedValue({ enabled: true, active: true })
+        ;(NativeModules.StartModule.getOverlayStatus as jest.Mock).mockResolvedValue({ enabled: false })
+        ;(NativeModules.StartModule.getBatteryOptimizationStatus as jest.Mock).mockResolvedValue({ enabled: false })
+
+        const { findAllByText, queryByText } = render(<SystemChecksWizard />)
+        await waitFor(() => {
+            jest.advanceTimersByTime(300)
+        })
+        const refreshButtons = await findAllByText("Refresh")
+        expect(refreshButtons.length).toBe(1)
+        expect(queryByText(/render its on-screen control overlay/i)).toBeTruthy()
+        expect(queryByText(/killing the bot during long-running/i)).toBeNull()
+    })
+
+    it("shows the All system checks passed banner only when every permission is granted", async () => {
+        ;(NativeModules.StartModule.getAccessibilityStatus as jest.Mock).mockResolvedValue({ enabled: true, active: true })
+        ;(NativeModules.StartModule.getOverlayStatus as jest.Mock).mockResolvedValue({ enabled: true })
+        ;(NativeModules.StartModule.getBatteryOptimizationStatus as jest.Mock).mockResolvedValue({ enabled: true })
+
+        const { findByText } = render(<SystemChecksWizard />)
+        await waitFor(() => {
+            jest.advanceTimersByTime(300)
+        })
+        expect(await findByText("All system checks passed")).toBeTruthy()
+    })
+
+    it("hides the All system checks passed banner when any permission is missing", async () => {
+        ;(NativeModules.StartModule.getAccessibilityStatus as jest.Mock).mockResolvedValue({ enabled: true, active: true })
+        ;(NativeModules.StartModule.getOverlayStatus as jest.Mock).mockResolvedValue({ enabled: false })
+        ;(NativeModules.StartModule.getBatteryOptimizationStatus as jest.Mock).mockResolvedValue({ enabled: true })
+
+        const { queryByText } = render(<SystemChecksWizard />)
+        await waitFor(() => {
+            jest.advanceTimersByTime(300)
+        })
+        expect(queryByText("All system checks passed")).toBeNull()
     })
 })

@@ -109,7 +109,7 @@ interface RowConfig {
     title: string
     /** Explanation shown when the row is in the missing state. */
     description: string
-    /** Current grant state driving the icon, chip, and expanded body. */
+    /** Current grant state driving the row icon. */
     state: RowState
     /** Inline warning shown above the action buttons when set. */
     inlineWarning: string | null
@@ -122,10 +122,9 @@ interface RowConfig {
 }
 
 /**
- * Unified vertical permissions list. Always renders three rows -- Accessibility, Overlay, Battery
- * Optimization. Granted rows collapse to one line. Missing rows expand inline with description +
- * Refresh + Open Settings buttons. A Re-check link at the bottom sweeps all three pollers with a
- * staggered animation.
+ * System permissions list rendered as a done-card style block. Shows an "All system checks passed" banner when every permission is granted, then always renders the three rows
+ * (Accessibility, Overlay, Battery Optimization) with their current status icons. The topmost missing row reveals its description + Refresh + Open Settings buttons inline; lower
+ * missing rows stay collapsed until the topmost one is granted. A Re-check link at the bottom sweeps all three pollers with a staggered animation.
  *
  * @param onPermissionsChange Fires whenever any grant flips, skipping the initial poll window.
  * @param embeddedInWizard Drops the outer card chrome when true.
@@ -218,22 +217,19 @@ const SystemChecksWizard = ({ onPermissionsChange, embeddedInWizard = false }: P
                     borderWidth: 0,
                     overflow: "visible",
                 },
-                row: { paddingHorizontal: SPACING.md, paddingTop: SPACING.md, paddingBottom: SPACING.md, borderBottomWidth: 1, borderBottomColor: colors.borderHair },
-                rowMissing: { backgroundColor: "rgba(224, 123, 123, 0.04)" },
+                banner: { flexDirection: "row", alignItems: "center", gap: SPACING.sm, paddingHorizontal: SPACING.md, paddingTop: SPACING.md, paddingBottom: SPACING.xs },
+                bannerText: { ...TYPE.body, fontWeight: "700", color: colors.brand, flex: 1 },
+                row: { paddingHorizontal: SPACING.md, paddingTop: SPACING.xs, paddingBottom: SPACING.xs },
                 rowHead: { flexDirection: "row", alignItems: "center", gap: SPACING.sm },
-                iconCircle: { width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center" },
-                iconCircleGranted: { backgroundColor: colors.successSubtle, borderWidth: 1, borderColor: colors.success },
-                iconCircleMissing: { backgroundColor: "rgba(224, 123, 123, 0.15)", borderWidth: 1, borderColor: colors.error },
-                missingBang: { color: colors.error, fontWeight: "700", fontSize: 13 },
+                iconSlot: { width: 20, alignItems: "center", justifyContent: "center" },
                 title: { ...TYPE.body, color: colors.text, flex: 1 },
                 titleMuted: { ...TYPE.body, color: colors.textMuted, flex: 1 },
-                chip: { ...TYPE.monoLabel, fontSize: 10, letterSpacing: 0.6 },
-                expandedBody: { paddingTop: SPACING.sm, paddingLeft: 22 + SPACING.sm },
+                expandedBody: { paddingTop: SPACING.sm, paddingLeft: 20 + SPACING.sm },
                 description: { ...TYPE.caption, color: colors.textMuted, lineHeight: 18, marginBottom: SPACING.sm },
                 inlineWarning: { ...TYPE.caption, color: colors.warningText, lineHeight: 18, marginBottom: SPACING.sm },
                 actionRow: { flexDirection: "row", gap: 10 },
                 actionButton: { flex: 1 },
-                footer: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, flexDirection: "row", justifyContent: "flex-end" },
+                footer: { paddingHorizontal: SPACING.md, paddingTop: SPACING.sm, paddingBottom: SPACING.md },
                 recheckLink: { ...TYPE.caption, color: colors.brand, fontWeight: "600" },
                 recheckDisabled: { opacity: 0.5 },
             }),
@@ -257,6 +253,26 @@ const SystemChecksWizard = ({ onPermissionsChange, embeddedInWizard = false }: P
                 }
             }),
         [statuses, refreshing, pollPermission]
+    )
+
+    /**
+     * The single permission row whose expanded body is visible. Stays `null` during the initial poll so partial-settle states don't flash an expansion,
+     * then resolves to the first ungranted permission in `PERMISSIONS` order, or `null` once all three are granted.
+     */
+    const expandedKey = useMemo<PermissionKey | null>(() => {
+        const allSettled = PERMISSIONS.every((p) => statuses[p.key] !== null)
+        if (!allSettled) return null
+        for (const def of PERMISSIONS) {
+            const status = statuses[def.key]!
+            if (!def.isGranted(status)) return def.key
+        }
+        return null
+    }, [statuses])
+
+    /** Whether all three permissions are settled AND granted, which drives the success banner at the top of the card. */
+    const allGranted = useMemo(
+        () => PERMISSIONS.every((p) => statuses[p.key] !== null && p.isGranted(statuses[p.key]!)),
+        [statuses]
     )
 
     /**
@@ -289,42 +305,37 @@ const SystemChecksWizard = ({ onPermissionsChange, embeddedInWizard = false }: P
      */
     const renderIcon = (state: RowState) => {
         if (state === "checking") {
-            return <ActivityIndicator size="small" color={colors.brand} style={{ width: 22, height: 22 }} />
+            return <ActivityIndicator size="small" color={colors.brand} style={styles.iconSlot} />
         }
         if (state === "granted") {
             return (
-                <View style={[styles.iconCircle, styles.iconCircleGranted]}>
-                    <Ionicons name="checkmark" size={14} color={colors.success} />
+                <View style={styles.iconSlot}>
+                    <Ionicons name="checkmark" size={16} color={colors.brand} />
                 </View>
             )
         }
         return (
-            <View style={[styles.iconCircle, styles.iconCircleMissing]}>
-                <Text style={styles.missingBang}>!</Text>
+            <View style={styles.iconSlot}>
+                <Ionicons name="close" size={16} color={colors.error} />
             </View>
         )
     }
 
-    /**
-     * @param state The current row state.
-     * @returns The chip element for the row.
-     */
-    const renderChip = (state: RowState) => {
-        if (state === "checking") return <Text style={[styles.chip, { color: colors.textMuted }]}>CHECKING...</Text>
-        if (state === "granted") return <Text style={[styles.chip, { color: colors.success }]}>GRANTED</Text>
-        return <Text style={[styles.chip, { color: colors.error }]}>MISSING</Text>
-    }
-
     return (
         <View style={embeddedInWizard ? styles.wrapperEmbedded : styles.wrapper}>
+            {allGranted && (
+                <View style={styles.banner}>
+                    <Ionicons name="checkmark-circle" size={20} color={colors.brand} />
+                    <Text style={styles.bannerText}>All system checks passed</Text>
+                </View>
+            )}
             {rowConfigs.map((row) => (
-                <View key={row.key} style={[styles.row, row.state === "missing" && styles.rowMissing]}>
+                <View key={row.key} style={styles.row}>
                     <View style={styles.rowHead}>
                         {renderIcon(row.state)}
                         <Text style={row.state === "checking" ? styles.titleMuted : styles.title}>{row.title}</Text>
-                        {renderChip(row.state)}
                     </View>
-                    {row.state === "missing" && (
+                    {row.key === expandedKey && (
                         <View style={styles.expandedBody}>
                             <Text style={styles.description}>{row.description}</Text>
                             {row.inlineWarning && <Text style={styles.inlineWarning}>{row.inlineWarning}</Text>}
