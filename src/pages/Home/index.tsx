@@ -320,7 +320,7 @@ Note: Reinstall using the x86_64 release APK for much better performance.`)
                         <Ionicons name="information-circle-outline" size={24} color={colors.info} />
                     </TooltipTrigger>
                     <TooltipContent sideOffset={12} side="bottom" style={{ width: 200 }}>
-                        <Text>Select a Scenario to start from the center button dropdown.</Text>
+                        <Text>Select a Scenario to start from the selector button dropdown.</Text>
                     </TooltipContent>
                 </Tooltip>
             )
