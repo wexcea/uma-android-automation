@@ -42,7 +42,7 @@ describe("useLogcatDump", () => {
         act(() => {
             void result.current.dump()
         })
-        await waitFor(() => expect(result.current.dumping).toBe(true))
+        expect(result.current.dumping).toBe(true)
         await act(async () => {
             resolveDump({ filename: "a.txt", bytes: 1, location: "X" })
         })
@@ -60,5 +60,21 @@ describe("useLogcatDump", () => {
             result.current.clearMessage()
         })
         expect(result.current.message).toBeNull()
+    })
+
+    it("ignores a second dump call while one is already in flight", async () => {
+        let resolveDump: (value: { filename: string; bytes: number; location: string }) => void = () => {}
+        mockBridge.dumpLogcat.mockReturnValue(new Promise((resolve) => { resolveDump = resolve }))
+        const { result } = renderHook(() => useLogcatDump())
+        act(() => {
+            void result.current.dump()
+        })
+        act(() => {
+            void result.current.dump()
+        })
+        await act(async () => {
+            resolveDump({ filename: "a.txt", bytes: 1, location: "X" })
+        })
+        expect(mockBridge.dumpLogcat).toHaveBeenCalledTimes(1)
     })
 })

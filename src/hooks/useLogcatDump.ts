@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { logcatBridge } from "../lib/logcatBridge"
 
 /** State and actions returned by `useLogcatDump`. */
@@ -22,9 +22,11 @@ export interface LogcatDumpState {
 export function useLogcatDump(): LogcatDumpState {
     const [dumping, setDumping] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
+    const dumpingRef = useRef(false)
 
     const dump = useCallback(async () => {
-        if (dumping) return
+        if (dumpingRef.current) return
+        dumpingRef.current = true
         setDumping(true)
         try {
             const result = await logcatBridge.dumpLogcat()
@@ -32,9 +34,10 @@ export function useLogcatDump(): LogcatDumpState {
         } catch (error) {
             setMessage(`Logcat dump failed: ${error instanceof Error ? error.message : String(error)}`)
         } finally {
+            dumpingRef.current = false
             setDumping(false)
         }
-    }, [dumping])
+    }, [])
 
     const clearMessage = useCallback(() => setMessage(null), [])
 
