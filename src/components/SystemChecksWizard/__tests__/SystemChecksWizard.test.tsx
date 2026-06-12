@@ -27,15 +27,7 @@ jest.mock("../../CustomButton", () => {
     const { Pressable, Text } = require("react-native")
     return {
         __esModule: true,
-        default: ({
-            onPress,
-            children,
-            disabled,
-        }: {
-            onPress?: () => void
-            children: React.ReactNode
-            disabled?: boolean
-        }) => (
+        default: ({ onPress, children, disabled }: { onPress?: () => void; children: React.ReactNode; disabled?: boolean }) => (
             <Pressable onPress={onPress} disabled={disabled}>
                 <Text>{children}</Text>
             </Pressable>

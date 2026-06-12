@@ -88,12 +88,7 @@ const renderMigrationCard = (
     const accent = danger ? colors.error : primary ? colors.primary : colors.text
     const border = danger ? colors.error : primary ? colors.primary : colors.borderHair
     return (
-        <Pressable
-            key={choice}
-            onPress={() => onPress(choice)}
-            disabled={busy !== null}
-            style={[styles.migCard, { borderColor: border, backgroundColor: colors.surface }]}
-        >
+        <Pressable key={choice} onPress={() => onPress(choice)} disabled={busy !== null} style={[styles.migCard, { borderColor: border, backgroundColor: colors.surface }]}>
             <Text style={[styles.migIcon, { color: accent }]}>{icon}</Text>
             <View style={{ flex: 1 }}>
                 <Text style={[styles.migTitle, { color: accent }]}>{title}</Text>
@@ -212,8 +207,7 @@ const FirstRunWizard = ({ onComplete }: Props) => {
 
     const folderComplete = picked !== null
     const migrationComplete = !hasLegacyFiles || migrationChoice !== null
-    const permissionsComplete =
-        permissionsGranted !== null && permissionsGranted.accessibility && permissionsGranted.overlay && permissionsGranted.battery
+    const permissionsComplete = permissionsGranted !== null && permissionsGranted.accessibility && permissionsGranted.overlay && permissionsGranted.battery
     const canFinish = folderComplete && migrationComplete && permissionsComplete
     const stepsTotal = 2 + (hasLegacyFiles ? 1 : 0)
     const stepsCompleted = (folderComplete ? 1 : 0) + (hasLegacyFiles && migrationComplete ? 1 : 0) + (permissionsComplete ? 1 : 0)
@@ -260,14 +254,11 @@ const FirstRunWizard = ({ onComplete }: Props) => {
                 <View style={[styles.progressTrack, { backgroundColor: colors.surface }]}>
                     <View style={[styles.progressFill, { width: `${(stepsCompleted / stepsTotal) * 100}%`, backgroundColor: colors.brand }]} />
                 </View>
-                <Text style={[styles.progressLabel, { color: colors.textMuted }]}>{stepsCompleted} OF {stepsTotal}</Text>
+                <Text style={[styles.progressLabel, { color: colors.textMuted }]}>
+                    {stepsCompleted} OF {stepsTotal}
+                </Text>
             </View>
-            <ScrollView
-                style={styles.scrollArea}
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator
-            >
+            <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator>
                 {accessError && (
                     <View style={[styles.accessBanner, { backgroundColor: colors.warningSubtle ?? colors.surface, borderColor: colors.warning }]}>
                         <Text style={[styles.accessBannerText, { color: colors.warning }]}>{accessError}</Text>
@@ -284,13 +275,18 @@ const FirstRunWizard = ({ onComplete }: Props) => {
                             <>
                                 <Text style={[styles.headline, { color: colors.text }]}>Where should the bot save your files?</Text>
                                 <Text style={[styles.hint, { color: colors.textMuted }]}>
-                                    Choose a folder somewhere you can open in your file manager. Recent Android versions hide app-private storage from file managers, so the bot needs a spot you control. It will put its logs/ and recordings/ subfolders inside whatever you pick.
+                                    Choose a folder somewhere you can open in your file manager. Recent Android versions hide app-private storage from file managers, so the bot needs a spot you
+                                    control. It will put its logs/ and recordings/ subfolders inside whatever you pick.
                                 </Text>
-                                <CustomButton variant="primary" onPress={handlePick}>Pick a folder</CustomButton>
+                                <CustomButton variant="primary" onPress={handlePick}>
+                                    Pick a folder
+                                </CustomButton>
                                 {pickError && (
                                     <View style={styles.errorBlock}>
                                         <Text style={[styles.error, { color: colors.error }]}>{pickError}</Text>
-                                        <CustomButton variant="primary" onPress={handlePick}>Retry</CustomButton>
+                                        <CustomButton variant="primary" onPress={handlePick}>
+                                            Retry
+                                        </CustomButton>
                                     </View>
                                 )}
                             </>

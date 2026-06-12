@@ -55,7 +55,9 @@ describe("useFirstRunGate", () => {
         saveSetting.mockResolvedValue(undefined)
         const { result } = renderHook(() => useFirstRunGate())
         await waitFor(() => expect(result.current.ready).toBe(true))
-        await act(async () => { await result.current.markComplete() })
+        await act(async () => {
+            await result.current.markComplete()
+        })
         expect(saveSetting).toHaveBeenCalledWith("firstRun", "completed", true)
         expect(result.current.isFirstRun).toBe(false)
     })

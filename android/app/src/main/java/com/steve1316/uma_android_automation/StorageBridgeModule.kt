@@ -72,9 +72,10 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
             return
         }
         try {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-            }
+            val intent =
+                Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                }
             pendingPickPromise = promise
             appContext.startActivityForResult(intent, REQUEST_CODE_PICK_FOLDER, null)
         } catch (e: Exception) {

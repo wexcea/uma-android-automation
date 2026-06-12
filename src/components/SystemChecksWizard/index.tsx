@@ -68,10 +68,7 @@ const PERMISSIONS: readonly PermissionDef[] = [
         openSettings: () => NativeModules.StartModule.openAccessibilitySettings(),
         defaultOnError: { enabled: false, active: false },
         isGranted: (s) => !!(s.enabled && s.active),
-        inlineWarning: (s) =>
-            s.enabled && !s.active
-                ? "The service is enabled but it seems Android killed it in the background. Toggling it off and back on in settings will restart it."
-                : null,
+        inlineWarning: (s) => (s.enabled && !s.active ? "The service is enabled but it seems Android killed it in the background. Toggling it off and back on in settings will restart it." : null),
     },
     {
         key: "overlay",
@@ -270,10 +267,7 @@ const SystemChecksWizard = ({ onPermissionsChange, embeddedInWizard = false }: P
     }, [statuses])
 
     /** Whether all three permissions are settled AND granted, which drives the success banner at the top of the card. */
-    const allGranted = useMemo(
-        () => PERMISSIONS.every((p) => statuses[p.key] !== null && p.isGranted(statuses[p.key]!)),
-        [statuses]
-    )
+    const allGranted = useMemo(() => PERMISSIONS.every((p) => statuses[p.key] !== null && p.isGranted(statuses[p.key]!)), [statuses])
 
     /**
      * Sequentially re-run each system check with a small visual delay so the user sees the progress sweep through the rows.
