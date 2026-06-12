@@ -39,6 +39,25 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
         return "StorageBridgeModule"
     }
 
+    /**
+     * Runs the synchronous part of a `@ReactMethod` inside a uniform try/catch wrapper. The block's
+     * return value is forwarded to `promise.resolve`. Any thrown exception is logged with the
+     * method's name and the promise is rejected with the given error code.
+     *
+     * @param promise The React Native promise to resolve or reject.
+     * @param errorCode Tag passed to `promise.reject` on failure.
+     * @param methodName Friendly name used as the log prefix.
+     * @param block Work that produces the value to resolve.
+     */
+    private inline fun <T> resolveSafely(promise: Promise, errorCode: String, methodName: String, block: () -> T) {
+        try {
+            promise.resolve(block())
+        } catch (e: Exception) {
+            Log.e(TAG, "$methodName failed", e)
+            promise.reject(errorCode, e.message ?: e.toString(), e)
+        }
+    }
+
     /** Launches the system folder picker so the user can choose a directory for the app's
      * user-visible artefacts. Resolves with the chosen `Uri` string when the user confirms, or
      * `null` when the user cancels. Rejects if the picker cannot be launched or if a previous
@@ -72,21 +91,13 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
      */
     @ReactMethod
     fun getCurrentFolder(promise: Promise) {
-        try {
-            val storage = UserStorageManager.getInstance(appContext)
-            val uri = storage.getTreeUri()
-            if (uri == null) {
-                promise.resolve(null)
-                return
-            }
+        resolveSafely(promise, "READ_FAILED", "getCurrentFolder") {
+            val uri = UserStorageManager.getInstance(appContext).getTreeUri() ?: return@resolveSafely null
             val doc = DocumentFile.fromTreeUri(appContext, uri)
             val map: WritableMap = Arguments.createMap()
             map.putString("uri", uri.toString())
             map.putString("name", doc?.name ?: "")
-            promise.resolve(map)
-        } catch (e: Exception) {
-            Log.e(TAG, "getCurrentFolder failed", e)
-            promise.reject("READ_FAILED", e.message ?: e.toString(), e)
+            map
         }
     }
 
@@ -97,12 +108,9 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
      */
     @ReactMethod
     fun clearFolder(promise: Promise) {
-        try {
+        resolveSafely(promise, "CLEAR_FAILED", "clearFolder") {
             UserStorageManager.getInstance(appContext).setTreeUri(null)
-            promise.resolve(true)
-        } catch (e: Exception) {
-            Log.e(TAG, "clearFolder failed", e)
-            promise.reject("CLEAR_FAILED", e.message ?: e.toString(), e)
+            true
         }
     }
 
@@ -114,11 +122,8 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
      */
     @ReactMethod
     fun validateAccess(promise: Promise) {
-        try {
-            promise.resolve(UserStorageManager.getInstance(appContext).validateAccess())
-        } catch (e: Exception) {
-            Log.e(TAG, "validateAccess failed", e)
-            promise.reject("VALIDATE_FAILED", e.message ?: e.toString(), e)
+        resolveSafely(promise, "VALIDATE_FAILED", "validateAccess") {
+            UserStorageManager.getInstance(appContext).validateAccess()
         }
     }
 
@@ -129,15 +134,12 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
      */
     @ReactMethod
     fun scanLegacyFiles(promise: Promise) {
-        try {
+        resolveSafely(promise, "SCAN_FAILED", "scanLegacyFiles") {
             val (logs, recordings) = UserStorageManager.getInstance(appContext).scanLegacyFiles()
             val map: WritableMap = Arguments.createMap()
             map.putInt("logs", logs)
             map.putInt("recordings", recordings)
-            promise.resolve(map)
-        } catch (e: Exception) {
-            Log.e(TAG, "scanLegacyFiles failed", e)
-            promise.reject("SCAN_FAILED", e.message ?: e.toString(), e)
+            map
         }
     }
 
@@ -149,7 +151,7 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
      */
     @ReactMethod
     fun migrateLegacyFiles(mode: String, promise: Promise) {
-        try {
+        resolveSafely(promise, "MIGRATE_FAILED", "migrateLegacyFiles") {
             val result = UserStorageManager.getInstance(appContext).migrateLegacyFiles(mode)
             val map: WritableMap = Arguments.createMap()
             map.putInt("movedLogs", result.movedLogs)
@@ -158,10 +160,7 @@ class StorageBridgeModule(reactContext: ReactApplicationContext) :
                 map.putString("error", result.error)
                 map.putInt("remaining", result.remaining)
             }
-            promise.resolve(map)
-        } catch (e: Exception) {
-            Log.e(TAG, "migrateLegacyFiles failed", e)
-            promise.reject("MIGRATE_FAILED", e.message ?: e.toString(), e)
+            map
         }
     }
 

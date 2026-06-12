@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
 
 /** Step 1 of the first-run wizard: storage folder selection.
  *
- * On mount, calls `getCurrentFolder` to pre-populate the Selected card if a URI was persisted in a prior wizard session. Otherwise shows the "Pick a folder" CTA which launches
- * the SAF picker.
+ * On mount, calls `getCurrentFolder` to pre-populate the Selected card if a URI was persisted in a prior wizard session.
+ * Otherwise shows the "Pick a folder" CTA which launches the SAF picker.
  *
  * @param props See `Props`.
  * @returns A React node.
@@ -50,15 +50,10 @@ const FolderStep = ({ onPick, onAdvance, onCtaChange }: Props) => {
     const { colors } = useTheme()
     const [picked, setPicked] = useState<PickedFolder | null>(null)
     const [error, setError] = useState<string | null>(null)
+    // Mirror `onPick` into a ref so the empty-deps mount effect always calls the latest version.
     const onPickRef = useRef(onPick)
-    const onCtaChangeRef = useRef(onCtaChange)
-
     useEffect(() => {
         onPickRef.current = onPick
-    })
-
-    useEffect(() => {
-        onCtaChangeRef.current = onCtaChange
     })
 
     useEffect(() => {
@@ -80,14 +75,14 @@ const FolderStep = ({ onPick, onAdvance, onCtaChange }: Props) => {
     }, [])
 
     useEffect(() => {
-        onCtaChangeRef.current(picked ? { label: "Next", enabled: true, onPress: onAdvance } : null)
-    }, [picked, onAdvance])
+        onCtaChange(picked ? { label: "Next", enabled: true, onPress: onAdvance } : null)
+    }, [picked, onAdvance, onCtaChange])
 
     // Clear the registered CTA on unmount so the outer wizard footer doesn't render a stale "Next"
     // while the next step (migration or system checks) is mounting.
     useEffect(() => {
-        return () => onCtaChangeRef.current(null)
-    }, [])
+        return () => onCtaChange(null)
+    }, [onCtaChange])
 
     const handlePick = async () => {
         setError(null)

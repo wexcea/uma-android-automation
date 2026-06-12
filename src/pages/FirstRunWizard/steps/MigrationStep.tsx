@@ -11,8 +11,8 @@ export type MigrationChoice = "move" | "leave" | "delete"
 interface Props {
     /** File counts from the legacy scan. */
     legacyCounts: LegacyCounts
-    /** Called once a choice resolves successfully. Second arg is the migration result for move/delete, null for leave. */
-    onChoice: (choice: MigrationChoice, result: MigrationResult | null) => void
+    /** Optional notification fired once a choice resolves successfully. Second arg is the migration result for move/delete, null for leave. */
+    onChoice?: (choice: MigrationChoice, result: MigrationResult | null) => void
     /** Called after `onChoice` to advance the outer wizard. */
     onAdvance: () => void
 }
@@ -58,7 +58,7 @@ const MigrationStep = ({ legacyCounts, onChoice, onAdvance }: Props) => {
                     return
                 }
             }
-            onChoice(choice, result)
+            onChoice?.(choice, result)
             onAdvance()
         } catch (e) {
             console.warn("[MigrationStep] migrate failed", e)

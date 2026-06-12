@@ -3,9 +3,9 @@ import { BackHandler, StyleSheet, Text, View } from "react-native"
 import CustomButton from "../../components/CustomButton"
 import { useTheme } from "../../context/ThemeContext"
 import { useLegacyFileScan } from "../../hooks/useLegacyFileScan"
-import { storageBridge, PickedFolder, MigrationResult } from "../../lib/storageBridge"
+import { storageBridge, PickedFolder } from "../../lib/storageBridge"
 import FolderStep, { CtaState } from "./steps/FolderStep"
-import MigrationStep, { MigrationChoice } from "./steps/MigrationStep"
+import MigrationStep from "./steps/MigrationStep"
 import SystemChecksStep from "./steps/SystemChecksStep"
 
 /** Props for `FirstRunWizard`. */
@@ -32,8 +32,7 @@ const styles = StyleSheet.create({
 
 /** Top-level first-run wizard. Mounted by `AppWithBootstrap` when `firstRun.completed` is unset.
  *
- * Renders the step counter + progress bar, the active step body, and the fixed footer CTAs. Owns
- * outer step state and the cross-step data (picked folder, migration outcome, permission snapshot).
+ * Renders the step counter + progress bar, the active step body, and the fixed footer CTAs.
  * Supports going back via the footer Back button and the Android hardware Back key.
  *
  * @param props See `Props`.
@@ -43,8 +42,6 @@ const FirstRunWizard = ({ onComplete }: Props) => {
     const { colors } = useTheme()
     const { scanning, counts, hasLegacyFiles } = useLegacyFileScan()
     const [outerStep, setOuterStep] = useState(0)
-    const [, setPicked] = useState<PickedFolder | null>(null)
-    const [, setMigrationOutcome] = useState<{ choice: MigrationChoice; result: MigrationResult | null } | null>(null)
     const [outerCta, setOuterCta] = useState<CtaState | null>(null)
     const [pendingAdvance, setPendingAdvance] = useState(false)
     const [saveError, setSaveError] = useState<string | null>(null)
@@ -66,7 +63,6 @@ const FirstRunWizard = ({ onComplete }: Props) => {
             const ok = await storageBridge.validateAccess()
             if (!ok) {
                 setOuterStep(0)
-                setPicked(null)
                 setOuterCta(null)
                 setAccessError("That folder is no longer accessible. Pick another one.")
                 return
@@ -98,7 +94,6 @@ const FirstRunWizard = ({ onComplete }: Props) => {
     }, [outerStep])
 
     const handlePicked = useCallback((folder: PickedFolder | null) => {
-        setPicked(folder)
         if (folder != null) setAccessError(null)
     }, [])
 
@@ -118,10 +113,6 @@ const FirstRunWizard = ({ onComplete }: Props) => {
         advance()
     }, [scanning, advance])
 
-    const handleMigrationChoice = useCallback((choice: MigrationChoice, result: MigrationResult | null) => {
-        setMigrationOutcome({ choice, result })
-    }, [])
-
     const handleFinish = useCallback(async () => {
         setSaveError(null)
         try {
@@ -137,7 +128,7 @@ const FirstRunWizard = ({ onComplete }: Props) => {
                 return <FolderStep onPick={handlePicked} onAdvance={handleFolderAdvance} onCtaChange={setOuterCta} />
             case "migration":
                 if (!counts) return null
-                return <MigrationStep legacyCounts={counts} onChoice={handleMigrationChoice} onAdvance={advance} />
+                return <MigrationStep legacyCounts={counts} onAdvance={advance} />
             case "systemChecks":
                 return <SystemChecksStep onAdvance={handleFinish} onCtaChange={setOuterCta} />
         }

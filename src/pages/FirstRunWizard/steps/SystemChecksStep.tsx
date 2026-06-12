@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import SystemChecksWizard, { SystemCheckResults } from "../../../components/SystemChecksWizard"
 import { CtaState } from "./FolderStep"
@@ -25,12 +25,6 @@ const styles = StyleSheet.create({
 const SystemChecksStep = ({ onAdvance, onCtaChange }: Props) => {
     const [granted, setGranted] = useState<SystemCheckResults | null>(null)
 
-    // Latest-ref pattern so the effects don't re-run on parent callback identity changes.
-    const onCtaChangeRef = useRef(onCtaChange)
-    const onAdvanceRef = useRef(onAdvance)
-    useEffect(() => { onCtaChangeRef.current = onCtaChange })
-    useEffect(() => { onAdvanceRef.current = onAdvance })
-
     const handlePermissionsChange = useCallback((r: SystemCheckResults) => {
         setGranted(r)
     }, [])
@@ -38,14 +32,14 @@ const SystemChecksStep = ({ onAdvance, onCtaChange }: Props) => {
     const allGranted = granted !== null && granted.accessibility && granted.overlay && granted.battery
 
     useEffect(() => {
-        onCtaChangeRef.current({ label: "Finish", enabled: allGranted, onPress: () => onAdvanceRef.current() })
-    }, [allGranted])
+        onCtaChange({ label: "Finish", enabled: allGranted, onPress: onAdvance })
+    }, [allGranted, onAdvance, onCtaChange])
 
     // Clear the registered CTA on unmount so the outer footer doesn't render a stale "Finish" if the
     // user navigates back to an earlier step.
     useEffect(() => {
-        return () => onCtaChangeRef.current(null)
-    }, [])
+        return () => onCtaChange(null)
+    }, [onCtaChange])
 
     return (
         <View style={styles.root}>

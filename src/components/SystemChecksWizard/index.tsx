@@ -27,39 +27,91 @@ interface Props {
     embeddedInWizard?: boolean
 }
 
-/** Native module reply describing the Accessibility Service. */
-interface AccessibilityStatus {
-    /** Whether the service is toggled on in system settings. */
+/** Stable identifier for one of the three checked permissions. */
+type PermissionKey = "accessibility" | "overlay" | "battery"
+
+/** Native module reply for any of the three permission polls. `active` is set only by the
+ * Accessibility Service poll where it distinguishes "toggled on in settings" from "currently running". */
+interface PermissionStatus {
+    /** Whether the permission is currently granted at the OS level. */
     enabled: boolean
-    /** Whether the service is currently running and not killed in the background. */
-    active: boolean
+    /** Accessibility only: whether the service is currently running (not killed by Android). */
+    active?: boolean
 }
 
-/** Native module reply describing the Overlay (Display over other apps) permission. */
-interface OverlayStatus {
-    /** Whether the overlay permission has been granted. */
-    enabled: boolean
+/** Static description of one of the three permissions checked by the component. */
+interface PermissionDef {
+    /** Stable identifier used for state lookups and as the list key. */
+    key: PermissionKey
+    /** Heading text shown on the row. */
+    title: string
+    /** Explanation shown when the row is in the missing state. */
+    description: string
+    /** Invokes the native module method that polls this permission's status. */
+    getStatus: () => Promise<PermissionStatus>
+    /** Opens the corresponding system settings screen. */
+    openSettings: () => void
+    /** Status used when the native module call rejects so the row can settle into a missing state. */
+    defaultOnError: PermissionStatus
+    /** Whether a resolved status counts as fully granted for this permission. */
+    isGranted: (status: PermissionStatus) => boolean
+    /** Optional inline warning shown above the action buttons when set. */
+    inlineWarning?: (status: PermissionStatus) => string | null
 }
 
-/** Native module reply describing the battery optimization exemption. */
-interface BatteryStatus {
-    /** Whether the app is currently exempt from battery optimization. */
-    enabled: boolean
-}
+const PERMISSIONS: readonly PermissionDef[] = [
+    {
+        key: "accessibility",
+        title: "Accessibility Service",
+        description: "The Accessibility Service allows the bot to perform clicks and gestures on your behalf.",
+        getStatus: () => NativeModules.StartModule.getAccessibilityStatus(),
+        openSettings: () => NativeModules.StartModule.openAccessibilitySettings(),
+        defaultOnError: { enabled: false, active: false },
+        isGranted: (s) => !!(s.enabled && s.active),
+        inlineWarning: (s) =>
+            s.enabled && !s.active
+                ? "The service is enabled but it seems Android killed it in the background. Toggling it off and back on in settings will restart it."
+                : null,
+    },
+    {
+        key: "overlay",
+        title: "Overlay Permission",
+        description: "The Overlay (Display over other apps) permission allows the bot to render its on-screen control overlay.",
+        getStatus: () => NativeModules.StartModule.getOverlayStatus(),
+        openSettings: () => NativeModules.StartModule.openOverlaySettings(),
+        defaultOnError: { enabled: false },
+        isGranted: (s) => !!s.enabled,
+    },
+    {
+        key: "battery",
+        title: "Battery Optimization",
+        description: "Disabling battery optimization for this app prevents Android from killing the bot during long-running automation runs.",
+        getStatus: () => NativeModules.StartModule.getBatteryOptimizationStatus(),
+        openSettings: () => NativeModules.StartModule.openBatteryOptimizationSettings(),
+        defaultOnError: { enabled: false },
+        isGranted: (s) => !!s.enabled,
+    },
+]
+
+type StatusMap = Record<PermissionKey, PermissionStatus | null>
+type RefreshingMap = Record<PermissionKey, boolean>
+
+const INITIAL_STATUSES: StatusMap = { accessibility: null, overlay: null, battery: null }
+const INITIAL_REFRESHING: RefreshingMap = { accessibility: false, overlay: false, battery: false }
 
 type RowState = "checking" | "granted" | "missing"
 
 /** Per-row configuration consumed by the list renderer. */
 interface RowConfig {
     /** Stable identifier used as the list key. */
-    key: string
+    key: PermissionKey
     /** Heading text shown on the row. */
     title: string
     /** Explanation shown when the row is in the missing state. */
     description: string
     /** Current grant state driving the icon, chip, and expanded body. */
     state: RowState
-    /** Optional warning shown inline above the action buttons when set. */
+    /** Inline warning shown above the action buttons when set. */
     inlineWarning: string | null
     /** Re-polls the native module for this permission. */
     refresh: () => void
@@ -82,12 +134,8 @@ interface RowConfig {
 const SystemChecksWizard = ({ onPermissionsChange, embeddedInWizard = false }: Props) => {
     const { colors } = useTheme()
 
-    const [accessibilityStatus, setAccessibilityStatus] = useState<AccessibilityStatus | null>(null)
-    const [overlayStatus, setOverlayStatus] = useState<OverlayStatus | null>(null)
-    const [batteryStatus, setBatteryStatus] = useState<BatteryStatus | null>(null)
-    const [isRefreshing, setIsRefreshing] = useState(false)
-    const [isRefreshingOverlay, setIsRefreshingOverlay] = useState(false)
-    const [isRefreshingBattery, setIsRefreshingBattery] = useState(false)
+    const [statuses, setStatuses] = useState<StatusMap>(INITIAL_STATUSES)
+    const [refreshing, setRefreshing] = useState<RefreshingMap>(INITIAL_REFRESHING)
     const [recheckingIndex, setRecheckingIndex] = useState<number | null>(null)
     const recheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const onPermissionsChangeRef = useRef(onPermissionsChange)
@@ -99,95 +147,53 @@ const SystemChecksWizard = ({ onPermissionsChange, embeddedInWizard = false }: P
     // Fire onPermissionsChange whenever any grant flips. Skips the initial polling-pending window
     // where any of the three statuses is still null so parents don't see a spurious all-false.
     useEffect(() => {
-        if (accessibilityStatus === null || overlayStatus === null || batteryStatus === null) return
+        const a = statuses.accessibility
+        const o = statuses.overlay
+        const b = statuses.battery
+        if (a === null || o === null || b === null) return
         onPermissionsChangeRef.current?.({
-            accessibility: !!(accessibilityStatus.enabled && accessibilityStatus.active),
-            overlay: !!overlayStatus.enabled,
-            battery: !!batteryStatus.enabled,
+            accessibility: !!(a.enabled && a.active),
+            overlay: !!o.enabled,
+            battery: !!b.enabled,
         })
-    }, [accessibilityStatus, overlayStatus, batteryStatus])
+    }, [statuses])
 
-    /** Checks with the native module if the Accessibility Service is currently running. */
-    const checkAccessibilityStatus = useCallback(() => {
-        setIsRefreshing(true)
+    /**
+     * Polls the native module for one permission and writes the result back into the keyed state
+     * maps. Honours a 200ms minimum loading window so the spinner reads as intentional.
+     *
+     * @param key Which permission to poll.
+     */
+    const pollPermission = useCallback((key: PermissionKey) => {
+        const def = PERMISSIONS.find((p) => p.key === key)!
+        setRefreshing((prev) => ({ ...prev, [key]: true }))
         const startTime = Date.now()
-        NativeModules.StartModule.getAccessibilityStatus()
-            .then((status: AccessibilityStatus) => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setAccessibilityStatus(status)
-                    setIsRefreshing(false)
-                }, remainingTime)
-            })
-            .catch(() => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setAccessibilityStatus({ enabled: false, active: false })
-                    setIsRefreshing(false)
-                }, remainingTime)
-            })
-    }, [])
-
-    /** Checks with the native module if the Overlay (Display over other apps) permission is granted. */
-    const checkOverlayStatus = useCallback(() => {
-        setIsRefreshingOverlay(true)
-        const startTime = Date.now()
-        NativeModules.StartModule.getOverlayStatus()
-            .then((status: OverlayStatus) => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setOverlayStatus(status)
-                    setIsRefreshingOverlay(false)
-                }, remainingTime)
-            })
-            .catch(() => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setOverlayStatus({ enabled: false })
-                    setIsRefreshingOverlay(false)
-                }, remainingTime)
-            })
-    }, [])
-
-    /** Checks with the native module if the app is currently ignoring battery optimizations. */
-    const checkBatteryStatus = useCallback(() => {
-        setIsRefreshingBattery(true)
-        const startTime = Date.now()
-        NativeModules.StartModule.getBatteryOptimizationStatus()
-            .then((status: BatteryStatus) => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setBatteryStatus(status)
-                    setIsRefreshingBattery(false)
-                }, remainingTime)
-            })
-            .catch(() => {
-                const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
-                setTimeout(() => {
-                    setBatteryStatus({ enabled: false })
-                    setIsRefreshingBattery(false)
-                }, remainingTime)
-            })
+        const settle = (status: PermissionStatus) => {
+            const remainingTime = Math.max(0, 200 - (Date.now() - startTime))
+            setTimeout(() => {
+                setStatuses((prev) => ({ ...prev, [key]: status }))
+                setRefreshing((prev) => ({ ...prev, [key]: false }))
+            }, remainingTime)
+        }
+        def.getStatus()
+            .then(settle)
+            .catch(() => settle(def.defaultOnError))
     }, [])
 
     useEffect(() => {
-        checkAccessibilityStatus()
-        checkOverlayStatus()
-        checkBatteryStatus()
+        PERMISSIONS.forEach((p) => pollPermission(p.key))
 
         // Refresh all permission statuses whenever the app comes back into the foreground.
         const subscription = AppState.addEventListener("change", (nextAppState: AppStateStatus) => {
             if (nextAppState === "active") {
-                checkAccessibilityStatus()
-                checkOverlayStatus()
-                checkBatteryStatus()
+                PERMISSIONS.forEach((p) => pollPermission(p.key))
             }
         })
 
         return () => {
             subscription.remove()
         }
-    }, [checkAccessibilityStatus, checkOverlayStatus, checkBatteryStatus])
+    }, [pollPermission])
 
     // Clear any pending re-check sweep timer when the component unmounts so we don't update state on a stale instance.
     useEffect(() => {
@@ -234,61 +240,37 @@ const SystemChecksWizard = ({ onPermissionsChange, embeddedInWizard = false }: P
         [colors]
     )
 
-    const rowConfigs: RowConfig[] = useMemo(() => {
-        const derive = (status: AccessibilityStatus | OverlayStatus | BatteryStatus | null, granted: boolean): RowState => {
-            if (status === null) return "checking"
-            return granted ? "granted" : "missing"
-        }
-        return [
-            {
-                key: "accessibility",
-                title: "Accessibility Service",
-                description: "The Accessibility Service allows the bot to perform clicks and gestures on your behalf.",
-                state: derive(accessibilityStatus, !!(accessibilityStatus?.enabled && accessibilityStatus?.active)),
-                inlineWarning:
-                    accessibilityStatus?.enabled && !accessibilityStatus?.active
-                        ? "The service is enabled but it seems Android killed it in the background. Toggling it off and back on in settings will restart it."
-                        : null,
-                refresh: checkAccessibilityStatus,
-                refreshing: isRefreshing,
-                openSettings: () => NativeModules.StartModule.openAccessibilitySettings(),
-            },
-            {
-                key: "overlay",
-                title: "Overlay Permission",
-                description: "The Overlay (Display over other apps) permission allows the bot to render its on-screen control overlay.",
-                state: derive(overlayStatus, !!overlayStatus?.enabled),
-                inlineWarning: null,
-                refresh: checkOverlayStatus,
-                refreshing: isRefreshingOverlay,
-                openSettings: () => NativeModules.StartModule.openOverlaySettings(),
-            },
-            {
-                key: "battery",
-                title: "Battery Optimization",
-                description: "Disabling battery optimization for this app prevents Android from killing the bot during long-running automation runs.",
-                state: derive(batteryStatus, !!batteryStatus?.enabled),
-                inlineWarning: null,
-                refresh: checkBatteryStatus,
-                refreshing: isRefreshingBattery,
-                openSettings: () => NativeModules.StartModule.openBatteryOptimizationSettings(),
-            },
-        ]
-    }, [accessibilityStatus, overlayStatus, batteryStatus, isRefreshing, isRefreshingOverlay, isRefreshingBattery, checkAccessibilityStatus, checkOverlayStatus, checkBatteryStatus])
+    const rowConfigs: RowConfig[] = useMemo(
+        () =>
+            PERMISSIONS.map((def) => {
+                const status = statuses[def.key]
+                const state: RowState = status === null ? "checking" : def.isGranted(status) ? "granted" : "missing"
+                return {
+                    key: def.key,
+                    title: def.title,
+                    description: def.description,
+                    state,
+                    inlineWarning: status !== null && def.inlineWarning ? def.inlineWarning(status) : null,
+                    refresh: () => pollPermission(def.key),
+                    refreshing: refreshing[def.key],
+                    openSettings: def.openSettings,
+                }
+            }),
+        [statuses, refreshing, pollPermission]
+    )
 
     /**
      * Sequentially re-run each system check with a small visual delay so the user sees the progress sweep through the rows.
      */
     const handleRecheckAll = useCallback(() => {
         if (recheckTimerRef.current) clearTimeout(recheckTimerRef.current)
-        const pollers = [checkAccessibilityStatus, checkOverlayStatus, checkBatteryStatus]
         setRecheckingIndex(0)
-        pollers[0]()
+        pollPermission(PERMISSIONS[0].key)
         let i = 1
         const advance = () => {
-            if (i < pollers.length) {
+            if (i < PERMISSIONS.length) {
                 setRecheckingIndex(i)
-                pollers[i]()
+                pollPermission(PERMISSIONS[i].key)
                 i++
                 recheckTimerRef.current = setTimeout(advance, 350)
             } else {
@@ -299,7 +281,7 @@ const SystemChecksWizard = ({ onPermissionsChange, embeddedInWizard = false }: P
             }
         }
         recheckTimerRef.current = setTimeout(advance, 350)
-    }, [checkAccessibilityStatus, checkOverlayStatus, checkBatteryStatus])
+    }, [pollPermission])
 
     /**
      * @param state The current row state.
