@@ -1019,6 +1019,12 @@ const searchConfig: SearchOption[] = [
         page: "DebugSettings",
     },
     {
+        id: "dump-logcat",
+        title: "Dump logcat (last 6h)",
+        description: "Saves this app's recent logcat output to a timestamped .txt file at the root of your storage folder.",
+        page: "DebugSettings",
+    },
+    {
         id: "llm-ask-the-docs",
         title: "Ask the Docs",
         description:
