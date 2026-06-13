@@ -1132,7 +1132,7 @@ object LogStreamServer {
                                 if (raw.contains('/') ||
                                     raw.contains('\\') ||
                                     raw.contains("..") ||
-                                    raw.contains(' ') ||
+                                    raw.contains('\u0000') ||
                                     !raw.lowercase().endsWith(".txt")
                                 ) {
                                     call.respondText("Invalid filename.", ContentType.Text.Plain, HttpStatusCode.BadRequest)
