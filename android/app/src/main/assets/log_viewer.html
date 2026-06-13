@@ -1118,6 +1118,9 @@
                 z-index: 10000;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
                 max-width: 250px;
+                /* Cap height so a tall tooltip (many epithet rows) can never exceed the viewport. The 30px matches the 15px viewport padding used when positioning. */
+                max-height: calc(100vh - 30px);
+                overflow-y: auto;
             }
             .custom-tooltip.visible {
                 opacity: 1;
@@ -2135,18 +2138,23 @@
                 const padding = 15
                 let x = event.clientX + padding
                 let y = event.clientY + padding
-                
-                // Keep within viewport.
+
                 const width = tooltip.offsetWidth
                 const height = tooltip.offsetHeight
-                
+
+                // Flip to the other side of the cursor when the preferred side would overflow.
                 if (x + width > window.innerWidth) {
                     x = event.clientX - width - padding
                 }
                 if (y + height > window.innerHeight) {
                     y = event.clientY - height - padding
                 }
-                
+
+                // Clamp into the viewport so the tooltip never spills off an edge, even when it is
+                // taller than the space beside the cursor (e.g. a race cell with many epithet rows).
+                x = Math.max(padding, Math.min(x, window.innerWidth - width - padding))
+                y = Math.max(padding, Math.min(y, window.innerHeight - height - padding))
+
                 tooltip.style.left = x + "px"
                 tooltip.style.top = y + "px"
             }
