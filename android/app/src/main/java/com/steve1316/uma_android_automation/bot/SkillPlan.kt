@@ -123,6 +123,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
      * @property skillBlacklist Names of skills to exclude from purchase regardless of strategy.
      * @property excludedTypes Skill type categories (GREEN / YELLOW / BLUE / RED) to exclude wholesale.
      * @property bExcludeUniqueSkills Whether to exclude all inherited unique skills from purchase, even if listed in the plan.
+     * @property bExcludeDoubleCircleSkills Whether to skip double-circle (double-O) skills in the auto-strategy. Planned ones are still bought.
      */
     data class SkillPlanSettings(
         val bIsEnabled: Boolean,
@@ -132,6 +133,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
         val skillBlacklist: List<String> = emptyList(),
         val excludedTypes: Set<SkillType> = emptySet(),
         val bExcludeUniqueSkills: Boolean = false,
+        val bExcludeDoubleCircleSkills: Boolean = false,
     )
 
     companion object {
@@ -148,6 +150,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
          * @property isUserPlanned Whether this skill is in the user's plan.
          * @property communityTier The community tier ranking (lower is better, null = unranked).
          * @property isBlacklisted Whether this skill is blacklisted by the user's plan settings (per-skill or category-level).
+         * @property isDoubleCircle Whether this is a double-circle (double-O) variant of the skill.
          */
         data class SkillCandidate(
             val name: String,
@@ -158,6 +161,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
             val isUserPlanned: Boolean = false,
             val communityTier: Int? = null,
             val isBlacklisted: Boolean = false,
+            val isDoubleCircle: Boolean = false,
         ) {
             /** The ratio of rank gained to price. Higher is better. */
             val evaluationPointRatio: Double
@@ -267,7 +271,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
             val alreadyBought = common.map { it.first }
 
             // Strategy-specific purchases
-            val remainingCandidates = candidates.filter { it.name !in alreadyBought }
+            val remainingCandidates = candidates.filter { it.name !in alreadyBought && !(settings.bExcludeDoubleCircleSkills && it.isDoubleCircle) }
             val strategyPurchases =
                 when (settings.strategy) {
                     SpendingStrategy.DEFAULT, SpendingStrategy.OPTIMIZE_RANK -> {

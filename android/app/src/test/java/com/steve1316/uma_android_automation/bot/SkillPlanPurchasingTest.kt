@@ -456,6 +456,60 @@ class SkillPlanPurchasingTest {
                 )
             }
         }
+
+        @Test
+        fun `OPTIMIZE_RANK skips double-circle skills when toggle on`() {
+            val settings =
+                SkillPlanSettings(
+                    bIsEnabled = true,
+                    strategy = SpendingStrategy.OPTIMIZE_RANK,
+                    bEnableBuyNegativeSkills = false,
+                    skillNames = emptyList(),
+                    bExcludeDoubleCircleSkills = true,
+                )
+            // ASCII names; detection here is via the isDoubleCircle flag (mirrors real Winter Runner single/double variants).
+            val candidates =
+                listOf(
+                    SkillCandidate("Winter Runner (double)", price = 110, evaluationPoints = 174, isDoubleCircle = true),
+                    SkillCandidate("Winter Runner (single)", price = 90, evaluationPoints = 129),
+                )
+            val result = calculateSkillPurchases(candidates, 1000, settings)
+            assertTrue(result.none { it.first == "Winter Runner (double)" })
+            assertTrue(result.any { it.first == "Winter Runner (single)" })
+        }
+
+        @Test
+        fun `planned double-circle skill is still bought when toggle on`() {
+            val settings =
+                SkillPlanSettings(
+                    bIsEnabled = true,
+                    strategy = SpendingStrategy.OPTIMIZE_RANK,
+                    bEnableBuyNegativeSkills = false,
+                    skillNames = listOf("Nakayama Racecourse (double)"),
+                    bExcludeDoubleCircleSkills = true,
+                )
+            val candidates =
+                listOf(
+                    SkillCandidate("Nakayama Racecourse (double)", price = 110, evaluationPoints = 174, isDoubleCircle = true, isUserPlanned = true),
+                )
+            val result = calculateSkillPurchases(candidates, 1000, settings)
+            assertTrue(result.any { it.first == "Nakayama Racecourse (double)" })
+        }
+
+        @Test
+        fun `double-circle skill is bought when toggle off`() {
+            val settings =
+                SkillPlanSettings(
+                    bIsEnabled = true,
+                    strategy = SpendingStrategy.OPTIMIZE_RANK,
+                    bEnableBuyNegativeSkills = false,
+                    skillNames = emptyList(),
+                    bExcludeDoubleCircleSkills = false,
+                )
+            val candidates = listOf(SkillCandidate("Winter Runner (double)", price = 110, evaluationPoints = 174, isDoubleCircle = true))
+            val result = calculateSkillPurchases(candidates, 1000, settings)
+            assertTrue(result.any { it.first == "Winter Runner (double)" })
+        }
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////
