@@ -4,8 +4,12 @@ import com.steve1316.uma_android_automation.bot.SkillPlan.Companion.SkillCandida
 import com.steve1316.uma_android_automation.bot.SkillPlan.Companion.calculateCommonPurchases
 import com.steve1316.uma_android_automation.bot.SkillPlan.Companion.calculateOptimizeRankPurchases
 import com.steve1316.uma_android_automation.bot.SkillPlan.Companion.calculateSkillPurchases
+import com.steve1316.uma_android_automation.bot.SkillPlan.Companion.matchesPreference
 import com.steve1316.uma_android_automation.bot.SkillPlan.SkillPlanSettings
 import com.steve1316.uma_android_automation.bot.SkillPlan.SpendingStrategy
+import com.steve1316.uma_android_automation.types.RunningStyle
+import com.steve1316.uma_android_automation.types.TrackDistance
+import com.steve1316.uma_android_automation.types.TrackSurface
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -612,6 +616,62 @@ class SkillPlanPurchasingTest {
             val commonResult = calculateCommonPurchases(candidates, budget = 1000, settings = settings)
 
             assertTrue(commonResult.isEmpty(), "Common phase with no plan and both flags off should buy nothing")
+        }
+    }
+
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////////////////
+    // matchesPreference()
+
+    @Nested
+    @DisplayName("matchesPreference()")
+    inner class MatchesPreferenceTests {
+        @Test
+        fun `no preference set means everything matches`() {
+            assertTrue(matchesPreference(TrackDistance.SPRINT, RunningStyle.LATE_SURGER, emptyList(), TrackSurface.DIRT, null, null, null))
+        }
+
+        @Test
+        fun `matching distance is kept and off-distance is excluded`() {
+            assertTrue(matchesPreference(TrackDistance.MEDIUM, null, emptyList(), null, TrackDistance.MEDIUM, null, null))
+            assertFalse(matchesPreference(TrackDistance.SPRINT, null, emptyList(), null, TrackDistance.MEDIUM, null, null))
+        }
+
+        @Test
+        fun `generic skill with null axis is always kept`() {
+            assertTrue(matchesPreference(null, null, emptyList(), null, TrackDistance.MEDIUM, RunningStyle.FRONT_RUNNER, TrackSurface.TURF))
+        }
+
+        @Test
+        fun `explicit running style match is kept`() {
+            assertTrue(matchesPreference(null, RunningStyle.FRONT_RUNNER, emptyList(), null, null, RunningStyle.FRONT_RUNNER, null))
+        }
+
+        @Test
+        fun `inferred running style match is kept`() {
+            assertTrue(matchesPreference(null, null, listOf(RunningStyle.FRONT_RUNNER), null, null, RunningStyle.FRONT_RUNNER, null))
+        }
+
+        @Test
+        fun `committed running style with no matching inferred is excluded`() {
+            assertFalse(matchesPreference(null, RunningStyle.LATE_SURGER, listOf(RunningStyle.LATE_SURGER), null, null, RunningStyle.FRONT_RUNNER, null))
+        }
+
+        @Test
+        fun `matching surface kept and off-surface excluded`() {
+            assertTrue(matchesPreference(null, null, emptyList(), TrackSurface.TURF, null, null, TrackSurface.TURF))
+            assertFalse(matchesPreference(null, null, emptyList(), TrackSurface.DIRT, null, null, TrackSurface.TURF))
+        }
+
+        @Test
+        fun `one off-axis fails the whole match`() {
+            // distance matches MEDIUM but surface DIRT != preferred TURF -> excluded
+            assertFalse(matchesPreference(TrackDistance.MEDIUM, null, emptyList(), TrackSurface.DIRT, TrackDistance.MEDIUM, null, TrackSurface.TURF))
+        }
+
+        @Test
+        fun `explicit style match passes despite non-matching inferred styles`() {
+            assertTrue(matchesPreference(null, RunningStyle.FRONT_RUNNER, listOf(RunningStyle.LATE_SURGER), null, null, RunningStyle.FRONT_RUNNER, null))
         }
     }
 }
