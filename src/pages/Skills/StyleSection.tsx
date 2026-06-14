@@ -130,26 +130,26 @@ const StyleSection: React.FC = () => {
     return (
         <>
             <Section label="Style">
-                <SearchableItem id="skill-plan-running-style" title="Running Style for Skills" description="Dictates which skills are considered for purchase based on the preferred running style.">
+                <SearchableItem id="skill-plan-running-style" title="Running Style for Skills" description="Restricts auto-purchased skills to the preferred running style across all spending strategies.">
                     <Row
                         title="Running Style"
-                        description="Dictates which skills are considered for purchase based on the preferred running style."
+                        description="Restricts auto-purchased skills to the preferred running style across all spending strategies."
                         onPress={() => setOpenPicker("running")}
                         right={chipFor(runningChip)}
                     />
                 </SearchableItem>
-                <SearchableItem id="preferred-distance-override" title="Track Distance for Skills" description="Dictates which skills are considered for purchase based on the track distance.">
+                <SearchableItem id="preferred-distance-override" title="Track Distance for Skills" description="Restricts auto-purchased skills to the preferred track distance across all spending strategies.">
                     <Row
                         title="Track Distance"
-                        description="Dictates which skills are considered for purchase based on the track distance."
+                        description="Restricts auto-purchased skills to the preferred track distance across all spending strategies."
                         onPress={() => setOpenPicker("distance")}
                         right={chipFor(distanceChip)}
                     />
                 </SearchableItem>
-                <SearchableItem id="preferred-track-surface" title="Track Surface for Skills" description="Dictates which skills are considered for purchase based on the terrain.">
+                <SearchableItem id="preferred-track-surface" title="Track Surface for Skills" description="Restricts auto-purchased skills to the preferred track surface across all spending strategies.">
                     <Row
                         title="Track Surface"
-                        description="Dictates which skills are considered for purchase based on the terrain."
+                        description="Restricts auto-purchased skills to the preferred track surface across all spending strategies."
                         onPress={() => setOpenPicker("surface")}
                         right={chipFor(surfaceChip)}
                     />
