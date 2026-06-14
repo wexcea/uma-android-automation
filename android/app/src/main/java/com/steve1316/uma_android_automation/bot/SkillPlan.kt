@@ -775,7 +775,16 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
                     continue
                 }
 
-                if (!matchesPreference(entry.trackDistance, entry.runningStyle, entry.inferredRunningStyles, entry.trackSurface, preferredTrackDistance, preferredRunningStyle, preferredTrackSurface)) {
+                if (!matchesPreference(
+                        entry.trackDistance,
+                        entry.runningStyle,
+                        entry.inferredRunningStyles,
+                        entry.trackSurface,
+                        preferredTrackDistance,
+                        preferredRunningStyle,
+                        preferredTrackSurface,
+                    )
+                ) {
                     continue
                 }
 

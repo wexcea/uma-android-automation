@@ -293,7 +293,11 @@ const PlanTab: React.FC<PlanTabProps> = ({ planKey }) => {
                         right={<Switch checked={excludeUniqueSkills} onCheckedChange={(checked) => updatePlanSetting("excludeUniqueSkills", checked)} />}
                     />
                 </SearchableItem>
-                <SearchableItem id={`exclude-double-circle-skills-${config.name}`} title="Skip All Double-O (Circle) Skills" description="Only buy the single-circle version; skip the double-circle upgrade">
+                <SearchableItem
+                    id={`exclude-double-circle-skills-${config.name}`}
+                    title="Skip All Double-O (Circle) Skills"
+                    description="Only buy the single-circle version; skip the double-circle upgrade"
+                >
                     <Row
                         title="Skip Double-O (Circle) Skills"
                         description="Skip double-circle upgrades in the auto-strategy. Ones you add to the plan are still bought."

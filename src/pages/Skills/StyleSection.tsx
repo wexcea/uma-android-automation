@@ -130,7 +130,11 @@ const StyleSection: React.FC = () => {
     return (
         <>
             <Section label="Style">
-                <SearchableItem id="skill-plan-running-style" title="Running Style for Skills" description="Restricts auto-purchased skills to the preferred running style across all spending strategies.">
+                <SearchableItem
+                    id="skill-plan-running-style"
+                    title="Running Style for Skills"
+                    description="Restricts auto-purchased skills to the preferred running style across all spending strategies."
+                >
                     <Row
                         title="Running Style"
                         description="Restricts auto-purchased skills to the preferred running style across all spending strategies."
@@ -138,7 +142,11 @@ const StyleSection: React.FC = () => {
                         right={chipFor(runningChip)}
                     />
                 </SearchableItem>
-                <SearchableItem id="preferred-distance-override" title="Track Distance for Skills" description="Restricts auto-purchased skills to the preferred track distance across all spending strategies.">
+                <SearchableItem
+                    id="preferred-distance-override"
+                    title="Track Distance for Skills"
+                    description="Restricts auto-purchased skills to the preferred track distance across all spending strategies."
+                >
                     <Row
                         title="Track Distance"
                         description="Restricts auto-purchased skills to the preferred track distance across all spending strategies."
@@ -146,7 +154,11 @@ const StyleSection: React.FC = () => {
                         right={chipFor(distanceChip)}
                     />
                 </SearchableItem>
-                <SearchableItem id="preferred-track-surface" title="Track Surface for Skills" description="Restricts auto-purchased skills to the preferred track surface across all spending strategies.">
+                <SearchableItem
+                    id="preferred-track-surface"
+                    title="Track Surface for Skills"
+                    description="Restricts auto-purchased skills to the preferred track surface across all spending strategies."
+                >
                     <Row
                         title="Track Surface"
                         description="Restricts auto-purchased skills to the preferred track surface across all spending strategies."
