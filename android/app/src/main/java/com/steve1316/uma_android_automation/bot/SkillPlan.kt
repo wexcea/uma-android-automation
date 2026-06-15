@@ -77,6 +77,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
                             skillBlacklist = skillBlacklist,
                             excludedTypes = excludedTypes,
                             bExcludeUniqueSkills = planData.optBoolean("excludeUniqueSkills", false),
+                            bExcludeDoubleCircleSkills = planData.optBoolean("excludeDoubleCircleSkills", false),
                         )
                 }
                 plansMap
@@ -123,6 +124,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
      * @property skillBlacklist Names of skills to exclude from purchase regardless of strategy.
      * @property excludedTypes Skill type categories (GREEN / YELLOW / BLUE / RED) to exclude wholesale.
      * @property bExcludeUniqueSkills Whether to exclude all inherited unique skills from purchase, even if listed in the plan.
+     * @property bExcludeDoubleCircleSkills Whether to skip double-circle (double-O) skills in the auto-strategy. Planned ones are still bought.
      */
     data class SkillPlanSettings(
         val bIsEnabled: Boolean,
@@ -132,10 +134,47 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
         val skillBlacklist: List<String> = emptyList(),
         val excludedTypes: Set<SkillType> = emptySet(),
         val bExcludeUniqueSkills: Boolean = false,
+        val bExcludeDoubleCircleSkills: Boolean = false,
     )
 
     companion object {
         private val TAG: String = "[${MainActivity.loggerTag}]SkillPlan"
+
+        /** The double-circle (double-O) marker found in double-circle skill names. */
+        private const val DOUBLE_CIRCLE_CHAR: Char = '\u25CE'
+
+        /**
+         * Whether a skill is compatible with the resolved Style preference on every axis. A skill passes when, for each axis with a
+         * preference, it either has no commitment on that axis (generic / aptitude-independent) or its value matches. Running style
+         * matches on the explicit style or any inferred style, mirroring the Optimize Skills include-pass.
+         *
+         * @param skillDistance The skill's track distance, or null.
+         * @param skillStyle The skill's explicit running style, or null.
+         * @param skillInferredStyles The skill's inferred running styles (may be empty).
+         * @param skillSurface The skill's track surface, or null.
+         * @param prefDistance The preferred track distance, or null for no restriction.
+         * @param prefStyle The preferred running style, or null for no restriction.
+         * @param prefSurface The preferred track surface, or null for no restriction.
+         * @return True if the skill is buyable under the preference.
+         */
+        fun matchesPreference(
+            skillDistance: TrackDistance?,
+            skillStyle: RunningStyle?,
+            skillInferredStyles: List<RunningStyle>,
+            skillSurface: TrackSurface?,
+            prefDistance: TrackDistance?,
+            prefStyle: RunningStyle?,
+            prefSurface: TrackSurface?,
+        ): Boolean {
+            val distanceOk = prefDistance == null || skillDistance == null || skillDistance == prefDistance
+            val surfaceOk = prefSurface == null || skillSurface == null || skillSurface == prefSurface
+            val styleOk =
+                prefStyle == null ||
+                    (skillStyle == null && skillInferredStyles.isEmpty()) ||
+                    skillStyle == prefStyle ||
+                    prefStyle in skillInferredStyles
+            return distanceOk && surfaceOk && styleOk
+        }
 
         /**
          * Represents a skill available for purchase in a pure calculation context.
@@ -148,6 +187,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
          * @property isUserPlanned Whether this skill is in the user's plan.
          * @property communityTier The community tier ranking (lower is better, null = unranked).
          * @property isBlacklisted Whether this skill is blacklisted by the user's plan settings (per-skill or category-level).
+         * @property isDoubleCircle Whether this is a double-circle (double-O) variant of the skill.
          */
         data class SkillCandidate(
             val name: String,
@@ -158,6 +198,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
             val isUserPlanned: Boolean = false,
             val communityTier: Int? = null,
             val isBlacklisted: Boolean = false,
+            val isDoubleCircle: Boolean = false,
         ) {
             /** The ratio of rank gained to price. Higher is better. */
             val evaluationPointRatio: Double
@@ -267,7 +308,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
             val alreadyBought = common.map { it.first }
 
             // Strategy-specific purchases
-            val remainingCandidates = candidates.filter { it.name !in alreadyBought }
+            val remainingCandidates = candidates.filter { it.name !in alreadyBought && !(settings.bExcludeDoubleCircleSkills && it.isDoubleCircle) }
             val strategyPurchases =
                 when (settings.strategy) {
                     SpendingStrategy.DEFAULT, SpendingStrategy.OPTIMIZE_RANK -> {
@@ -375,6 +416,42 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////
     // //////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /** The resolved Style preference for each axis (null = no restriction). */
+    private data class PreferredAxes(
+        /** The resolved preferred running style, or null for no restriction. */
+        val runningStyle: RunningStyle?,
+        /** The resolved preferred track distance, or null for no restriction. */
+        val trackDistance: TrackDistance?,
+        /** The resolved preferred track surface, or null for no restriction. */
+        val trackSurface: TrackSurface?,
+    )
+
+    /**
+     * Resolve the global Style preference settings into concrete enum values, applying the no_preference / inherit rules.
+     *
+     * @return The resolved running style, track distance, and track surface (any of which may be null for no restriction).
+     */
+    private fun resolvePreferredAxes(): PreferredAxes {
+        val runningStyle: RunningStyle? =
+            when (skillSettingRunningStyleString.lowercase()) {
+                "no_preference" -> null
+                "inherit" -> RunningStyle.fromShortName(racingSettingRunningStyleString) ?: campaign.trainee.runningStyle
+                else -> RunningStyle.fromName(skillSettingRunningStyleString)
+            }
+        val trackDistance: TrackDistance? =
+            when (skillSettingTrackDistanceString.lowercase()) {
+                "no_preference" -> null
+                "inherit" -> TrackDistance.fromName(trainingSettingTrackDistanceString) ?: campaign.trainee.trackDistance
+                else -> TrackDistance.fromName(skillSettingTrackDistanceString)
+            }
+        val trackSurface: TrackSurface? =
+            when (skillSettingTrackSurfaceString.lowercase()) {
+                "no_preference" -> null
+                else -> TrackSurface.fromName(skillSettingTrackSurfaceString)
+            }
+        return PreferredAxes(runningStyle, trackDistance, trackSurface)
+    }
 
     /**
      * Whether the given skill entry should be excluded from purchase due to the user's blacklist settings.
@@ -570,28 +647,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
         val result: MutableMap<String, Int> = mutableMapOf()
         var remainingSkillPoints = availableSkillPoints
 
-        // Determine the user-specified preferred running style.
-        val preferredRunningStyle: RunningStyle? =
-            when (skillSettingRunningStyleString.lowercase()) {
-                "no_preference" -> null
-                "inherit" -> RunningStyle.fromShortName(racingSettingRunningStyleString) ?: campaign.trainee.runningStyle
-                else -> RunningStyle.fromName(skillSettingRunningStyleString)
-            }
-
-        // Determine the user-specified preferred track distance.
-        val preferredTrackDistance: TrackDistance? =
-            when (skillSettingTrackDistanceString.lowercase()) {
-                "no_preference" -> null
-                "inherit" -> TrackDistance.fromName(trainingSettingTrackDistanceString) ?: campaign.trainee.trackDistance
-                else -> TrackDistance.fromName(skillSettingTrackDistanceString)
-            }
-
-        // Determine the user-specified preferred track surface.
-        val preferredTrackSurface: TrackSurface? =
-            when (skillSettingTrackSurfaceString.lowercase()) {
-                "no_preference" -> null
-                else -> TrackSurface.fromName(skillSettingTrackSurfaceString)
-            }
+        val (preferredRunningStyle, preferredTrackDistance, preferredTrackSurface) = resolvePreferredAxes()
 
         MessageLog.d(TAG, "[DEBUG] getSkillsToBuyOptimizeSkillsStrategy:: Using preferred running style: $preferredRunningStyle")
         MessageLog.d(TAG, "[DEBUG] getSkillsToBuyOptimizeSkillsStrategy:: Using preferred track distance: $preferredTrackDistance")
@@ -648,6 +704,10 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
                         continue
                     }
 
+                    if (skillPlanSettings.bExcludeDoubleCircleSkills && entry.skillData.name.contains(DOUBLE_CIRCLE_CHAR)) {
+                        continue
+                    }
+
                     if (!entry.bIsAvailable || entry.screenPrice > remainingSkillPoints) {
                         continue
                     }
@@ -690,6 +750,7 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
     private fun getSkillsToBuyOptimizeRankStrategy(skillPlanSettings: SkillPlanSettings, skillList: SkillList, skillsToBuy: List<String>, availableSkillPoints: Int): Map<String, Int> {
         val result: MutableMap<String, Int> = mutableMapOf()
         var remainingSkillPoints = availableSkillPoints
+        val (preferredRunningStyle, preferredTrackDistance, preferredTrackSurface) = resolvePreferredAxes()
 
         // Iterate until no more affordable skills are found, as purchasing can unlock new options.
         val maxIterations = 10
@@ -707,6 +768,23 @@ class SkillPlan(private val game: Game, private val campaign: Campaign) {
                 }
 
                 if (isBlacklisted(entry, skillPlanSettings)) {
+                    continue
+                }
+
+                if (skillPlanSettings.bExcludeDoubleCircleSkills && entry.skillData.name.contains(DOUBLE_CIRCLE_CHAR)) {
+                    continue
+                }
+
+                if (!matchesPreference(
+                        entry.trackDistance,
+                        entry.runningStyle,
+                        entry.inferredRunningStyles,
+                        entry.trackSurface,
+                        preferredTrackDistance,
+                        preferredRunningStyle,
+                        preferredTrackSurface,
+                    )
+                ) {
                     continue
                 }
 

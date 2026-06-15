@@ -22,6 +22,8 @@ interface SkillPlanSettingsConfig {
     excludeRedSkills: boolean
     /** When true, all inherited unique (legacy) skills are excluded from this plan's purchases, even if listed in the plan. */
     excludeUniqueSkills: boolean
+    /** When true, double-circle (double-O) skills are skipped by the auto-strategy. Planned ones are still bought. */
+    excludeDoubleCircleSkills: boolean
 }
 
 /**
@@ -307,6 +309,7 @@ export const defaultSettings: Settings = {
                     excludeGreenSkills: false,
                     excludeRedSkills: false,
                     excludeUniqueSkills: false,
+                    excludeDoubleCircleSkills: false,
                 }
                 return acc
             },

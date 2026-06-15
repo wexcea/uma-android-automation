@@ -38,11 +38,12 @@ const formatAdvancedScoringSection = (training: Settings["training"]): string =>
     return `\n\n---------- Advanced Training Scoring ----------\n${overrides.join("\n")}`
 }
 
-const formatExcludedCategories = (plan: { excludeGreenSkills: boolean; excludeRedSkills: boolean; excludeUniqueSkills: boolean }): string => {
+const formatExcludedCategories = (plan: { excludeGreenSkills: boolean; excludeRedSkills: boolean; excludeUniqueSkills: boolean; excludeDoubleCircleSkills: boolean }): string => {
     const parts: string[] = []
     if (plan.excludeGreenSkills) parts.push("Green")
     if (plan.excludeRedSkills) parts.push("Red")
     if (plan.excludeUniqueSkills) parts.push("Unique")
+    if (plan.excludeDoubleCircleSkills) parts.push("Double-O")
     return parts.length === 0 ? "None" : parts.join(", ")
 }
 

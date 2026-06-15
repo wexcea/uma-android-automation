@@ -639,6 +639,13 @@ const searchConfig: SearchOption[] = [
         page: "Skills",
         parentId: "skill-point-check-plan",
     },
+    {
+        id: "exclude-double-circle-skills-SkillPlanSettingsSkillPointCheck",
+        title: "Skip All Double-O (Circle) Skills",
+        description: "Only buy the single-circle version; skip the double-circle upgrade",
+        page: "Skills",
+        parentId: "skill-point-check-plan",
+    },
 
     // ============================================================
     // Skill Plan Settings — Pre-Finals
@@ -677,6 +684,13 @@ const searchConfig: SearchOption[] = [
         page: "Skills",
         parentId: "enable-skill-plan-preFinals",
     },
+    {
+        id: "exclude-double-circle-skills-SkillPlanSettingsPreFinals",
+        title: "Skip All Double-O (Circle) Skills",
+        description: "Only buy the single-circle version; skip the double-circle upgrade",
+        page: "Skills",
+        parentId: "enable-skill-plan-preFinals",
+    },
 
     // ============================================================
     // Skill Plan Settings — Career Complete
@@ -712,6 +726,13 @@ const searchConfig: SearchOption[] = [
         id: "exclude-unique-skills-SkillPlanSettingsCareerComplete",
         title: "Skip All Unique Skills",
         description: "Exclude inherited unique (legacy) skills",
+        page: "Skills",
+        parentId: "enable-skill-plan-careerComplete",
+    },
+    {
+        id: "exclude-double-circle-skills-SkillPlanSettingsCareerComplete",
+        title: "Skip All Double-O (Circle) Skills",
+        description: "Only buy the single-circle version; skip the double-circle upgrade",
         page: "Skills",
         parentId: "enable-skill-plan-careerComplete",
     },

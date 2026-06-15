@@ -78,7 +78,7 @@ const PlanTab: React.FC<PlanTabProps> = ({ planKey }) => {
 
     const combinedConfig = { ...defaultSettings.skills.plans, ...skills.plans }
     const planData = combinedConfig[planKey] ?? defaultSettings.skills.plans[planKey]
-    const { enabled, strategy, enableBuyNegativeSkills, plan, blacklist, excludeGreenSkills, excludeRedSkills, excludeUniqueSkills } = planData
+    const { enabled, strategy, enableBuyNegativeSkills, plan, blacklist, excludeGreenSkills, excludeRedSkills, excludeUniqueSkills, excludeDoubleCircleSkills } = planData
 
     const [searchQuery, setSearchQuery] = useState("")
     const [showSelected, setShowSelected] = useState(false)
@@ -238,6 +238,7 @@ const PlanTab: React.FC<PlanTabProps> = ({ planKey }) => {
     if (excludeGreenSkills) excludedCategories.push("Green")
     if (excludeRedSkills) excludedCategories.push("Red")
     if (excludeUniqueSkills) excludedCategories.push("Unique")
+    if (excludeDoubleCircleSkills) excludedCategories.push("Double-O")
     const idsToNames = (ids: number[]): string[] => ids.map((id) => skillData.find((s) => s.id === id)?.name_en ?? `Unknown (ID ${id})`)
 
     const renderSpecChipList = (ids: number[]) => {
@@ -290,6 +291,17 @@ const PlanTab: React.FC<PlanTabProps> = ({ planKey }) => {
                         title="Skip Unique Skills"
                         description="Exclude inherited unique (legacy) skills"
                         right={<Switch checked={excludeUniqueSkills} onCheckedChange={(checked) => updatePlanSetting("excludeUniqueSkills", checked)} />}
+                    />
+                </SearchableItem>
+                <SearchableItem
+                    id={`exclude-double-circle-skills-${config.name}`}
+                    title="Skip All Double-O (Circle) Skills"
+                    description="Only buy the single-circle version; skip the double-circle upgrade"
+                >
+                    <Row
+                        title="Skip Double-O (Circle) Skills"
+                        description="Skip double-circle upgrades in the auto-strategy. Ones you add to the plan are still bought."
+                        right={<Switch checked={excludeDoubleCircleSkills} onCheckedChange={(checked) => updatePlanSetting("excludeDoubleCircleSkills", checked)} />}
                     />
                 </SearchableItem>
             </Section>
