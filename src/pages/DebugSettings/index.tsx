@@ -481,7 +481,9 @@ const DebugSettings = () => {
                             Diagnostics */}
                         <Section label="Diagnostics" firstDivider={false}>
                             <Text style={styles.sectionDescription}>
-                                {"Saves this app's recent logcat output to a timestamped .txt file at the root of your storage folder. The 6-hour window is capped by the device's log buffer size. To increase it, enable Developer Options (tap Build number 7 times under Settings > About phone), then raise Logger buffer sizes in Developer options."}
+                                {
+                                    "Saves this app's recent logcat output to a timestamped .txt file at the root of your storage folder. The 6-hour window is capped by the device's log buffer size. To increase it, enable Developer Options (tap Build number 7 times under Settings > About phone), then raise Logger buffer sizes in Developer options."
+                                }
                             </Text>
                             <SearchableItem
                                 id="dump-logcat"
