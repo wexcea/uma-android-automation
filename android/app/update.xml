@@ -1,23 +1,26 @@
 <AppUpdater>
   <update>
-    <latestVersion>5.7.4</latestVersion>
+    <latestVersion>5.7.5</latestVersion>
     <url>https://github.com/steve1316/uma-android-automation/releases</url>
     <releaseNotes>
-v5.7.4 - Changelog
+v5.7.5 - Changelog
 
 New
 ---
-- Add a first-time setup wizard that opens on the first app launch and walks you: picking the folder where the bot stores its files, moving any existing files into it from the old storage location, and granting the accessibility, overlay, and battery permissions. This is to future-proof against future Android versions that may restrict access to the storage location that we have been using since.
-- Add a `Dump logcat (last 6h)` button to the `Debug Settings` page that saves a timestamped `adb_dump_*.txt` log file to your storage folder to help with debugging.
+- Add a `Skip Double-O (Circle) Skills` per-plan toggle that only buys the single-circle version of a skill and skips the more expensive double-circle upgrade in the auto-strategy. Double-circle skills you add to the plan yourself are still bought.
+- Add a `Disable Schedule Re-Plan Upon Race Loss` option in the `Smart Race Solver` page to prevent the solver from re-planning the schedule when a race is lost. Defaults to off.
 
 Adjustments
 ---
-- Update game data up to `Taiki Shuttle (Camping) 2026-06-10`.
-- Update Automation Library version to `2.5.7` for the new SAF-backed storage implementation.
+- The `Running Style`, `Track Distance`, and `Track Surface` skill preferences now restrict auto-purchased skills across all spending strategies instead of only some of them.
+- Rename the `Crane Game` setting to `Claw Machine`.
+- Improved the `Remote Log Viewer` by allowing the `Compact` button to collapse/re-collapse the logs and racing style for each race will now be shown in the Race History's popover tooltips.
 
 Fixes
 ---
-- Minor visual cleanup from the recent UI refresh.
+- Fix the `Remote Log Viewer` `Log Files` and `Debug Images` tabs showing nothing after the recent storage redesign.
+- Fix a rare crash on startup caused by reading empty template-match and stat-priority settings.
+- Fix a visual bug where the race history tooltip in the `Remote Log Viewer` could extend beyond the screen edge.
 
     </releaseNotes>
   </update>
