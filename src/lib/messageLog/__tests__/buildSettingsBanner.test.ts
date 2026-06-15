@@ -51,6 +51,6 @@ describe("buildSettingsBanner", () => {
 
     it("includes the disable schedule re-plan on race loss line", () => {
         const banner = buildSettingsBanner(makeStubSettings())
-        expect(banner).toContain("Disable Schedule Re-Plan on Race Loss")
+        expect(banner).toContain("Disable Schedule Re-Plan Upon Race Loss")
     })
 })
