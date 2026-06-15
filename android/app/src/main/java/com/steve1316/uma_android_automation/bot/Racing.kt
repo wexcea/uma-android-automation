@@ -2030,6 +2030,17 @@ class Racing(private val game: Game, private val campaign: Campaign) {
                     lastRaceFans = raceDataList[0].fans
                     lastRaceDistance = raceDataList[0].trackDistance
                     MessageLog.i(TAG, "[RACE] Detected scheduled race grade: $lastRaceGrade.")
+
+                    // Stage the scheduled race so finalizeRaceResults() records its win/loss in the solver's history. Without this, scheduled
+                    // races run via the in-game agenda never get committed and render as blank Race History cells in the Remote Log Viewer.
+                    if (enableSmartRaceSolver) {
+                        SmartRaceSolverIntegration.markPendingRace(
+                            raceKey = raceDataList[0].name,
+                            raceName = raceDataList[0].name,
+                            classYear = campaign.date.year.name,
+                            turnNumber = campaign.date.day,
+                        )
+                    }
                 }
             }
 

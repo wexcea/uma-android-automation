@@ -41,6 +41,12 @@ object RaceHistory {
     private const val FIRST_PLACE_W = 160
     private const val FIRST_PLACE_H = 120
 
+    // Running-style chip sits just right of the LabelStrategy anchor on the same row. Offset derived from crop (190, 960) minus anchor centre (130, 980).
+    private const val STRATEGY_OFFSET_X = 60
+    private const val STRATEGY_OFFSET_Y = -20
+    private const val STRATEGY_W = 130
+    private const val STRATEGY_H = 40
+
     /**
      * One race entry parsed from the Career -> Race History dialog. The race name itself
      * is intentionally not captured - OCR on the row's primary label was unreliable, and
@@ -49,8 +55,9 @@ object RaceHistory {
      * @property nameFormatted Formatted track string (e.g. "Tokyo Turf 1600m (Mile) Left").
      * @property dateString In-game date as shown on screen (e.g. "Junior Year Early Nov").
      * @property won True if the IconRaceHistory1st laurel was found in the placement region.
+     * @property strategy Raw OCR of the running-style chip (e.g. "Front Runner"). Empty when OCR returned nothing.
      */
-    data class RaceHistoryEntry(val nameFormatted: String, val dateString: String, val won: Boolean)
+    data class RaceHistoryEntry(val nameFormatted: String, val dateString: String, val won: Boolean, val strategy: String)
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////
     // //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,6 +184,17 @@ object RaceHistory {
                     debugName = "race_history_date_$anchorY",
                 ).trim()
 
+        val strategy =
+            game.imageUtils
+                .performOCRFromReference(
+                    referencePoint = anchor,
+                    offsetX = STRATEGY_OFFSET_X,
+                    offsetY = STRATEGY_OFFSET_Y,
+                    width = game.imageUtils.relWidth(STRATEGY_W),
+                    height = game.imageUtils.relHeight(STRATEGY_H),
+                    debugName = "race_history_strategy_$anchorY",
+                ).trim()
+
         val firstPlaceRegion =
             intArrayOf(
                 anchorX + game.imageUtils.relWidth(FIRST_PLACE_OFFSET_X),
@@ -186,6 +204,6 @@ object RaceHistory {
             )
         val won: Boolean = IconRaceHistory1st.find(game.imageUtils, region = firstPlaceRegion, tries = 1).first != null
 
-        return RaceHistoryEntry(nameFormatted, dateString, won)
+        return RaceHistoryEntry(nameFormatted, dateString, won, strategy)
     }
 }

@@ -143,12 +143,14 @@ data class RaceCandidate(
  * @property name Race name (matches [RaceCandidate.name]).
  * @property classYear Class-year prefix at the time of the win.
  * @property turnNumber Turn the win occurred on.
+ * @property strategy Running style OCR'd from the Race History scrape (e.g. "Pace"). Empty for live commits and the preview seed, which have no scrape data.
  */
 data class RaceWin(
     val raceKey: String,
     val name: String,
     val classYear: String,
     val turnNumber: TurnNumber,
+    val strategy: String = "",
 )
 
 /** Win/lose marker for a finished race surfaced to the Remote Log Viewer calendar. */
@@ -163,12 +165,14 @@ enum class RaceOutcome { WIN, LOSE }
  * @property name Display name of the race (matches [RaceCandidate.name]).
  * @property classYear Class-year prefix at the time of the race.
  * @property turnNumber Turn the loss occurred on.
+ * @property strategy Running style OCR'd from the Race History scrape (e.g. "Pace"). Empty for live commits, which have no scrape data.
  */
 data class RaceLossRecord(
     val raceKey: String,
     val name: String,
     val classYear: String,
     val turnNumber: TurnNumber,
+    val strategy: String = "",
 )
 
 /**

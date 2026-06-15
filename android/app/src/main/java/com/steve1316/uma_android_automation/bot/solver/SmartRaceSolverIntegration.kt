@@ -116,11 +116,12 @@ object SmartRaceSolverIntegration {
      * @param raceName Race name (matches [RaceCandidate.name]).
      * @param classYear Class-year prefix at the time of the race.
      * @param turnNumber Turn the loss occurred on.
+     * @param strategy Running style OCR'd from the Race History scrape. Empty for live in-run losses.
      */
-    fun recordRaceLost(raceKey: String, raceName: String, classYear: String, turnNumber: TurnNumber) {
+    fun recordRaceLost(raceKey: String, raceName: String, classYear: String, turnNumber: TurnNumber, strategy: String = "") {
         synchronized(raceLosses) {
             if (raceLosses.none { it.raceKey == raceKey && it.turnNumber == turnNumber }) {
-                raceLosses.add(RaceLossRecord(raceKey, raceName, classYear, turnNumber))
+                raceLosses.add(RaceLossRecord(raceKey, raceName, classYear, turnNumber, strategy))
             }
         }
     }
@@ -134,11 +135,12 @@ object SmartRaceSolverIntegration {
      * @param raceName Race name (matches [RaceCandidate.name]).
      * @param classYear Class-year prefix at the time of the win.
      * @param turnNumber Turn the win occurred on.
+     * @param strategy Running style OCR'd from the Race History scrape. Empty for live in-run wins and preview-assumed wins.
      */
-    fun recordRaceWon(raceKey: String, raceName: String, classYear: String, turnNumber: TurnNumber) {
+    fun recordRaceWon(raceKey: String, raceName: String, classYear: String, turnNumber: TurnNumber, strategy: String = "") {
         synchronized(raceHistory) {
             if (raceHistory.none { it.raceKey == raceKey && it.turnNumber == turnNumber }) {
-                raceHistory.add(RaceWin(raceKey, raceName, classYear, turnNumber))
+                raceHistory.add(RaceWin(raceKey, raceName, classYear, turnNumber, strategy))
             }
         }
     }
@@ -713,7 +715,7 @@ object SmartRaceSolverIntegration {
         // Career -> Race History is sorted newest-first, so turns must strictly decrease as
         // we iterate. Any entry that breaks that invariant is OCR garbage from a
         // mid-scroll frame and is safely dropped.
-        data class MatchedEntry(val candidate: RaceCandidate, val dateString: String, val won: Boolean)
+        data class MatchedEntry(val candidate: RaceCandidate, val dateString: String, val won: Boolean, val strategy: String)
         val matched = mutableListOf<MatchedEntry>()
         var lastTurnSeen: TurnNumber = Int.MAX_VALUE
         for (entry in entries) {
@@ -739,11 +741,11 @@ object SmartRaceSolverIntegration {
                     ?: continue
             val candidate = candidates.firstOrNull { it.nameFormatted == matchedFormatted } ?: continue
 
-            matched.add(MatchedEntry(candidate, entry.dateString, entry.won))
+            matched.add(MatchedEntry(candidate, entry.dateString, entry.won, entry.strategy))
             if (entry.won) {
-                recordRaceWon(candidate.key, candidate.name, candidate.classYear, turnNumber)
+                recordRaceWon(candidate.key, candidate.name, candidate.classYear, turnNumber, entry.strategy)
             } else {
-                recordRaceLost(candidate.key, candidate.name, candidate.classYear, turnNumber)
+                recordRaceLost(candidate.key, candidate.name, candidate.classYear, turnNumber, entry.strategy)
             }
         }
 
@@ -755,7 +757,7 @@ object SmartRaceSolverIntegration {
         } else {
             for (m in matched) {
                 val outcome = if (m.won) "Won" else "Lost"
-                sb.append("\n  Turn ${m.candidate.turnNumber} (${m.dateString}): $outcome - ${m.candidate.name}")
+                sb.append("\n  Turn ${m.candidate.turnNumber} (${m.dateString}): $outcome - ${m.candidate.name} [${m.strategy.ifBlank { "?" }}]")
             }
         }
         // Append the synthetic Junior Make Debut row to the scrape recap so the operator sees a
@@ -766,7 +768,8 @@ object SmartRaceSolverIntegration {
         // duplicate trailing line later in [runStartupHooks].
         val debutDate = scrapedDebutEntry?.dateString ?: "Junior Year Late Jun"
         val debutOutcome = if (scrapedDebutEntry?.won == false) "Lost" else "Won"
-        sb.append("\n  Turn $MAKE_DEBUT_DISPLAY_TURN ($debutDate): $debutOutcome - Make Debut (Does not affect epithets)")
+        val debutStrategy = scrapedDebutEntry?.strategy?.ifBlank { "?" } ?: "?"
+        sb.append("\n  Turn $MAKE_DEBUT_DISPLAY_TURN ($debutDate): $debutOutcome - Make Debut [$debutStrategy] (Does not affect epithets)")
         debutDisplayLogged.set(true)
         MessageLog.i(TAG, sb.toString())
         return true
@@ -1335,10 +1338,10 @@ object SmartRaceSolverIntegration {
 
         val results = JSONArray()
         for (win in winsSnapshot) {
-            results.put(buildResultEntry(win.turnNumber, win.raceKey, win.name, racesByTurn, RaceOutcome.WIN, contributionsByTurn[win.turnNumber]))
+            results.put(buildResultEntry(win.turnNumber, win.raceKey, win.name, racesByTurn, RaceOutcome.WIN, contributionsByTurn[win.turnNumber], win.strategy))
         }
         for (loss in lossesSnapshot) {
-            results.put(buildResultEntry(loss.turnNumber, loss.raceKey, loss.name, racesByTurn, RaceOutcome.LOSE, null))
+            results.put(buildResultEntry(loss.turnNumber, loss.raceKey, loss.name, racesByTurn, RaceOutcome.LOSE, null, loss.strategy))
         }
 
         // Always append a synthetic entry for the in-game Junior Make Debut race. This row is purely a visual breadcrumb in the Remote Log
@@ -1370,6 +1373,8 @@ object SmartRaceSolverIntegration {
         // parts row alongside the grade and fan count. Skipped when the scrape was bypassed or
         // the row was missing (pre-debut runs).
         scrapedDebut?.nameFormatted?.takeIf { it.isNotBlank() }?.let { syntheticEntry.put("raceTrack", it) }
+        // Carry the OCR-scraped running style through so the Make Debut tooltip shows it after the fan count, matching every other race cell.
+        scrapedDebut?.strategy?.takeIf { it.isNotBlank() }?.let { syntheticEntry.put("strategy", it) }
         results.put(syntheticEntry)
 
         return JSONObject()
@@ -1390,7 +1395,8 @@ object SmartRaceSolverIntegration {
      * @param racesByTurn Candidate pool used to resolve race details.
      * @param outcome Win or loss marker.
      * @param contributions Pre-computed epithet contributions for this turn, or null.
-     * @return JSON `{turn, raceKey, name, grade, outcome, raceTrack?, terrain?, distanceType?, distanceMeters?, fans?, contributions?}`.
+     * @param strategy Running style OCR'd from the Race History scrape. Omitted from the JSON when blank.
+     * @return JSON `{turn, raceKey, name, grade, outcome, raceTrack?, terrain?, distanceType?, distanceMeters?, fans?, strategy?, contributions?}`.
      */
     private fun buildResultEntry(
         turn: TurnNumber,
@@ -1399,6 +1405,7 @@ object SmartRaceSolverIntegration {
         racesByTurn: Map<TurnNumber, List<RaceCandidate>>,
         outcome: RaceOutcome,
         contributions: JSONArray?,
+        strategy: String = "",
     ): JSONObject {
         val race = findCandidate(turn, raceKey, raceName, racesByTurn)
         val obj =
@@ -1409,6 +1416,7 @@ object SmartRaceSolverIntegration {
                 .put("grade", race?.grade?.name ?: "")
                 .put("outcome", outcome.name)
         if (race != null) addRaceDetails(obj, race)
+        if (strategy.isNotBlank()) obj.put("strategy", strategy)
         if (contributions != null) obj.put("contributions", contributions)
         return obj
     }

@@ -2402,6 +2402,47 @@
             }
 
             /**
+             * Renders one parsed log message into the given target node, applying condensation when enabled. Mutates messageCache,
+             * visibleMessageCount, and condensationBuffer. Shared by the live append paths and rebuildLog so condensed output is identical.
+             * @param {object} parsed - The pre-parsed log object.
+             * @param {Node} target - Node to append new entries to (logContainer for single appends, a DocumentFragment for batches/rebuild).
+             */
+            function processParsedMessage(parsed, target) {
+                const canCondense = isCondensing && !condensationExclusions.has(parsed.level)
+                const match = canCondense ? condensationBuffer.find(item =>
+                    item.parsed.level === parsed.level &&
+                    item.parsed.message === parsed.message
+                ) : null
+
+                if (match) {
+                    match.count++
+                    match.parsed.timestamp = parsed.timestamp
+                    updateCondensedEntry(match.el, parsed, match.count)
+                } else {
+                    const entry = createLogEntry(parsed)
+                    messageCache.push({
+                        el: entry,
+                        text: parsed.message.toLowerCase(),
+                        level: parsed.level
+                    })
+                    if (!entry.classList.contains("hidden")) {
+                        visibleMessageCount++
+                    }
+                    target.appendChild(entry)
+                    if (canCondense) {
+                        condensationBuffer.push({
+                            el: entry,
+                            parsed: parsed,
+                            count: 1
+                        })
+                        if (condensationBuffer.length > condensationLimit) {
+                            condensationBuffer.shift()
+                        }
+                    }
+                }
+            }
+
+            /**
              * Processes and appends a single log message to the log container.
              * @param {object} parsed - The pre-parsed log object from the server.
              */
@@ -2419,43 +2460,7 @@
                 // Handle special messages for dashboard updates immediately for individual messages.
                 processSpecialLogs(parsed)
 
-                const canCondense = isCondensing && !condensationExclusions.has(parsed.level)
-                let match = canCondense ? condensationBuffer.find(item =>
-                    item.parsed.level === parsed.level &&
-                    item.parsed.message === parsed.message
-                ) : null
-
-                if (match) {
-                    match.count++
-                    match.parsed.timestamp = parsed.timestamp
-                    updateCondensedEntry(match.el, parsed, match.count)
-                } else {
-                    var entry = createLogEntry(parsed)
-
-                    // Add to message cache for fast filtering.
-                    messageCache.push({
-                        el: entry,
-                        text: parsed.message.toLowerCase(),
-                        level: parsed.level
-                    })
-
-                    if (!entry.classList.contains("hidden")) {
-                        visibleMessageCount++
-                    }
-                    logContainer.appendChild(entry)
-
-                    if (canCondense) {
-                        condensationBuffer.push({
-                            el: entry,
-                            parsed: parsed,
-                            count: 1
-                        })
-
-                        if (condensationBuffer.length > condensationLimit) {
-                            condensationBuffer.shift()
-                        }
-                    }
-                }
+                processParsedMessage(parsed, logContainer)
 
                 updateMessageCountDisplay()
 
@@ -2511,42 +2516,7 @@
                         // Collect updates into the batch state object.
                         processSpecialLogs(parsed, batchState)
 
-                        const canCondense = isCondensing && !condensationExclusions.has(parsed.level)
-                        let match = canCondense ? condensationBuffer.find(item =>
-                            item.parsed.level === parsed.level &&
-                            item.parsed.message === parsed.message
-                        ) : null
-
-                        if (match) {
-                            match.count++
-                            match.parsed.timestamp = parsed.timestamp
-                            updateCondensedEntry(match.el, parsed, match.count)
-                        } else {
-                            var entry = createLogEntry(parsed)
-
-                            // Add to message cache for fast filtering.
-                            messageCache.push({
-                                el: entry,
-                                text: parsed.message.toLowerCase(),
-                                level: parsed.level
-                            })
-
-                            if (!entry.classList.contains("hidden")) {
-                                visibleMessageCount++
-                            }
-                            fragment.appendChild(entry)
-
-                            if (canCondense) {
-                                condensationBuffer.push({
-                                    el: entry,
-                                    parsed: parsed,
-                                    count: 1
-                                })
-                                if (condensationBuffer.length > condensationLimit) {
-                                    condensationBuffer.shift()
-                                }
-                            }
-                        }
+                        processParsedMessage(parsed, fragment)
                     } catch (e) {
                         console.error("Error processing log in batch:", e, parsed)
                     }
@@ -2668,6 +2638,35 @@
             // ==============================================
 
             /**
+             * Re-renders the entire log from allMessages, applying or removing condensation based on the current isCondensing flag. Used by
+             * the Compact toggle so previously-condensed lines can be expanded and re-collapsed. Active filters/search are re-applied and
+             * auto-scroll is respected. messageCount is left untouched since it already reflects allMessages.length.
+             */
+            function rebuildLog() {
+                // Drop existing entries (keep the empty-state div) and reset the per-entry caches.
+                const entries = logContainer.querySelectorAll(".log-entry")
+                entries.forEach(function (entry) {
+                    entry.remove()
+                })
+                messageCache = []
+                condensationBuffer = []
+                visibleMessageCount = 0
+
+                // Replay every stored message through the shared renderer into a single fragment.
+                const fragment = document.createDocumentFragment()
+                allMessages.forEach(function (msg) {
+                    processParsedMessage(msg.parsed, fragment)
+                })
+                logContainer.appendChild(fragment)
+
+                // Re-apply the active level filters and search, then restore scroll position.
+                applyFilters()
+                if (autoScroll) {
+                    scrollToBottom()
+                }
+            }
+
+            /**
              * Toggles the log condensation feature on or off.
              */
             function toggleCondensing() {
@@ -2677,9 +2676,9 @@
                     btn.classList.add("active")
                 } else {
                     btn.classList.remove("active")
-                    // Clear buffer when turning off so it doesn't resume from old state
-                    condensationBuffer = []
                 }
+                // Re-render the whole log so already-condensed lines expand (or re-collapse) to match the new state.
+                rebuildLog()
             }
 
             /**
@@ -2965,7 +2964,7 @@
 
             /**
              * Renders the Race History calendar from a snapshot pushed by the bot.
-             * Snapshot shape: { currentTurn:int, decisions:{turn->{type,raceKey?,name?,grade?,raceTrack?,terrain?,distanceType?,distanceMeters?,fans?,contributions?}}, results:[{turn,raceKey,name,grade,outcome,...}] }
+             * Snapshot shape: { currentTurn:int, decisions:{turn->{type,raceKey?,name?,grade?,raceTrack?,terrain?,distanceType?,distanceMeters?,fans?,contributions?}}, results:[{turn,raceKey,name,grade,outcome,strategy?,...}] }
              * @param {object|null} snapshot Calendar snapshot JSON, or null to paint the empty grid.
              */
             function renderCalendar(snapshot) {
@@ -3152,6 +3151,7 @@
                     parts.push(dt)
                 }
                 if (typeof src.fans === "number") parts.push(formatNumberWithCommas(src.fans) + " fans")
+                if (src.strategy) parts.push(src.strategy)
 
                 var content = '<div class="tooltip-row"><span class="tooltip-label" style="font-weight:700">' + escapeHtml(src.name || "") + '</span></div>'
                 if (parts.length > 0) {
