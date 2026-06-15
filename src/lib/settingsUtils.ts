@@ -191,6 +191,14 @@ export const applyMigrations = (settings: any, rawSettings?: any): { settings: a
         logWithTimestamp("[SettingsManager] Dropped removed setting enablePopupCheck.")
     }
 
+    // Migration: Rename the Crane Game setting to Claw Machine.
+    if (general?.enableCraneGameAttempt !== undefined) {
+        migratedSettings.general.enableClawMachineAttempt = general.enableCraneGameAttempt
+        delete general.enableCraneGameAttempt
+        anyMigrated = true
+        logWithTimestamp("[SettingsManager] Migrated enableCraneGameAttempt to enableClawMachineAttempt.")
+    }
+
     // Migration: Rename Trackblazer Charm and Item Floor settings to behavior-first names.
     // The old keys (trackblazerMinStatGainForCharm, trackblazerLowMainStatGainItemFloor) are replaced by
     // trackblazerSkipRiskyCharmTrainingBelowGain and trackblazerSkipBadMoodItemsBelowGain respectively.

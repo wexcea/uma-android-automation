@@ -171,6 +171,17 @@ describe("applyMigrations", () => {
         expect((migrated as any).ocr).toBeUndefined()
     })
 
+    it("migrates enableCraneGameAttempt to enableClawMachineAttempt", () => {
+        const settings = {
+            general: { enableCraneGameAttempt: true, enableClawMachineAttempt: false },
+        } as any
+
+        const { settings: migrated, anyMigrated } = applyMigrations(settings)
+        expect(anyMigrated).toBe(true)
+        expect(migrated.general.enableClawMachineAttempt).toBe(true)
+        expect((migrated.general as any).enableCraneGameAttempt).toBeUndefined()
+    })
+
     it("migrates stopAtDate string to stopAtDates array", () => {
         const settings = {
             general: { stopAtDate: "Senior January Early", stopAtDates: [] },
