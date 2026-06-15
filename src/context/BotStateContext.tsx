@@ -35,7 +35,7 @@ export interface Settings {
     // General settings
     general: {
         scenario: string
-        enableCraneGameAttempt: boolean
+        enableClawMachineAttempt: boolean
         enableSwipeBasedScrolling: boolean
         enableStopBeforeFinals: boolean
         enableStopAtDate: boolean
@@ -235,7 +235,7 @@ export interface Settings {
 export const defaultSettings: Settings = {
     general: {
         scenario: "",
-        enableCraneGameAttempt: false,
+        enableClawMachineAttempt: false,
         enableSwipeBasedScrolling: false,
         enableStopBeforeFinals: false,
         enableStopAtDate: false,

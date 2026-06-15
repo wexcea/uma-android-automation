@@ -314,11 +314,11 @@ const Settings = () => {
                         </SearchableItem>
                     )}
 
-                    <SearchableItem id="settings-crane-game-attempt" title="Enable Crane Game Attempt" description="Attempt to complete the crane game instead of stopping">
+                    <SearchableItem id="settings-claw-machine-attempt" title="Enable Claw Machine Attempt" description="Attempt to complete the claw machine instead of stopping">
                         <Row
-                            title="Enable Crane Game Attempt"
-                            description="Attempt to complete the crane game instead of stopping"
-                            right={<Switch checked={general.enableCraneGameAttempt} onCheckedChange={(checked) => updateGeneral({ enableCraneGameAttempt: checked })} />}
+                            title="Enable Claw Machine Attempt"
+                            description="Attempt to complete the claw machine instead of stopping"
+                            right={<Switch checked={general.enableClawMachineAttempt} onCheckedChange={(checked) => updateGeneral({ enableClawMachineAttempt: checked })} />}
                         />
                     </SearchableItem>
 

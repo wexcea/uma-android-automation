@@ -231,7 +231,7 @@ ${longTargetsString}${formatAdvancedScoringSection(settings.training)}
 ✨ Trackblazer Glow Stick Min Fans: ${settings.scenarioOverrides?.trackblazerGlowStickMinFans}
 
 ---------- Misc Options ----------
-🔍 Enable Crane Game Attempt: ${settings.general.enableCraneGameAttempt ? "✅" : "❌"}
+🔍 Enable Claw Machine Attempt: ${settings.general.enableClawMachineAttempt ? "✅" : "❌"}
 🌀 Enable Swipe-Based Scrolling: ${settings.general.enableSwipeBasedScrolling ? "✅" : "❌"}
 🛑 Stop Before Finals: ${settings.general.enableStopBeforeFinals ? "✅" : "❌"}
 🛑 Stop At Date: ${settings.general.enableStopAtDate ? `✅ (${settings.general.stopAtDates.join(", ")})` : "❌"}

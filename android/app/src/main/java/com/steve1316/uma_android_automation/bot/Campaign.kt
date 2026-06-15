@@ -12,10 +12,10 @@ import com.steve1316.uma_android_automation.components.ButtonBack
 import com.steve1316.uma_android_automation.components.ButtonCancel
 import com.steve1316.uma_android_automation.components.ButtonCareerEndSkills
 import com.steve1316.uma_android_automation.components.ButtonChangeRunningStyle
+import com.steve1316.uma_android_automation.components.ButtonClawMachine
+import com.steve1316.uma_android_automation.components.ButtonClawMachineOk
 import com.steve1316.uma_android_automation.components.ButtonClose
 import com.steve1316.uma_android_automation.components.ButtonCompleteCareer
-import com.steve1316.uma_android_automation.components.ButtonCraneGame
-import com.steve1316.uma_android_automation.components.ButtonCraneGameOk
 import com.steve1316.uma_android_automation.components.ButtonDetails
 import com.steve1316.uma_android_automation.components.ButtonEventProgressChevron
 import com.steve1316.uma_android_automation.components.ButtonHomeFansInfo
@@ -132,8 +132,8 @@ abstract class Campaign(game: Game) : Task(game) {
     /** Flag to track if the bot should force a specific target mood during recovery. */
     var forcedTargetMood: Mood? = null
 
-    /** Whether the bot should attempt the crane game. */
-    protected val enableCraneGameAttempt: Boolean = SettingsHelper.getBooleanSetting("general", "enableCraneGameAttempt")
+    /** Whether the bot should attempt the claw machine. */
+    protected val enableClawMachineAttempt: Boolean = SettingsHelper.getBooleanSetting("general", "enableClawMachineAttempt")
 
     /** Whether the bot should check for a skill point threshold. */
     protected val enableSkillPointCheck: Boolean = SettingsHelper.getBooleanSetting("skills", "enableSkillPointCheck")
@@ -1370,42 +1370,42 @@ abstract class Campaign(game: Game) : Task(game) {
     }
 
     /**
-     * Handles the Crane Game event by attempting to complete it with three long-press attempts.
+     * Handles the Claw Machine event by attempting to complete it with three long-press attempts.
      *
-     * @return True if the crane game was successfully completed, false otherwise.
+     * @return True if the claw machine was successfully completed, false otherwise.
      */
-    open fun handleCraneGame(): Boolean {
-        MessageLog.v(TAG, "\n[CRANE_GAME] Starting Crane Game attempt...")
+    open fun handleClawMachine(): Boolean {
+        MessageLog.v(TAG, "\n[CLAW_MACHINE] Starting Claw Machine attempt...")
 
-        // Find the Crane Game button location.
-        val buttonLocation = ButtonCraneGame.find(game.imageUtils)
+        // Find the Claw Machine button location.
+        val buttonLocation = ButtonClawMachine.find(game.imageUtils)
         val buttonPoint = buttonLocation.first
         if (buttonPoint == null) {
-            MessageLog.w(TAG, "[WARN] handleCraneGame:: Could not find the Crane Game button. Aborting.")
+            MessageLog.w(TAG, "[WARN] handleClawMachine:: Could not find the Claw Machine button. Aborting.")
             return false
         }
 
-        val imageName = ButtonCraneGame.template.path
+        val imageName = ButtonClawMachine.template.path
         val pressDurations = listOf(1.90, 1.00, 0.65)
 
         // Perform three attempts with different press durations.
         for (attempt in 1..3) {
             val pressDuration = pressDurations[attempt - 1]
-            MessageLog.i(TAG, "[CRANE_GAME] Attempt $attempt: Long pressing for ${pressDuration}s...")
+            MessageLog.i(TAG, "[CLAW_MACHINE] Attempt $attempt: Long pressing for ${pressDuration}s...")
 
             // Perform long press on the button.
             game.gestureUtils.tap(buttonPoint.x, buttonPoint.y, imageName, longPress = true, pressDuration = pressDuration)
 
             if (attempt < 3) {
                 // After attempts 1 and 2, wait for the button to reappear.
-                MessageLog.i(TAG, "[CRANE_GAME] Waiting for the Crane Game button to reappear after attempt $attempt...")
+                MessageLog.i(TAG, "[CLAW_MACHINE] Waiting for the Claw Machine button to reappear after attempt $attempt...")
                 var buttonReappeared = false
                 val maxWaitTime = 30.0
                 val checkInterval = 1.0
                 var elapsedTime = 0.0
 
                 while (elapsedTime < maxWaitTime) {
-                    if (ButtonCraneGame.check(game.imageUtils)) {
+                    if (ButtonClawMachine.check(game.imageUtils)) {
                         buttonReappeared = true
                         break
                     }
@@ -1414,12 +1414,12 @@ abstract class Campaign(game: Game) : Task(game) {
                 }
 
                 if (!buttonReappeared) {
-                    MessageLog.w(TAG, "[WARN] handleCraneGame:: The Crane Game button did not reappear within $maxWaitTime seconds after attempt $attempt.")
+                    MessageLog.w(TAG, "[WARN] handleClawMachine:: The Claw Machine button did not reappear within $maxWaitTime seconds after attempt $attempt.")
                 }
 
                 game.wait(1.0)
             } else {
-                MessageLog.v(TAG, "[CRANE_GAME] Final attempt completed.")
+                MessageLog.v(TAG, "[CLAW_MACHINE] Final attempt completed.")
                 return true
             }
         }
@@ -1567,26 +1567,26 @@ abstract class Campaign(game: Game) : Task(game) {
             ButtonNext.click(game.imageUtils)
             game.wait(1.0)
             return true
-        } else if (ButtonCraneGame.check(game.imageUtils, sourceBitmap = sourceBitmap)) {
-            if (enableCraneGameAttempt) {
-                handleCraneGame()
+        } else if (ButtonClawMachine.check(game.imageUtils, sourceBitmap = sourceBitmap)) {
+            if (enableClawMachineAttempt) {
+                handleClawMachine()
                 return true
             } else {
-                // Stop when the bot has reached the Crane Game Event.
-                MessageLog.v(TAG, "\n[END] Bot will stop due to the detection of the Crane Game Event.")
-                game.notificationMessage = "Bot will stop due to the detection of the Crane Game Event."
+                // Stop when the bot has reached the Claw Machine Event.
+                MessageLog.v(TAG, "\n[END] Bot will stop due to the detection of the Claw Machine Event.")
+                game.notificationMessage = "Bot will stop due to the detection of the Claw Machine Event."
                 if (DiscordUtils.enableDiscordNotifications) {
-                    DiscordUtils.queue.add("```diff\n- ${MessageLog.getSystemTimeString()} Bot will stop due to the detection of the Crane Game Event.\n```")
+                    DiscordUtils.queue.add("```diff\n- ${MessageLog.getSystemTimeString()} Bot will stop due to the detection of the Claw Machine Event.\n```")
                 }
                 throw CampaignBreakpointException(game.notificationMessage)
             }
         } else if (
             LabelOrdinaryCuties.check(game.imageUtils, sourceBitmap = sourceBitmap) &&
-            ButtonCraneGameOk.check(game.imageUtils, sourceBitmap = sourceBitmap)
+            ButtonClawMachineOk.check(game.imageUtils, sourceBitmap = sourceBitmap)
         ) {
-            ButtonCraneGameOk.click(game.imageUtils, sourceBitmap = sourceBitmap)
+            ButtonClawMachineOk.click(game.imageUtils, sourceBitmap = sourceBitmap)
             game.waitForLoading()
-            MessageLog.v(TAG, "[CRANE_GAME] Event exited.")
+            MessageLog.v(TAG, "[CLAW_MACHINE] Event exited.")
             return true
         } else if (ButtonNextRaceEnd.click(game.imageUtils, sourceBitmap = sourceBitmap)) {
             MessageLog.i(TAG, "[MISC] Ended a leftover race.")
@@ -1622,7 +1622,7 @@ abstract class Campaign(game: Game) : Task(game) {
             return false
         } else {
             consecutiveButtonCancelMatches = 0
-            MessageLog.i(TAG, "[MISC] Did not detect any popups or the Crane Game on the screen. Moving on...")
+            MessageLog.i(TAG, "[MISC] Did not detect any popups or the Claw Machine on the screen. Moving on...")
         }
 
         return false

@@ -23,9 +23,9 @@ const searchConfig: SearchOption[] = [
         page: "SettingsMain",
     },
     {
-        id: "settings-crane-game-attempt",
-        title: "Enable Crane Game Attempt",
-        description: "Attempt to complete the crane game instead of stopping",
+        id: "settings-claw-machine-attempt",
+        title: "Enable Claw Machine Attempt",
+        description: "Attempt to complete the claw machine instead of stopping",
         page: "SettingsMain",
     },
     {

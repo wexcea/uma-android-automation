@@ -376,12 +376,12 @@ object ButtonCareerEndSkills : ButtonInterface {
     override val template = Template("components/button/career_end_skills")
 }
 
-object ButtonCraneGame : ButtonInterface {
-    override val template = Template("components/button/crane_game", region = Region.bottomHalf)
+object ButtonClawMachine : ButtonInterface {
+    override val template = Template("components/button/claw_machine", region = Region.bottomHalf)
 }
 
-object ButtonCraneGameOk : ButtonInterface {
-    override val template = Template("components/button/crane_game_ok", region = Region.bottomHalf)
+object ButtonClawMachineOk : ButtonInterface {
+    override val template = Template("components/button/claw_machine_ok", region = Region.bottomHalf)
 }
 
 object ButtonInheritance : ButtonInterface {
