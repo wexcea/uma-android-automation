@@ -2638,6 +2638,35 @@
             // ==============================================
 
             /**
+             * Re-renders the entire log from allMessages, applying or removing condensation based on the current isCondensing flag. Used by
+             * the Compact toggle so previously-condensed lines can be expanded and re-collapsed. Active filters/search are re-applied and
+             * auto-scroll is respected. messageCount is left untouched since it already reflects allMessages.length.
+             */
+            function rebuildLog() {
+                // Drop existing entries (keep the empty-state div) and reset the per-entry caches.
+                const entries = logContainer.querySelectorAll(".log-entry")
+                entries.forEach(function (entry) {
+                    entry.remove()
+                })
+                messageCache = []
+                condensationBuffer = []
+                visibleMessageCount = 0
+
+                // Replay every stored message through the shared renderer into a single fragment.
+                const fragment = document.createDocumentFragment()
+                allMessages.forEach(function (msg) {
+                    processParsedMessage(msg.parsed, fragment)
+                })
+                logContainer.appendChild(fragment)
+
+                // Re-apply the active level filters and search, then restore scroll position.
+                applyFilters()
+                if (autoScroll) {
+                    scrollToBottom()
+                }
+            }
+
+            /**
              * Toggles the log condensation feature on or off.
              */
             function toggleCondensing() {
@@ -2647,9 +2676,9 @@
                     btn.classList.add("active")
                 } else {
                     btn.classList.remove("active")
-                    // Clear buffer when turning off so it doesn't resume from old state
-                    condensationBuffer = []
                 }
+                // Re-render the whole log so already-condensed lines expand (or re-collapse) to match the new state.
+                rebuildLog()
             }
 
             /**
