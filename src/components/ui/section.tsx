@@ -79,7 +79,7 @@ export const Section = ({ label, children, collapsible = false, defaultOpen = tr
                         return (
                             <View key={idx}>
                                 {child}
-                                {showDivider ? <View style={{ height: 1, backgroundColor: colors.borderHair, marginLeft: SPACING.lg }} /> : null}
+                                {showDivider ? <View style={{ height: 1, backgroundColor: colors.borderHair, marginHorizontal: SPACING.lg }} /> : null}
                             </View>
                         )
                     })}
