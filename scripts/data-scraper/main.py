@@ -1,4 +1,4 @@
-from selenium import webdriver
+﻿from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, WebDriverException
@@ -2082,6 +2082,121 @@ class CharacterPresetScraper(BaseScraper):
         return out if out else None
 
 
+class CharacterObjectivesScraper(BaseScraper):
+    """Scrapes each character's mandatory career-objective races (URA scenario) from GameTora.
+
+    GameTora exposes the URA objectives as a structured manifest data file (`ura-objectives`),
+    joined to character names by `char_id` via the `characters` manifest. The Smart Race Solver
+    uses these to lock the turns the game forces a mandatory race so it never double-books them.
+
+    Output schema (one entry per EN-playable character) -> `src/data/character_objectives.json`:
+
+        {
+            "<character name>": {
+                "name": "<character name>",
+                "mandatoryRaces": [
+                    {
+                        "turn": 25,
+                        "isChoice": false,
+                        "options": [
+                            { "raceName": "Shinzan Kinen", "grade": "G3", "surface": "Turf",
+                              "distanceType": "Mile", "fans": 3800 }
+                        ]
+                    }
+                ]
+            }
+        }
+    """
+
+    # GameTora numeric codes. Debut (900) is intentionally dropped: the Junior Make Debut turn is
+    # pre-debut and already shown via the solver's synthetic display row.
+    GRADE_CODES = {100: "G1", 200: "G2", 300: "G3", 400: "OP", 900: "Debut"}
+    TERRAIN_CODES = {1: "Turf", 2: "Dirt"}
+
+    def __init__(self):
+        super().__init__("", "character_objectives.json")
+
+    @staticmethod
+    def _distance_type(meters: int) -> str:
+        """Buckets a race distance in meters to the app's distance category.
+
+        Mirrors the Kotlin `TrackDistance` thresholds: Sprint <= 1400, Mile <= 1800,
+        Medium <= 2400, otherwise Long.
+
+        Args:
+            meters: Race distance in meters.
+
+        Returns:
+            One of 'Sprint', 'Mile', 'Medium', 'Long'.
+        """
+        if meters <= 1400:
+            return "Sprint"
+        if meters <= 1800:
+            return "Mile"
+        if meters <= 2400:
+            return "Medium"
+        return "Long"
+
+    def start(self):
+        """Fetches the URA objectives + characters manifests and writes the mandatory-race file."""
+        # Full rebuild every run (small, static-ish dataset). Ignore the delta-merge baseline so
+        # characters that left the EN server do not linger in the output.
+        self.data = {}
+
+        objectives = fetch_gametora_manifest_data("ura-objectives")
+        characters = fetch_gametora_manifest_data("characters")
+
+        id_to_name = {c["char_id"]: c.get("en_name") for c in characters if c.get("char_id") and c.get("en_name")}
+        en_playable = {c["char_id"] for c in characters if c.get("char_id") and c.get("playable_en") and c.get("en_name")}
+
+        for entry in objectives:
+            char_id = entry.get("char_id")
+            name = id_to_name.get(char_id)
+            if not name or char_id not in en_playable:
+                continue
+
+            by_turn: Dict[int, List[Dict[str, Any]]] = {}
+            for obj in entry.get("objectives", []):
+                # target_type 1 is a race-placement objective. target_type 3 is the URA Finals.
+                if obj.get("target_type") != 1:
+                    continue
+                turn = obj.get("turn")
+                if not isinstance(turn, int) or turn > 72:  # 72 is the final turn of a URA career.
+                    continue
+                for r in obj.get("races", []):
+                    grade = self.GRADE_CODES.get(r.get("grade"))
+                    if grade is None or grade == "Debut":
+                        continue
+                    meters = r.get("distance", 0)
+                    by_turn.setdefault(turn, []).append(
+                        {
+                            "raceName": r.get("name_en", ""),
+                            "grade": grade,
+                            "surface": self.TERRAIN_CODES.get(r.get("terrain"), "Turf"),
+                            "distanceType": self._distance_type(meters),
+                            "fans": r.get("fans_gained", 0),
+                        }
+                    )
+
+            mandatory_races: List[Dict[str, Any]] = []
+            for turn in sorted(by_turn.keys()):
+                seen = set()
+                deduped: List[Dict[str, Any]] = []
+                for o in by_turn[turn]:
+                    k = (o["raceName"], o["distanceType"], o["surface"])
+                    if k in seen:
+                        continue
+                    seen.add(k)
+                    deduped.append(o)
+                mandatory_races.append({"turn": turn, "isChoice": len(deduped) > 1, "options": deduped})
+
+            if mandatory_races:
+                self.data[name] = {"name": name, "mandatoryRaces": mandatory_races}
+
+        logging.info(f"Scraped mandatory objectives for {len(self.data)} EN-playable characters.")
+        self.save_data()
+
+
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
     start_time = time.time()
@@ -2105,6 +2220,9 @@ if __name__ == "__main__":
 
     character_preset_scraper = CharacterPresetScraper()
     character_preset_scraper.start()
+
+    character_objectives_scraper = CharacterObjectivesScraper()
+    character_objectives_scraper.start()
 
     end_time = round(time.time() - start_time, 2)
     logging.info(f"Total time for processing all applications: {end_time} seconds or {round(end_time / 60, 2)} minutes.")
