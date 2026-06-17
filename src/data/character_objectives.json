@@ -1,0 +1,6272 @@
+{
+    "Admire Vega": {
+        "name": "Admire Vega",
+        "mandatoryRaces": [
+            {
+                "turn": 24,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hopeful Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Agnes Digital": {
+        "name": "Agnes Digital",
+        "mandatoryRaces": [
+            {
+                "turn": 28,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hyacinth Stakes",
+                        "grade": "OP",
+                        "surface": "Dirt",
+                        "distanceType": "Mile",
+                        "fans": 1900
+                    }
+                ]
+            },
+            {
+                "turn": 33,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "NHK Mile Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 37,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Dirt Derby",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Medium",
+                        "fans": 4500
+                    }
+                ]
+            },
+            {
+                "turn": 46,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mile Championship",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    },
+    "Agnes Tachyon": {
+        "name": "Agnes Tachyon",
+        "mandatoryRaces": [
+            {
+                "turn": 29,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yayoi Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 33,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "NHK Mile Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Air Groove": {
+        "name": "Air Groove",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Juvenile Fillies",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6500
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Oka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japanese Oaks",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Shuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 64,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sapporo Kinen",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    },
+    "Biwa Hayahide": {
+        "name": "Biwa Hayahide",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Asahi Hai Futurity Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Curren Chan": {
+        "name": "Curren Chan",
+        "mandatoryRaces": [
+            {
+                "turn": 29,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Fillies' Revue",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 5200
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Aoi Stakes",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 36,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hakodate Sprint Stakes",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 3900
+                    }
+                ]
+            },
+            {
+                "turn": 42,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 53,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Ocean Stakes",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 4100
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takamatsunomiya Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 66,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            }
+        ]
+    },
+    "Daiwa Scarlet": {
+        "name": "Daiwa Scarlet",
+        "mandatoryRaces": [
+            {
+                "turn": 29,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tulip Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 5200
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Oka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": true,
+                "options": [
+                    {
+                        "raceName": "Japanese Oaks",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    },
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Shuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 45,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Queen Elizabeth II Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Eishin Flash": {
+        "name": "Eishin Flash",
+        "mandatoryRaces": [
+            {
+                "turn": 25,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Keisei Hai",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 46,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "El Condor Pasa": {
+        "name": "El Condor Pasa",
+        "mandatoryRaces": [
+            {
+                "turn": 27,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kyodo News Hai",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 33,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "NHK Mile Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 43,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mainichi Okan",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Fine Motion": {
+        "name": "Fine Motion",
+        "mandatoryRaces": [
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Oka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japanese Oaks",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Shuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 45,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Queen Elizabeth II Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 64,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sapporo Kinen",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 69,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Queen Elizabeth II Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mile Championship",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Fuji Kiseki": {
+        "name": "Fuji Kiseki",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Asahi Hai Futurity Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 29,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yayoi Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 33,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "NHK Mile Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 46,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mile Championship",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takamatsunomiya Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Gold City": {
+        "name": "Gold City",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Juvenile Fillies",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6500
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Gold Ship": {
+        "name": "Gold Ship",
+        "mandatoryRaces": [
+            {
+                "turn": 24,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hopeful Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Grass Wonder": {
+        "name": "Grass Wonder",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Asahi Hai Futurity Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 46,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 67,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mainichi Okan",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Haru Urara": {
+        "name": "Haru Urara",
+        "mandatoryRaces": [
+            {
+                "turn": 50,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Negishi Stakes",
+                        "grade": "G3",
+                        "surface": "Dirt",
+                        "distanceType": "Sprint",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 52,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "February Stakes",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Mile",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 63,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Elm Stakes",
+                        "grade": "G3",
+                        "surface": "Dirt",
+                        "distanceType": "Mile",
+                        "fans": 3600
+                    }
+                ]
+            },
+            {
+                "turn": 69,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "JBC Sprint",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Sprint",
+                        "fans": 6000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Hishi Akebono": {
+        "name": "Hishi Akebono",
+        "mandatoryRaces": [
+            {
+                "turn": 42,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Swan Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 5900
+                    }
+                ]
+            },
+            {
+                "turn": 46,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mile Championship",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takamatsunomiya Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 66,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mile Championship",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 11000
+                    }
+                ]
+            }
+        ]
+    },
+    "Hishi Amazon": {
+        "name": "Hishi Amazon",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Juvenile Fillies",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6500
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Oka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japanese Oaks",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Shuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Inari One": {
+        "name": "Inari One",
+        "mandatoryRaces": [
+            {
+                "turn": 37,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Dirt Derby",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Medium",
+                        "fans": 4500
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Daishoten",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Medium",
+                        "fans": 8000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 67,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mainichi Okan",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Ines Fujin": {
+        "name": "Ines Fujin",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Asahi Hai Futurity Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Kawakami Princess": {
+        "name": "Kawakami Princess",
+        "mandatoryRaces": [
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japanese Oaks",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Shuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 45,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Queen Elizabeth II Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 53,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kinko Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 57,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Victoria Mile",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 69,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Queen Elizabeth II Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10500
+                    }
+                ]
+            }
+        ]
+    },
+    "King Halo": {
+        "name": "King Halo",
+        "mandatoryRaces": [
+            {
+                "turn": 24,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hopeful Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takamatsunomiya Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 66,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    },
+    "Kitasan Black": {
+        "name": "Kitasan Black",
+        "mandatoryRaces": [
+            {
+                "turn": 42,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "St. Lite Kinen",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Manhattan Cafe": {
+        "name": "Manhattan Cafe",
+        "mandatoryRaces": [
+            {
+                "turn": 29,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yayoi Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 42,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "St. Lite Kinen",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Maruzensky": {
+        "name": "Maruzensky",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Asahi Hai Futurity Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 30,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Spring Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    },
+    "Matikanefukukitaru": {
+        "name": "Matikanefukukitaru",
+        "mandatoryRaces": [
+            {
+                "turn": 29,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yayoi Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 30,
+                "isChoice": true,
+                "options": [
+                    {
+                        "raceName": "Spring Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 5400
+                    },
+                    {
+                        "raceName": "Mainichi Hai",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 53,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kinko Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 61,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hakodate Kinen",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 4100
+                    }
+                ]
+            },
+            {
+                "turn": 63,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kokura Kinen",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 4100
+                    }
+                ]
+            },
+            {
+                "turn": 64,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sapporo Kinen",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Matikanetannhauser": {
+        "name": "Matikanetannhauser",
+        "mandatoryRaces": [
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 52,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Diamond Stakes",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 4100
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Mayano Top Gun": {
+        "name": "Mayano Top Gun",
+        "mandatoryRaces": [
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Daishoten",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Meisho Doto": {
+        "name": "Meisho Doto",
+        "mandatoryRaces": [
+            {
+                "turn": 49,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Nikkei Shinshun Hai",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5700
+                    }
+                ]
+            },
+            {
+                "turn": 53,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kinko Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Mejiro Ardan": {
+        "name": "Mejiro Ardan",
+        "mandatoryRaces": [
+            {
+                "turn": 32,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Aoba Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": true,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    },
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 67,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mainichi Okan",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    },
+    "Mejiro Bright": {
+        "name": "Mejiro Bright",
+        "mandatoryRaces": [
+            {
+                "turn": 24,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hopeful Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 47,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Stayers Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 6200
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Mejiro Dober": {
+        "name": "Mejiro Dober",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Juvenile Fillies",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6500
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Oka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japanese Oaks",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Shuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 67,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Fuchu Umamusume Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 5500
+                    }
+                ]
+            },
+            {
+                "turn": 69,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Queen Elizabeth II Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10500
+                    }
+                ]
+            }
+        ]
+    },
+    "Mejiro McQueen": {
+        "name": "Mejiro McQueen",
+        "mandatoryRaces": [
+            {
+                "turn": 42,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kobe Shimbun Hai",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    },
+    "Mejiro Palmer": {
+        "name": "Mejiro Palmer",
+        "mandatoryRaces": [
+            {
+                "turn": 37,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hakodate Kinen",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 4100
+                    }
+                ]
+            },
+            {
+                "turn": 49,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Nikkei Shinshun Hai",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5700
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Mejiro Ryan": {
+        "name": "Mejiro Ryan",
+        "mandatoryRaces": [
+            {
+                "turn": 25,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Junior Cup",
+                        "grade": "OP",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 2000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Mihono Bourbon": {
+        "name": "Mihono Bourbon",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Asahi Hai Futurity Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 30,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Spring Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Narita Brian": {
+        "name": "Narita Brian",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Asahi Hai Futurity Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Daishoten",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Narita Taishin": {
+        "name": "Narita Taishin",
+        "mandatoryRaces": [
+            {
+                "turn": 24,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hopeful Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Nikkei Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Nice Nature": {
+        "name": "Nice Nature",
+        "mandatoryRaces": [
+            {
+                "turn": 26,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Wakagoma Stakes",
+                        "grade": "OP",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 2000
+                    }
+                ]
+            },
+            {
+                "turn": 39,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kokura Kinen",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 4100
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 71,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Chunichi Shimbun Hai",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 4100
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Nishino Flower": {
+        "name": "Nishino Flower",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Juvenile Fillies",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6500
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Oka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japanese Oaks",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 42,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takamatsunomiya Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Milers Cup",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 5900
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 66,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            }
+        ]
+    },
+    "Oguri Cap": {
+        "name": "Oguri Cap",
+        "mandatoryRaces": [
+            {
+                "turn": 33,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "NHK Mile Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 46,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mile Championship",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Rice Shower": {
+        "name": "Rice Shower",
+        "mandatoryRaces": [
+            {
+                "turn": 30,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Spring Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Nikkei Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Sakura Bakushin O": {
+        "name": "Sakura Bakushin O",
+        "mandatoryRaces": [
+            {
+                "turn": 21,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Keio Hai Junior Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 30,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Spring Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Aoi Stakes",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 42,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takamatsunomiya Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hakodate Sprint Stakes",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 3900
+                    }
+                ]
+            },
+            {
+                "turn": 61,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "CBC Sho",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 3900
+                    }
+                ]
+            },
+            {
+                "turn": 65,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Centaur Stakes",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 5900
+                    }
+                ]
+            },
+            {
+                "turn": 66,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mile Championship",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 11000
+                    }
+                ]
+            }
+        ]
+    },
+    "Sakura Chiyono O": {
+        "name": "Sakura Chiyono O",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Asahi Hai Futurity Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Satono Diamond": {
+        "name": "Satono Diamond",
+        "mandatoryRaces": [
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 67,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kyoto Daishoten",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Seiun Sky": {
+        "name": "Seiun Sky",
+        "mandatoryRaces": [
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Silence Suzuka": {
+        "name": "Silence Suzuka",
+        "mandatoryRaces": [
+            {
+                "turn": 29,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yayoi Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 42,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kobe Shimbun Hai",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 53,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kinko Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 67,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mainichi Okan",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    },
+    "Smart Falcon": {
+        "name": "Smart Falcon",
+        "mandatoryRaces": [
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 37,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Dirt Derby",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Medium",
+                        "fans": 4500
+                    }
+                ]
+            },
+            {
+                "turn": 45,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "JBC Classic",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Medium",
+                        "fans": 8000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Daishoten",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Medium",
+                        "fans": 8000
+                    }
+                ]
+            },
+            {
+                "turn": 52,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "February Stakes",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Mile",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Teio Sho",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Medium",
+                        "fans": 6000
+                    }
+                ]
+            },
+            {
+                "turn": 69,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "JBC Classic",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Medium",
+                        "fans": 8000
+                    }
+                ]
+            },
+            {
+                "turn": 71,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Champions Cup",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Mile",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Daishoten",
+                        "grade": "G1",
+                        "surface": "Dirt",
+                        "distanceType": "Medium",
+                        "fans": 8000
+                    }
+                ]
+            }
+        ]
+    },
+    "Special Week": {
+        "name": "Special Week",
+        "mandatoryRaces": [
+            {
+                "turn": 27,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kisaragi Sho",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Super Creek": {
+        "name": "Super Creek",
+        "mandatoryRaces": [
+            {
+                "turn": 28,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sumire Stakes",
+                        "grade": "OP",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 2000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Sweep Tosho": {
+        "name": "Sweep Tosho",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Juvenile Fillies",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6500
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Oka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japanese Oaks",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Shuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 45,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Queen Elizabeth II Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 69,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Queen Elizabeth II Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10500
+                    }
+                ]
+            }
+        ]
+    },
+    "Symboli Rudolf": {
+        "name": "Symboli Rudolf",
+        "mandatoryRaces": [
+            {
+                "turn": 19,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Saudi Arabia Royal Cup",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 3300
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "TM Opera O": {
+        "name": "TM Opera O",
+        "mandatoryRaces": [
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Taiki Shuttle": {
+        "name": "Taiki Shuttle",
+        "mandatoryRaces": [
+            {
+                "turn": 25,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Shinzan Kinen",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 33,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "NHK Mile Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 36,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Unicorn Stakes",
+                        "grade": "G3",
+                        "surface": "Dirt",
+                        "distanceType": "Mile",
+                        "fans": 3500
+                    }
+                ]
+            },
+            {
+                "turn": 46,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mile Championship",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 66,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Sprinters Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Sprint",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mile Championship",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 11000
+                    }
+                ]
+            }
+        ]
+    },
+    "Tamamo Cross": {
+        "name": "Tamamo Cross",
+        "mandatoryRaces": [
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Daishoten",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 6700
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Tokai Teio": {
+        "name": "Tokai Teio",
+        "mandatoryRaces": [
+            {
+                "turn": 26,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Wakagoma Stakes",
+                        "grade": "OP",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 2000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 70,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Tosen Jordan": {
+        "name": "Tosen Jordan",
+        "mandatoryRaces": [
+            {
+                "turn": 24,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hopeful Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 45,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Copa Republica Argentina",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 5700
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    },
+    "Vodka": {
+        "name": "Vodka",
+        "mandatoryRaces": [
+            {
+                "turn": 23,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hanshin Juvenile Fillies",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 6500
+                    }
+                ]
+            },
+            {
+                "turn": 29,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tulip Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 5200
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Oka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Shuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 10000
+                    }
+                ]
+            },
+            {
+                "turn": 48,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 57,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Victoria Mile",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 10500
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    },
+    "Winning Ticket": {
+        "name": "Winning Ticket",
+        "mandatoryRaces": [
+            {
+                "turn": 24,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hopeful Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 29,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yayoi Sho",
+                        "grade": "G2",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 5400
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
+    "Yaeno Muteki": {
+        "name": "Yaeno Muteki",
+        "mandatoryRaces": [
+            {
+                "turn": 30,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Mainichi Hai",
+                        "grade": "G3",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 3800
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 54,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Osaka Hai",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 13500
+                    }
+                ]
+            },
+            {
+                "turn": 59,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Yasuda Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Mile",
+                        "fans": 13000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            }
+        ]
+    }
+}

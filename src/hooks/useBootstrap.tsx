@@ -195,6 +195,12 @@ export const useBootstrap = () => {
             await yieldToFrame()
             await databaseManager.saveSetting("racing", "characterPresetsData", characterPresetsData, true)
             logWithTimestamp(`[Bootstrap] Successfully saved character presets data (${Object.keys(characterPresetsData).length} presets) to SQLite`)
+            await yieldToFrame()
+
+            const characterObjectivesData = require("../data/character_objectives.json")
+            await yieldToFrame()
+            await databaseManager.saveSetting("racing", "characterObjectivesData", characterObjectivesData, true)
+            logWithTimestamp(`[Bootstrap] Successfully saved character objectives data (${Object.keys(characterObjectivesData).length} characters) to SQLite`)
 
             logWithTimestamp("[Bootstrap] Solver data population complete")
         } catch (error) {

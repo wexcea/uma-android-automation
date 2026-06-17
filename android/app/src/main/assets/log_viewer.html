@@ -1404,6 +1404,11 @@
                 color: var(--text-muted);
             }
 
+            .calendar-cell.mandatory-race {
+                border-color: #f59e0b;
+                box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.45);
+            }
+
             .calendar-cell.win-result {
                 border-color: rgba(34, 197, 94, 0.65);
                 box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.35);
@@ -3060,6 +3065,10 @@
                     classes.push("lose-result")
                 }
 
+                if (raceSrc && raceSrc.mandatory) {
+                    classes.push("mandatory-race")
+                }
+
                 // Only race cells (with race details to show) get the hover handlers. Synthetic
                 // display-only cells share the same rich tooltip; showRaceCellTooltip swaps its
                 // epithet section for a "Does not affect solver" notice when src.synthetic is true.
@@ -3156,6 +3165,10 @@
                 var content = '<div class="tooltip-row"><span class="tooltip-label" style="font-weight:700">' + escapeHtml(src.name || "") + '</span></div>'
                 if (parts.length > 0) {
                     content += '<div class="tooltip-row" style="opacity:0.85"><span>' + escapeHtml(parts.join(sep)) + '</span></div>'
+                }
+
+                if (src.mandatory) {
+                    content += '<div class="tooltip-section" style="margin-top:6px;font-weight:700;color:#f59e0b">Mandatory career race</div>'
                 }
 
                 var contribs = (src.contributions && src.contributions.length > 0)

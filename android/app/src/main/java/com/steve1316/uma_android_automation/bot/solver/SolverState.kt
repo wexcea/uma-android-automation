@@ -120,6 +120,8 @@ data class Weights(
  * @property distanceMeters Race distance in meters.
  * @property fans Reward fans count. Scaled by [Weights.fanWeight] in [ScoringFunctions.raceValue].
  * @property turnNumber Turn the race takes place on (1..72).
+ * @property isMandatory True when this candidate is a forced career-objective race the solver
+ *   locked onto its turn (not an optional race from the pool). Drives the calendar's mandatory styling.
  */
 data class RaceCandidate(
     val key: String,
@@ -134,6 +136,7 @@ data class RaceCandidate(
     val distanceMeters: Int,
     val fans: Int,
     val turnNumber: TurnNumber,
+    val isMandatory: Boolean = false,
 )
 
 /**

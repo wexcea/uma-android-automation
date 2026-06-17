@@ -69,7 +69,7 @@ const compareSettings = (current: Settings, imported: Settings) => {
         for (const key of Object.keys(importedCategory)) {
             // Skip large settings fields that shouldn't be shown in preview, plus the Discord token (excluded from import entirely; see `useSettingsManager.importSettings`).
             if (
-                (category === "racing" && (key === "epithetsData" || key === "characterPresetsData" || key === "racesData")) ||
+                (category === "racing" && (key === "epithetsData" || key === "characterPresetsData" || key === "racesData" || key === "characterObjectivesData")) ||
                 (category === "misc" && key === "formattedSettingsString") ||
                 (category === "discord" && key === "discordToken")
             ) {

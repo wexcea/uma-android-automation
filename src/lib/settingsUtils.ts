@@ -43,6 +43,7 @@ export const DB_OWNED_KEYS: ReadonlyArray<readonly [string, string]> = [
     ["racing", "racesData"],
     ["racing", "epithetsData"],
     ["racing", "characterPresetsData"],
+    ["racing", "characterObjectivesData"],
     ["racing", "racingPlanData"],
     ["trainingEvent", "characterEventData"],
     ["trainingEvent", "supportEventData"],

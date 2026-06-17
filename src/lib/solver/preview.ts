@@ -51,6 +51,8 @@ export interface SolverConfigSnapshot {
     racesDataJson?: string
     /** Bundled epithets.json passed inline for the same reason as `racesDataJson`. */
     epithetsDataJson?: string
+    /** Bundled character_objectives.json passed inline for the same reason as `racesDataJson`. */
+    objectivesDataJson?: string
 }
 
 /** Decision the solver picked for a given turn: race a real race, do generic training, or rest. */
@@ -65,6 +67,8 @@ export interface ScheduleEntry {
     name?: string
     /** Race grade string (e.g. "G1", "OP"). Present only when `type === "Race"`; same shape as `RaceEntry.grade`. */
     grade?: string
+    /** True when this race is a forced mandatory career objective the solver locked, not a chosen optional race. */
+    mandatory?: boolean
 }
 
 export interface SchedulePreview {

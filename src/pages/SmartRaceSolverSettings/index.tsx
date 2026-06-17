@@ -40,6 +40,7 @@ import WarningContainer from "../../components/WarningContainer"
 import { Input } from "../../components/ui/input"
 import racesData from "../../data/races.json"
 import epithetsData from "../../data/epithets.json"
+import characterObjectivesData from "../../data/character_objectives.json"
 import characterPresetsData from "../../data/characterPresets.json"
 import PageHeader from "../../components/PageHeader"
 import { usePerformanceLogging } from "../../hooks/usePerformanceLogging"
@@ -59,6 +60,7 @@ import { RADII } from "../../lib/radii"
 // Stringify the bundled JSON once at module load so we don't pay the serialisation cost on every debounced preview call.
 const RACES_DATA_JSON = JSON.stringify(racesData)
 const EPITHETS_DATA_JSON = JSON.stringify(epithetsData)
+const OBJECTIVES_DATA_JSON = JSON.stringify(characterObjectivesData)
 
 // Remembers the last preview so re-opening this page shows the previous calendar instantly instead of a blank screen while the solver re-runs.
 // Keyed on a JSON snapshot of the solver-relevant settings. Cleared only on app reload.
@@ -472,6 +474,7 @@ const SmartRaceSolverSettings = () => {
         // Only ship the bundled JSON the first time; Kotlin caches it after that.
         racesDataJson: bridgeDataPrimed ? undefined : RACES_DATA_JSON,
         epithetsDataJson: bridgeDataPrimed ? undefined : EPITHETS_DATA_JSON,
+        objectivesDataJson: bridgeDataPrimed ? undefined : OBJECTIVES_DATA_JSON,
     })
 
     /** Snapshot key of the settings that produced `preview`. Used to detect whether the current preview is stale relative to the live settings. */
@@ -823,6 +826,11 @@ const SmartRaceSolverSettings = () => {
                     borderWidth: 2,
                     borderColor: colors.brand,
                 },
+                calendarCellMandatory: {
+                    borderWidth: 2,
+                    borderColor: "#f59e0b",
+                    backgroundColor: "rgba(245, 158, 11, 0.12)",
+                },
                 popoverColumn: { flexShrink: 1 },
                 popoverHeader: { flexShrink: 0 },
                 popoverBodyScroll: { flexShrink: 1, marginTop: 4 },
@@ -849,6 +857,7 @@ const SmartRaceSolverSettings = () => {
                 popoverAltName: { fontSize: 12, fontWeight: "600", color: colors.text },
                 popoverAltMeta: { fontSize: 10, color: colors.textMuted },
                 popoverHint: { fontSize: 10, color: colors.textMuted, fontStyle: "italic", marginTop: 8, textAlign: "center" },
+                popoverMandatoryNote: { fontSize: 12, color: colors.warningText, fontWeight: "700", marginTop: 4 },
                 recalcFab: { position: "absolute", bottom: 16, right: 16, zIndex: 10, alignItems: "flex-end" },
                 recalcFabLabel: {
                     backgroundColor: colors.surface,
@@ -928,6 +937,7 @@ const SmartRaceSolverSettings = () => {
         const matched = race && preview ? epithetsForRace(race).filter((ep) => allowedEpithetNames.has(ep.name) && turnsContributingToEpithet(ep, preview, racesByKey).has(turn)) : []
         const lockedValue: string | undefined = manualLocks[String(turn)]
         const isLocked = lockedValue != null
+        const isMandatory = isRace && entry?.mandatory === true
         const alternatives = (eligibleRacesForTurn.get(turn) ?? []).filter((r) => !race || r.name !== race.name)
 
         // Cap the popover at the screen minus its 60px top/bottom insets, then hand the body whatever the pinned header and footer leave behind.
@@ -946,7 +956,7 @@ const SmartRaceSolverSettings = () => {
                     }}
                 >
                     <Text style={styles.popoverTitle}>
-                        {isLocked ? "🔒 " : ""}T{turn} · {fullDateLabel}
+                        {isMandatory ? "📌 " : isLocked ? "🔒 " : ""}T{turn} · {fullDateLabel}
                     </Text>
                     {isRace && race ? (
                         <>
@@ -956,9 +966,15 @@ const SmartRaceSolverSettings = () => {
                                 {race.fans.toLocaleString()} fans
                             </Text>
                         </>
+                    ) : isRace ? (
+                        <Text style={styles.popoverMeta}>
+                            {entry?.name ?? "Mandatory race"}
+                            {entry?.grade ? ` · ${entry.grade.replace("PRE_OP", "Pre-OP")}` : ""}
+                        </Text>
                     ) : (
                         <Text style={styles.popoverMeta}>{entry?.type === "Rest" ? "Rest" : "No race scheduled — solver chose Train."}</Text>
                     )}
+                    {isMandatory ? <Text style={styles.popoverMandatoryNote}>Mandatory career race. The game forces this race on this turn.</Text> : null}
                 </View>
 
                 {/* Body - epithet progression and eligible races, the only scrollable region */}
@@ -995,33 +1011,37 @@ const SmartRaceSolverSettings = () => {
                         </>
                     )}
 
-                    <Divider style={{ marginTop: 16 }} />
+                    {!isMandatory && (
+                        <>
+                            <Divider style={{ marginTop: 16 }} />
 
-                    <Text style={styles.popoverSection}>Switch to an eligible race</Text>
-                    {alternatives.length === 0 ? (
-                        <Text style={styles.popoverEmpty}>No other eligible races on this turn.</Text>
-                    ) : (
-                        alternatives.map((alt) => {
-                            const altColor = GRADE_COLORS[alt.grade] ?? colors.brand
-                            return (
-                                <Pressable
-                                    key={`${alt.name}-${alt.date}`}
-                                    style={styles.popoverAltRow}
-                                    onPress={() => switchTurnRace(turn, alt.name)}
-                                    android_ripple={{ color: colors.ripple, foreground: true }}
-                                >
-                                    <View style={[styles.popoverAltBadge, { backgroundColor: altColor }]}>
-                                        <Text style={styles.calendarBadgeText}>{alt.grade.replace("PRE_OP", "Pre").replace("PRE-OP", "Pre")}</Text>
-                                    </View>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={styles.popoverAltName}>{alt.name}</Text>
-                                        <Text style={styles.popoverAltMeta}>
-                                            {alt.raceTrack} · {alt.terrain} · {alt.distanceType} ({alt.distanceMeters}m) · {alt.fans.toLocaleString()} fans
-                                        </Text>
-                                    </View>
-                                </Pressable>
-                            )
-                        })
+                            <Text style={styles.popoverSection}>Switch to an eligible race</Text>
+                            {alternatives.length === 0 ? (
+                                <Text style={styles.popoverEmpty}>No other eligible races on this turn.</Text>
+                            ) : (
+                                alternatives.map((alt) => {
+                                    const altColor = GRADE_COLORS[alt.grade] ?? colors.brand
+                                    return (
+                                        <Pressable
+                                            key={`${alt.name}-${alt.date}`}
+                                            style={styles.popoverAltRow}
+                                            onPress={() => switchTurnRace(turn, alt.name)}
+                                            android_ripple={{ color: colors.ripple, foreground: true }}
+                                        >
+                                            <View style={[styles.popoverAltBadge, { backgroundColor: altColor }]}>
+                                                <Text style={styles.calendarBadgeText}>{alt.grade.replace("PRE_OP", "Pre").replace("PRE-OP", "Pre")}</Text>
+                                            </View>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={styles.popoverAltName}>{alt.name}</Text>
+                                                <Text style={styles.popoverAltMeta}>
+                                                    {alt.raceTrack} · {alt.terrain} · {alt.distanceType} ({alt.distanceMeters}m) · {alt.fans.toLocaleString()} fans
+                                                </Text>
+                                            </View>
+                                        </Pressable>
+                                    )
+                                })
+                            )}
+                        </>
                     )}
                 </ScrollView>
 
@@ -1034,14 +1054,24 @@ const SmartRaceSolverSettings = () => {
                     }}
                 >
                     <View style={styles.popoverButtonRow}>
-                        {isRace && (
-                            <CustomButton variant="destructive" size="sm" onPress={() => lockTurnToTrain(turn)}>
-                                Delete
-                            </CustomButton>
+                        {isMandatory ? (
+                            <Text style={styles.popoverHint}>This turn is locked to a mandatory race and cannot be changed.</Text>
+                        ) : (
+                            <>
+                                {isRace && (
+                                    <CustomButton variant="destructive" size="sm" onPress={() => lockTurnToTrain(turn)}>
+                                        Delete
+                                    </CustomButton>
+                                )}
+                                <CustomButton
+                                    variant={isLocked ? "secondary" : "default"}
+                                    size="sm"
+                                    onPress={() => toggleLockForTurn(turn, isLocked, isRace ? (race?.name ?? entry?.name ?? null) : null)}
+                                >
+                                    {isLocked ? "Unlock" : "Lock"}
+                                </CustomButton>
+                            </>
                         )}
-                        <CustomButton variant={isLocked ? "secondary" : "default"} size="sm" onPress={() => toggleLockForTurn(turn, isLocked, isRace ? (race?.name ?? entry?.name ?? null) : null)}>
-                            {isLocked ? "Unlock" : "Lock"}
-                        </CustomButton>
                     </View>
                     <Text style={styles.popoverHint}>Changes take effect after tapping Recalculate.</Text>
                 </View>
@@ -1065,6 +1095,7 @@ const SmartRaceSolverSettings = () => {
         const isPreDebut = turn <= 13
         const isSummerBlocked = !weights.allowSummerRacing && ((turn >= 37 && turn <= 40) || (turn >= 61 && turn <= 64))
         const isLocked = manualLocks[String(turn)] != null
+        const isMandatory = isRace && entry?.mandatory === true
         const highlightHit = isRace && contributingTurnsForHighlight.has(turn)
 
         if (isPreDebut || isSummerBlocked) {
@@ -1096,7 +1127,13 @@ const SmartRaceSolverSettings = () => {
                 <Popover>
                     <PopoverTrigger asChild>
                         <Pressable
-                            style={[styles.calendarCell, isRace && styles.calendarCellRace, isLocked && styles.calendarCellLocked, highlightHit && styles.calendarCellHighlighted]}
+                            style={[
+                                styles.calendarCell,
+                                isRace && styles.calendarCellRace,
+                                isMandatory && styles.calendarCellMandatory,
+                                isLocked && styles.calendarCellLocked,
+                                highlightHit && styles.calendarCellHighlighted,
+                            ]}
                             android_ripple={{ color: colors.ripple, foreground: true }}
                         >
                             {cellInner}
@@ -1114,7 +1151,7 @@ const SmartRaceSolverSettings = () => {
                     </PopoverContent>
                 </Popover>
                 <Text style={styles.calendarDateLabel}>
-                    {isLocked ? "🔒 " : ""}
+                    {isMandatory ? "📌 " : isLocked ? "🔒 " : ""}
                     {dateLabel}
                 </Text>
             </View>
