@@ -7,6 +7,8 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+        <!-- Chart.js (loaded via CDN, like the Google Fonts above) powers the Analytics tab's charts. -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
         <style>
             :root {
                 --bg-primary: #0a0a0f;
@@ -1678,6 +1680,187 @@
                     padding: 12px;
                 }
             }
+            /* ==============================================
+               Analytics Tab
+               ============================================== */
+            #analyticsView {
+                background: var(--bg-primary);
+            }
+            .analytics-scroll {
+                flex: 1;
+                overflow-y: auto;
+                padding: 24px clamp(16px, 4vw, 48px) 64px;
+            }
+            .analytics-empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                min-height: 60vh;
+                text-align: center;
+            }
+            .analytics-empty-glyph {
+                font-family: var(--font-mono);
+                font-size: 38px;
+                letter-spacing: 8px;
+                color: var(--accent-blue);
+                animation: analyticPulse 2.4s ease-in-out infinite;
+            }
+            @keyframes analyticPulse {
+                0%, 100% { opacity: 0.25; }
+                50% { opacity: 0.6; }
+            }
+            .analytics-empty-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+            .analytics-empty-sub { font-size: 13px; color: var(--text-muted); }
+
+            .analytics-dashboard {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 28px;
+            }
+            /* Staggered reveal on first paint. */
+            .analytics-dashboard > * { animation: analyticRise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+            .analytics-dashboard > *:nth-child(1) { animation-delay: 0.02s; }
+            .analytics-dashboard > *:nth-child(2) { animation-delay: 0.08s; }
+            .analytics-dashboard > *:nth-child(3) { animation-delay: 0.14s; }
+            .analytics-dashboard > *:nth-child(4) { animation-delay: 0.20s; }
+            .analytics-dashboard > *:nth-child(5) { animation-delay: 0.26s; }
+            @keyframes analyticRise {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: none; }
+            }
+
+            /* Hero */
+            .analytic-card.analytic-hero-card {
+                position: relative;
+                border-color: var(--border-accent);
+                background:
+                    radial-gradient(120% 160% at 0% 0%, rgba(108, 140, 255, 0.16), transparent 60%),
+                    radial-gradient(120% 160% at 100% 100%, rgba(155, 109, 255, 0.14), transparent 55%),
+                    var(--bg-secondary);
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .analytic-hero-stats { position: relative; border-top: 1px solid var(--border-color); margin-top: 4px; padding-top: 14px; }
+            .analytic-hero-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+            .analytic-hero-name { font-size: 20px; font-weight: 700; color: var(--text-primary); line-height: 1.1; }
+            .analytic-hero-meta { font-size: 12px; color: var(--text-secondary); }
+            .analytic-statline { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--text-secondary); }
+            .analytic-statline b { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+            .analytic-statline .l { opacity: 0.7; margin-left: 3px; }
+            .analytic-progress {
+                margin-top: 18px;
+                height: 7px;
+                border-radius: 99px;
+                background: var(--bg-tertiary);
+                overflow: hidden;
+                position: relative;
+                z-index: 1;
+            }
+            .analytic-progress-bar { height: 100%; width: 0%; border-radius: 99px; background: var(--accent-gradient); transition: width 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+            .analytic-progress-label { margin-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); position: relative; z-index: 1; }
+            .analytic-ended-badge {
+                font-family: var(--font-mono);
+                font-size: 10px;
+                letter-spacing: 1px;
+                padding: 2px 8px;
+                border-radius: 99px;
+                color: var(--status-connected);
+                border: 1px solid var(--status-connected);
+                background: rgba(34, 197, 94, 0.12);
+            }
+            .analytic-reset-btn {
+                position: absolute;
+                top: 14px;
+                right: 14px;
+                z-index: 2;
+                font-family: var(--font-mono);
+                font-size: 10px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                color: var(--text-muted);
+                background: var(--bg-tertiary);
+                border: 1px solid var(--border-color);
+                border-radius: 99px;
+                padding: 4px 10px;
+                cursor: pointer;
+                transition: color var(--transition), border-color var(--transition);
+            }
+            .analytic-reset-btn:hover {
+                color: var(--log-error);
+                border-color: var(--log-error);
+            }
+
+            /* Sections + cards */
+            .analytic-section { display: flex; flex-direction: column; gap: 14px; }
+            .analytic-section-title {
+                margin: 0;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--text-secondary);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .analytic-section-title::before { content: ""; width: 3px; height: 14px; border-radius: 2px; background: var(--accent-gradient); }
+            .analytic-grid { display: grid; gap: 16px; }
+            .analytic-grid-2 { grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); }
+            .analytic-grid-3 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+            .analytic-grid-4 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+            .analytic-grid-half { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .analytic-card {
+                padding: 16px 18px;
+                border-radius: 14px;
+                border: 1px solid var(--border-color);
+                background: var(--bg-secondary);
+                transition: border-color var(--transition);
+                min-width: 0;
+                position: relative;
+            }
+            .analytic-card:hover { border-color: var(--border-accent); }
+            .analytic-card-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; }
+            .analytic-card-title-row { display: flex; align-items: center; gap: 8px; }
+            .analytic-card-title-row > :first-child { margin-right: auto; }
+            .analytic-badge { font-size: 12px; font-weight: 700; color: var(--accent-blue); border: 1px solid var(--border-accent); border-radius: 999px; padding: 2px 10px; }
+
+            /* Info popover */
+            .analytic-info-btn, .analytic-dl-btn {
+                flex: 0 0 auto; width: 18px; height: 18px; padding: 0;
+                border-radius: 50%; border: 1px solid var(--border-accent, rgba(120,120,150,0.4));
+                background: transparent; color: var(--text-secondary);
+                font: 700 11px var(--font-sans, "Inter, sans-serif"); line-height: 1; cursor: pointer;
+                display: inline-flex; align-items: center; justify-content: center;
+            }
+            .analytic-dl-btn { font-size: 12px; }
+            .analytic-info-btn:hover, .analytic-dl-btn:hover { color: var(--text-primary); }
+            .analytic-info-pop {
+                position: absolute; top: 34px; right: 12px; max-width: 240px;
+                background: var(--bg-elevated, #1c1c26); border: 1px solid var(--border-accent, rgba(120,120,150,0.4));
+                border-radius: 8px; padding: 10px 12px; font-size: 11px; line-height: 1.45;
+                color: var(--text-secondary); box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 20; display: none;
+            }
+            .analytic-info-pop.open { display: block; }
+            .analytic-canvas { position: relative; height: 230px; }
+            .analytic-canvas-lg { height: 288px; }
+            .analytic-card-wide { grid-column: 1 / -1; }
+
+            /* Win-rate gauge */
+            .analytic-winrate-wrap { position: relative; height: 230px; }
+            .analytic-winrate-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+            .analytic-winrate-center span { font-size: 30px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+            .analytic-winrate-center small { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 4px; }
+
+            @media (max-width: 880px) {
+                .analytic-grid-2, .analytic-grid-3, .analytic-grid-4, .analytic-grid-half { grid-template-columns: 1fr; }
+            }
+            @media (max-width: 560px) {
+                .analytics-scroll { padding: 16px 12px 48px; }
+            }
         </style>
     </head>
     <body>
@@ -1701,6 +1884,7 @@
             <button id="logsTabBtn" class="tab-btn active" onclick="switchTab('logs')">Logs & Dashboard</button>
             <button id="imagesTabBtn" class="tab-btn" onclick="switchTab('images')">Debug Images</button>
             <button id="logFilesTabBtn" class="tab-btn" onclick="switchTab('logFiles')">Log Files</button>
+            <button id="analyticsTabBtn" class="tab-btn" onclick="switchTab('analytics')">Analytics</button>
         </nav>
 
         <!-- Logs & Dashboard View -->
@@ -1966,6 +2150,275 @@
                     <!-- File rows will be injected here. -->
                 </div>
                 <div id="logFilesEmpty" class="log-files-empty" style="display: none;">No log files yet. Completed sessions will show up here.</div>
+            </div>
+        </div>
+
+        <!-- Analytics View -->
+        <div id="analyticsView" class="tab-view">
+            <div class="analytics-scroll">
+                <div id="analyticsEmpty" class="analytics-empty">
+                    <div class="analytics-empty-glyph">/ / /</div>
+                    <div class="analytics-empty-title">Waiting for the trainee scan</div>
+                    <div class="analytics-empty-sub">Charts populate as soon as the bot finishes scanning the trainee's stats this turn.</div>
+                </div>
+
+                <div id="analyticsDashboard" class="analytics-dashboard" style="display: none">
+                    <!-- Trainee -->
+                    <section class="analytic-section">
+                        <h3 class="analytic-section-title">Trainee</h3>
+                        <div class="analytic-grid analytic-grid-half">
+                            <div class="analytic-card analytic-hero-card">
+                                <button class="analytic-reset-btn" onclick="resetAnalytics()" title="Discard the saved run and start the analytics fresh from the current turn">Start fresh</button>
+                                <div class="analytic-hero-line">
+                                    <span class="analytic-hero-name" id="analyticTraineeName">-</span>
+                                    <span class="analytic-hero-meta"><span id="analyticScenario">-</span> &middot; <span id="analyticDate">-</span> &middot; <span id="analyticTurnLabel">Turn -</span></span>
+                                    <span id="analyticEndedBadge" class="analytic-ended-badge" style="display: none">RUN COMPLETE</span>
+                                </div>
+                                <div class="analytic-progress"><div class="analytic-progress-bar" id="analyticProgressBar"></div></div>
+                                <div class="analytic-statline" id="analyticStatline"></div>
+                                <div class="analytic-hero-stats">
+                                    <div class="analytic-card-title analytic-card-title-row"><span>Stats</span><span class="analytic-badge" id="analyticStatTotalBadge">&Sigma; 0</span><button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticRadar" onclick="analyticToggleInfo(event, this)">i</button><button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticRadar" onclick="analyticExportChartCsv(event, this)">&#8595;</button></div>
+                                    <div class="analytic-info-pop" data-info-for="analyticRadar" onclick="event.stopPropagation()"></div>
+                                    <div class="analytic-canvas analytic-canvas-lg"><canvas id="analyticRadar"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="analytic-grid analytic-grid-2">
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Stat Growth</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticStatGrowth" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticStatGrowth" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticStatGrowth" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticStatGrowth"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Stat Composition Over Time</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticStatComp" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticStatComp" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticStatComp" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas analytic-canvas-lg"><canvas id="analyticStatComp"></canvas></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Training -->
+                    <section class="analytic-section">
+                        <h3 class="analytic-section-title">Training</h3>
+                        <div class="analytic-grid analytic-grid-4">
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Training Focus</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticTrainingDist" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticTrainingDist" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticTrainingDist" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticTrainingDist"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Stat Gains</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticStatGains" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticStatGains" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticStatGains" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticStatGains"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Cumulative Stat Gains</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticCumGains" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticCumGains" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticCumGains" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticCumGains"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Skill Points Over Time</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticSkillPts" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticSkillPts" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticSkillPts" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticSkillPts"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="analytic-grid analytic-grid-3">
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Failure Chance Over Time</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticFailure" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticFailure" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticFailure" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticFailure"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Failure-Chance Distribution</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticFailHist" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticFailHist" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticFailHist" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticFailHist"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Energy vs Failure</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticEnergyFail" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticEnergyFail" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticEnergyFail" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticEnergyFail"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="analytic-grid">
+                            <div class="analytic-card analytic-card-wide">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Stat Gains per Turn</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticGainsPerTurn" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticGainsPerTurn" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticGainsPerTurn" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticGainsPerTurn"></canvas></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Racing -->
+                    <section class="analytic-section">
+                        <h3 class="analytic-section-title">Racing</h3>
+                        <div class="analytic-grid analytic-grid-4">
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Win Rate</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticWinRate" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticWinRate" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticWinRate" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-winrate-wrap">
+                                    <canvas id="analyticWinRate"></canvas>
+                                    <div class="analytic-winrate-center"><span id="analyticWinPct">0%</span><small id="analyticWinTally">0/0</small></div>
+                                </div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Races by Grade</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticRacesByGrade" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticRacesByGrade" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticRacesByGrade" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticRacesByGrade"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Wins &amp; Losses by Grade</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticWinByGrade" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticWinByGrade" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticWinByGrade" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticWinByGrade"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Race Results</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticRaceTimeline" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticRaceTimeline" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticRaceTimeline" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticRaceTimeline"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="analytic-grid analytic-grid-2">
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Races by Surface</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticBySurface" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticBySurface" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticBySurface" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticBySurface"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Races by Distance</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticByDistance" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticByDistance" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticByDistance" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticByDistance"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="analytic-grid analytic-grid-2">
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Fans Over Time</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticFans" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticFans" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticFans" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticFans"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Fans per Race</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticFansPerRace" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticFansPerRace" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticFansPerRace" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticFansPerRace"></canvas></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Per-year + cadence -->
+                    <section class="analytic-section">
+                        <h3 class="analytic-section-title">Per-Year &amp; Cadence</h3>
+                        <div class="analytic-grid analytic-grid-3">
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Action Mix by Year</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticActionMix" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticActionMix" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticActionMix" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticActionMix"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Action Distribution</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticActionDist" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticActionDist" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticActionDist" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticActionDist"></canvas></div>
+                            </div>
+                            <div class="analytic-card">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Mood Distribution</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticMoodDist" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticMoodDist" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticMoodDist" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticMoodDist"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="analytic-grid">
+                            <div class="analytic-card analytic-card-wide">
+                                <div class="analytic-card-title analytic-card-title-row">
+                                    <span>Energy &amp; Mood Over Time</span>
+                                    <button class="analytic-info-btn" type="button" aria-label="About this chart" data-info="analyticEnergyMood" onclick="analyticToggleInfo(event, this)">i</button>
+                                    <button class="analytic-dl-btn" type="button" aria-label="Export chart data as CSV" title="Export as CSV" data-export="analyticEnergyMood" onclick="analyticExportChartCsv(event, this)">&#8595;</button>
+                                </div>
+                                <div class="analytic-info-pop" data-info-for="analyticEnergyMood" onclick="event.stopPropagation()"></div>
+                                <div class="analytic-canvas"><canvas id="analyticEnergyMood"></canvas></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
 
@@ -2310,6 +2763,13 @@
                         // Smart Race Solver enabled flag pushed by Racing.kt at run start. Toggles
                         // the .srs-disabled class on the panel so it disappears when SRS is off.
                         setSmartRaceSolverEnabled(event.data.substring(10) === "true")
+                    } else if (event.data.startsWith("ANALYTICS:")) {
+                        // Run-analytics snapshot pushed by RunAnalytics at each turn boundary and at run end.
+                        try {
+                            onAnalyticsSnapshot(JSON.parse(event.data.substring(10)))
+                        } catch (e) {
+                            console.error("Error parsing analytics snapshot:", e)
+                        }
                     } else {
                         // Process individual log messages, images or unknown formats.
                         try {
@@ -3800,15 +4260,18 @@
              * @param {string} tabID - The ID of the tab to switch to ('logs', 'images', or 'logFiles').
              */
             function switchTab(tabID) {
+                if (tabID !== "analytics") analyticStopRuntimeTicker()
                 // Update buttons.
                 document.getElementById("logsTabBtn").classList.toggle("active", tabID === "logs")
                 document.getElementById("imagesTabBtn").classList.toggle("active", tabID === "images")
                 document.getElementById("logFilesTabBtn").classList.toggle("active", tabID === "logFiles")
+                document.getElementById("analyticsTabBtn").classList.toggle("active", tabID === "analytics")
 
                 // Update views.
                 document.getElementById("logsView").classList.toggle("active", tabID === "logs")
                 document.getElementById("imagesView").classList.toggle("active", tabID === "images")
                 document.getElementById("logFilesView").classList.toggle("active", tabID === "logFiles")
+                document.getElementById("analyticsView").classList.toggle("active", tabID === "analytics")
 
                 if (tabID === "logs" && autoScroll) {
                     scrollToBottom()
@@ -3818,6 +4281,15 @@
                 if (tabID === "logFiles" && !window.__logFilesLoaded) {
                     loadLogFiles()
                     window.__logFilesLoaded = true
+                }
+
+                // Lazy-init the analytics charts on first activation, then paint the latest snapshot. Further repaints are push-driven per turn.
+                if (tabID === "analytics") {
+                    if (!window.__analyticsInited) {
+                        initAnalyticsCharts()
+                        window.__analyticsInited = true
+                    }
+                    renderAnalytics()
                 }
             }
 
@@ -4091,6 +4563,862 @@
             document.getElementById("logFileModal").addEventListener("click", function(e) {
                 if (e.target === this) closeLogFileModal()
             })
+
+            // //////////////////////////////////////////////////////////////////////////////////////////////////
+            // //////////////////////////////////////////////////////////////////////////////////////////////////
+            // Analytics Tab
+
+            // Latest analytics snapshot pushed by the bot (RunAnalytics), stored on each ANALYTICS: frame and repainted on arrival while the tab is active.
+            var latestAnalyticsSnapshot = null
+            var analyticsCharts = {}
+
+            // Canonical Uma Musume stat colors so the charts read as domain-authentic rather than generic.
+            var ANALYTIC_STAT_ORDER = ["speed", "stamina", "power", "guts", "wit"]
+            var ANALYTIC_STAT_LABELS = { speed: "Speed", stamina: "Stamina", power: "Power", guts: "Guts", wit: "Wit" }
+            var ANALYTIC_STAT_COLORS = { speed: "#4d9fff", stamina: "#ff5c5c", power: "#ffb03d", guts: "#ff6fb5", wit: "#54e08a" }
+            var ANALYTIC_MOOD_ORDER = ["AWFUL", "BAD", "NORMAL", "GOOD", "GREAT"]
+            var ANALYTIC_APT_COLORS = { S: "#ff5cc8", A: "#ff7a5c", B: "#ffb03d", C: "#54e08a", D: "#4d9fff", E: "#8aa0c0", F: "#6b7280", G: "#55556a" }
+            var ANALYTIC_GRADE_RANK = ["G1", "G2", "G3", "OP", "PRE_OP", "MAIDEN", "DEBUT", "FINALE", "EX"]
+            var ANALYTIC_ACTION_DEFS = [
+                { key: "TRAIN", label: "Train", cssVar: "--accent-blue", fallback: "#6c8cff" },
+                { key: "RACE", label: "Race", cssVar: "--accent-purple", fallback: "#9b6dff" },
+                { key: "REST", label: "Rest", cssVar: "--status-connected", fallback: "#22c55e" },
+                { key: "RECOVER_MOOD", label: "Mood", cssVar: "--log-warn", fallback: "#f59e0b" }
+            ]
+
+            /**
+             * Read a CSS custom property from :root.
+             * @param {string} name - The CSS variable name including the leading --.
+             * @returns {string} The trimmed value, or "".
+             */
+            function analyticCssVar(name) {
+                return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+            }
+
+            /**
+             * Map a race grade enum name to its calendar color, falling back to gray.
+             * @param {string} grade - Grade enum name (e.g. "G1", "PRE_OP").
+             * @returns {string} A hex color.
+             */
+            function analyticGradeColor(grade) {
+                return (typeof CAL_GRADE_COLORS !== "undefined" && CAL_GRADE_COLORS[grade]) || "#6b7280"
+            }
+
+            /**
+             * Pretty-print a grade enum name for an axis label.
+             * @param {string} grade - Grade enum name.
+             * @returns {string} The display label.
+             */
+            function analyticGradeLabel(grade) {
+                return { PRE_OP: "Pre-OP", MAIDEN: "Maiden", DEBUT: "Debut", FINALE: "Finale" }[grade] || grade
+            }
+
+            /**
+             * Title-case an enum name (e.g. "RECOVER_MOOD" -> "Recover Mood").
+             * @param {string} value - The raw string.
+             * @returns {string} The title-cased string.
+             */
+            function analyticTitleCase(value) {
+                return String(value || "")
+                    .toLowerCase()
+                    .replace(/(^|[_\s])([a-z])/g, function (_m, sep, ch) {
+                        return (sep ? " " : "") + ch.toUpperCase()
+                    })
+            }
+
+            /**
+             * Abbreviate a large number (1234 -> 1.2k, 1200000 -> 1.2M).
+             * @param {number} n - The value.
+             * @returns {string} The abbreviated string.
+             */
+            function analyticAbbrevNum(n) {
+                if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M"
+                if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, "") + "k"
+                return String(n)
+            }
+
+            /**
+             * Format an elapsed-millisecond duration as "Xh Ym" or "Xm Ys".
+             * @param {number} ms - Duration in milliseconds.
+             * @returns {string} The formatted duration.
+             */
+            function analyticFormatRuntime(ms) {
+                var s = Math.floor((ms || 0) / 1000)
+                var h = Math.floor(s / 3600)
+                var m = Math.floor((s % 3600) / 60)
+                if (h > 0) return h + "h " + m + "m"
+                return m + "m " + (s % 60) + "s"
+            }
+
+            /**
+             * Set an element's text content by id.
+             * @param {string} id - Element id.
+             * @param {string} text - Text to set.
+             */
+            function analyticSetText(id, text) {
+                var el = document.getElementById(id)
+                if (el) el.textContent = text
+            }
+
+            /**
+             * Apply a mutation to a chart and repaint it without animation.
+             * @param {string} key - Chart key in analyticsCharts.
+             * @param {function} mutate - Callback that mutates the chart's data in place.
+             */
+            function analyticUpdateChart(key, mutate) {
+                var chart = analyticsCharts[key]
+                if (!chart) return
+                mutate(chart)
+                chart.update("none")
+            }
+
+            /**
+             * Handle an incoming analytics snapshot: store it and flag a redraw. On the final frame, force a paint and stop the loop.
+             * @param {object} snapshot - Parsed analytics snapshot.
+             */
+            function onAnalyticsSnapshot(snapshot) {
+                if (!snapshot || typeof snapshot !== "object") return
+                latestAnalyticsSnapshot = snapshot
+                // Push-driven: the bot broadcasts a snapshot at each turn start (and turn end), so repaint as soon as one arrives while the tab is visible.
+                var view = document.getElementById("analyticsView")
+                if (view && view.classList.contains("active")) renderAnalytics()
+            }
+
+            /** Ask the bot to discard the saved run and start the analytics over from the current turn. */
+            function resetAnalytics() {
+                if (!confirm("Discard the saved run and start the analytics over from the current turn? This cannot be undone.")) return
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send("CMD:RESET_ANALYTICS")
+                } else {
+                    alert("Not connected to the bot.")
+                }
+            }
+
+            var ANALYTIC_GRID_COLOR = "rgba(120, 120, 150, 0.12)"
+
+            function analyticLinAxis() { return { grid: { color: ANALYTIC_GRID_COLOR }, ticks: { maxTicksLimit: 6 }, border: { display: false }, grace: "8%" } }
+            function analyticCatAxis() { return { grid: { display: false }, ticks: { maxTicksLimit: 12 }, border: { display: false } } }
+            function analyticTimeSeriesScales() { return { x: analyticCatAxis(), y: analyticLinAxis() } }
+
+            /** Scriptable backgroundColor that paints a top-to-bottom gradient over the chart area; recomputes on resize. */
+            function analyticAreaGradient(from, to) {
+                return function (ctx) {
+                    var area = ctx.chart.chartArea
+                    if (!area) return from
+                    var g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom)
+                    g.addColorStop(0, from)
+                    g.addColorStop(1, to)
+                    return g
+                }
+            }
+
+            /** Tooltip title for per-turn charts: "Turn 37 (Classic Early Jul)". */
+            function analyticTooltipTurnTitle(items) {
+                if (!items || !items.length) return ""
+                var turn = items[0].label
+                var date = (window.__analyticTurnDates && window.__analyticTurnDates[items[0].dataIndex]) || ""
+                return date ? "Turn " + turn + " (" + date + ")" : "Turn " + turn
+            }
+
+            /** Register a one-time vertical-crosshair plugin for charts opting in via options.plugins.analyticCrosshair. */
+            function analyticRegisterCrosshair() {
+                if (window.__analyticCrosshairReg) return
+                window.__analyticCrosshairReg = true
+                Chart.register({
+                    id: "analyticCrosshair",
+                    afterDatasetsDraw: function (chart) {
+                        if (!chart.options.plugins || chart.options.plugins.analyticCrosshair !== true) return
+                        var active = chart.tooltip && chart.tooltip._active
+                        if (!active || !active.length) return
+                        var x = active[0].element.x
+                        var ctx = chart.ctx
+                        ctx.save()
+                        ctx.beginPath()
+                        ctx.moveTo(x, chart.chartArea.top)
+                        ctx.lineTo(x, chart.chartArea.bottom)
+                        ctx.lineWidth = 1
+                        ctx.strokeStyle = "rgba(140, 160, 220, 0.35)"
+                        ctx.stroke()
+                        ctx.restore()
+                    }
+                })
+            }
+
+            /** Register a one-time plugin that prints each bar's value above it, for charts opting in via options.plugins.analyticBarValueLabels. */
+            function analyticRegisterBarValueLabels() {
+                if (window.__analyticBarLabelReg) return
+                window.__analyticBarLabelReg = true
+                Chart.register({
+                    id: "analyticBarValueLabels",
+                    afterDatasetsDraw: function (chart) {
+                        if (!chart.options.plugins || chart.options.plugins.analyticBarValueLabels !== true) return
+                        var ctx = chart.ctx
+                        ctx.save()
+                        ctx.font = "700 10px " + (analyticCssVar("--font-sans") || "Inter, sans-serif")
+                        ctx.fillStyle = analyticCssVar("--text-primary") || "#dfe3f2"
+                        ctx.textAlign = "center"
+                        chart.data.datasets.forEach(function (ds, di) {
+                            var meta = chart.getDatasetMeta(di)
+                            if (meta.hidden) return
+                            meta.data.forEach(function (el, i) {
+                                var v = ds.data[i]
+                                if (v == null || v === 0) return
+                                var label = (typeof v === "number" && v >= 1000) ? analyticAbbrevNum(v) : v
+                                var ty = el.y - 3
+                                if (ty - 10 < chart.chartArea.top) {
+                                    // Not enough room above the bar; draw the label just inside the top of the bar so it is never clipped.
+                                    ctx.textBaseline = "top"
+                                    ty = el.y + 3
+                                } else {
+                                    ctx.textBaseline = "bottom"
+                                }
+                                ctx.fillText(label, el.x, ty)
+                            })
+                        })
+                        ctx.restore()
+                    }
+                })
+            }
+
+            /** Register a one-time plugin that draws the dataset total in a doughnut's hole, for charts opting in via options.plugins.analyticDoughnutCenter. */
+            function analyticRegisterDoughnutCenter() {
+                if (window.__analyticDoughCenterReg) return
+                window.__analyticDoughCenterReg = true
+                Chart.register({
+                    id: "analyticDoughnutCenter",
+                    afterDatasetsDraw: function (chart) {
+                        if (!chart.options.plugins || chart.options.plugins.analyticDoughnutCenter !== true) return
+                        var ds = chart.data.datasets[0]
+                        if (!ds) return
+                        var el = chart.getDatasetMeta(0).data[0]
+                        if (!el) return
+                        var total = ds.data.reduce(function (a, b) { return a + (b || 0) }, 0)
+                        var ctx = chart.ctx
+                        ctx.save()
+                        ctx.textAlign = "center"
+                        ctx.textBaseline = "middle"
+                        ctx.fillStyle = analyticCssVar("--text-primary") || "#eef0fa"
+                        ctx.font = "700 21px " + (analyticCssVar("--font-sans") || "Inter, sans-serif")
+                        ctx.fillText(total >= 1000 ? analyticAbbrevNum(total) : total, el.x, el.y - 7)
+                        ctx.fillStyle = analyticCssVar("--text-secondary") || "#8888a0"
+                        ctx.font = "600 10px " + (analyticCssVar("--font-sans") || "Inter, sans-serif")
+                        ctx.fillText("total", el.x, el.y + 12)
+                        ctx.restore()
+                    }
+                })
+            }
+
+            /** Tooltip label for doughnut charts: "Label: value (pct%)" using the dataset total as the denominator, so each slice shows its share on hover. */
+            function analyticDoughnutTooltipLabel(ctx) {
+                var data = ctx.dataset.data || []
+                var total = data.reduce(function (a, b) { return a + (b || 0) }, 0)
+                var value = ctx.parsed || 0
+                var pct = total ? Math.round((value / total) * 100) : 0
+                return (ctx.label || "") + ": " + value + " (" + pct + "%)"
+            }
+
+            /** Create a themed doughnut chart. opts: { cutout, legend }. */
+            function analyticDoughnut(canvasId, labels, colors, opts) {
+                opts = opts || {}
+                return new Chart(document.getElementById(canvasId), {
+                    type: "doughnut",
+                    data: { labels: labels, datasets: [{ data: labels.map(function () { return 0 }), backgroundColor: colors, borderColor: analyticCssVar("--bg-secondary") || "#12121a", borderWidth: 2, hoverOffset: 0 }] },
+                    options: { cutout: opts.cutout || "62%", plugins: { analyticDoughnutCenter: true, legend: { display: opts.legend !== false, position: "right" }, tooltip: { callbacks: { label: analyticDoughnutTooltipLabel } } } }
+                })
+            }
+
+            /** Create every analytics Chart instance once with empty data and themed options. Later updates reuse these via .update(). */
+            function initAnalyticsCharts() {
+                if (typeof Chart === "undefined") {
+                    console.error("Chart.js failed to load; analytics charts unavailable.")
+                    return
+                }
+                analyticRegisterCrosshair()
+                analyticRegisterBarValueLabels()
+                analyticRegisterDoughnutCenter()
+                var textSec = analyticCssVar("--text-secondary") || "#8888a0"
+                var gridColor = "rgba(120, 120, 150, 0.12)"
+                Chart.defaults.color = textSec
+                Chart.defaults.font.family = analyticCssVar("--font-sans") || "Inter, sans-serif"
+                Chart.defaults.font.size = 11
+                Chart.defaults.maintainAspectRatio = false
+                Chart.defaults.animation = { duration: 350 }
+                Chart.defaults.plugins.legend.labels.usePointStyle = true
+                Chart.defaults.plugins.legend.labels.boxWidth = 8
+                Chart.defaults.plugins.legend.labels.boxHeight = 8
+                Chart.defaults.plugins.legend.labels.padding = 14
+                Chart.defaults.plugins.tooltip.backgroundColor = "rgba(10, 10, 15, 0.95)"
+                Chart.defaults.plugins.tooltip.borderColor = analyticCssVar("--border-accent") || "#3a3a5a"
+                Chart.defaults.plugins.tooltip.borderWidth = 1
+                Chart.defaults.plugins.tooltip.padding = 10
+                Chart.defaults.plugins.tooltip.cornerRadius = 8
+                // Tooltips never faded in because Chart.defaults.animation was replaced wholesale, freezing the opacity tween. Render them instantly.
+                Chart.defaults.plugins.tooltip.animation = false
+                // Gradient area fills are CanvasGradient objects that Chart.js cannot interpolate.
+                // Never animate color properties, or a resize/hover tween throws "this._fn is not a function" and blanks the charts.
+                Chart.defaults.animations.colors = false
+
+                var linAxis = { grid: { color: gridColor }, ticks: { maxTicksLimit: 6 }, border: { display: false }, grace: "8%" }
+                var catAxis = { grid: { display: false }, ticks: { maxTicksLimit: 12 }, border: { display: false } }
+                var statColors = ANALYTIC_STAT_ORDER.map(function (s) { return ANALYTIC_STAT_COLORS[s] })
+                var statLabels = ANALYTIC_STAT_ORDER.map(function (s) { return ANALYTIC_STAT_LABELS[s] })
+
+                analyticsCharts.radar = new Chart(document.getElementById("analyticRadar"), {
+                    type: "radar",
+                    data: { labels: statLabels, datasets: [{ label: "Stats", data: [0, 0, 0, 0, 0], fill: true, backgroundColor: "rgba(108, 140, 255, 0.16)", borderColor: analyticCssVar("--accent-blue") || "#6c8cff", borderWidth: 2, pointBackgroundColor: statColors, pointBorderColor: analyticCssVar("--bg-primary") || "#0a0a0f", pointRadius: 4, pointHoverRadius: 6 }] },
+                    options: { plugins: { legend: { display: false } }, scales: { r: { angleLines: { color: gridColor }, grid: { color: gridColor }, pointLabels: { color: textSec, font: { size: 11, weight: "600" }, callback: function (label, i) { var s = ANALYTIC_STAT_ORDER[i]; var v = (window.__analyticStats && window.__analyticStats[s]) || 0; return ANALYTIC_STAT_LABELS[s] + " " + v } }, ticks: { display: false, backdropColor: "transparent" }, beginAtZero: true } } }
+                })
+
+                analyticsCharts.statGrowth = new Chart(document.getElementById("analyticStatGrowth"), {
+                    type: "line",
+                    data: { labels: [], datasets: ANALYTIC_STAT_ORDER.map(function (s) { return { label: ANALYTIC_STAT_LABELS[s], data: [], borderColor: ANALYTIC_STAT_COLORS[s], backgroundColor: ANALYTIC_STAT_COLORS[s], borderWidth: 2.5, tension: 0.3, pointRadius: 2.2, pointHoverRadius: 5, pointBorderColor: "rgba(255,255,255,0.9)", pointBorderWidth: 1, pointHitRadius: 12 } }) },
+                    options: { interaction: { mode: "index", intersect: false }, plugins: { legend: { position: "bottom" }, analyticCrosshair: true, tooltip: { callbacks: { title: analyticTooltipTurnTitle } } }, scales: { x: catAxis, y: linAxis } }
+                })
+
+                analyticsCharts.trainingDist = new Chart(document.getElementById("analyticTrainingDist"), {
+                    type: "doughnut",
+                    data: { labels: statLabels, datasets: [{ data: [0, 0, 0, 0, 0], backgroundColor: statColors, borderColor: analyticCssVar("--bg-secondary") || "#12121a", borderWidth: 2, hoverOffset: 0 }] },
+                    options: { cutout: "60%", plugins: { analyticDoughnutCenter: true, legend: { position: "right" }, tooltip: { callbacks: { label: analyticDoughnutTooltipLabel } } } }
+                })
+
+                analyticsCharts.statGains = new Chart(document.getElementById("analyticStatGains"), {
+                    type: "bar",
+                    data: { labels: statLabels, datasets: [{ data: [0, 0, 0, 0, 0], backgroundColor: statColors, borderRadius: 6, borderSkipped: false }] },
+                    options: { plugins: { legend: { display: false }, analyticBarValueLabels: true }, scales: { x: catAxis, y: linAxis } }
+                })
+
+                analyticsCharts.failure = new Chart(document.getElementById("analyticFailure"), {
+                    type: "line",
+                    data: { labels: [], datasets: [{ label: "Failure %", data: [], borderColor: analyticCssVar("--log-warn") || "#f59e0b", backgroundColor: analyticAreaGradient("rgba(245,158,11,0.40)", "rgba(245,158,11,0.02)"), borderWidth: 2.5, tension: 0.3, fill: true, spanGaps: true, pointRadius: 2.2, pointHoverRadius: 5, pointBorderColor: "rgba(255,255,255,0.9)", pointBorderWidth: 1, pointHitRadius: 12 }] },
+                    options: { interaction: { mode: "index", intersect: false }, plugins: { legend: { display: false }, analyticCrosshair: true, tooltip: { callbacks: { title: analyticTooltipTurnTitle } } }, scales: { x: catAxis, y: { grid: { color: gridColor }, border: { display: false }, suggestedMin: 0, suggestedMax: 100, ticks: { callback: function (v) { return v + "%" }, maxTicksLimit: 6 } } } }
+                })
+
+                analyticsCharts.winRate = new Chart(document.getElementById("analyticWinRate"), {
+                    type: "doughnut",
+                    data: { labels: ["Won", "Lost"], datasets: [{ data: [0, 1], backgroundColor: [analyticCssVar("--status-connected") || "#22c55e", "rgba(120, 120, 150, 0.16)"], borderWidth: 0 }] },
+                    options: { cutout: "78%", plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+                })
+
+                analyticsCharts.racesByGrade = new Chart(document.getElementById("analyticRacesByGrade"), {
+                    type: "bar",
+                    data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderRadius: 6, borderSkipped: false }] },
+                    options: { plugins: { legend: { display: false }, analyticBarValueLabels: true }, scales: { x: catAxis, y: { grid: { color: gridColor }, border: { display: false }, ticks: { precision: 0, maxTicksLimit: 5 } } } }
+                })
+
+                analyticsCharts.fans = new Chart(document.getElementById("analyticFans"), {
+                    type: "line",
+                    data: { labels: [], datasets: [{ label: "Fans", data: [], borderColor: analyticCssVar("--accent-purple") || "#9b6dff", backgroundColor: analyticAreaGradient("rgba(155,109,255,0.45)", "rgba(155,109,255,0.02)"), borderWidth: 2.5, tension: 0.3, fill: true, pointRadius: 2.2, pointHoverRadius: 5, pointBorderColor: "rgba(255,255,255,0.9)", pointBorderWidth: 1, pointHitRadius: 12 }] },
+                    options: { interaction: { mode: "index", intersect: false }, plugins: { legend: { display: false }, analyticCrosshair: true, tooltip: { callbacks: { title: analyticTooltipTurnTitle } } }, scales: { x: catAxis, y: { grid: { color: gridColor }, border: { display: false }, ticks: { callback: function (v) { return analyticAbbrevNum(v) }, maxTicksLimit: 6 } } } }
+                })
+
+                analyticsCharts.actionMix = new Chart(document.getElementById("analyticActionMix"), {
+                    type: "bar",
+                    data: { labels: [], datasets: ANALYTIC_ACTION_DEFS.map(function (d) { return { label: d.label, data: [], backgroundColor: analyticCssVar(d.cssVar) || d.fallback, borderRadius: 4, borderSkipped: false, stack: "actions" } }) },
+                    options: { interaction: { mode: "nearest", intersect: false }, plugins: { legend: { position: "bottom" } }, scales: { x: { stacked: true, grid: { display: false }, border: { display: false } }, y: { stacked: true, grid: { color: gridColor }, border: { display: false }, ticks: { precision: 0, maxTicksLimit: 6 } } } }
+                })
+
+                analyticsCharts.energyMood = new Chart(document.getElementById("analyticEnergyMood"), {
+                    type: "line",
+                    data: {
+                        labels: [],
+                        datasets: [
+                            { label: "Energy", data: [], yAxisID: "y", borderColor: analyticCssVar("--status-connected") || "#22c55e", backgroundColor: analyticAreaGradient("rgba(34,197,94,0.35)", "rgba(34,197,94,0.02)"), borderWidth: 2.5, tension: 0.3, fill: true, pointRadius: 2.2, pointHoverRadius: 5, pointBorderColor: "rgba(255,255,255,0.9)", pointBorderWidth: 1, pointHitRadius: 12 },
+                            { label: "Mood", data: [], yAxisID: "y1", borderColor: analyticCssVar("--accent-blue") || "#6c8cff", borderWidth: 2.5, tension: 0.3, pointRadius: 2.2, pointHoverRadius: 5, pointBorderColor: "rgba(255,255,255,0.9)", pointBorderWidth: 1, pointHitRadius: 12 }
+                        ]
+                    },
+                    options: {
+                        interaction: { mode: "index", intersect: false },
+                        plugins: { legend: { position: "bottom" }, analyticCrosshair: true, tooltip: { callbacks: { title: analyticTooltipTurnTitle, label: function (ctx) { return ctx.dataset.label === "Mood" ? "Mood: " + analyticTitleCase(ANALYTIC_MOOD_ORDER[ctx.raw] || "-") : "Energy: " + ctx.raw + "%" } } } },
+                        scales: {
+                            x: catAxis,
+                            y: { position: "left", grid: { color: gridColor }, border: { display: false }, suggestedMin: 0, suggestedMax: 100 },
+                            y1: { position: "right", min: 0, max: 4, grid: { display: false }, border: { display: false }, ticks: { stepSize: 1, callback: function (v) { return analyticTitleCase(ANALYTIC_MOOD_ORDER[v] || "") } } }
+                        }
+                    }
+                })
+
+                analyticsCharts.statComp = new Chart(document.getElementById("analyticStatComp"), {
+                    type: "line",
+                    data: { labels: [], datasets: ANALYTIC_STAT_ORDER.map(function (s) { return { label: ANALYTIC_STAT_LABELS[s], data: [], borderColor: ANALYTIC_STAT_COLORS[s], backgroundColor: ANALYTIC_STAT_COLORS[s], borderWidth: 0, tension: 0.3, fill: true, pointRadius: 0 } }) },
+                    options: { interaction: { mode: "index", intersect: false }, plugins: { legend: { position: "bottom" }, analyticCrosshair: true, tooltip: { callbacks: { title: analyticTooltipTurnTitle, label: function (ctx) { return ctx.dataset.label + ": " + ctx.raw + "%" } } } }, scales: { x: analyticCatAxis(), y: { stacked: true, min: 0, max: 100, grid: { color: ANALYTIC_GRID_COLOR }, border: { display: false }, ticks: { callback: function (v) { return v + "%" }, maxTicksLimit: 6 } } } }
+                })
+
+                analyticsCharts.skillPts = new Chart(document.getElementById("analyticSkillPts"), {
+                    type: "line",
+                    data: { labels: [], datasets: [{ label: "Skill Pts", data: [], borderColor: analyticCssVar("--accent-blue") || "#6c8cff", backgroundColor: analyticAreaGradient("rgba(108,140,255,0.40)", "rgba(108,140,255,0.02)"), borderWidth: 2.5, tension: 0.3, fill: true, pointRadius: 2.2, pointHoverRadius: 5, pointBorderColor: "rgba(255,255,255,0.9)", pointBorderWidth: 1, pointHitRadius: 12 }] },
+                    options: { interaction: { mode: "index", intersect: false }, plugins: { legend: { display: false }, analyticCrosshair: true, tooltip: { callbacks: { title: analyticTooltipTurnTitle } } }, scales: { x: analyticCatAxis(), y: Object.assign(analyticLinAxis(), { min: 0 }) } }
+                })
+
+                analyticsCharts.cumGains = new Chart(document.getElementById("analyticCumGains"), {
+                    type: "line",
+                    data: { labels: [], datasets: ANALYTIC_STAT_ORDER.map(function (s) { return { label: ANALYTIC_STAT_LABELS[s], data: [], borderColor: ANALYTIC_STAT_COLORS[s], backgroundColor: ANALYTIC_STAT_COLORS[s], borderWidth: 0, tension: 0.3, fill: true, pointRadius: 0 } }) },
+                    options: { interaction: { mode: "index", intersect: false }, plugins: { legend: { position: "bottom" }, analyticCrosshair: true, tooltip: { callbacks: { title: analyticTooltipTurnTitle } } }, scales: { x: analyticCatAxis(), y: { stacked: true, grid: { color: ANALYTIC_GRID_COLOR }, border: { display: false }, ticks: { maxTicksLimit: 6 } } } }
+                })
+
+                analyticsCharts.gainsPerTurn = new Chart(document.getElementById("analyticGainsPerTurn"), {
+                    type: "bar",
+                    data: { labels: [], datasets: ANALYTIC_STAT_ORDER.map(function (s) { return { label: ANALYTIC_STAT_LABELS[s], data: [], backgroundColor: ANALYTIC_STAT_COLORS[s], stack: "g" } }) },
+                    options: { interaction: { mode: "index", intersect: false }, plugins: { legend: { position: "bottom" }, tooltip: { filter: function (item) { return item.parsed.y > 0 }, callbacks: { title: analyticTooltipTurnTitle } } }, scales: { x: { stacked: true, grid: { display: false }, border: { display: false } }, y: { stacked: true, grid: { color: ANALYTIC_GRID_COLOR }, border: { display: false }, ticks: { maxTicksLimit: 6 } } } },
+                    plugins: [{ id: "analyticHideEmptyTooltip", beforeTooltipDraw: function (chart, args) { if (!args.tooltip.dataPoints || args.tooltip.dataPoints.length === 0) return false } }]
+                })
+
+                analyticsCharts.failHist = new Chart(document.getElementById("analyticFailHist"), {
+                    type: "bar",
+                    data: { labels: ["0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", "90-100"], datasets: [{ data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], backgroundColor: analyticCssVar("--log-warn") || "#f59e0b", borderRadius: 4, borderSkipped: false }] },
+                    options: { plugins: { legend: { display: false }, analyticBarValueLabels: true, tooltip: { callbacks: { label: function (ctx) { return ctx.raw + " trainings" } } } }, scales: { x: analyticCatAxis(), y: { grid: { color: ANALYTIC_GRID_COLOR }, border: { display: false }, ticks: { precision: 0, maxTicksLimit: 5 } } } }
+                })
+
+                analyticsCharts.energyFail = new Chart(document.getElementById("analyticEnergyFail"), {
+                    type: "scatter",
+                    data: { datasets: [{ label: "Trainings", data: [], pointBackgroundColor: [], pointRadius: 5, pointHoverRadius: 7 }] },
+                    options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (ctx) { return "Energy " + ctx.raw.x + "%, Fail " + ctx.raw.y + "%" } } } }, scales: { x: { title: { display: true, text: "Energy %" }, min: 0, max: 100, grid: { color: ANALYTIC_GRID_COLOR }, border: { display: false } }, y: { title: { display: true, text: "Failure %" }, min: 0, max: 100, grid: { color: ANALYTIC_GRID_COLOR }, border: { display: false } } } }
+                })
+
+                analyticsCharts.bySurface = analyticDoughnut("analyticBySurface", ["Turf", "Dirt"], [analyticCssVar("--accent-blue") || "#6c8cff", analyticCssVar("--log-warn") || "#f59e0b"])
+                analyticsCharts.byDistance = analyticDoughnut("analyticByDistance", ["Sprint", "Mile", "Medium", "Long"], ["#54e08a", "#4d9fff", "#ffb03d", "#ff6fb5"])
+
+                analyticsCharts.winByGrade = new Chart(document.getElementById("analyticWinByGrade"), {
+                    type: "bar",
+                    data: { labels: [], datasets: [
+                        { label: "Won", data: [], backgroundColor: analyticCssVar("--status-connected") || "#22c55e", stack: "r", borderRadius: 4, borderSkipped: false },
+                        { label: "Lost", data: [], backgroundColor: "rgba(120,120,150,0.30)", stack: "r", borderRadius: 4, borderSkipped: false }
+                    ] },
+                    options: { interaction: { mode: "nearest", intersect: false }, plugins: { legend: { position: "bottom" } }, scales: { x: { stacked: true, grid: { display: false }, border: { display: false } }, y: { stacked: true, grid: { color: ANALYTIC_GRID_COLOR }, border: { display: false }, ticks: { precision: 0, maxTicksLimit: 5 } } } }
+                })
+
+                analyticsCharts.fansPerRace = new Chart(document.getElementById("analyticFansPerRace"), {
+                    type: "bar",
+                    data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderRadius: 4, borderSkipped: false }] },
+                    options: { plugins: { legend: { display: false }, analyticBarValueLabels: true, tooltip: { callbacks: { title: function (items) { var n = window.__analyticFansPerRaceNames; return (n && n[items[0].dataIndex]) || items[0].label }, label: function (ctx) { return analyticAbbrevNum(ctx.raw) + " fans" } } } }, scales: { x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 60, minRotation: 0 } }, y: { grid: { color: ANALYTIC_GRID_COLOR }, border: { display: false }, ticks: { callback: function (v) { return analyticAbbrevNum(v) }, maxTicksLimit: 6 } } } }
+                })
+
+                analyticsCharts.raceTimeline = new Chart(document.getElementById("analyticRaceTimeline"), {
+                    type: "scatter",
+                    data: { datasets: [{ label: "Races", data: [], pointBackgroundColor: [], pointRadius: [], pointHoverRadius: 9 }] },
+                    options: { plugins: { legend: { display: false }, tooltip: { yAlign: "bottom", xAlign: "center", caretPadding: 6, callbacks: { label: function (ctx) { return ctx.raw.name + " - " + (ctx.raw.won ? "Won" : "Lost") + " (" + analyticAbbrevNum(ctx.raw.fans) + " fans)" } } } }, scales: { x: { title: { display: true, text: "Turn" }, min: 0, max: 72, grid: { color: ANALYTIC_GRID_COLOR }, border: { display: false }, ticks: { precision: 0 } }, y: { display: false, min: -1, max: 1 } } }
+                })
+
+                analyticsCharts.actionDist = analyticDoughnut("analyticActionDist", ANALYTIC_ACTION_DEFS.map(function (d) { return d.label }), ANALYTIC_ACTION_DEFS.map(function (d) { return analyticCssVar(d.cssVar) || d.fallback }))
+                analyticsCharts.moodDist = analyticDoughnut("analyticMoodDist", ANALYTIC_MOOD_ORDER.map(analyticTitleCase), ["#ff5c5c", "#ffb03d", "#cccccc", "#54e08a", "#4d9fff"])
+            }
+
+            var analyticRuntimeTimer = null
+
+            /** Update just the Runtime stat from the live clock so it advances every second instead of only on each snapshot. */
+            function analyticTickRuntime() {
+                var snap = latestAnalyticsSnapshot
+                if (!snap) return
+                var view = document.getElementById("analyticsView")
+                if (!view || !view.classList.contains("active")) return
+                var ms = snap.startTimeMs ? Date.now() - snap.startTimeMs : (snap.runtimeMs || 0)
+                analyticSetText("analyticRuntime", analyticFormatRuntime(ms))
+            }
+
+            /** Start the 1s runtime ticker (no-op if already running). */
+            function analyticStartRuntimeTicker() {
+                if (analyticRuntimeTimer) return
+                analyticRuntimeTimer = setInterval(analyticTickRuntime, 1000)
+            }
+
+            /** Stop the runtime ticker. */
+            function analyticStopRuntimeTicker() {
+                if (analyticRuntimeTimer) {
+                    clearInterval(analyticRuntimeTimer)
+                    analyticRuntimeTimer = null
+                }
+            }
+
+            /** Repaint the analytics dashboard (hero, KPIs, charts) from the latest snapshot. Reuses chart instances via .update(). */
+            function renderAnalytics() {
+                var snap = latestAnalyticsSnapshot
+                var empty = document.getElementById("analyticsEmpty")
+                var dash = document.getElementById("analyticsDashboard")
+                var hasData = snap && Array.isArray(snap.perTurn) && snap.perTurn.length > 0
+                if (empty) empty.style.display = hasData ? "none" : "flex"
+                if (dash) dash.style.display = hasData ? "flex" : "none"
+                if (!hasData) return
+                if (!window.__analyticsInited) return
+
+                var trainee = snap.trainee || {}
+                var stats = trainee.stats || {}
+                var totals = snap.totals || {}
+                var perTurn = snap.perTurn || []
+                var turnLabels = perTurn.map(function (p) { return p.turn })
+                window.__analyticTurnDates = perTurn.map(function (p) { return p.date })
+
+                // Hero.
+                analyticSetText("analyticTraineeName", trainee.name || "Unknown Trainee")
+                analyticSetText("analyticScenario", snap.scenario || "-")
+                analyticSetText("analyticDate", snap.currentDate || "-")
+                var total = Math.max(snap.totalTurns || 72, snap.currentTurn || 0)
+                var pct = total ? Math.max(0, Math.min(100, Math.round((snap.currentTurn / total) * 100))) : 0
+                var bar = document.getElementById("analyticProgressBar")
+                if (bar) bar.style.width = pct + "%"
+                analyticSetText("analyticTurnLabel", "Turn " + (snap.currentTurn || 0) + " / " + total)
+                var endedBadge = document.getElementById("analyticEndedBadge")
+                if (endedBadge) endedBadge.style.display = snap.ended ? "inline-block" : "none"
+
+                // KPIs (Stat Total now lives on the Stats card).
+                var winRate = totals.races ? Math.round((totals.wins / totals.races) * 100) : 0
+                analyticRenderStatline([
+                    { label: "win", value: winRate + "%" },
+                    { label: "fans", value: analyticAbbrevNum(trainee.fans || 0) },
+                    { label: "skill pts", value: (trainee.skillPoints || 0).toLocaleString() },
+                    { label: "trainings", value: totals.trainingCount || 0 },
+                    { label: "runtime", value: analyticFormatRuntime(snap.runtimeMs), id: "analyticRuntime" }
+                ])
+
+                // Stats radar (labels carry the live numbers) + total badge.
+                window.__analyticStats = stats
+                var statTotal = ANALYTIC_STAT_ORDER.reduce(function (a, s) { return a + (stats[s] > 0 ? stats[s] : 0) }, 0)
+                analyticSetText("analyticStatTotalBadge", "Σ " + statTotal.toLocaleString())
+                analyticUpdateChart("radar", function (c) {
+                    c.data.datasets[0].data = ANALYTIC_STAT_ORDER.map(function (s) { return Math.max(0, stats[s] || 0) })
+                })
+
+                // Stat growth.
+                analyticUpdateChart("statGrowth", function (c) {
+                    c.data.labels = turnLabels
+                    ANALYTIC_STAT_ORDER.forEach(function (s, i) {
+                        c.data.datasets[i].data = perTurn.map(function (p) { return p.stats && p.stats[s] >= 0 ? p.stats[s] : null })
+                    })
+                })
+
+                // Training focus + stat gains.
+                var tByStat = totals.trainingByStat || {}
+                var gByStat = totals.statGainsByStat || {}
+                analyticUpdateChart("trainingDist", function (c) { c.data.datasets[0].data = ANALYTIC_STAT_ORDER.map(function (s) { return tByStat[s] || 0 }) })
+                analyticUpdateChart("statGains", function (c) { c.data.datasets[0].data = ANALYTIC_STAT_ORDER.map(function (s) { return gByStat[s] || 0 }) })
+
+                // Failure chance over time.
+                analyticUpdateChart("failure", function (c) {
+                    c.data.labels = turnLabels
+                    c.data.datasets[0].data = perTurn.map(function (p) { return p.training && typeof p.training.failureChance === "number" ? p.training.failureChance : null })
+                })
+
+                // Win-rate gauge.
+                analyticUpdateChart("winRate", function (c) {
+                    var w = totals.wins || 0
+                    var r = totals.races || 0
+                    c.data.datasets[0].data = r ? [w, Math.max(0, r - w)] : [0, 1]
+                })
+                analyticSetText("analyticWinPct", winRate + "%")
+                analyticSetText("analyticWinTally", (totals.wins || 0) + " / " + (totals.races || 0))
+
+                // Races by grade.
+                var byGrade = totals.racesByGrade || {}
+                var grades = Object.keys(byGrade)
+                    .filter(function (k) { return byGrade[k] > 0 })
+                    .sort(function (a, b) { return ANALYTIC_GRADE_RANK.indexOf(a) - ANALYTIC_GRADE_RANK.indexOf(b) })
+                analyticUpdateChart("racesByGrade", function (c) {
+                    c.data.labels = grades.map(analyticGradeLabel)
+                    c.data.datasets[0].data = grades.map(function (k) { return byGrade[k] })
+                    c.data.datasets[0].backgroundColor = grades.map(analyticGradeColor)
+                })
+
+                // Fans over time.
+                analyticUpdateChart("fans", function (c) {
+                    c.data.labels = turnLabels
+                    c.data.datasets[0].data = perTurn.map(function (p) { return p.fans || 0 })
+                })
+
+                // Action mix by year (always show all three years). Mutate datasets in place so Chart.js reliably repaints.
+                analyticUpdateChart("actionMix", function (c) {
+                    var years = ["JUNIOR", "CLASSIC", "SENIOR"]
+                    c.data.labels = years.map(analyticTitleCase)
+                    ANALYTIC_ACTION_DEFS.forEach(function (d, i) {
+                        c.data.datasets[i].data = years.map(function (y) { return perTurn.filter(function (p) { return p.year === y && p.action === d.key }).length })
+                    })
+                })
+
+                // Energy + mood over time.
+                analyticUpdateChart("energyMood", function (c) {
+                    c.data.labels = turnLabels
+                    c.data.datasets[0].data = perTurn.map(function (p) { return typeof p.energy === "number" ? p.energy : null })
+                    c.data.datasets[1].data = perTurn.map(function (p) {
+                        var i = ANALYTIC_MOOD_ORDER.indexOf(p.mood)
+                        return i < 0 ? null : i
+                    })
+                })
+
+                // Skill points over time.
+                analyticUpdateChart("skillPts", function (c) {
+                    c.data.labels = turnLabels
+                    c.data.datasets[0].data = perTurn.map(function (p) { return p.skillPoints || 0 })
+                })
+
+                // Cumulative stat gains (running sum of per-turn training gains, per stat).
+                var running = { speed: 0, stamina: 0, power: 0, guts: 0, wit: 0 }
+                var cum = perTurn.map(function (p) {
+                    ANALYTIC_STAT_ORDER.forEach(function (s) { running[s] += (p.training && p.training.gains && p.training.gains[s]) || 0 })
+                    return { speed: running.speed, stamina: running.stamina, power: running.power, guts: running.guts, wit: running.wit }
+                })
+                analyticUpdateChart("cumGains", function (c) {
+                    c.data.labels = turnLabels
+                    ANALYTIC_STAT_ORDER.forEach(function (s, i) { c.data.datasets[i].data = cum.map(function (row) { return row[s] }) })
+                })
+
+                // Stat composition over time (each stat's share of the turn's stat sum).
+                analyticUpdateChart("statComp", function (c) {
+                    c.data.labels = turnLabels
+                    ANALYTIC_STAT_ORDER.forEach(function (s, i) {
+                        c.data.datasets[i].data = perTurn.map(function (p) {
+                            var sum = ANALYTIC_STAT_ORDER.reduce(function (a, k) { return a + (p.stats && p.stats[k] > 0 ? p.stats[k] : 0) }, 0)
+                            return sum ? Math.round(((p.stats[s] || 0) / sum) * 100) : 0
+                        })
+                    })
+                })
+
+                // Stat gains per turn.
+                analyticUpdateChart("gainsPerTurn", function (c) {
+                    c.data.labels = turnLabels
+                    ANALYTIC_STAT_ORDER.forEach(function (s, i) {
+                        c.data.datasets[i].data = perTurn.map(function (p) { return (p.training && p.training.gains && p.training.gains[s]) || 0 })
+                    })
+                })
+
+                // Failure-chance histogram.
+                analyticUpdateChart("failHist", function (c) {
+                    var buckets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    perTurn.forEach(function (p) {
+                        if (p.training && typeof p.training.failureChance === "number") {
+                            var b = Math.min(9, Math.floor(p.training.failureChance / 10))
+                            buckets[b]++
+                        }
+                    })
+                    c.data.datasets[0].data = buckets
+                })
+
+                // Energy vs failure scatter (one point per trained turn, colored by trained stat).
+                analyticUpdateChart("energyFail", function (c) {
+                    var pts = [], colors = []
+                    perTurn.forEach(function (p) {
+                        if (p.training && typeof p.training.failureChance === "number" && typeof p.energy === "number") {
+                            pts.push({ x: p.energy, y: p.training.failureChance })
+                            colors.push(ANALYTIC_STAT_COLORS[p.training.stat] || "#8888a0")
+                        }
+                    })
+                    c.data.datasets[0].data = pts
+                    c.data.datasets[0].pointBackgroundColor = colors
+                })
+
+                // Racing distributions (from the races[] array).
+                var races = snap.races || []
+                function analyticCountBy(arr, keyFn) { var m = {}; arr.forEach(function (x) { var k = keyFn(x); m[k] = (m[k] || 0) + 1 }); return m }
+
+                var bySurface = analyticCountBy(races, function (r) { return r.surface })
+                analyticUpdateChart("bySurface", function (c) { c.data.datasets[0].data = [bySurface.Turf || 0, bySurface.Dirt || 0] })
+
+                var byDist = analyticCountBy(races, function (r) { return r.distance })
+                analyticUpdateChart("byDistance", function (c) { c.data.datasets[0].data = [byDist.Sprint || 0, byDist.Mile || 0, byDist.Medium || 0, byDist.Long || 0] })
+
+
+                var gradesSeen = []
+                races.forEach(function (r) { if (gradesSeen.indexOf(r.grade) < 0) gradesSeen.push(r.grade) })
+                gradesSeen.sort(function (a, b) { return ANALYTIC_GRADE_RANK.indexOf(a) - ANALYTIC_GRADE_RANK.indexOf(b) })
+                analyticUpdateChart("winByGrade", function (c) {
+                    c.data.labels = gradesSeen.map(analyticGradeLabel)
+                    c.data.datasets[0].data = gradesSeen.map(function (g) { return races.filter(function (r) { return r.grade === g && r.won }).length })
+                    c.data.datasets[1].data = gradesSeen.map(function (g) { return races.filter(function (r) { return r.grade === g && !r.won }).length })
+                })
+
+                // Fans per race (ordered by turn; green when won).
+                var racesByTurn = races.slice().sort(function (a, b) { return a.turn - b.turn })
+                window.__analyticFansPerRaceNames = racesByTurn.map(function (r) { return r.name })
+                analyticUpdateChart("fansPerRace", function (c) {
+                    c.data.labels = racesByTurn.map(function (r) { return r.name.length > 14 ? r.name.slice(0, 13) + "..." : r.name })
+                    c.data.datasets[0].data = racesByTurn.map(function (r) { return r.fans || 0 })
+                    c.data.datasets[0].backgroundColor = racesByTurn.map(function (r) { return r.won ? (analyticCssVar("--status-connected") || "#22c55e") : "rgba(120,120,150,0.45)" })
+                })
+
+                // Race results timeline (turn axis; size scales with fans; green=won/red=lost).
+                analyticUpdateChart("raceTimeline", function (c) {
+                    var maxFans = Math.max.apply(null, races.map(function (r) { return r.fans || 0 }).concat([1]))
+                    c.data.datasets[0].data = races.map(function (r) { return { x: r.turn, y: 0, name: r.name, won: r.won, fans: r.fans || 0 } })
+                    c.data.datasets[0].pointBackgroundColor = races.map(function (r) { return r.won ? (analyticCssVar("--status-connected") || "#22c55e") : (analyticCssVar("--log-error") || "#ef4444") })
+                    c.data.datasets[0].pointRadius = races.map(function (r) { return 4 + Math.round(((r.fans || 0) / maxFans) * 10) })
+                })
+
+                // Overall action distribution (whole run).
+                analyticUpdateChart("actionDist", function (c) {
+                    c.data.datasets[0].data = ANALYTIC_ACTION_DEFS.map(function (d) { return perTurn.filter(function (p) { return p.action === d.key }).length })
+                })
+
+                // Mood distribution (whole run).
+                analyticUpdateChart("moodDist", function (c) {
+                    c.data.datasets[0].data = ANALYTIC_MOOD_ORDER.map(function (m) { return perTurn.filter(function (p) { return p.mood === m }).length })
+                })
+
+                // Runtime: tick live while the run is in progress, freeze on the final frame.
+                if (snap.ended) analyticStopRuntimeTicker()
+                else analyticStartRuntimeTicker()
+            }
+
+            /**
+             * Render a list of items into a container's innerHTML via a per-item template. No-op if the container is missing.
+             * @param {string} id - The container element id.
+             * @param {Array<object>} items - The items to render.
+             * @param {function} template - Maps one item to its HTML string.
+             */
+            function analyticRenderHtml(id, items, template) {
+                var el = document.getElementById(id)
+                if (el) el.innerHTML = items.map(template).join("")
+            }
+
+            function analyticRenderStatline(items) {
+                analyticRenderHtml("analyticStatline", items, function (k) {
+                    var idAttr = k.id ? ' id="' + k.id + '"' : ""
+                    return "<span><b" + idAttr + ">" + escapeHtml(String(k.value)) + "</b><span class=\"l\">" + escapeHtml(k.label) + "</span></span>"
+                })
+            }
+
+            // Plain-language explanation for each analytics chart, keyed by its canvas id.
+            var ANALYTIC_CHART_INFO = {
+                analyticRadar: "The trainee's current Speed, Stamina, Power, Guts, and Wit shown as a radar. A larger shape means higher overall stats.",
+                analyticStatGrowth: "Each stat's value across the turns of the run, one line per stat, so you can see which stats climbed fastest.",
+                analyticStatComp: "How the stat total is split among the five stats each turn, stacked. Shows whether the build stayed balanced or leaned into one stat.",
+                analyticTrainingDist: "How many trainings went into each stat over the run.",
+                analyticStatGains: "Total points gained in each stat from training across the whole run.",
+                analyticCumGains: "Running total of all stat points gained as the run progresses, stacked by stat.",
+                analyticSkillPts: "The trainee's skill point pool across the turns of the run.",
+                analyticFailure: "The training failure percentage each turn. Spikes usually line up with low energy.",
+                analyticFailHist: "How many trainings fell into each failure-chance band, from safe (0-9%) to risky (90-100%).",
+                analyticEnergyFail: "Each training plotted by the trainee's energy against that training's failure chance. The cloud should trend down to the right - more energy, less failure.",
+                analyticGainsPerTurn: "Points gained each turn, stacked by stat, so you can see which turns were productive.",
+                analyticWinRate: "Share of races won versus lost across the run.",
+                analyticRacesByGrade: "Number of races entered at each grade (G1, G2, G3, and so on).",
+                analyticWinByGrade: "Wins and losses stacked by grade, so you can see which grades the trainee raced most and how often it won.",
+                analyticRaceTimeline: "Every race plotted by the turn it happened on, sized by fans earned and colored green for a win or red for a loss.",
+                analyticBySurface: "Count of races run on turf versus dirt.",
+                analyticByDistance: "Count of races by distance category - sprint, mile, medium, and long.",
+                analyticFans: "The trainee's cumulative fan total across the turns of the run.",
+                analyticFansPerRace: "Fans gained from each individual race, in race order.",
+                analyticActionMix: "How each year's turns were split among training, racing, resting, and recreation.",
+                analyticActionDist: "The overall split of every action taken across the whole run.",
+                analyticMoodDist: "How often the trainee was in each mood, from Awful to Great.",
+                analyticEnergyMood: "The trainee's energy and mood tracked across the turns of the run."
+            }
+
+            /** Close every open info popover. */
+            function analyticCloseAllInfo() {
+                var open = document.querySelectorAll(".analytic-info-pop.open")
+                for (var i = 0; i < open.length; i++) open[i].classList.remove("open")
+            }
+
+            /**
+             * Toggle the info popover for a chart card. Closes any other open popover; clicking the same button closes its own.
+             * @param {Event} ev The click event (its propagation is stopped so the document handler does not immediately re-close).
+             * @param {HTMLElement} btn The info button that was clicked.
+             */
+            function analyticToggleInfo(ev, btn) {
+                ev.stopPropagation()
+                var key = btn.getAttribute("data-info")
+                var pop = document.querySelector('.analytic-info-pop[data-info-for="' + key + '"]')
+                if (!pop) return
+                var wasOpen = pop.classList.contains("open")
+                analyticCloseAllInfo()
+                if (!wasOpen) {
+                    if (!pop.textContent) pop.textContent = ANALYTIC_CHART_INFO[key] || ""
+                    pop.classList.add("open")
+                }
+            }
+
+            document.addEventListener("click", analyticCloseAllInfo)
+            document.addEventListener("keydown", function (e) { if (e.key === "Escape") analyticCloseAllInfo() })
+
+            /**
+             * Escape a single CSV cell, quoting it when it contains a comma, quote, or newline.
+             * @param {*} v The raw cell value.
+             * @returns {string} The CSV-safe cell text.
+             */
+            function analyticCsvEscape(v) {
+                var s = v == null ? "" : String(v)
+                return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s
+            }
+
+            /**
+             * Build the CSV rows (array of arrays, header first) backing a chart, read straight from its Chart.js data.
+             * The scatter timeline, the radar, and Fans per Race are handled specially; every other chart is labels plus one column per dataset.
+             * @param {object} chart The Chart.js instance.
+             * @param {string} id The chart's canvas id.
+             * @returns {Array<Array>} The rows to serialize.
+             */
+            function analyticChartCsvRows(chart, id) {
+                if (id === "analyticRaceTimeline") {
+                    var pts = (chart.data.datasets[0] || {}).data || []
+                    var trows = [["turn", "name", "fans", "result"]]
+                    pts.forEach(function (p) { trows.push([p.x, p.name, p.fans, p.won ? "Won" : "Lost"]) })
+                    return trows
+                }
+                var labels = chart.data.labels || []
+                var first = "label"
+                if (id === "analyticRadar") {
+                    labels = ANALYTIC_STAT_ORDER.map(function (s) { return ANALYTIC_STAT_LABELS[s] })
+                    first = "stat"
+                } else if (id === "analyticFansPerRace") {
+                    labels = window.__analyticFansPerRaceNames || labels
+                    first = "race"
+                } else if (labels.length && labels.every(function (l) { return /^\d+$/.test(String(l)) })) {
+                    first = "turn"
+                }
+                var ds = chart.data.datasets || []
+                var header = [first].concat(ds.map(function (d, i) { return d.label || (ds.length > 1 ? "value " + (i + 1) : "value") }))
+                var rows = [header]
+                for (var i = 0; i < labels.length; i++) {
+                    var row = [labels[i]]
+                    ds.forEach(function (d) { row.push(d.data ? d.data[i] : "") })
+                    rows.push(row)
+                }
+                return rows
+            }
+
+            /**
+             * Download an array-of-arrays as a CSV file via a temporary object URL.
+             * @param {string} filename The download file name.
+             * @param {Array<Array>} rows The rows to serialize, header first.
+             */
+            function analyticDownloadCsv(filename, rows) {
+                var csv = rows.map(function (r) { return r.map(analyticCsvEscape).join(",") }).join("\r\n")
+                var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+                var url = URL.createObjectURL(blob)
+                var a = document.createElement("a")
+                a.href = url
+                a.download = filename
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                setTimeout(function () { URL.revokeObjectURL(url) }, 0)
+            }
+
+            /**
+             * Build a "yyyy-MM-dd HH_mm_ss" local timestamp matching the saved log file naming.
+             * @returns {string} The formatted timestamp.
+             */
+            function analyticLogTimestamp() {
+                var d = new Date()
+                var p = function (n) { return (n < 10 ? "0" : "") + n }
+                return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + "_" + p(d.getMinutes()) + "_" + p(d.getSeconds())
+            }
+
+            /**
+             * Export one chart's underlying data points as a CSV download. Triggered by the per-card download button.
+             * @param {Event} ev The click event (propagation stopped so it does not also dismiss an open info popover).
+             * @param {HTMLElement} btn The download button that was clicked.
+             */
+            function analyticExportChartCsv(ev, btn) {
+                ev.stopPropagation()
+                var id = btn.getAttribute("data-export")
+                var chart = Chart.getChart(id)
+                if (!chart) return
+                var row = btn.closest(".analytic-card-title-row")
+                var titleEl = row ? row.querySelector("span") : null
+                var title = (titleEl ? titleEl.textContent : id).trim()
+                var name = (latestAnalyticsSnapshot && latestAnalyticsSnapshot.trainee && latestAnalyticsSnapshot.trainee.name) || "run"
+                // Mirror the saved log file naming, with a .csv extension: "<TraineeName>_<Chart-Title>_<yyyy-MM-dd HH_mm_ss>.csv" (trainee spaces -> underscores, chart spaces -> hyphens).
+                var who = name.replace(/ /g, "_")
+                var chartSlug = title.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "")
+                analyticDownloadCsv(who + "_" + chartSlug + "_" + analyticLogTimestamp() + ".csv", analyticChartCsvRows(chart, id))
+            }
 
             // Initiate the connection and settings when the page loads.
             initFontSize()
