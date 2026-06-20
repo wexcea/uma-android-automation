@@ -396,6 +396,128 @@
             }
         ]
     },
+    "Air Shakur": {
+        "name": "Air Shakur",
+        "mandatoryRaces": [
+            {
+                "turn": 24,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Hopeful Stakes",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 7000
+                    }
+                ]
+            },
+            {
+                "turn": 31,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Satsuki Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 11000
+                    }
+                ]
+            },
+            {
+                "turn": 34,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tokyo Yushun (Japanese Derby)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 20000
+                    }
+                ]
+            },
+            {
+                "turn": 44,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Kikuka Sho",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 12000
+                    }
+                ]
+            },
+            {
+                "turn": 46,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Japan Cup",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 30000
+                    }
+                ]
+            },
+            {
+                "turn": 56,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Spring)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 60,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Takarazuka Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 68,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Tenno Sho (Autumn)",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Medium",
+                        "fans": 15000
+                    }
+                ]
+            },
+            {
+                "turn": 72,
+                "isChoice": false,
+                "options": [
+                    {
+                        "raceName": "Arima Kinen",
+                        "grade": "G1",
+                        "surface": "Turf",
+                        "distanceType": "Long",
+                        "fans": 30000
+                    }
+                ]
+            }
+        ]
+    },
     "Biwa Hayahide": {
         "name": "Biwa Hayahide",
         "mandatoryRaces": [

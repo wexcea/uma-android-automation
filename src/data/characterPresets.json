@@ -51,6 +51,19 @@
             "Dirt": "G"
         }
     },
+    "Air Shakur": {
+        "name": "Air Shakur",
+        "distanceAptitudes": {
+            "Sprint": "G",
+            "Mile": "E",
+            "Medium": "A",
+            "Long": "A"
+        },
+        "surfaceAptitudes": {
+            "Turf": "A",
+            "Dirt": "G"
+        }
+    },
     "Biwa Hayahide": {
         "name": "Biwa Hayahide",
         "distanceAptitudes": {

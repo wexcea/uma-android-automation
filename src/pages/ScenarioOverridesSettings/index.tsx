@@ -118,6 +118,9 @@ const ScenarioOverridesSettings = () => {
         updateOverrideSetting("trackblazerEnergyThreshold", defaultSettings.scenarioOverrides.trackblazerEnergyThreshold)
         updateOverrideSetting("trackblazerForceTrainEnergyFloor", defaultSettings.scenarioOverrides.trackblazerForceTrainEnergyFloor)
         updateOverrideSetting("trackblazerSkipBadMoodItemsBelowGain", defaultSettings.scenarioOverrides.trackblazerSkipBadMoodItemsBelowGain)
+        updateOverrideSetting("trackblazerSkipEmpoweringMegaphoneBelowGain", defaultSettings.scenarioOverrides.trackblazerSkipEmpoweringMegaphoneBelowGain)
+        updateOverrideSetting("trackblazerSkipMotivatingMegaphoneBelowGain", defaultSettings.scenarioOverrides.trackblazerSkipMotivatingMegaphoneBelowGain)
+        updateOverrideSetting("trackblazerSkipCoachingMegaphoneBelowGain", defaultSettings.scenarioOverrides.trackblazerSkipCoachingMegaphoneBelowGain)
     }, [updateOverrideSetting, defaultSettings])
 
     /** Reset Training section sliders to defaults. */
@@ -414,11 +417,65 @@ const ScenarioOverridesSettings = () => {
                                             min={0}
                                             max={50}
                                             step={1}
-                                            label="Skip Items During Bad Mood Below Stat Gain"
+                                            label="Skip Items During Bad Mood Below Main Stat Gain"
                                             labelUnit=""
                                             showValue={true}
                                             showLabels={true}
                                             description="When mood is BAD or AWFUL, refuse to use Reset Whistle / Good-Luck Charm / Megaphone if the selected training's main stat gain is below this floor. Prevents wasting items on structurally low-return turns where the mood multiplier caps the stat gains."
+                                        />
+                                    </View>
+
+                                    <View style={{ padding: SPACING.md }}>
+                                        <CustomSlider
+                                            searchId="trackblazer-skip-empowering-megaphone-below-gain"
+                                            value={scenarioOverrides.trackblazerSkipEmpoweringMegaphoneBelowGain}
+                                            placeholder={defaultSettings.scenarioOverrides.trackblazerSkipEmpoweringMegaphoneBelowGain}
+                                            onValueChange={(value) => updateOverrideSetting("trackblazerSkipEmpoweringMegaphoneBelowGain", value)}
+                                            onSlidingComplete={(value) => updateOverrideSetting("trackblazerSkipEmpoweringMegaphoneBelowGain", value)}
+                                            min={0}
+                                            max={100}
+                                            step={1}
+                                            label="Skip Empowering Megaphone Below Main Stat Gain"
+                                            labelUnit=""
+                                            showValue={true}
+                                            showLabels={true}
+                                            description="Skip the Empowering Megaphone (+60% for 2 turns) when the selected training's main stat gain is below this value, falling through to a lower tier whose threshold is met. 0 = always allowed."
+                                        />
+                                    </View>
+
+                                    <View style={{ padding: SPACING.md }}>
+                                        <CustomSlider
+                                            searchId="trackblazer-skip-motivating-megaphone-below-gain"
+                                            value={scenarioOverrides.trackblazerSkipMotivatingMegaphoneBelowGain}
+                                            placeholder={defaultSettings.scenarioOverrides.trackblazerSkipMotivatingMegaphoneBelowGain}
+                                            onValueChange={(value) => updateOverrideSetting("trackblazerSkipMotivatingMegaphoneBelowGain", value)}
+                                            onSlidingComplete={(value) => updateOverrideSetting("trackblazerSkipMotivatingMegaphoneBelowGain", value)}
+                                            min={0}
+                                            max={100}
+                                            step={1}
+                                            label="Skip Motivating Megaphone Below Main Stat Gain"
+                                            labelUnit=""
+                                            showValue={true}
+                                            showLabels={true}
+                                            description="Skip the Motivating Megaphone (+40% for 3 turns) when the selected training's main stat gain is below this value, falling through to a lower tier whose threshold is met. 0 = always allowed."
+                                        />
+                                    </View>
+
+                                    <View style={{ padding: SPACING.md }}>
+                                        <CustomSlider
+                                            searchId="trackblazer-skip-coaching-megaphone-below-gain"
+                                            value={scenarioOverrides.trackblazerSkipCoachingMegaphoneBelowGain}
+                                            placeholder={defaultSettings.scenarioOverrides.trackblazerSkipCoachingMegaphoneBelowGain}
+                                            onValueChange={(value) => updateOverrideSetting("trackblazerSkipCoachingMegaphoneBelowGain", value)}
+                                            onSlidingComplete={(value) => updateOverrideSetting("trackblazerSkipCoachingMegaphoneBelowGain", value)}
+                                            min={0}
+                                            max={100}
+                                            step={1}
+                                            label="Skip Coaching Megaphone Below Main Stat Gain"
+                                            labelUnit=""
+                                            showValue={true}
+                                            showLabels={true}
+                                            description="Skip the Coaching Megaphone (+20% for 4 turns) when the selected training's main stat gain is below this value. 0 = always allowed."
                                         />
                                     </View>
                                 </Section>
@@ -435,7 +492,7 @@ const ScenarioOverridesSettings = () => {
                                             min={20}
                                             max={100}
                                             step={5}
-                                            label="Skip Risky Charm Training Below Stat Gain"
+                                            label="Skip Risky Charm Training Below Main Stat Gain"
                                             labelUnit=""
                                             showValue={true}
                                             showLabels={true}

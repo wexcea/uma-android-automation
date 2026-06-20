@@ -84,6 +84,16 @@
         ],
         "(❯❯)\nBloom by the Oak": [
             "Randomly either\n----------\nEnergy -20\nPower +5\nStraightaway Acceleration hint +1\n----------\n\n----------\nEnergy -20\nPower +5\nGuts +5\nStraightaway Acceleration hint +1\nAir Groove bond +5\n----------\n\n----------\nEnergy -10\nStamina +5\nPower +5\nGuts +10\nStraightaway Acceleration hint +3\nAir Groove bond +5"
+        ],
+        "(❯)\nMy Source of Admiration": [
+            "Mood +1\nPower +10\nFearless hint +1\nAir Groove bond +5"
+        ],
+        "(❯❯)\nYou Make Me Who I Am": [
+            "Power +7\nWit +7\nTake the Chance hint +1\nAir Groove bond +5",
+            "Skill points +10\nUpdrafters hint +1\nAir Groove bond +5"
+        ],
+        "(❯❯❯)\nDynamic Duo": [
+            "Power +10\nWit +10\nLie in Wait hint +1\nAir Groove bond +5"
         ]
     },
     "Air Shakur": {
@@ -419,6 +429,13 @@
         ],
         "(❯❯❯)\nOne Step": [
             "Energy +10\nSpeed +10\nStamina +10\nKeen Eye hint +2\nGold City bond +5"
+        ],
+        "(❯)\nI Can Do It Myself": [
+            "Skill points +30\nGold City bond +5"
+        ],
+        "(❯❯)\nRelying On Others": [
+            "Speed +10\nSkill points +10\nStraightaway Recovery hint +2\nGold City bond +5",
+            "Wit +10\nSkill points +10\nSnowy Days ○ hint +2\nGold City bond +5"
         ]
     },
     "Gold Ship": {

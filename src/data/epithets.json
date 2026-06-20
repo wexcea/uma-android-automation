@@ -109,6 +109,59 @@
         ],
         "matchers": []
     },
+    "Barrier-Breaking Genius": {
+        "name": "Barrier-Breaking Genius",
+        "bullet_points": [
+            "Air Shakur only",
+            "Win the Satsuki Sho, Tokyo Yushun (Japanese Derby), and Kikuka Sho",
+            "Win the Tenno Sho (Spring), Takarazuka Kinen (Senior), Tenno Sho (Autumn) (Senior) and Arima Kinen (Senior)",
+            "Reach 1200 or more Wisdom"
+        ],
+        "scenarios": [],
+        "characters": [
+            "Air Shakur"
+        ],
+        "matchers": [
+            {
+                "type": "winRace",
+                "name": "Satsuki Sho",
+                "displayLabel": "Win the Satsuki Sho"
+            },
+            {
+                "type": "winRace",
+                "name": "Tokyo Yushun (Japanese Derby)",
+                "displayLabel": "Win the Tokyo Yushun (Japanese Derby)"
+            },
+            {
+                "type": "winRace",
+                "name": "Kikuka Sho",
+                "displayLabel": "Win the Kikuka Sho"
+            },
+            {
+                "type": "winRace",
+                "name": "Tenno Sho (Spring)",
+                "displayLabel": "Win the Tenno Sho (Spring)"
+            },
+            {
+                "type": "winRace",
+                "name": "Takarazuka Kinen",
+                "atClass": "Senior",
+                "displayLabel": "Win the Takarazuka Kinen"
+            },
+            {
+                "type": "winRace",
+                "name": "Tenno Sho (Autumn)",
+                "atClass": "Senior",
+                "displayLabel": "Win the Tenno Sho (Autumn)"
+            },
+            {
+                "type": "winRace",
+                "name": "Arima Kinen",
+                "atClass": "Senior",
+                "displayLabel": "Win the Arima Kinen"
+            }
+        ]
+    },
     "Beauty of the Century": {
         "name": "Beauty of the Century",
         "bullet_points": [

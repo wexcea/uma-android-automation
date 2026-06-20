@@ -1,18 +1,17 @@
 <AppUpdater>
   <update>
-    <latestVersion>5.7.6</latestVersion>
+    <latestVersion>5.7.7</latestVersion>
     <url>https://github.com/steve1316/uma-android-automation/releases</url>
     <releaseNotes>
-v5.7.6 - Changelog
+v5.7.7 - Changelog
 
 New
 ---
-- Add a `Sync Priorities` button to the `Training Settings` page that will sync the priorities of the `Event Choice Prioritization` and `Summer Training Prioritization` settings with their parent `Prioritization` setting.
-- Add per-character mandatory races to the Smart Race Solver automatically to lock off those days to avoid the Solver scheduling races on those days by accident.
+- Add per-tier megaphone stat thresholds to `Scenario Overrides Settings` page for Trackblazer.
 
-Fixes
+Adjustments
 ---
-- Fix section dividers having the wrong margins.
+- Update game data up to `Air Shakur 2026-06-17`.
 
     </releaseNotes>
   </update>

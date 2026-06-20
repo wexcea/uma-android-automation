@@ -214,8 +214,11 @@ ${longTargetsString}${formatAdvancedScoringSection(settings.training)}
 🛍️ Trackblazer Shop Check Grades: ${settings.scenarioOverrides?.trackblazerShopCheckGrades?.join(", ")}
 🛍️ Trackblazer Shop Check Frequency: ${settings.scenarioOverrides?.trackblazerShopCheckFrequency}
 🛍️ Trackblazer Excluded Items: ${settings.scenarioOverrides?.trackblazerExcludedItems?.length === 0 ? "None" : settings.scenarioOverrides?.trackblazerExcludedItems?.join(", ")}
-✨ Trackblazer Skip Risky Charm Training Below Stat Gain: ${settings.scenarioOverrides?.trackblazerSkipRiskyCharmTrainingBelowGain}
-✨ Trackblazer Skip Items During Bad Mood Below Stat Gain: ${settings.scenarioOverrides?.trackblazerSkipBadMoodItemsBelowGain}
+✨ Trackblazer Skip Risky Charm Training Below Main Stat Gain: ${settings.scenarioOverrides?.trackblazerSkipRiskyCharmTrainingBelowGain}
+✨ Trackblazer Skip Items During Bad Mood Below Main Stat Gain: ${settings.scenarioOverrides?.trackblazerSkipBadMoodItemsBelowGain}
+✨ Trackblazer Skip Empowering Megaphone Below Main Stat Gain: ${settings.scenarioOverrides?.trackblazerSkipEmpoweringMegaphoneBelowGain}
+✨ Trackblazer Skip Motivating Megaphone Below Main Stat Gain: ${settings.scenarioOverrides?.trackblazerSkipMotivatingMegaphoneBelowGain}
+✨ Trackblazer Skip Coaching Megaphone Below Main Stat Gain: ${settings.scenarioOverrides?.trackblazerSkipCoachingMegaphoneBelowGain}
 🔄 Trackblazer Max Retries per Race: ${settings.scenarioOverrides?.trackblazerMaxRetriesPerRace}
 🔄 Trackblazer Whistle Forces Training: ${settings.scenarioOverrides?.trackblazerWhistleForcesTraining ? "✅" : "❌"}
 🔄 Trackblazer Retry Grades: ${settings.scenarioOverrides?.trackblazerRetryRacesBeforeFinalGrades?.join(", ")}
