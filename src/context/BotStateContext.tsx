@@ -213,6 +213,9 @@ export interface Settings {
         trackblazerShopCheckGrades: string[]
         trackblazerSkipRiskyCharmTrainingBelowGain: number
         trackblazerSkipBadMoodItemsBelowGain: number
+        trackblazerSkipEmpoweringMegaphoneBelowGain: number
+        trackblazerSkipMotivatingMegaphoneBelowGain: number
+        trackblazerSkipCoachingMegaphoneBelowGain: number
         trackblazerMaxRetriesPerRace: number
         trackblazerWhistleForcesTraining: boolean
         trackblazerRetryRacesBeforeFinalGrades: string[]
@@ -466,6 +469,9 @@ export const defaultSettings: Settings = {
         trackblazerShopCheckGrades: ["G1", "G2", "G3"],
         trackblazerSkipRiskyCharmTrainingBelowGain: 30,
         trackblazerSkipBadMoodItemsBelowGain: 15,
+        trackblazerSkipEmpoweringMegaphoneBelowGain: 0,
+        trackblazerSkipMotivatingMegaphoneBelowGain: 0,
+        trackblazerSkipCoachingMegaphoneBelowGain: 0,
         trackblazerMaxRetriesPerRace: 1,
         trackblazerWhistleForcesTraining: true,
         trackblazerRetryRacesBeforeFinalGrades: ["G1", "G2", "G3"],

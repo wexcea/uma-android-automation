@@ -935,7 +935,8 @@ The first cupcake encountered during the scan is used. Berry Sweet Cupcake raise
 **When NOT used:**
 - A megaphone effect is already active (turns remaining > 0). The bot decrements the counter each turn after an action is taken.
 - No training is selected this turn (e.g., the bot is racing or resting).
-- A better megaphone is available in inventory.
+- A better eligible megaphone is available in inventory.
+- The selected training's main stat gain is below the tier's per-tier stat threshold (`trackblazerSkipEmpoweringMegaphoneBelowGain` / `trackblazerSkipMotivatingMegaphoneBelowGain` / `trackblazerSkipCoachingMegaphoneBelowGain`, all default 0). When a tier is blocked by its threshold, the bot falls through to the next lower tier whose threshold is met. If no tier qualifies, no megaphone is used this turn.
 
 **Duration tracking:** After use, the bot sets `megaphoneTurnCounter` to 2/3/4 depending on the megaphone type. This counter is decremented by 1 at the end of each turn where an action was taken — training, voluntary races, **and mandatory races** (the latter is handled explicitly in `Trackblazer.handleRaceEvents()` because the mandatory-race path returns before reaching `executeAction()`, which is where the per-turn decrement normally fires).
 
