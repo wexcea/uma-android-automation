@@ -214,7 +214,7 @@ const ScenarioOverridesSettings = () => {
                         {showBody && (
                             <>
                                 {/* Racing */}
-                                <Section label="Racing" labelRight={makeResetLink(resetRacingDefaults)}>
+                                <Section label="Racing" collapsible labelRight={makeResetLink(resetRacingDefaults)}>
                                     <View style={{ padding: SPACING.md }}>
                                         <CustomSlider
                                             searchId="trackblazer-consecutive-races-limit"
@@ -370,7 +370,7 @@ const ScenarioOverridesSettings = () => {
                                 </Section>
 
                                 {/* Energy & Resources */}
-                                <Section label="Energy & Resources" labelRight={makeResetLink(resetEnergyDefaults)}>
+                                <Section label="Energy & Resources" collapsible defaultOpen={false} labelRight={makeResetLink(resetEnergyDefaults)}>
                                     <View style={{ padding: SPACING.md }}>
                                         <CustomSlider
                                             searchId="trackblazer-energy-threshold"
@@ -481,7 +481,7 @@ const ScenarioOverridesSettings = () => {
                                 </Section>
 
                                 {/* Training */}
-                                <Section label="Training" labelRight={makeResetLink(resetTrainingDefaults)}>
+                                <Section label="Training" collapsible defaultOpen={false} labelRight={makeResetLink(resetTrainingDefaults)}>
                                     <View style={{ padding: SPACING.md }}>
                                         <CustomSlider
                                             searchId="trackblazer-skip-risky-charm-training-below-gain"
@@ -558,7 +558,7 @@ const ScenarioOverridesSettings = () => {
                                 </Section>
 
                                 {/* Shop & Items */}
-                                <Section label="Shop & Items" labelRight={makeResetLink(resetShopDefaults)}>
+                                <Section label="Shop & Items" collapsible defaultOpen={false} labelRight={makeResetLink(resetShopDefaults)}>
                                     <View style={{ padding: SPACING.md }}>
                                         <CustomSlider
                                             searchId="trackblazer-shop-check-frequency"
@@ -678,7 +678,7 @@ const ScenarioOverridesSettings = () => {
                                 </Section>
 
                                 {/* Item Conservation */}
-                                <Section label="Item Conservation" labelRight={makeResetLink(resetConservationDefaults)}>
+                                <Section label="Item Conservation" collapsible defaultOpen={false} labelRight={makeResetLink(resetConservationDefaults)}>
                                     <View style={{ padding: SPACING.md }}>
                                         <Text style={styles.conservationSectionIntro}>
                                             Controls how aggressively the bot saves items for high-value turns. Set any threshold to 0 to disable that conservation rule and use items freely.
@@ -823,7 +823,7 @@ const ScenarioOverridesSettings = () => {
                                         borderWidth: 1,
                                         borderRadius: RADII.lg,
                                         alignItems: "center",
-                                        marginBottom: SPACING.md,
+                                        marginVertical: SPACING.md,
                                     }}
                                 >
                                     <Text style={{ ...TYPE.body, color: colors.destructive, fontWeight: "600" }}>Reset {activeCampaign} to Defaults</Text>
