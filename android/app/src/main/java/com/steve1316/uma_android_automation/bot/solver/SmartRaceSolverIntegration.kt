@@ -621,6 +621,7 @@ object SmartRaceSolverIntegration {
                 targetEpithets = jsonStringList(config.optJSONArray("targetEpithets")).toSet(),
                 lockedDecisions = applied.lockedDecisions,
                 weights = parseWeightsObj(config.optJSONObject("weights")),
+                maxRaces = config.optInt("maxRaces", -1).takeIf { it > 0 },
             )
 
         val schedule = SmartRaceSolver.solve(state)
@@ -665,6 +666,7 @@ object SmartRaceSolverIntegration {
             targetEpithets = readStringSet("smartRaceSolverTargetEpithets"),
             lockedDecisions = applied.lockedDecisions,
             weights = readWeights(),
+            maxRaces = readMaxRaces(),
         )
     }
 
@@ -900,6 +902,13 @@ object SmartRaceSolverIntegration {
         if (json.isEmpty()) return Weights()
         return runCatching { parseWeightsObj(JSONObject(json)) }.getOrElse { Weights() }
     }
+
+    /**
+     * Reads the user's maximum-optional-races cap. Returns null (no limit) when unset or non-positive.
+     *
+     * @return The cap as a positive Int, or null when the solver should plan races without an upper bound.
+     */
+    private fun readMaxRaces(): Int? = SettingsHelper.getIntSetting("racing", "smartRaceSolverMaxRaces", -1).takeIf { it > 0 }
 
     /**
      * Parses a weights JSON object. Each field falls back to the corresponding [Weights] default when missing.
