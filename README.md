@@ -1,4 +1,4 @@
-# Uma Musume Automation For Android
+# Auto Train (Custom)
 
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/steve1316/uma-android-automation?logo=GitHub) ![GitHub last commit](https://img.shields.io/github/last-commit/steve1316/uma-android-automation?logo=GitHub) ![GitHub issues](https://img.shields.io/github/issues/steve1316/uma-android-automation?logo=GitHub) ![GitHub pull requests](https://img.shields.io/github/issues-pr/steve1316/uma-android-automation?logo=GitHub) ![GitHub](https://img.shields.io/github/license/steve1316/uma-android-automation?logo=GitHub)
 
@@ -67,8 +67,8 @@ This project is purely for educational purposes to learn about Android automatio
 > [!WARNING]
 > Disable the system `Accessibility shortcut` (the floating Accessibility button or volume-key shortcut) before starting a run. Leaving it enabled and hanging out on the screen has caused problems in the past, including covering UI elements that the bot needs to read at the edges of the screen.
 
-5. Once enabled, tapping `Start` will request `MediaProjection` access (select `Entire screen` if prompted). A floating overlay button will appear that you can drag around the screen.
-6. Follow the guidance overlay when you drag the overlay button for the places on the screen to safely leave the button at to avoid covering important UI elements.
+7. Once enabled, tapping `Start` will request `MediaProjection` access (select `Entire screen` if prompted). A floating overlay button will appear that you can drag around the screen.
+8. Follow the guidance overlay when you drag the overlay button for the places on the screen to safely leave the button at to avoid covering important UI elements.
 
 > [!CAUTION]
 > Placing the overlay button over important UI elements will interfere with template matching and OCR detection.
