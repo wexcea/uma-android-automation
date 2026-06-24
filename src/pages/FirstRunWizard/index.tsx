@@ -7,7 +7,7 @@ import { useTheme } from "../../context/ThemeContext"
 import { useLegacyFileScan } from "../../hooks/useLegacyFileScan"
 import { RADII } from "../../lib/radii"
 import { SPACING } from "../../lib/spacing"
-import { storageBridge, PickedFolder } from "../../lib/storageBridge"
+import { storageBridge, PickedFolder, INTERNAL_STORAGE_FOLDER } from "../../lib/storageBridge"
 import { TYPE } from "../../lib/type"
 
 const styles = StyleSheet.create({
@@ -128,7 +128,7 @@ const FirstRunWizard = ({ onComplete }: Props) => {
     const { colors } = useTheme()
     const { counts, hasLegacyFiles } = useLegacyFileScan()
     const [picked, setPicked] = useState<PickedFolder | null>(null)
-    const [pickError, setPickError] = useState<string | null>(null)
+    const [pickError, setPickError] = useState<{ message: string; canRetry: boolean } | null>(null)
     const [migrationChoice, setMigrationChoice] = useState<MigrationChoice | null>(null)
     const [migrationBusy, setMigrationBusy] = useState<MigrationChoice | null>(null)
     const [migrationError, setMigrationError] = useState<string | null>(null)
@@ -173,9 +173,25 @@ const FirstRunWizard = ({ onComplete }: Props) => {
                 setPicked(folder)
                 setAccessError(null)
             }
-        } catch {
-            setPickError("Couldn't open the folder picker. Retry?")
+        } catch (e) {
+            // NO_PICKER means the device has no document picker app, so retrying is pointless - steer them to the fallback below.
+            if ((e as { code?: string })?.code === "NO_PICKER") {
+                setPickError({ message: "This device has no compatible folder picker functionality. Use app default storage below.", canRetry: false })
+            } else {
+                setPickError({ message: "Couldn't open the folder picker. Retry?", canRetry: true })
+            }
         }
+    }, [])
+
+    const handleUseInternalStorage = useCallback(async () => {
+        setPickError(null)
+        try {
+            await storageBridge.clearFolder()
+        } catch (e) {
+            console.warn("[FirstRunWizard] clearFolder failed", e)
+        }
+        setPicked(INTERNAL_STORAGE_FOLDER)
+        setAccessError(null)
     }, [])
 
     const handleMigrationChoice = useCallback(
@@ -206,6 +222,7 @@ const FirstRunWizard = ({ onComplete }: Props) => {
     )
 
     const folderComplete = picked !== null
+    const usingInternalDefault = picked?.uri === ""
     const migrationComplete = !hasLegacyFiles || migrationChoice !== null
     const permissionsComplete = permissionsGranted !== null && permissionsGranted.accessibility && permissionsGranted.overlay && permissionsGranted.battery
     const canFinish = folderComplete && migrationComplete && permissionsComplete
@@ -216,11 +233,16 @@ const FirstRunWizard = ({ onComplete }: Props) => {
         if (!canFinish) return
         setSaveError(null)
         setFinishing(true)
+        // Internal storage has no SAF Uri to probe, and validateAccess() reports false for a null tree, so accept it directly.
         let ok = false
-        try {
-            ok = await storageBridge.validateAccess()
-        } catch {
-            ok = false
+        if (usingInternalDefault) {
+            ok = true
+        } else {
+            try {
+                ok = await storageBridge.validateAccess()
+            } catch {
+                ok = false
+            }
         }
         if (!ok) {
             setFinishing(false)
@@ -236,7 +258,7 @@ const FirstRunWizard = ({ onComplete }: Props) => {
             setSaveError("Couldn't save your setup. Tap Finish to retry.")
             setFinishing(false)
         }
-    }, [canFinish, onComplete])
+    }, [canFinish, onComplete, usingInternalDefault])
 
     const migrationConfirmationLabel = useMemo(() => {
         if (migrationChoice === "move") return "Moved to new folder"
@@ -283,12 +305,17 @@ const FirstRunWizard = ({ onComplete }: Props) => {
                                 </CustomButton>
                                 {pickError && (
                                     <View style={styles.errorBlock}>
-                                        <Text style={[styles.error, { color: colors.error }]}>{pickError}</Text>
-                                        <CustomButton variant="primary" onPress={handlePick}>
-                                            Retry
-                                        </CustomButton>
+                                        <Text style={[styles.error, { color: colors.error }]}>{pickError.message}</Text>
+                                        {pickError.canRetry && (
+                                            <CustomButton variant="primary" onPress={handlePick}>
+                                                Retry
+                                            </CustomButton>
+                                        )}
                                     </View>
                                 )}
+                                <Pressable onPress={handleUseInternalStorage} style={styles.changeLinkPressable} hitSlop={8}>
+                                    <Text style={[styles.changeLink, { color: colors.primary }]}>Use app default storage instead</Text>
+                                </Pressable>
                             </>
                         ) : (
                             <View style={[styles.selected, { borderColor: colors.success }]}>
@@ -296,7 +323,7 @@ const FirstRunWizard = ({ onComplete }: Props) => {
                                 <Text style={[styles.selectedName, { color: colors.text }]}>{picked.name}</Text>
                                 <Text style={[styles.selectedSub, { color: colors.textMuted }]}>logs/{"\n"}recordings/</Text>
                                 <Pressable onPress={handlePick} style={styles.changeLinkPressable} hitSlop={8}>
-                                    <Text style={[styles.changeLink, { color: colors.primary }]}>Change folder</Text>
+                                    <Text style={[styles.changeLink, { color: colors.primary }]}>{usingInternalDefault ? "Pick a folder instead" : "Change folder"}</Text>
                                 </Pressable>
                             </View>
                         )}

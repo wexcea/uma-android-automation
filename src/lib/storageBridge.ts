@@ -8,6 +8,10 @@ export interface PickedFolder {
     name: string
 }
 
+/** Sentinel `PickedFolder` for the internal-storage fallback. Its empty `uri` marks it as not a real SAF folder, and the native side
+ * already writes under `getExternalFilesDir()` whenever the tree Uri is null. */
+export const INTERNAL_STORAGE_FOLDER: PickedFolder = { uri: "", name: "App default (internal storage)" }
+
 /** File counts under the legacy `getExternalFilesDir` paths. */
 export interface LegacyCounts {
     /** Number of files under `getExternalFilesDir/logs`. */
