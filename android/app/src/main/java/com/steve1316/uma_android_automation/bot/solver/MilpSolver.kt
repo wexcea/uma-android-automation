@@ -112,6 +112,7 @@ object MilpSolver {
             wireXrConsistency()
             wireSummerHardBlock()
             wireManualLocks()
+            wireMaxRaces()
             wireConsecutiveRaceIndicators()
             wireEpithetMatchers()
             wireDependsOn()
@@ -167,6 +168,21 @@ object MilpSolver {
                     Decision.Train, Decision.Rest -> xVars[turn]!!.upper(0.0)
                 }
             }
+        }
+
+        /**
+         * Caps the number of optional races: `sum(x[t]) <= maxRaces + lockedRaceCount`. Locked Race turns are forced x=1
+         * by [wireManualLocks], so they are added back into the bound and never consume the user's budget. No-op when
+         * [SolverState.maxRaces] is null.
+         */
+        private fun wireMaxRaces() {
+            val cap = state.maxRaces ?: return
+            val lockedRaceTurns =
+                state.lockedDecisions.count { (turn, decision) ->
+                    turn in turns && decision is Decision.RaceDecision && raceVars[turn]?.get(decision.raceKey) != null
+                }
+            val expr = model.newExpression("max_races").upper((cap + lockedRaceTurns).toDouble())
+            for ((_, v) in xVars) expr.set(v, 1.0)
         }
 
         /**

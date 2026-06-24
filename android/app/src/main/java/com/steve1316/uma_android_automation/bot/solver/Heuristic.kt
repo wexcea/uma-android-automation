@@ -100,8 +100,19 @@ object Heuristic {
                 .filter { it.key !in alreadyWon }
 
         val children = ArrayList<Beam>(racesHere.size + 2)
-        for (race in racesHere) {
-            children += applyDecision(beam, turn, Decision.RaceDecision(race.key), state)
+        // Count only optional races already scheduled (a race turn that is not a locked RaceDecision). Locked/mandatory
+        // races short-circuit above and so never count toward the cap.
+        val cap = state.maxRaces
+        val optionalRacesSoFar =
+            if (cap == null) {
+                0
+            } else {
+                beam.decisions.count { (t, d) -> d is Decision.RaceDecision && state.lockedDecisions[t] !is Decision.RaceDecision }
+            }
+        if (cap == null || optionalRacesSoFar < cap) {
+            for (race in racesHere) {
+                children += applyDecision(beam, turn, Decision.RaceDecision(race.key), state)
+            }
         }
         children += applyDecision(beam, turn, Decision.Train, state)
         children += applyDecision(beam, turn, Decision.Rest, state)

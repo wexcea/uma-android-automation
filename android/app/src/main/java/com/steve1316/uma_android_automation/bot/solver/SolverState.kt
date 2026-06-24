@@ -199,6 +199,7 @@ data class RaceLossRecord(
  * @property lockedDecisions User-locked turn -> decision overrides.
  * @property summerBlockTurns No-race turns. Defaults to [DEFAULT_SUMMER_BLOCKS].
  * @property weights Active scoring weights.
+ * @property maxRaces Maximum number of optional races the solver may schedule, or null for no limit. Locked/mandatory races always run and do not count toward this cap.
  */
 data class SolverState(
     val currentTurn: TurnNumber,
@@ -215,6 +216,7 @@ data class SolverState(
     val lockedDecisions: Map<TurnNumber, Decision> = emptyMap(),
     val summerBlockTurns: Set<TurnNumber> = DEFAULT_SUMMER_BLOCKS,
     val weights: Weights = Weights(),
+    val maxRaces: Int? = null,
 ) {
     val epithetsByName: Map<String, Epithet> by lazy { epithets.associateBy { it.name } }
 
